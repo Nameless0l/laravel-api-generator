@@ -16,14 +16,14 @@ A powerful Laravel package that generates a complete API structure including Mod
 - Includes Policy setup
 - Generates Factory and Seeder
 - Generate Migrations
-- Configurable field types and validations(FormRequest)
+- Configurable field types and validations(**FormRequest**)
 
 ## Installation
 
 You can install the package via composer:
 
 ```bash
-composer require nameless/laravel-api-generator:dev-main
+composer require nameless/laravel-api-generator
 ```
 
 The package will automatically register its service provider.
