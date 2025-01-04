@@ -1,6 +1,7 @@
 {
     "name": "nameless/laravel-api-generator",
-    "description": "Un générateur d'API RESTful pour Laravel",
+    "description": "A powerful Laravel API generator that automatically creates a complete API structure including models, controllers, services, DTOs, policies, resources, factories, migrations, Seeders and more with a single command.",
+
     "type": "library",
     "version": "1.0.0",
     "license": "MIT",

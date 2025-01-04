@@ -43,15 +43,15 @@ php artisan make:fullapi Post --fields="title:string,content:text,published:bool
 ```
 
 This will generate:
-- Model (`App\Models\Post`)
-- Controller (`App\Http\Controllers\PostController`)
-- Service (`App\Services\PostService`)
-- DTO (`App\DTO\PostDTO`)
-- Policy (`App\Policies\PostPolicy`)
-- Resource (`App\Http\Resources\PostResource`)
-- Factory (`Database\Factories\PostFactory`)
-- Migration
-- Seeder
+- Models (App\Models)
+- Controllers (App\Http\Controllers)
+- Services (App\Services)
+- DTOs (App\DTO)
+- Policies (App\Policies)
+- Resources (App\Http\Resources)
+- Factories (Database\Factories)
+- Migrations (Database\Migrations)
+- Seeders (Database\Seeders)
 
 ### Supported Field Types
 
@@ -473,12 +473,15 @@ composer test
 ## Local Development
 
 1. Clone this repository
+```bash
+git clone https://github.com/Nameless0l/laravel-api-generator.git
+```
 2. Install dependencies:
 ```bash
 composer install
 ```
 
-3. Run tests:
+1. Run tests:
 ```bash
 ./vendor/bin/phpunit
 ```
