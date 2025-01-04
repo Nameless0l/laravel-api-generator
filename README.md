@@ -13,6 +13,7 @@ A powerful Laravel package that generates a complete API structure including Mod
 - Generates RESTful Controllers
 - Implements Service Layer pattern
 - Creates Data Transfer Objects (DTOs)
+- Create Resource
 - Includes Policy setup
 - Generates Factory and Seeder
 - Generate Migrations
@@ -48,6 +49,7 @@ This will generate:
 - Services (App\Services)
 - DTOs (App\DTO)
 - Policies (App\Policies)
+- Request (App\Http\Request)
 - Resources (App\Http\Resources)
 - Factories (Database\Factories)
 - Migrations (Database\Migrations)
