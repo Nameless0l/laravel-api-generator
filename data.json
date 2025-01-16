@@ -1,0 +1,209 @@
+[
+    {
+        "name": "person",
+        "type": "class",
+        "attributes": [
+            {
+                "visibility": "public",
+                "name": "name",
+                "type": "str"
+            },
+            {
+                "visibility": "public",
+                "name": "phonenumber",
+                "type": "str"
+            },
+            {
+                "visibility": "public",
+                "name": "emailaddress",
+                "type": "str"
+            },
+            {
+                "visibility": "private",
+                "type": "Address",
+                "name": "address"
+            }
+        ],
+        "methods": [
+            {
+                "visibility": "public",
+                "name": "purchaseparkingpass",
+                "type": "void",
+                "args": []
+            }
+        ],
+        "aggregations": [],
+        "compositions": [],
+        "import_list": true
+    },
+    {
+        "name": "student",
+        "type": "class",
+        "attributes": [
+            {
+                "visibility": "public",
+                "name": "studentnumber",
+                "type": "int"
+            },
+            {
+                "visibility": "public",
+                "name": "averagemark",
+                "type": "int"
+            }
+        ],
+        "methods": [
+            {
+                "visibility": "public",
+                "name": "iseligibletoenroll",
+                "type": "bool",
+                "args": [
+                    {
+                        "type": "Object",
+                        "name": "str"
+                    }
+                ]
+            },
+            {
+                "visibility": "public",
+                "name": "getseminarstaken",
+                "type": "int",
+                "args": [
+                    {
+                        "type": "string",
+                        "name": "papa"
+                    }
+                ]
+            }
+        ],
+        "aggregations": [],
+        "compositions": [],
+        "parent": "person",
+        "import_list": true
+    },
+    {
+        "name": "professor",
+        "type": "class",
+        "attributes": [
+            {
+                "visibility": "public",
+                "name": "name",
+                "type": "void"
+            },
+            {
+                "visibility": "protected",
+                "name": "staffnumber",
+                "type": "int"
+            },
+            {
+                "visibility": "private",
+                "name": "yearsofservice",
+                "type": "int"
+            },
+            {
+                "visibility": "public",
+                "name": "numberofclasses",
+                "type": "int"
+            }
+        ],
+        "methods": [],
+        "aggregations": [],
+        "compositions": [
+            {
+                "visibility": "private",
+                "type": "string",
+                "name": "adressess"
+            }
+        ],
+        "parent": "person",
+        "import_list": true
+    },
+    {
+        "name": "address",
+        "type": "class",
+        "attributes": [
+            {
+                "visibility": "public",
+                "name": "street",
+                "type": "str"
+            },
+            {
+                "visibility": "public",
+                "name": "city",
+                "type": "str"
+            },
+            {
+                "visibility": "public",
+                "name": "state",
+                "type": "str"
+            },
+            {
+                "visibility": "public",
+                "name": "postalcode",
+                "type": "int"
+            },
+            {
+                "visibility": "public",
+                "name": "country",
+                "type": "str"
+            }
+        ],
+        "methods": [
+            {
+                "visibility": "private",
+                "name": "validate",
+                "type": "bool",
+                "args": []
+            },
+            {
+                "visibility": "public",
+                "name": "outputaslabel",
+                "type": "str",
+                "args": []
+            }
+        ],
+        "aggregations": [],
+        "compositions": []
+    },
+    {
+        "name": "adresses",
+        "type": "class",
+        "attributes": [
+            {
+                "visibility": "public",
+                "name": "city",
+                "type": "str"
+            },
+            {
+                "visibility": "public",
+                "name": "state",
+                "type": "str"
+            },
+            {
+                "visibility": "public",
+                "name": "postalcode",
+                "type": "int"
+            },
+            {
+                "visibility": "public",
+                "name": "country",
+                "type": "str"
+            }
+        ],
+        "methods": [
+            {
+                "visibility": "private",
+                "name": "validate",
+                "type": "bool",
+                "args": []
+            },
+            {
+                "visibility": "public",
+                "name": "outputaslabel",
+                "type": "str",
+                "args": []
+            }
+        ],
+        "aggregations": [],
+        "compositions": []
+    }
+]
