@@ -2,16 +2,20 @@
 
 namespace nameless\CodeGenerator\Console\Commands;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Artisan;
+
+
 
 class MakeApi extends Command
 {
-    protected $signature = 'make:fullapi {name} {--fields=}';
+    protected $signature = 'make:fullapi {name?} {--fields=}';
     protected $description = 'Créer un modèle, migration, controller, resource, request, factory, seeder et DTO avec champs dynamiques';
+    protected $classes;
     private $nameLower;
-
+    const BASE_STUB_PATH = "vendor/nameless/laravel-api-generator/stubs/";
     public function handle()
     {
         $name = $this->argument('name');
@@ -19,20 +23,32 @@ class MakeApi extends Command
         $nameLower = strtolower($name);
         $this->nameLower = $nameLower;
 
-
-        if (!$fields) {
-            $this->error('Vous devez spécifier des champs avec l\'option --fields="champ:type,champ:type"');
+        if (empty($name)) {
+            $this->callDiagramsMethods();
             return;
         }
+        if (!$fields) {
+            $this->error('Vous devez spécifier des champs avec l\'option --fields="champ1:type1,champ2:type2"');
+            return;
+        }
+        $this->callDefaulttMethods($name, $fields);
+    }
+
+    private function callDefaulttMethods($name, $fields)
+    {
 
         $fieldsArray = $this->parseFields($fields);
         $pluralName = Str::plural(Str::lower($name));
 
-        $this->info("Création des fichiers pour l'API: {$name}");
+        info("Création des fichiers pour l'API: {$name}");
+        $route = "Route::apiResource('{$this->nameLower}', App\Http\Controllers\ProductController::class);";
+        $apiFilePath = base_path('routes/api.php');
+        File::append($apiFilePath, PHP_EOL . $route);
+
 
         // Créer le modèle avec la migration et le factory
         Artisan::call("make:model {$name} -mf");
-        $this->info("Modèle, migration et factory créés.");
+        info("Modèle, migration et factory créés.");
 
         // Mettre à jour le modèle avec les fillable
         $this->updateModel($name, $fieldsArray);
@@ -42,7 +58,7 @@ class MakeApi extends Command
         $this->updateMigration($name, $fieldsArray);
 
         // Créer le service
-        $this->createService($name,$nameLower);
+        $this->createService($name, $this->nameLower);
         $this->info("Service créé.");
 
         // Créer la policy
@@ -74,13 +90,88 @@ class MakeApi extends Command
         $this->info("DTO créé.");
 
         // Ajouter les méthodes CRUD au contrôleur
-        $this->addCrudToController($name,$nameLower, $pluralName);
+        $this->addCrudToController($name, $this->nameLower, $pluralName);
 
         // Mettre à jour AuthServiceProvider
         $this->updateAuthServiceProvider($name);
 
         $this->info("API complète créée pour : {$name} !");
         $this->updateFactory($name, $fieldsArray);
+    }
+    private function callDiagramsMethods()
+    {
+        $this->warn("Aucun nom fourni. Utilisation du nom par défaut : Product");
+        $jsonFilePath = base_path('data.json');
+        if (!file_exists($jsonFilePath)) {
+            $this->error("Le fichier data.json est introuvable.");
+            return;
+        }
+
+        $this->info("Lecture du fichier JSON...");
+        $jsonData = file_get_contents($jsonFilePath);
+        $this->classes = json_decode($jsonData, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $this->error("Erreur de décodage JSON : " . json_last_error_msg());
+            return;
+        }
+
+        $this->info("Extraction des données JSON...");
+        $this->jsonExtractionToArray();
+
+        $this->info("Génération des API avec Artisan...");
+        $this->runFullApiWithDiagram();
+        return;
+    }
+
+    /**
+     * Extraire et formater les données JSON dans un tableau compatible.
+     */
+    public function jsonExtractionToArray()
+    {
+        $this->classes = array_map(function ($class) {
+            return [
+                'name' => ucfirst($class['name']),
+                'attributes' => array_map(function ($attribute) {
+                    return [
+                        'name' => $attribute['name'],
+                        'type' => match (strtolower($attribute['type'])) {
+                            'integer' => 'int',
+                            'bigint' => 'int',
+                            'str', 'text' => 'string',
+                            'boolean' => 'bool',
+                            default => $attribute['type'],
+                        },
+                    ];
+                }, $class['attributes']),
+            ];
+        }, $this->classes);
+    }
+
+    /**
+     * Parcourir les classes et exécuter les commandes Artisan pour générer les API.
+     */
+    public function runFullApiWithDiagram()
+    {
+        echo "Ici les parametres : " . print_r($this->classes, true) . "\n";
+        foreach ($this->classes as $class) {
+            $className = ucfirst($class['name']);
+            $fields = [];
+
+            foreach ($class['attributes'] as $attribute) {
+                $fields[] = "{$attribute['name']}:{$attribute['type']}";
+            }
+
+            $fieldsString = implode(',', $fields);
+
+            try {
+                $this->callDefaulttMethods($className, $fieldsString);
+                // Artisan::call("make:fullapi {$className} --fields={$fieldsString}");
+                $this->info("API pour la classe $className générée avec succès !");
+            } catch (\Exception $e) {
+                $this->error("Erreur lors de la génération de l'API pour la classe $className : " . $e->getMessage());
+            }
+        }
     }
 
     private function updateFactory($name, $fieldsArray)
@@ -140,7 +231,7 @@ class MakeApi extends Command
             return;
         }
 
-        $migrationPath = $migrations[0]; // On suppose qu'il n'y a qu'une seule migration correspondante
+        $migrationPath = $migrations[0]; // On suppose qu'il n'y a qu'une seule migration correspondante, si c'est pas le cas c'est pas mon problème heinn 😃
         $migrationFile = file_get_contents($migrationPath);
 
         $fieldLines = '';
@@ -193,7 +284,7 @@ class MakeApi extends Command
         file_put_contents($requestPath, $requestFile);
     }
 
-    private function addCrudToController($name,$nameLower, $pluralName)
+    private function addCrudToController($name, $nameLower, $pluralName)
     {
         $controllerPath = app_path("Http/Controllers/{$name}Controller.php");
 
@@ -314,25 +405,25 @@ class MakeApi extends Command
 
         $attributes = '';
         foreach ($fieldsArray as $field => $type) {
-            if($type == 'text') {
+            if ($type == 'text') {
                 $type = 'string';
             }
             if ($type == 'boolean') {
                 $type = 'bool';
             }
-            if ($type == 'integer'||$type == 'bigint') {
+            if ($type == 'integer' || $type == 'bigint') {
                 $type = 'int';
             }
-            if($type == 'date' || $type == 'datetime'||$type == 'timestamp'|| $type == 'time') {
+            if ($type == 'date' || $type == 'datetime' || $type == 'timestamp' || $type == 'time') {
                 $type = '\DateTimeInterface';
             }
             $attributes .= "public? $type \${$field},\n        ";
         }
         $atributsFromRequest = '';
         foreach ($fieldsArray as $field => $type) {
-            if($type == 'date' || $type == 'datetime'||$type == 'timestamp'|| $type == 'time') {
+            if ($type == 'date' || $type == 'datetime' || $type == 'timestamp' || $type == 'time') {
                 $atributsFromRequest .= "$field : \Carbon\Carbon::parse(\$request->get('{$field}')),\n            ";
-            }else {
+            } else {
                 $atributsFromRequest .= "$field : \$request->get('{$field}'),\n            ";
             }
         }
@@ -366,7 +457,7 @@ EOD;
         file_put_contents($dtoPath, $content);
     }
 
-    private function createService($name,$nameLower)
+    private function createService($name, $nameLower)
     {
         if (!file_exists(app_path('Services'))) {
             mkdir(app_path('Services'), 0755, true);
@@ -618,14 +709,11 @@ EOD;
 
         $modelContent = file_get_contents($modelPath);
 
-        // Préparer la liste des champs fillable
         $fillableFields = array_keys($fieldsArray);
         $fillableString = "'" . implode("', '", $fillableFields) . "'";
 
-        // Ajouter la propriété fillable
         $fillableProperty = "\n    protected \$fillable = [{$fillableString}];\n";
 
-        // Insérer la propriété fillable après la déclaration de la classe
         $modelContent = preg_replace(
             '/(class\s+' . $name . '\s+extends\s+Model\s*{)/',
             "$1{$fillableProperty}",
@@ -636,41 +724,24 @@ EOD;
     }
 
     private function updateResource($name, $fieldsArray)
-{
-    $resourcePath = app_path("Http/Resources/{$name}Resource.php");
-    if (!file_exists(app_path('Http/Resources'))) {
-        mkdir(app_path('Http/Resources'), 0755, true);
-    }
-
-    $fieldsCode = '';
-    foreach ($fieldsArray as $field => $type) {
-        $fieldsCode .= "'{$field}' => \$this->{$field},\n            ";
-    }
-
-    $template = "<?php
-
-namespace App\Http\Resources;
-
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-
-class {$name}Resource extends JsonResource
-{
-    /**
-     * Transform the resource into an array.
-     *
-     * @param  Request  \$request
-     * @return array<string, mixed>
-     */
-    public function toArray(Request \$request): array
     {
-        return [
-            {$fieldsCode}
-        ];
-    }
-}
-";
+        $resourcePath = app_path("Http/Resources/{$name}Resource.php");
+        if (!file_exists(app_path('Http/Resources'))) {
+            mkdir(app_path('Http/Resources'), 0755, true);
+        }
 
-    file_put_contents($resourcePath, $template);
-}
+        $fieldsCode = '';
+        foreach ($fieldsArray as $field => $type) {
+            $fieldsCode .= "'{$field}' => \$this->{$field},\n            ";
+        }
+
+        // $stubPath = base_path(MakeApi::BASE_STUB_PATH . 'resource.stub');
+        $stub = file_get_contents(base_path(MakeApi::BASE_STUB_PATH . 'resource.stub'));
+        $template = str_replace(
+            ['{{modelName}}', '{{fields}}'],
+            [$name, $fieldsCode],
+            $stub
+        );
+        file_put_contents($resourcePath, $template);
+    }
 }
