@@ -1,0 +1,21 @@
+<?php
+
+
+
+namespace App\DTO;
+
+use App\Http\Requests\\{$name}Request;
+readonly class {$name}DTO
+{
+
+    public function __construct(
+        {$attributes}
+    ) {}
+
+    public static function fromRequest({$name}Request \$request): self
+    {
+        return new self(
+            {$atributsFromRequest}
+        );
+    }
+}
