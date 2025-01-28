@@ -26,6 +26,14 @@ You can install the package via composer:
 ```bash
 composer require nameless/laravel-api-generator
 ```
+```bash
+php artisan api:install
+```
+
+```bash
+php artisan 
+```
+
 
 The package will automatically register its service provider.
 
