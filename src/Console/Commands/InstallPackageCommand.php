@@ -43,6 +43,10 @@ class InstallPackageCommand extends Command
                 } elseif ($authChoice === 'ui') {
                     $this->installLaravelUI();
                 }
+            }else{
+                $this->info('No authentication starter kit installed.');
+                $this->call('install:api');
+
             }
 
             $this->publishScrambleConfig();
