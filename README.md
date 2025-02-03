@@ -54,13 +54,13 @@ php artisan api-generator:install
 You can generate a complete API structure in two ways:
 
 1. **Using a UML Diagram**:
-   Ensure you have a `data.json` file in the root directory containing your classes and their attributes. Then run:
+   Ensure you have a `class_data` file in the root directory containing your classes and their attributes. Then run:
 
    ```bash
    php artisan make:fullapi
    ```
 
-   form of data.json file
+   form of class_data file
 
    ```json
     {
