@@ -1,77 +1,165 @@
-# Laravel api Generator
+# Laravel API Generator
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/nameless/laravel-api-generator.svg)](https://packagist.org/packages/nameless/laravel-api-generator)
 [![Total Downloads](https://img.shields.io/packagist/dt/nameless/laravel-api-generator.svg)](https://packagist.org/packages/nameless/laravel-api-generator)
 [![License](https://img.shields.io/packagist/l/nameless/laravel-api-generator.svg)](https://packagist.org/packages/nameless/laravel-api-generator)
 
-A powerful Laravel package that generates a complete API structure including Models, Controllers, Services, DTOs, and more with a single command.
+**Laravel API Generator** is a powerful Laravel package that generates a complete API structure, including **Models**, **Controllers**, **Services**, **DTOs**, **Policies**, **Resources**, **Factories**, **Seeders**, and **Migrations**, with a single command.
+
+---
 
 ## Features
 
-- Generate complete API structure with one command
-- Creates Models with proper relationships
-- Generates RESTful Controllers
-- Implements Service Layer pattern
-- Creates Data Transfer Objects (DTOs)
-- Create Resource
-- Includes Policy setup
-- Generates Factory and Seeder
-- Generate Migrations
-- Configurable field types and validations(**FormRequest**)
+- Generate a complete API structure with one command.
+- Create **Models** with proper relationships.
+- Generate RESTful **Controllers**.
+- Implement the **Service Layer** pattern.
+- Create **Data Transfer Objects (DTOs)**.
+- Generate **Resources** for API responses.
+- Automatically set up **Policies**.
+- Generate **Factories** and **Seeders**.
+- Create **Migrations**.
+- Support for configurable field types and validations (**FormRequest**).
+
+---
 
 ## Installation
 
-You can install the package via composer:
+You can install the package via Composer:
 
 ```bash
 composer require nameless/laravel-api-generator
 ```
+
+Then, run the installation command to set up the package:
+
 ```bash
 php artisan api:install
 ```
 
-```bash
-php artisan 
-```
-
-
 The package will automatically register its service provider.
+
+---
 
 ## Usage
 
-Generate a complete API structure using the following command:
+### Generate Authentication
+If you want to get started with authentication using Laravel's starter kits, run:
 
 ```bash
-php artisan make:fullapi ModelName --fields="field1:type,field2:type"
+php artisan api-generator:install
 ```
 
-Example:
+### Generate a Complete API Structure
+You can generate a complete API structure in two ways:
+
+1. **Using a UML Diagram**:
+   Ensure you have a `data.json` file in the root directory containing your classes and their attributes. Then run:
+
+   ```bash
+   php artisan make:fullapi
+   ```
+
+   form of data.json file
+
+   ```json
+    {
+        "name": "person",
+        "type": "class",
+        "attributes": [
+            {
+                "visibility": "public",
+                "name": "name",
+                "type": "str"
+            },
+            {
+                "visibility": "public",
+                "name": "phonenumber",
+                "type": "str"
+            },
+            {
+                "visibility": "public",
+                "name": "emailaddress",
+                "type": "str"
+            },
+            {
+                "visibility": "private",
+                "type": "Address",
+                "name": "address"
+            }
+        ],
+        "methods": [
+            {
+                "visibility": "public",
+                "name": "purchaseparkingpass",
+                "type": "void",
+                "args": []
+            }
+        ],
+        "aggregations": [],
+        "compositions": [],
+        "import_list": true
+    }
+    ```
+
+
+2. **Without a UML Diagram**:
+
+   Use the following command to generate the API structure:
+
+   ```bash
+   php artisan make:fullapi ModelName --fields="field1:type,field2:type"
+   ```
+
+#### Example
 
 ```bash
 php artisan make:fullapi Post --fields="title:string,content:text,published:boolean"
 ```
 
-This will generate:
-- Models (App\Models)
-- Controllers (App\Http\Controllers)
-- Services (App\Services)
-- DTOs (App\DTO)
-- Policies (App\Policies)
-- Request (App\Http\Request)
-- Resources (App\Http\Resources)
-- Factories (Database\Factories)
-- Migrations (Database\Migrations)
-- Seeders (Database\Seeders)
+This command will generate:
+- **Models** (`App\Models`)
+- **Controllers** (`App\Http\Controllers`)
+- **Services** (`App\Services`)
+- **DTOs** (`App\DTO`)
+- **Policies** (`App\Policies`)
+- **Requests** (`App\Http\Requests`)
+- **Resources** (`App\Http\Resources`)
+- **Factories** (`Database\Factories`)
+- **Migrations** (`Database\Migrations`)
+- **Seeders** (`Database\Seeders`)
+#### Architecture
+```
+project/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   ├── Requests/
+│   │   └── Resources/
+│   ├── Models/
+│   ├── Services/
+│   ├── DTO/
+│   └── Policies/
+│
+└── database/
+   ├── factories/
+   ├── migrations/
+   └── seeders/
+```
 
 ### Supported Field Types
 
-- `string`
-- `integer`
-- `boolean`
-- `text`
-- `date`
-- `datetime`
-- `timestamp`
+| Type | Description | Default Validation |
+|------|-------------|-------------------|
+| string | String of characters | max:255 |
+| integer | Whole number | numeric |
+| boolean | Boolean value | boolean |
+| text | Long text | string |
+| date | Date | date |
+| datetime | Date and time | datetime |
+| timestamp | Unix timestamp | timestamp |
+
+---
 
 ## Generated Structure
 
@@ -83,7 +171,6 @@ This will generate:
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-
 use App\Http\Requests\PostRequest;
 use App\Models\Post;
 use App\Http\Resources\PostResource;
@@ -93,8 +180,6 @@ use Illuminate\Http\Response;
 
 class PostController extends Controller
 {
-    //
-
     private PostService $service;
 
     public function __construct(PostService $service)
@@ -104,8 +189,8 @@ class PostController extends Controller
 
     public function index()
     {
-        $post = $this->service->getAll();
-        return PostResource::collection($post);
+        $posts = $this->service->getAll();
+        return PostResource::collection($posts);
     }
 
     public function store(PostRequest $request)
@@ -132,9 +217,7 @@ class PostController extends Controller
         $this->service->delete($post);
         return response(null, 204);
     }
-
 }
-
 ```
 
 ### Service
@@ -182,33 +265,31 @@ class PostService
 ```php
 <?php
 
-
-
 namespace App\DTO;
 
 use App\Http\Requests\PostRequest;
+
 readonly class PostDTO
 {
-
     public function __construct(
-        public? string $title,
-        public? string $content,
-        public? bool $published,
-
+        public ?string $title,
+        public ?string $content,
+        public ?bool $published,
     ) {}
 
     public static function fromRequest(PostRequest $request): self
     {
         return new self(
-            title : $request->get('title'),
-            content : $request->get('content'),
-            published : $request->get('published'),
-
+            title: $request->get('title'),
+            content: $request->get('content'),
+            published: $request->get('published'),
         );
     }
 }
 ```
-## Model
+
+### Model
+
 ```php
 <?php
 
@@ -224,9 +305,10 @@ class Post extends Model
     /** @use HasFactory<\Database\Factories\PostFactory> */
     use HasFactory;
 }
-
 ```
-## Resource
+
+### Resource
+
 ```php
 <?php
 
@@ -237,25 +319,19 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class PostResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @param  Request  $request
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
             'title' => $this->title,
             'content' => $this->content,
             'published' => $this->published,
-            
         ];
     }
 }
-
 ```
-## Request
+
+### Request
+
 ```php
 <?php
 
@@ -265,33 +341,24 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class PostRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'title' => 'string|max:255',
             'content' => 'string',
             'published' => 'boolean',
-            
         ];
     }
 }
-
 ```
 
-## Factory
+### Factory
+
 ```php
 <?php
 
@@ -299,51 +366,39 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Post>
- */
 class PostFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
             'title' => fake()->word(),
             'content' => fake()->sentence(),
-            'published' => fake()->boolean()
+            'published' => fake()->boolean(),
         ];
     }
 }
-
 ```
 
-## Seeder
+### Seeder
+
 ```php
 <?php
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class PostSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-    public function run()
+    public function run(): void
     {
         \App\Models\Post::factory(10)->create();
+    }
 }
-}
-
 ```
 
-## Policy
+### Policy
+
 ```php
 <?php
 
@@ -358,90 +413,45 @@ class PostPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine whether the user can view any models.
-     *
-     * @param  User  $user
-     * @return Response|bool
-     */
     public function viewAny(User $user): Response|bool
     {
         return true;
     }
 
-    /**
-     * Determine whether the user can view the model.
-     *
-     * @param  User  $user
-     * @param  Post  $post
-     * @return Response|bool
-     */
     public function view(User $user, Post $post): Response|bool
     {
         return true;
     }
 
-    /**
-     * Determine whether the user can create models.
-     *
-     * @param  User  $user
-     * @return Response|bool
-     */
     public function create(User $user): Response|bool
     {
         return true;
     }
 
-    /**
-     * Determine whether the user can update the model.
-     *
-     * @param  User  $user
-     * @param  Post  $post
-     * @return Response|bool
-     */
     public function update(User $user, Post $post): Response|bool
     {
         return true;
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     *
-     * @param  User  $user
-     * @param  Post  $post
-     * @return Response|bool
-     */
     public function delete(User $user, Post $post): Response|bool
     {
         return true;
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     *
-     * @param  User  $user
-     * @param  Post  $post
-     * @return Response|bool
-     */
     public function restore(User $user, Post $post): Response|bool
     {
         return true;
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     *
-     * @param  User  $user
-     * @param  Post  $post
-     * @return Response|bool
-     */
     public function forceDelete(User $user, Post $post): Response|bool
     {
         return true;
     }
 }
 ```
-## migration
+
+### Migration
+
 ```php
 <?php
 
@@ -451,9 +461,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('posts', function (Blueprint $table) {
@@ -465,9 +472,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('posts');
@@ -475,31 +479,42 @@ return new class extends Migration
 };
 ```
 
+---
+
 ## Testing
+
+To run the tests, use the following command:
 
 ```bash
 composer test
 ```
 
+---
+
 ## Local Development
 
-1. Clone this repository
+1. Clone this repository:
+
 ```bash
 git clone https://github.com/Nameless0l/laravel-api-generator.git
 ```
+
 2. Install dependencies:
+
 ```bash
 composer install
 ```
 
-1. Run tests:
+3. Run tests:
+
 ```bash
 ./vendor/bin/phpunit
 ```
 
 ### Testing in a Laravel Project
 
-1. In your Laravel project's `composer.json`:
+1. In your Laravel project's `composer.json`, add:
+
 ```json
 {
     "repositories": [
@@ -518,22 +533,27 @@ composer install
 ```
 
 2. Run:
+
 ```bash
 composer update
 ```
 
-<!-- ## Contributing
-
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details. -->
+---
 
 ## Security
 
-If you discover any security related issues, please email loicmbassi5@gmail.com instead of using the issue tracker.
+If you discover any security-related issues, please email [loicmbassi5@gmail.com](mailto:loicmbassi5@gmail.com) instead of using the issue tracker.
+
+---
 
 ## Credits
 
-- [Mbassi Loic Aron](https://github.com/Nameless0l)
+- [Mbassi Loïc Aron](https://github.com/Nameless0l)
+
+---
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+This package is open-source and distributed under the MIT License. See the [LICENSE](LICENSE.md) file for more details.
+
+---
