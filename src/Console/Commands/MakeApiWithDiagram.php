@@ -14,10 +14,10 @@ class MakeApiWithDiagram extends Command
     public function handle()
     {
         // Lecture du fichier JSON
-        $jsonFilePath = base_path('data.json');
+        $jsonFilePath = base_path('class_data');
         echo $jsonFilePath;
         if (!file_exists($jsonFilePath)) {
-            $this->error("Le fichier data.json est introuvable.");
+            $this->error("Le fichier class_data est introuvable.");
             return;
         }
 

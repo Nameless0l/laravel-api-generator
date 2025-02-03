@@ -18,9 +18,9 @@ class DeleteFullApi extends Command
         $name = $this->argument('name');
         if (empty($name)) {
             $this->warn("Aucun nom fourni. Utilisation du nom par défaut : Product");
-            $jsonFilePath = base_path('data.json');
+            $jsonFilePath = base_path('class_data');
             if (!file_exists($jsonFilePath)) {
-                $this->error("Le fichier data.json est introuvable.");
+                $this->error("Le fichier class_data est introuvable.");
                 return;
             }
 

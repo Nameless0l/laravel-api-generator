@@ -100,10 +100,10 @@ class MakeApi extends Command
     }
     private function callDiagramsMethods()
     {
-        $this->warn("Aucune nom fourni. Utilisation du nom par défaut : Product");
-        $jsonFilePath = base_path('data.json');
+        $this->warn("Aucun nom fourni. Utilisation du nom par défaut : Product");
+        $jsonFilePath = base_path('class_data');
         if (!file_exists($jsonFilePath)) {
-            $this->error("Le fichier data.json est introuvable.");
+            $this->error("Le fichier class_data est introuvable.");
             return;
         }
 
@@ -135,12 +135,12 @@ class MakeApi extends Command
                 'attributes' => array_map(function ($attribute) {
                     return [
                         'name' => $attribute['name'],
-                        'type' => match (strtolower($attribute['type'])) {
+                        '_type' => match (strtolower($attribute['_type'])) {
                             'integer' => 'int',
                             'bigint' => 'int',
                             'str', 'text' => 'string',
                             'boolean' => 'bool',
-                            default => $attribute['type'],
+                            default => $attribute['_type'],
                         },
                     ];
                 }, $class['attributes']),
@@ -153,13 +153,12 @@ class MakeApi extends Command
      */
     public function runFullApiWithDiagram()
     {
-        echo "Ici les parametres : " . print_r($this->classes, true) . "\n";
         foreach ($this->classes as $class) {
             $className = ucfirst($class['name']);
             $fields = [];
 
             foreach ($class['attributes'] as $attribute) {
-                $fields[] = "{$attribute['name']}:{$attribute['type']}";
+                $fields[] = "{$attribute['name']}:{$attribute['_type']}";
             }
 
             $fieldsString = implode(',', $fields);
