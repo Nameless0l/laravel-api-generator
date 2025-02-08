@@ -101,9 +101,9 @@ class MakeApi extends Command
     private function callDiagramsMethods()
     {
         $this->warn("Aucun nom fourni. Utilisation du nom par défaut : Product");
-        $jsonFilePath = base_path('class_data');
+        $jsonFilePath = base_path('class_data.json');
         if (!file_exists($jsonFilePath)) {
-            $this->error("Le fichier class_data est introuvable.");
+            $this->error("Le fichier class_data.json est introuvable.");
             return;
         }
 
