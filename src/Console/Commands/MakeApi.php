@@ -139,6 +139,7 @@ class MakeApi extends Command
                             'integer' => 'int',
                             'bigint' => 'int',
                             'str', 'text' => 'string',
+                            'date', 'datetime', 'timestamp', 'time' => '\DateTimeInterface',
                             'boolean' => 'bool',
                             default => $attribute['_type'],
                         },
@@ -191,7 +192,9 @@ class MakeApi extends Command
                 'integer' => "fake()->randomNumber()",
                 'boolean' => "fake()->boolean()",
                 'text' => "fake()->sentence()",
-                'datetime', 'timestamp' => "fake()->dateTime()",
+                'uuid' => "fake()->uuid()",
+                'UUID' => "fake()->uuid()",
+                'date', 'datetime', 'timestamp', 'time' => "fake()->dateTime()",
                 default => "fake()->word()"
             };
             $fields[] = "'{$field}' => {$value}";
@@ -235,6 +238,16 @@ class MakeApi extends Command
 
         $fieldLines = '';
         foreach ($fieldsArray as $field => $type) {
+            $type = match ($type) {
+                'string' => 'string',
+                'integer' => 'integer',
+                'boolean' => 'boolean',
+                'text' => 'text',
+                'date', 'datetime', 'timestamp', 'time' => 'timestamp',
+                'uuid' => 'uuid',
+                'UUID' => 'uuid',
+                default => 'string'
+            };
             $fieldLines .= "\$table->{$type}('{$field}')->nullable();\n            ";
         }
 
@@ -269,6 +282,11 @@ class MakeApi extends Command
                 'integer' => "'integer'",
                 'boolean' => "'boolean'",
                 'text' => "'string'",
+                'uuid' => "'uuid'",
+                'UUID' => "'uuid'",
+                'date' => "'date'",
+                'datetime' => "'date'",
+                'timestamp' => "'date'",
                 default => "'required'"
             };
             $rules .= "'{$field}' => {$rule},\n            ";
@@ -379,6 +397,9 @@ class MakeApi extends Command
                 'string' => "fake()->word()",
                 'integer' => "fake()->randomNumber()",
                 'boolean' => "fake()->boolean()",
+                'uuid','UUID'=>"fake()->uuid()",
+                'bigint' => "fake()->randomNumber()",
+                'date', 'datetime', 'timestamp', 'time' => "fake()->dateTime()",
                 'text' => "fake()->paragraph()",
                 default => "fake()->word()"
             };
