@@ -70,21 +70,21 @@ You can generate a complete API structure in two ways:
             {
                 "visibility": "public",
                 "name": "name",
-                "type": "str"
+                "_type": "str"
             },
             {
                 "visibility": "public",
                 "name": "phonenumber",
-                "type": "str"
+                "_type": "str"
             },
             {
                 "visibility": "public",
                 "name": "emailaddress",
-                "type": "str"
+                "_type": "str"
             },
             {
                 "visibility": "private",
-                "type": "Address",
+                "_type": "Address",
                 "name": "address"
             }
         ],
@@ -92,7 +92,7 @@ You can generate a complete API structure in two ways:
             {
                 "visibility": "public",
                 "name": "purchaseparkingpass",
-                "type": "void",
+                "_type": "void",
                 "args": []
             }
         ],
