@@ -19,14 +19,13 @@ class MakeApi extends Command
     public function handle()
     {
         $name = $this->argument('name');
-        $fields = $this->option('fields');
-        $nameLower = strtolower($name);
-        $this->nameLower = $nameLower;
 
-        if (empty($name)) {
+        if (empty($this->argument('name'))) {
             $this->callDiagramsMethods();
             return;
         }
+        $fields = $this->option('fields');
+        $this->nameLower = strtolower($name);
         if (!$fields) {
             $this->error('Vous devez spécifier des champs avec l\'option --fields="champ1:type1,champ2:type2"');
             return;
@@ -39,12 +38,21 @@ class MakeApi extends Command
 
         $fieldsArray = $this->parseFields($fields);
         $pluralName = Str::plural(Str::lower($name));
+        $this->nameLower = Str::lower($name);
 
         info("Création des fichiers pour l'API: {$name}");
-        $route = "Route::apiResource('{$this->nameLower}', App\Http\Controllers\ProductController::class);";
+        $route = "Route::apiResource('{$pluralName}', App\Http\Controllers\\{$name}Controller::class);";
         $apiFilePath = base_path('routes/api.php');
-        File::append($apiFilePath, PHP_EOL . $route);
+        $phpHeader = "<?php\n\nuse Illuminate\Support\Facades\Route;\n\n";
 
+        if (!File::exists($apiFilePath)) {
+            File::put($apiFilePath, $phpHeader); 
+        }
+
+        $existingRoutes = File::get($apiFilePath);
+        if (!str_contains($existingRoutes, $route)) {
+            File::append($apiFilePath, PHP_EOL . $route);
+        }
 
         // Créer le modèle avec la migration et le factory
         Artisan::call("make:model {$name} -mf");
@@ -100,7 +108,7 @@ class MakeApi extends Command
     }
     private function callDiagramsMethods()
     {
-        $this->warn("Aucun nom fourni. Utilisation du nom par défaut : Product");
+        $this->warn("Aucun nom fourni. Utilisation par défaut du fichier JSON...");
         $jsonFilePath = base_path('class_data.json');
         if (!file_exists($jsonFilePath)) {
             $this->error("Le fichier class_data.json est introuvable.");
@@ -218,7 +226,7 @@ class MakeApi extends Command
         $fieldsArray = [];
         foreach (explode(',', $fields) as $field) {
             [$name, $type] = explode(':', $field);
-            $fieldsArray[$name] = $type;
+            $fieldsArray[$name] = strtolower($type);
         }
         return $fieldsArray;
     }
@@ -424,6 +432,7 @@ class MakeApi extends Command
         }
 
         $attributes = '';
+
         foreach ($fieldsArray as $field => $type) {
             if ($type == 'text') {
                 $type = 'string';
@@ -437,6 +446,10 @@ class MakeApi extends Command
             if ($type == 'date' || $type == 'datetime' || $type == 'timestamp' || $type == 'time') {
                 $type = '\DateTimeInterface';
             }
+            if($type == 'uuid' || $type == 'UUID'){
+                $type = 'string';
+            }
+            
             $attributes .= "public? $type \${$field},\n        ";
         }
         $atributsFromRequest = '';
