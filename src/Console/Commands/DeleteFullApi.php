@@ -17,10 +17,10 @@ class DeleteFullApi extends Command
     {
         $name = $this->argument('name');
         if (empty($name)) {
-            $this->warn("Aucun nom fourni. Utilisation du nom par défaut : Product");
-            $jsonFilePath = base_path('class_data');
+            $this->warn("Aucun nom fourni. Utilisation du nom par défaut du fichier JSON.");
+            $jsonFilePath = base_path('class_data.json');
             if (!file_exists($jsonFilePath)) {
-                $this->error("Le fichier class_data est introuvable.");
+                $this->error("Le fichier class_data.json est introuvable.");
                 return;
             }
 
@@ -90,12 +90,12 @@ class DeleteFullApi extends Command
                 'attributes' => array_map(function ($attribute) {
                     return [
                         'name' => $attribute['name'],
-                        'type' => match (strtolower($attribute['type'])) {
+                        '_type' => match (strtolower($attribute['_type'])) {
                             'integer' => 'int',
                             'bigint' => 'int',
                             'str', 'text' => 'string',
                             'boolean' => 'bool',
-                            default => $attribute['type'],
+                            default => $attribute['_type'],
                         },
                     ];
                 }, $class['attributes']),
