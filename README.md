@@ -20,6 +20,7 @@
 - Generate **Factories** and **Seeders**.
 - Create **Migrations**.
 - Support for configurable field types and validations (**FormRequest**).
+- Delete generated API structures with a single command.
 
 ---
 
@@ -128,6 +129,31 @@ This command will generate:
 - **Factories** (`Database\Factories`)
 - **Migrations** (`Database\Migrations`)
 - **Seeders** (`Database\Seeders`)
+
+### Delete API Structure
+
+To remove the generated API structure, you can use:
+
+```bash
+php artisan delete:fullapi
+```
+
+This will remove all the generated files from the API structure.
+
+To delete a specific model's API structure, use:
+
+```bash
+php artisan delete:fullapi ModelName
+```
+
+For example:
+
+```bash
+php artisan delete:fullapi Post
+```
+
+This will delete all the generated files related to the Post model, including controllers, services, DTOs, policies, resources, factories, seeders, and migrations.
+
 #### Architecture
 ```
 project/
@@ -555,5 +581,3 @@ If you discover any security-related issues, please email [loicmbassi5@gmail.com
 ## License
 
 This package is open-source and distributed under the MIT License. See the [LICENSE](LICENSE.md) file for more details.
-
----
