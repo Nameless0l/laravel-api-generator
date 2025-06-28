@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Artisan;
 class MakeApi extends Command
 {
     protected $signature = 'make:fullapi {name?} {--fields=}';
-    protected $description = 'Créer un modèle, migration, controller, resource, request, factory, seeder et DTO avec champs dynamiques';
+    protected $description = 'Créer un modèle, migration, controller, resource, request, factory, seeder et DTO avec champs dynamiques et relations';
     protected $classes;
     private $nameLower;
     const BASE_STUB_PATH = "vendor/nameless/laravel-api-generator/stubs/";
@@ -33,7 +33,7 @@ class MakeApi extends Command
         $this->callDefaulttMethods($name, $fields);
     }
 
-    private function callDefaulttMethods($name, $fields)
+    private function callDefaulttMethods($name, $fields, ?array $classData = null)
     {
 
         $fieldsArray = $this->parseFields($fields);
@@ -46,7 +46,7 @@ class MakeApi extends Command
         $phpHeader = "<?php\n\nuse Illuminate\Support\Facades\Route;\n\n";
 
         if (!File::exists($apiFilePath)) {
-            File::put($apiFilePath, $phpHeader); 
+            File::put($apiFilePath, $phpHeader);
         }
 
         $existingRoutes = File::get($apiFilePath);
@@ -58,12 +58,15 @@ class MakeApi extends Command
         Artisan::call("make:model {$name} -mf");
         info("Modèle, migration et factory créés.");
 
-        // Mettre à jour le modèle avec les fillable
-        $this->updateModel($name, $fieldsArray);
-        $this->info("Modèle mis à jour avec les fillable.");
+        // Mettre à jour le modèle avec les fillable et les relations
+        $this->updateModel($name, $fieldsArray, $classData);
+        $this->info("Modèle mis à jour avec les fillable et les relations.");
 
-        // Ajouter les champs dans la migration
-        $this->updateMigration($name, $fieldsArray);
+        // Ajouter les champs et les clés étrangères dans la migration
+        $this->updateMigration($name, $fieldsArray, $classData);
+
+        // Créer les migrations pour les tables pivots (ManyToMany)
+        $this->createPivotMigrations($name, $classData);
 
         // Créer le service
         $this->createService($name, $this->nameLower);
@@ -117,11 +120,19 @@ class MakeApi extends Command
 
         $this->info("Lecture du fichier JSON...");
         $jsonData = file_get_contents($jsonFilePath);
-        $this->classes = json_decode($jsonData, true);
+        // Le JSON peut être un tableau d'objets ou un seul objet avec une clé "data"
+        $rawClasses = json_decode($jsonData, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             $this->error("Erreur de décodage JSON : " . json_last_error_msg());
             return;
+        }
+        
+        // S'assurer que nous travaillons avec un tableau
+        if (isset($rawClasses['data']) && is_array($rawClasses['data'])) {
+             $this->classes = [$rawClasses];
+        } else {
+             $this->classes = $rawClasses;
         }
 
         $this->info("Extraction des données JSON...");
@@ -137,22 +148,31 @@ class MakeApi extends Command
      */
     public function jsonExtractionToArray()
     {
-        $this->classes = array_map(function ($class) {
+        $this->classes = array_map(function ($classData) {
+            // Gérer les deux formats JSON (avec ou sans l'enveloppe 'data')
+            $class = isset($classData['data']) ? $classData['data'] : $classData;
+    
             return [
                 'name' => ucfirst($class['name']),
+                'parent' => isset($class['parent']) ? ucfirst($class['parent']) : null,
                 'attributes' => array_map(function ($attribute) {
                     return [
                         'name' => $attribute['name'],
                         '_type' => match (strtolower($attribute['_type'])) {
-                            'integer' => 'int',
+                            'integer', 'long', 'int' => 'int',
                             'bigint' => 'int',
-                            'str', 'text' => 'string',
-                            'date', 'datetime', 'timestamp', 'time' => '\DateTimeInterface',
+                            'str', 'string', 'text', 'java.time.offsetdatetime', 'java.time.localdate' => 'string',
                             'boolean' => 'bool',
-                            default => $attribute['_type'],
+                            'java.math.bigdecimal' => 'float',
+                            'java.util.map' => 'json',
+                            default => strtolower($attribute['_type']),
                         },
                     ];
-                }, $class['attributes']),
+                }, $class['attributes'] ?? []),
+                'oneToOneRelationships' => $class['oneToOneRelationships'] ?? [],
+                'manyToOneRelationships' => $class['manyToOneRelationships'] ?? [],
+                'oneToManyRelationships' => $class['oneToManyRelationships'] ?? [],
+                'manyToManyRelationships' => $class['manyToManyRelationships'] ?? [],
             ];
         }, $this->classes);
     }
@@ -173,8 +193,8 @@ class MakeApi extends Command
             $fieldsString = implode(',', $fields);
 
             try {
-                $this->callDefaulttMethods($className, $fieldsString);
-                // Artisan::call("make:fullapi {$className} --fields={$fieldsString}");
+                // Passer le tableau complet de la classe, qui inclut maintenant les relations
+                $this->callDefaulttMethods($className, $fieldsString, $class);
                 $this->info("API pour la classe $className générée avec succès !");
             } catch (\Exception $e) {
                 $this->error("Erreur lors de la génération de l'API pour la classe $className : " . $e->getMessage());
@@ -197,11 +217,12 @@ class MakeApi extends Command
         foreach ($fieldsArray as $field => $type) {
             $value = match ($type) {
                 'string' => "fake()->word()",
-                'integer' => "fake()->randomNumber()",
-                'boolean' => "fake()->boolean()",
+                'integer', 'int' => "fake()->randomNumber()",
+                'boolean', 'bool' => "fake()->boolean()",
                 'text' => "fake()->sentence()",
-                'uuid' => "fake()->uuid()",
-                'UUID' => "fake()->uuid()",
+                'uuid', 'UUID' => "fake()->uuid()",
+                'float' => "fake()->randomFloat(2, 1, 1000)",
+                'json' => "json_encode(['key' => 'value'])",
                 'date', 'datetime', 'timestamp', 'time' => "fake()->dateTime()",
                 default => "fake()->word()"
             };
@@ -225,13 +246,15 @@ class MakeApi extends Command
     {
         $fieldsArray = [];
         foreach (explode(',', $fields) as $field) {
-            [$name, $type] = explode(':', $field);
-            $fieldsArray[$name] = strtolower($type);
+            $parts = explode(':', $field);
+            if(count($parts) == 2){
+                $fieldsArray[$parts[0]] = strtolower($parts[1]);
+            }
         }
         return $fieldsArray;
     }
 
-    private function updateMigration($name, $fieldsArray)
+    private function updateMigration($name, $fieldsArray, ?array $classData = null)
     {
         $pluralName = Str::plural(Str::snake($name));
         $migrations = glob(database_path("migrations/*_create_{$pluralName}_table.php"));
@@ -241,73 +264,145 @@ class MakeApi extends Command
             return;
         }
 
-        $migrationPath = $migrations[0]; // On suppose qu'il n'y a qu'une seule migration correspondante, si c'est pas le cas c'est pas mon problème heinn 😃
+        $migrationPath = $migrations[0]; 
         $migrationFile = file_get_contents($migrationPath);
 
         $fieldLines = '';
         foreach ($fieldsArray as $field => $type) {
-            $type = match ($type) {
+             $type = match ($type) {
                 'string' => 'string',
-                'integer' => 'integer',
-                'boolean' => 'boolean',
+                'integer', 'int' => 'integer',
+                'boolean', 'bool' => 'boolean',
                 'text' => 'text',
+                'float' => 'decimal',
+                'json' => 'json',
                 'date', 'datetime', 'timestamp', 'time' => 'timestamp',
-                'uuid' => 'uuid',
-                'UUID' => 'uuid',
+                'uuid', 'UUID' => 'uuid',
                 default => 'string'
             };
-            $fieldLines .= "\$table->{$type}('{$field}')->nullable();\n            ";
+            if($type === 'decimal'){
+                 $fieldLines .= "\$table->{$type}('{$field}', 8, 2)->nullable();\n            ";
+            } else {
+                 $fieldLines .= "\$table->{$type}('{$field}')->nullable();\n            ";
+            }
+        }
+        
+        $foreignKeyLines = '';
+        if ($classData) {
+            // Les relations Many-to-One et One-to-One (côté "enfant") impliquent une clé étrangère
+            $relations = array_merge($classData['manyToOneRelationships'], $classData['oneToOneRelationships']);
+            foreach ($relations as $relation) {
+                $foreignKeyColumn = Str::snake($relation['role']) . '_id';
+                // Assumer que le nom de la table est le pluriel du nom du modèle lié
+                $relatedTable = Str::plural(Str::snake($relation['comodel']));
+                $foreignKeyLines .= "\$table->foreignId('{$foreignKeyColumn}')->nullable()->constrained('{$relatedTable}')->onDelete('set null');\n            ";
+            }
         }
 
         // Injecter les champs dans la migration
-        $pattern = '/Schema::create\([\'"]' . preg_quote($pluralName, '/') . '[\'"],\s*function\s*\(Blueprint\s*\$table\)\s*\{.*?\$table->timestamps\(\);/s';
-        $replacement = "Schema::create('{$pluralName}', function (Blueprint \$table) {\n            \$table->id();\n            {$fieldLines}\$table->timestamps();";
+        $pattern = '/\$table->id\(\);(.*?)\$table->timestamps\(\);/s';
+        $replacement = "\$table->id();\n            {$fieldLines}{$foreignKeyLines}\$table->timestamps();";
+        
+        if(preg_match($pattern, $migrationFile)) {
+            $migrationFile = preg_replace($pattern, $replacement, $migrationFile);
+        } else {
+             $pattern = '/Schema::create\([\'"]' . preg_quote($pluralName, '/') . '[\'"],\s*function\s*\(Blueprint\s*\$table\)\s*\{.*?id\(\);/s';
+             $replacement = "Schema::create('{$pluralName}', function (Blueprint \$table) {\n            \$table->id();\n            {$fieldLines}{$foreignKeyLines}";
+             $migrationFile = preg_replace($pattern, $replacement, $migrationFile);
+        }
 
-        $migrationFile = preg_replace($pattern, $replacement, $migrationFile);
-
-        // Sauvegarder la migration mise à jour
         file_put_contents($migrationPath, $migrationFile);
-
         $this->info("Migration mise à jour : {$migrationPath}");
     }
 
-    private function updateRequest($name, $fieldsArray)
+    private function createPivotMigrations($name, ?array $classData = null)
     {
-        $requestPath = app_path("Http/Requests/{$name}Request.php");
-        $requestFile = file_get_contents($requestPath);
-
-        // Ajouter la méthode authorize qui retourne true
-        $requestFile = str_replace(
-            "public function authorize(): bool\n    {\n        return false;\n    }",
-            "public function authorize(): bool\n    {\n        return true;\n    }",
-            $requestFile
-        );
-
-        $rules = '';
-        foreach ($fieldsArray as $field => $type) {
-            $rule = match ($type) {
-                'string' => "'string|max:255'",
-                'integer' => "'integer'",
-                'boolean' => "'boolean'",
-                'text' => "'string'",
-                'uuid' => "'uuid'",
-                'UUID' => "'uuid'",
-                'date' => "'date'",
-                'datetime' => "'date'",
-                'timestamp' => "'date'",
-                default => "'required'"
-            };
-            $rules .= "'{$field}' => {$rule},\n            ";
+        if (!$classData || empty($classData['manyToManyRelationships'])) {
+            return;
         }
 
-        $requestFile = preg_replace(
-            "/public function rules\(\).*?\{.*?\n.*?\}/s",
-            "public function rules()\n    {\n        return [\n            {$rules}\n        ];\n    }",
-            $requestFile
-        );
+        $modelNameSingular = Str::snake($name);
 
-        file_put_contents($requestPath, $requestFile);
+        foreach ($classData['manyToManyRelationships'] as $relation) {
+            $relatedModel = ucfirst($relation['comodel']);
+            $relatedModelSingular = Str::snake($relatedModel);
+
+            $tableParts = [$modelNameSingular, $relatedModelSingular];
+            sort($tableParts);
+            $pivotTableName = implode('_', $tableParts);
+
+            $existingMigrations = File::glob(database_path("migrations/*_create_{$pivotTableName}_table.php"));
+            if (!empty($existingMigrations)) {
+                $this->warn("La migration de la table pivot '{$pivotTableName}' existe déjà. Ignorée.");
+                continue;
+            }
+
+            $migrationName = "create_{$pivotTableName}_table";
+            Artisan::call('make:migration', ['name' => $migrationName]);
+            $this->info("Migration de la table pivot créée : {$migrationName}");
+
+            $migrationFile = last(File::glob(database_path("migrations/*_{$migrationName}.php")));
+
+            if ($migrationFile) {
+                $upMethodContent = "
+        Schema::create('{$pivotTableName}', function (Blueprint \$table) {
+            \$table->primary(['{$tableParts[0]}_id', '{$tableParts[1]}_id']);
+            \$table->foreignId('{$tableParts[0]}_id')->constrained('" . Str::plural($tableParts[0]) . "')->onDelete('cascade');
+            \$table->foreignId('{$tableParts[1]}_id')->constrained('" . Str::plural($tableParts[1]) . "')->onDelete('cascade');
+            \$table->timestamps();
+        });";
+
+                $migrationContent = file_get_contents($migrationFile);
+                $migrationContent = preg_replace(
+                    '/(public function up\(\): void\s*{)/s',
+                    "$1" . $upMethodContent,
+                    $migrationContent
+                );
+
+                file_put_contents($migrationFile, $migrationContent);
+                $this->info("Migration de la table pivot mise à jour : {$migrationFile}");
+            }
+        }
     }
+
+
+   private function updateRequest($name, $fieldsArray)
+{
+    $requestPath = app_path("Http/Requests/{$name}Request.php");
+    $requestFile = file_get_contents($requestPath);
+
+    // Ajouter la méthode authorize qui retourne true
+    $requestFile = str_replace(
+        "public function authorize(): bool\n    {\n        return false;\n    }",
+        "public function authorize(): bool\n    {\n        return true;\n    }",
+        $requestFile
+    );
+
+    $rules = '';
+    foreach ($fieldsArray as $field => $type) {
+        $rule = match ($type) {
+            'string' => 'string|max:255',
+            'integer', 'int' => 'integer',
+            'boolean', 'bool' => 'boolean',
+            'text' => 'string',
+            'uuid', 'UUID' => 'uuid',
+            'float' => 'numeric',
+            'json' => 'json',
+            'date', 'datetime', 'timestamp' => 'date',
+            default => 'sometimes|string'
+        };
+        // CORRECTION : Pas de guillemets dans le match, on les ajoute ici
+        $rules .= "'{$field}' => 'sometimes|{$rule}',\n            ";
+    }
+
+    $requestFile = preg_replace(
+        "/public function rules\(\).*?\{.*?\n.*?\}/s",
+        "public function rules(): array\n    {\n        return [\n            {$rules}\n        ];\n    }",
+        $requestFile
+    );
+
+    file_put_contents($requestPath, $requestFile);
+}
 
     private function addCrudToController($name, $nameLower, $pluralName)
     {
@@ -348,8 +443,8 @@ class MakeApi extends Command
 
         public function index()
         {
-            \${$nameLower} = \$this->service->getAll();
-            return {$name}Resource::collection(\${$nameLower});
+            \${$pluralName} = \$this->service->getAll();
+            return {$name}Resource::collection(\${$pluralName});
         }
 
         public function store({$name}Request \$request)
@@ -386,8 +481,12 @@ class MakeApi extends Command
             "use App\\Http\\Requests\\{$name}Request;\nuse App\\Models\\{$name};\nuse App\\Http\\Resources\\{$name}Resource;\nuse App\\Services\\{$name}Service;\nuse App\\DTO\\{$name}DTO;\nuse Illuminate\\Http\\Response;",
             $content
         );
+        
+        // Vider la classe avant d'ajouter les nouvelles méthodes
+        $pattern = '/class ' . $name . 'Controller extends Controller\s*{[^}]*}/';
+        $replacement = 'class ' . $name . 'Controller extends Controller {' . $methods . '}';
+        $content = preg_replace($pattern, $replacement, $content, 1);
 
-        $content = str_replace('}', $methods . "\n}", $content);
 
         file_put_contents($controllerPath, $content);
 
@@ -416,8 +515,8 @@ class MakeApi extends Command
 
         $factoryContent = implode(",\n            ", $factoryFields);
         $seederFile = preg_replace(
-            "/public function run\(\).*?\{.*?\}/s",
-            "public function run()\n    {\n        \\App\\Models\\{$name}::factory(10)->create();\n}",
+            "/public function run\(\): void\s*{[^}]*}/s",
+            "public function run(): void\n    {\n        \\App\\Models\\{$name}::factory(10)->create();\n    }",
             $seederFile
         );
 
@@ -443,6 +542,12 @@ class MakeApi extends Command
             if ($type == 'integer' || $type == 'bigint') {
                 $type = 'int';
             }
+            if ($type == 'float'){
+                 $type = 'float';
+            }
+            if($type == 'json'){
+                 $type = 'array';
+            }
             if ($type == 'date' || $type == 'datetime' || $type == 'timestamp' || $type == 'time') {
                 $type = '\DateTimeInterface';
             }
@@ -450,27 +555,30 @@ class MakeApi extends Command
                 $type = 'string';
             }
             
-            $attributes .= "public? $type \${$field},\n        ";
+            $attributes .= "public ?{$type} \${$field},
+        ";
         }
         $atributsFromRequest = '';
         foreach ($fieldsArray as $field => $type) {
             if ($type == 'date' || $type == 'datetime' || $type == 'timestamp' || $type == 'time') {
-                $atributsFromRequest .= "$field : \Carbon\Carbon::parse(\$request->get('{$field}')),\n            ";
+                $atributsFromRequest .= "$field: \$request->filled('{$field}') ? \Carbon\Carbon::parse(\$request->get('{$field}')) : null,\n            ";
             } else {
-                $atributsFromRequest .= "$field : \$request->get('{$field}'),\n            ";
+                $atributsFromRequest .= "$field: \$request->get('{$field}'),\n            ";
             }
         }
-        $attributes = rtrim($attributes, ', ');
-        $atributsFromRequest = rtrim($atributsFromRequest, ', ');
+        $attributes = rtrim($attributes, ",
+        ");
+        $atributsFromRequest = rtrim($atributsFromRequest, ",
+            ");
 
         $content = <<<EOD
 <?php
 
-
-
 namespace App\DTO;
 
 use App\Http\Requests\\{$name}Request;
+use Illuminate\Http\Request;
+
 readonly class {$name}DTO
 {
 
@@ -478,7 +586,7 @@ readonly class {$name}DTO
         {$attributes}
     ) {}
 
-    public static function fromRequest({$name}Request \$request): self
+    public static function fromRequest(Request \$request): self
     {
         return new self(
             {$atributsFromRequest}
@@ -514,7 +622,8 @@ class {$name}Service
 
     public function create({$name}DTO \$dto)
     {
-        return {$name}::create((array) \$dto);
+        \$data = array_filter((array) \$dto, fn(\$value) => \$value !== null);
+        return {$name}::create(\$data);
     }
 
     public function find(\$id)
@@ -524,7 +633,8 @@ class {$name}Service
 
     public function update({$name} \${$nameLower}, {$name}DTO \$dto)
     {
-        \${$nameLower}->update((array) \$dto);
+        \$data = array_filter((array) \$dto, fn(\$value) => \$value !== null);
+        \${$nameLower}->update(\$data);
         return \${$nameLower};
     }
 
@@ -546,106 +656,14 @@ EOD;
             $this->error("Le fichier Policy pour {$name} n'existe pas.");
             return;
         }
+        
+        $policyContent = file_get_contents($policyPath);
 
-        $content = <<<EOD
-<?php
+        // Rendre toutes les méthodes true
+        $policyContent = preg_replace('/(return\s+)(false|Response::deny\(\));/m', '$1true;', $policyContent);
 
-namespace App\Policies;
 
-use App\Models\\{$name};
-use App\Models\User;
-use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Auth\Access\Response;
-
-class {$name}Policy
-{
-    use HandlesAuthorization;
-
-    /**
-     * Determine whether the user can view any models.
-     *
-     * @param  User  \$user
-     * @return Response|bool
-     */
-    public function viewAny(User \$user): Response|bool
-    {
-        return true;
-    }
-
-    /**
-     * Determine whether the user can view the model.
-     *
-     * @param  User  \$user
-     * @param  {$name}  \${$this->nameLower}
-     * @return Response|bool
-     */
-    public function view(User \$user, {$name} \${$this->nameLower}): Response|bool
-    {
-        return true;
-    }
-
-    /**
-     * Determine whether the user can create models.
-     *
-     * @param  User  \$user
-     * @return Response|bool
-     */
-    public function create(User \$user): Response|bool
-    {
-        return true;
-    }
-
-    /**
-     * Determine whether the user can update the model.
-     *
-     * @param  User  \$user
-     * @param  {$name}  \${$this->nameLower}
-     * @return Response|bool
-     */
-    public function update(User \$user, {$name} \${$this->nameLower}): Response|bool
-    {
-        return true;
-    }
-
-    /**
-     * Determine whether the user can delete the model.
-     *
-     * @param  User  \$user
-     * @param  {$name}  \${$this->nameLower}
-     * @return Response|bool
-     */
-    public function delete(User \$user, {$name} \${$this->nameLower}): Response|bool
-    {
-        return true;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     *
-     * @param  User  \$user
-     * @param  {$name}  \${$this->nameLower}
-     * @return Response|bool
-     */
-    public function restore(User \$user, {$name} \${$this->nameLower}): Response|bool
-    {
-        return true;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     *
-     * @param  User  \$user
-     * @param  {$name}  \${$this->nameLower}
-     * @return Response|bool
-     */
-    public function forceDelete(User \$user, {$name} \${$this->nameLower}): Response|bool
-    {
-        return true;
-    }
-}
-EOD;
-
-        file_put_contents($policyPath, $content);
+        file_put_contents($policyPath, $policyContent);
     }
 
     private function updateAuthServiceProvider($name)
@@ -658,34 +676,24 @@ EOD;
 
         $content = file_get_contents($providerPath);
 
-        // Ajouter l'import du modèle et de la policy
-        $modelImport = "use App\Models\\{$name};";
-        $policyImport = "use App\Policies\\{$name}Policy;";
-
-        // Ajouter les imports après le namespace
-        $content = preg_replace(
-            '/namespace App\\\\Providers;/',
-            "namespace App\\Providers;\n\n{$modelImport}\n{$policyImport}",
-            $content
-        );
-
-        // Ajouter le mapping modèle-policy dans la propriété $policies
+        // Éviter les doublons d'imports et de mappings
+        $modelImport = "use App\\Models\\{$name};";
+        $policyImport = "use App\\Policies\\{$name}Policy;";
         $mapping = "        {$name}::class => {$name}Policy::class,";
 
-        // Ajouter le mapping dans le tableau $policies
-        if (strpos($content, 'protected $policies = [') !== false) {
-            // Si le tableau existe déjà, ajouter le nouveau mapping
+        if (strpos($content, $modelImport) === false) {
+             $content = preg_replace('/(namespace App\\\\Providers;)/', "$1\n{$modelImport}", $content, 1);
+        }
+        if (strpos($content, $policyImport) === false) {
+             $content = preg_replace('/(namespace App\\\\Providers;)/', "$1\n{$policyImport}", $content, 1);
+        }
+
+        if (strpos($content, $mapping) === false) {
             $content = preg_replace(
-                '/protected \$policies = \[(.*?)\]/s',
-                "protected \$policies = [\n{$mapping}\$1\n    ]",
-                $content
-            );
-        } else {
-            // Si le tableau n'existe pas, le créer avec le mapping
-            $content = preg_replace(
-                '/class AuthServiceProvider extends ServiceProvider\s*{/',
-                "class AuthServiceProvider extends ServiceProvider\n{\n    protected \$policies = [\n{$mapping}\n    ];",
-                $content
+                '/protected \$policies = \[/',
+                "protected \$policies = [\n{$mapping}",
+                $content,
+                1
             );
         }
 
@@ -722,7 +730,6 @@ class AuthServiceProvider extends ServiceProvider
 }
 EOD;
 
-        // Créer le répertoire Providers s'il n'existe pas
         if (!file_exists(app_path('Providers'))) {
             mkdir(app_path('Providers'), 0755, true);
         }
@@ -731,7 +738,7 @@ EOD;
         $this->info('AuthServiceProvider créé.');
     }
 
-    private function updateModel($name, $fieldsArray)
+    private function updateModel($name, $fieldsArray, ?array $classData = null)
     {
         $modelPath = app_path("Models/{$name}.php");
 
@@ -740,18 +747,91 @@ EOD;
             return;
         }
 
-        $modelContent = file_get_contents($modelPath);
-
+        // Préparer les données pour le template
         $fillableFields = array_keys($fieldsArray);
+        
+        // Ajouter les clés étrangères
+        if ($classData) {
+            $relations = array_merge(
+                $classData['manyToOneRelationships'] ?? [], 
+                $classData['oneToOneRelationships'] ?? []
+            );
+            foreach ($relations as $relation) {
+                $fillableFields[] = Str::snake($relation['role']) . '_id';
+            }
+        }
+        
         $fillableString = "'" . implode("', '", $fillableFields) . "'";
+        $fillableProperty = "protected \$fillable = [{$fillableString}];";
 
-        $fillableProperty = "\n    protected \$fillable = [{$fillableString}];\n";
+        // Générer les relations
+        $relationshipMethods = '';
+        $imports = '';
+        $parentClass = 'Model';
+        
+        if ($classData) {
+            // Ne pas traiter l'héritage pour l'instant car dans ce JSON c'est des relations
+            // L'héritage sera traité différemment plus tard
+            
+            $relations = [
+                'oneToOne' => $classData['oneToOneRelationships'] ?? [],
+                'oneToMany' => $classData['oneToManyRelationships'] ?? [],
+                'manyToOne' => $classData['manyToOneRelationships'] ?? [],
+                'manyToMany' => $classData['manyToManyRelationships'] ?? []
+            ];
 
-        $modelContent = preg_replace(
-            '/(class\s+' . $name . '\s+extends\s+Model\s*{)/',
-            "$1{$fillableProperty}",
-            $modelContent
-        );
+            $relatedModels = [];
+            
+            foreach ($relations['oneToOne'] as $rel) {
+                $methodName = Str::camel($rel['role']);
+                $relatedModel = ucfirst($rel['comodel']);
+                $relatedModels[$relatedModel] = true;
+                $relationshipMethods .= "\n    public function {$methodName}()\n    {\n        return \$this->hasOne({$relatedModel}::class);\n    }\n";
+            }
+            
+            foreach ($relations['oneToMany'] as $rel) {
+                $methodName = Str::camel($rel['role']);
+                $relatedModel = ucfirst($rel['comodel']);
+                $relatedModels[$relatedModel] = true;
+                $relationshipMethods .= "\n    public function {$methodName}()\n    {\n        return \$this->hasMany({$relatedModel}::class);\n    }\n";
+            }
+            
+            foreach ($relations['manyToOne'] as $rel) {
+                $methodName = Str::camel($rel['role']);
+                $relatedModel = ucfirst($rel['comodel']);
+                $relatedModels[$relatedModel] = true;
+                $relationshipMethods .= "\n    public function {$methodName}()\n    {\n        return \$this->belongsTo({$relatedModel}::class);\n    }\n";
+            }
+            
+            foreach ($relations['manyToMany'] as $rel) {
+                $methodName = Str::camel($rel['role']);
+                $relatedModel = ucfirst($rel['comodel']);
+                $relatedModels[$relatedModel] = true;
+                $relationshipMethods .= "\n    public function {$methodName}()\n    {\n        return \$this->belongsToMany({$relatedModel}::class);\n    }\n";
+            }
+            
+            // Ajouter les imports pour les modèles liés
+            $uniqueRelatedModels = array_unique(array_keys($relatedModels));
+            foreach ($uniqueRelatedModels as $relatedModel) {
+                if ($relatedModel !== $name && $relatedModel !== $parentClass) { // Éviter l'auto-import et le parent
+                    $imports .= "\nuse App\\Models\\{$relatedModel};";
+                }
+            }
+        }
+
+        // Charger le stub et remplacer les placeholders
+        $stubPath = base_path(self::BASE_STUB_PATH . 'model.stub');
+        if (!file_exists($stubPath)) {
+            $this->error("Stub model.stub introuvable: {$stubPath}");
+            return;
+        }
+        
+        $modelContent = file_get_contents($stubPath);
+        $modelContent = str_replace('{{modelName}}', $name, $modelContent);
+        $modelContent = str_replace('{{parentClass}}', $parentClass, $modelContent);
+        $modelContent = str_replace('{{fillable}}', $fillableProperty, $modelContent);
+        $modelContent = str_replace('{{relationships}}', $relationshipMethods, $modelContent);
+        $modelContent = str_replace('{{imports}}', $imports, $modelContent);
 
         file_put_contents($modelPath, $modelContent);
     }
@@ -765,14 +845,13 @@ EOD;
 
         $fieldsCode = '';
         foreach ($fieldsArray as $field => $type) {
-            $fieldsCode .= "'{$field}' => \$this->{$field},\n            ";
+            $fieldsCode .= "            '{$field}' => \$this->{$field},\n";
         }
 
-        // $stubPath = base_path(MakeApi::BASE_STUB_PATH . 'resource.stub');
         $stub = file_get_contents(base_path(MakeApi::BASE_STUB_PATH . 'resource.stub'));
         $template = str_replace(
             ['{{modelName}}', '{{fields}}'],
-            [$name, $fieldsCode],
+            [$name, rtrim($fieldsCode)],
             $stub
         );
         file_put_contents($resourcePath, $template);

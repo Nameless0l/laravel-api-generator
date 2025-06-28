@@ -1,6 +1,18 @@
 parameters:
-    level: 5
+    level: 8
     paths:
         - src
+        - tests
+    
+    ignoreErrors:
+        - '#Call to an undefined method Illuminate\\Contracts\\Foundation\\Application::#'
+        - '#Access to an undefined property Illuminate\\Contracts\\Foundation\\Application::#'
+        - '#Undefined function#'
+    
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    
     excludePaths:
         - vendor/*
+        
+    reportUnmatchedIgnoredErrors: false

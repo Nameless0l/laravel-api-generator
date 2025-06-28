@@ -1,0 +1,66 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\{{modelName}}Request;
+use App\Models\{{modelName}};
+use App\Http\Resources\{{modelName}}Resource;
+use App\Services\{{modelName}}Service;
+use App\DTO\{{modelName}}DTO;
+use Illuminate\Http\Response;
+
+class {{modelName}}Controller extends Controller
+{
+    public function __construct(
+        private readonly {{modelName}}Service $service
+    ) {}
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        ${{pluralName}} = $this->service->getAll();
+        return {{modelName}}Resource::collection(${{pluralName}});
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store({{modelName}}Request $request)
+    {
+        $dto = {{modelName}}DTO::fromRequest($request);
+        ${{modelNameLower}} = $this->service->create($dto);
+        return new {{modelName}}Resource(${{modelNameLower}});
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show({{modelName}} ${{modelNameLower}})
+    {
+        return new {{modelName}}Resource(${{modelNameLower}});
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update({{modelName}}Request $request, {{modelName}} ${{modelNameLower}})
+    {
+        $dto = {{modelName}}DTO::fromRequest($request);
+        $updated{{modelName}} = $this->service->update(${{modelNameLower}}, $dto);
+        return new {{modelName}}Resource($updated{{modelName}});
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy({{modelName}} ${{modelNameLower}})
+    {
+        $this->service->delete(${{modelNameLower}});
+        return response(null, 204);
+    }
+}
