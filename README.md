@@ -4,27 +4,44 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/nameless/laravel-api-generator.svg)](https://packagist.org/packages/nameless/laravel-api-generator)
 [![License](https://img.shields.io/packagist/l/nameless/laravel-api-generator.svg)](https://packagist.org/packages/nameless/laravel-api-generator)
 
-**Laravel API Generator** is a powerful Laravel package that generates a complete API structure, including **Models**, **Controllers**, **Services**, **DTOs**, **Policies**, **Resources**, **Factories**, **Seeders**, and **Migrations**, with a single command.
+**Laravel API Generator** is a professional, enterprise-grade Laravel package that generates complete API structures following best practices and clean architecture principles.
 
 ---
 
-## Features
+## 🚀 Features
 
-- Generate a complete API structure with one command.
-- Create **Models** with proper relationships.
-- Generate RESTful **Controllers**.
-- Implement the **Service Layer** pattern.
-- Create **Data Transfer Objects (DTOs)**.
-- Generate **Resources** for API responses.
-- Automatically set up **Policies**.
-- Generate **Factories** and **Seeders**.
-- Create **Migrations**.
-- Support for configurable field types and validations (**FormRequest**).
-- Delete generated API structures with a single command.
+### ✨ Complete API Generation
+- **Models** with proper relationships and fillable properties
+- **RESTful Controllers** with full CRUD operations
+- **Service Layer** implementation for business logic
+- **Data Transfer Objects (DTOs)** for type-safe data handling
+- **Form Request Validations** with intelligent rules
+- **API Resources** for consistent response formatting
+- **Policies** for authorization
+- **Database Factories** with realistic fake data
+- **Seeders** for test data generation
+- **Migrations** with proper foreign keys and constraints
+
+### 🏗️ Architecture & Design Patterns
+- **Clean Architecture** with separated concerns
+- **Repository Pattern** with service layer
+- **Value Objects** for domain modeling
+- **Dependency Injection** throughout
+- **SOLID Principles** compliance
+- **Type Safety** with PHP 8.1+ features
+
+### 🔧 Advanced Features
+- **JSON Schema Support** for bulk generation
+- **Relationship Management** (One-to-One, One-to-Many, Many-to-Many)
+- **Inheritance Support** for model hierarchies
+- **Custom Field Types** with validation rules
+- **Extensible Generator System**
+- **Professional Error Handling**
+- **Delete generated API structures** with a single command
 
 ---
 
-## Installation
+## 📦 Installation
 
 You can install the package via Composer:
 
@@ -32,93 +49,170 @@ You can install the package via Composer:
 composer require nameless/laravel-api-generator
 ```
 
-Then, run the installation command to set up the package:
-
-```bash
-php artisan api:install
-```
-
-The package will automatically register its service provider.
+The package automatically registers its service provider.
 
 ---
 
-## Usage
+## 🎯 Quick Start
 
-### Generate Authentication
-If you want to get started with authentication using Laravel's starter kits, run:
+### Single Entity Generation
+
+Generate a complete API for a single entity:
 
 ```bash
-php artisan api-generator:install
+php artisan make:fullapi User --fields="name:string,email:string,age:integer,is_active:boolean"
 ```
 
-### Generate a Complete API Structure
-You can generate a complete API structure in two ways:
+This creates:
 
-1. **Using a UML Diagram**:
-   Ensure you have a `class_data` file in the root directory containing your classes and their attributes. Then run:
+- `app/Models/User.php`
+- `app/Http/Controllers/UserController.php`
+- `app/Http/Requests/UserRequest.php`
+- `app/Http/Resources/UserResource.php`
+- `app/Services/UserService.php`
+- `app/DTO/UserDTO.php`
+- `app/Policies/UserPolicy.php`
+- `database/factories/UserFactory.php`
+- `database/seeders/UserSeeder.php`
+- `database/migrations/xxxx_create_users_table.php`
+- API routes in `routes/api.php`
 
-   ```bash
-   php artisan make:fullapi
-   ```
+### Bulk Generation from JSON
 
-   form of class_data file
+Create a `class_data.json` file in your project root:
 
-   ```json
+```json
+[
+  {
+    "name": "User",
+    "attributes": [
+      {"name": "name", "_type": "string"},
+      {"name": "email", "_type": "string"},
+      {"name": "email_verified_at", "_type": "timestamp"}
+    ],
+    "oneToManyRelationships": [
+      {"role": "posts", "comodel": "Post"}
+    ]
+  },
+  {
+    "name": "Post",
+    "attributes": [
+      {"name": "title", "_type": "string"},
+      {"name": "content", "_type": "text"},
+      {"name": "published_at", "_type": "timestamp"}
+    ],
+    "manyToOneRelationships": [
+      {"role": "user", "comodel": "User"}
+    ]
+  }
+]
+```
+
+Then run:
+
+```bash
+php artisan make:fullapi
+```
+
+### Delete Generated API
+
+Remove all generated files for an entity:
+
+---
+
+## 🏗️ Architecture Overview
+
+### Service Layer Pattern
+
+The generated code follows the Service Layer pattern for better organization:
+
+```php
+class UserController extends Controller
+{
+    public function __construct(
+        private readonly UserService $service
+    ) {}
+
+    public function store(UserRequest $request)
     {
-        "name": "person",
-        "type": "class",
-        "attributes": [
-            {
-                "visibility": "public",
-                "name": "name",
-                "_type": "str"
-            },
-            {
-                "visibility": "public",
-                "name": "phonenumber",
-                "_type": "str"
-            },
-            {
-                "visibility": "public",
-                "name": "emailaddress",
-                "_type": "str"
-            },
-            {
-                "visibility": "private",
-                "_type": "Address",
-                "name": "address"
-            }
-        ],
-        "methods": [
-            {
-                "visibility": "public",
-                "name": "purchaseparkingpass",
-                "_type": "void",
-                "args": []
-            }
-        ],
-        "aggregations": [],
-        "compositions": [],
-        "import_list": true
+        $dto = UserDTO::fromRequest($request);
+        $user = $this->service->create($dto);
+        return new UserResource($user);
     }
-    ```
-
-
-2. **Without a UML Diagram**:
-
-   Use the following command to generate the API structure:
-
-   ```bash
-   php artisan make:fullapi ModelName --fields="field1:type,field2:type"
-   ```
-
-#### Example
-
-```bash
-php artisan make:fullapi Post --fields="title:string,content:text,published:boolean"
+}
 ```
 
-This command will generate:
+### Data Transfer Objects
+
+Type-safe data handling with DTOs:
+
+```php
+readonly class UserDTO
+{
+    public function __construct(
+        public ?string $name,
+        public ?string $email,
+        public ?int $age,
+        public ?bool $is_active,
+    ) {}
+
+    public static function fromRequest(Request $request): self
+    {
+        return new self(
+            name: $request->get('name'),
+            email: $request->get('email'),
+            age: $request->get('age'),
+            is_active: $request->get('is_active'),
+        );
+    }
+}
+```
+
+## 🛠️ Advanced Usage
+
+### Custom Field Types
+
+Supported field types:
+
+- `string` - VARCHAR(255)
+- `text` - TEXT
+- `integer`/`int` - INTEGER
+- `bigint` - BIG INTEGER
+- `boolean`/`bool` - BOOLEAN
+- `float`/`decimal` - DECIMAL
+- `json` - JSON
+- `date` - DATE
+- `datetime` - DATETIME
+- `timestamp` - TIMESTAMP
+- `uuid` - UUID
+
+### Relationship Types
+
+The generator supports all Laravel relationship types:
+
+- **One-to-One**: `oneToOneRelationships`
+- **One-to-Many**: `oneToManyRelationships`
+- **Many-to-One**: `manyToOneRelationships`
+- **Many-to-Many**: `manyToManyRelationships`
+
+### Model Inheritance
+
+Support for model inheritance:
+
+```json
+{
+  "name": "AdminUser",
+  "parent": "User",
+  "attributes": [
+    {"name": "permissions", "_type": "json"}
+  ]
+}
+```
+
+### Generated File Structure
+
+This command generates:
+
 - **Models** (`App\Models`)
 - **Controllers** (`App\Http\Controllers`)
 - **Services** (`App\Services`)
@@ -154,42 +248,55 @@ php artisan delete:fullapi Post
 
 This will delete all the generated files related to the Post model, including controllers, services, DTOs, policies, resources, factories, seeders, and migrations.
 
-#### Architecture
-```
-project/
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   ├── Requests/
-│   │   └── Resources/
-│   ├── Models/
-│   ├── Services/
-│   ├── DTO/
-│   └── Policies/
-│
-└── database/
-   ├── factories/
-   ├── migrations/
-   └── seeders/
+---
+
+## 🔧 Configuration
+
+### Custom Stubs
+
+You can customize the generated code by publishing and modifying the stubs:
+
+```bash
+php artisan vendor:publish --tag=laravel-api-generator-stubs
 ```
 
-### Supported Field Types
+### Service Registration
 
-| Type | Description | Default Validation |
-|------|-------------|-------------------|
-| string | String of characters | max:255 |
-| integer | Whole number | numeric |
-| boolean | Boolean value | boolean |
-| text | Long text | string |
-| date | Date | date |
-| datetime | Date and time | datetime |
-| timestamp | Unix timestamp | timestamp |
+The package automatically registers all generators and services through dependency injection.
+
+---
+
+## 🧪 Testing
+
+```bash
+composer test
+```
+
+Run static analysis:
+
+```bash
+composer analyse
+```
+
+Format code:
+
+```bash
+composer format
+```
+
+---
+
+## 📖 API Documentation
+
+The package integrates with [Scramble](https://github.com/dedoc/scramble) for automatic API documentation generation.
+
+After generating your APIs, visit `/docs/api` to see the generated documentation.
 
 ---
 
 ## Generated Structure
 
-### Controller
+### Modern Controller Example
 
 ```php
 <?php
@@ -507,17 +614,41 @@ return new class extends Migration
 
 ---
 
-## Testing
+## 🤝 Contributing
 
-To run the tests, use the following command:
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📚 Testing
+
+Run the test suite:
 
 ```bash
 composer test
 ```
 
+Run static analysis:
+
+```bash
+composer analyse
+```
+
+Format code:
+
+```bash
+composer format
+```
+
 ---
 
-## Local Development
+## 🚀 Local Development
 
 1. Clone this repository:
 
@@ -546,14 +677,14 @@ composer install
     "repositories": [
         {
             "type": "path",
-            "url": "../laravel-code-generator",
+            "url": "../laravel-api-generator",
             "options": {
                 "symlink": true
             }
         }
     ],
     "require": {
-        "nameless/laravel-code-generator": "@dev"
+        "nameless/laravel-api-generator": "@dev"
     }
 }
 ```
@@ -566,18 +697,39 @@ composer update
 
 ---
 
-## Security
+## 🔒 Security
 
 If you discover any security-related issues, please email [loicmbassi5@gmail.com](mailto:loicmbassi5@gmail.com) instead of using the issue tracker.
 
 ---
 
-## Credits
+## 🏆 Credits
 
-- [Mbassi Loïc Aron](https://github.com/Nameless0l)
+- **Author**: [Mbassi Loïc Aron](https://github.com/Nameless0l)
+- **Email**: loicmbassi5@gmail.com
 
 ---
 
-## License
+## 📚 Changelog
+
+Please see [CHANGELOG.md](CHANGELOG.md) for more information on what has changed recently.
+
+---
+
+## 💡 Why Choose Laravel API Generator?
+
+✅ **Professional Architecture** - Built with enterprise-grade patterns  
+✅ **Type Safety** - Full PHP 8.1+ type declarations  
+✅ **Clean Code** - SOLID principles and clean architecture  
+✅ **Extensible** - Easy to extend with custom generators  
+✅ **Well Tested** - Comprehensive test suite  
+✅ **Documentation** - Complete API documentation generation  
+✅ **Best Practices** - Follows Laravel and PHP best practices  
+
+Transform your Laravel development workflow with professional API generation!
+
+---
+
+## 📄 License
 
 This package is open-source and distributed under the MIT License. See the [LICENSE](LICENSE.md) file for more details.

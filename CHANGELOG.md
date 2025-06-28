@@ -5,6 +5,28 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.1] - 2025-06-28
+
+### 📚 Documentation & Polish
+
+### Updated
+- **Documentation Improvements**
+  - Completely updated README.md with modern features and architecture examples
+  - Added comprehensive usage examples with new syntax
+  - Improved installation and quick start guides
+  - Added architecture overview with Service Layer and DTO examples
+  - Enhanced field types documentation
+  - Added configuration and testing sections
+
+### Fixed
+- Minor documentation formatting and consistency issues
+- Updated examples to reflect current v3.0+ architecture
+
+### Added
+- Better code examples showing modern PHP 8.1+ features
+- Enhanced Quick Start section with single entity and bulk generation examples
+- Comprehensive field types and relationship documentation
+
 ## [3.0.0] - 2025-06-28
 
 ### 🚀 Major Refactoring - Clean Architecture Implementation
