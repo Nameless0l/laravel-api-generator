@@ -6,6 +6,14 @@
 
 A professional Laravel package that generates complete, production-ready REST API structures from a single command. Built with clean architecture principles, PHP 8.1+ features, and Laravel best practices.
 
+![Demo](docs/demo.gif)
+
+---
+
+## Architecture
+
+![Architecture Diagram](docs/architecture-diagram.png)
+
 ---
 
 ## What it generates
@@ -413,30 +421,6 @@ The `--interactive` flag launches a step-by-step wizard that guides you through 
 6. **Generate** -- confirm and generate all files
 
 This mode is ideal for developers who prefer a guided experience or want to configure field constraints (unique, defaults) that aren't available in the `--fields` string syntax.
-
----
-
-## Architecture
-
-The generated code follows the **Service Layer pattern** with clear separation of concerns:
-
-```
-Request  -->  Controller  -->  Service  -->  Model
-                 |                |
-              Request          DTO
-              (validation)     (type-safe data)
-                 |
-              Resource
-              (response formatting)
-```
-
-The package itself is built with:
-
-- **Value Objects** (`EntityDefinition`, `FieldDefinition`, `RelationshipDefinition`) for domain modeling
-- **Abstract Generator** base class for extensibility
-- **Contracts/Interfaces** for testability
-- **Dependency Injection** throughout
-- PHP 8.1+ features: readonly classes, constructor promotion, match expressions, named arguments
 
 ---
 
