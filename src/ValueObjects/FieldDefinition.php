@@ -12,6 +12,7 @@ final readonly class FieldDefinition
         public string $name,
         public string $type,
         public bool $nullable = true,
+        public bool $unique = false,
         public ?string $default = null,
         public array $validationRules = [],
         public array $attributes = []
@@ -92,7 +93,14 @@ final readonly class FieldDefinition
             default => 'string'
         };
 
-        return $this->nullable ? "sometimes|{$rule}" : "required|{$rule}";
+        $prefix = $this->nullable ? 'sometimes' : 'required';
+        $rule = "{$prefix}|{$rule}";
+
+        if ($this->unique) {
+            $rule .= '|unique';
+        }
+
+        return $rule;
     }
 
     public function getFakeValue(): string

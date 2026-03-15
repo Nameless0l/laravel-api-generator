@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.2.0] - 2026-03-15
 
 ### Added
+- **Interactive wizard** -- `--interactive` flag launches a step-by-step guided setup: entity name, fields (with type, nullable, unique, default), relationships, options, preview, and confirmation
+- **Sanctum authentication** -- `--auth` flag scaffolds a complete auth system: AuthController (register/login/logout/user), LoginRequest, RegisterRequest, auth routes, and wraps API resources in `auth:sanctum` middleware
 - **Auto-generated tests** -- Feature tests (CRUD endpoints) and Unit tests (Service layer) are now generated for every entity
 - **Postman collection export** -- `--postman` flag generates a ready-to-import Postman v2.1 JSON collection with all endpoints and sample data
 - **Soft Deletes support** -- `--soft-deletes` flag adds the SoftDeletes trait, migration column, restore/forceDelete controller and service methods, and dedicated routes
@@ -15,7 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Complete generator implementations** -- All 9 generator classes (Controller, DTO, Factory, Migration, Policy, Request, Resource, Seeder, Service) are now fully implemented following the AbstractGenerator pattern
 - **FeatureTestGenerator** and **UnitTestGenerator** for automatic test scaffolding
 - **PostmanExporter** service for collection generation
-- New stubs: `test.feature.stub`, `test.unit.stub`
+- **AuthGenerator** service for Sanctum auth scaffolding
+- `unique` and `default` field constraints support in FieldDefinition, MigrationGenerator, and RequestGenerator
+- New stubs: `test.feature.stub`, `test.unit.stub`, `auth.controller.stub`, `auth.login-request.stub`, `auth.register-request.stub`
 
 ### Fixed
 - **StubLoader placeholder matching** -- Fixed a bug where `{{placeholder}}` syntax in stubs was not matched correctly (single vs double braces)
@@ -25,10 +29,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **MakeApiCommand** is now the active command (replaces the legacy MakeApi command)
-- Command signature updated: `make:fullapi {name?} {--fields=} {--soft-deletes} {--postman}`
-- ServiceProvider now registers all 12 generators (including test generators)
+- Command signature updated: `make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive}`
+- ServiceProvider now registers all 12 generators (including test generators) plus AuthGenerator
 - Generated controllers now accept `Request $request` in `index()` for filtering
 - Generated services now accept `array $filters` in `getAll()` method
+- Generated migrations now support `->unique()` and `->default()` modifiers
+- Generated validation rules now include `unique` constraint when applicable
 - `deleteCompleteApi()` now also cleans up generated test files
 - PHPStan configuration cleaned up (removed deprecated options)
 
