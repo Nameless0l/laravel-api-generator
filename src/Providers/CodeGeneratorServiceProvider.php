@@ -13,6 +13,7 @@ use nameless\CodeGenerator\Console\Commands\InstallPackageCommand;
 use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
 use nameless\CodeGenerator\Services\ApiGenerationService;
 use nameless\CodeGenerator\Services\PostmanExporter;
+use nameless\CodeGenerator\Services\AuthGenerator;
 use nameless\CodeGenerator\Support\JsonParser;
 use nameless\CodeGenerator\Support\StubLoader;
 use nameless\CodeGenerator\EntitiesGenerator\ModelGeneratorRefactored;
@@ -63,6 +64,9 @@ class CodeGeneratorServiceProvider extends ServiceProvider
 
         // Register PostmanExporter
         $this->app->singleton(PostmanExporter::class);
+
+        // Register AuthGenerator
+        $this->app->singleton(AuthGenerator::class);
 
         // Register main API generation service
         $this->app->singleton(ApiGenerationServiceInterface::class, function ($app) {

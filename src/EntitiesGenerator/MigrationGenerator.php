@@ -46,8 +46,17 @@ class MigrationGenerator extends AbstractGenerator
     {
         $fields = $definition->fields->map(function (FieldDefinition $field) {
             $dbType = $field->getDatabaseType();
-            $nullable = $field->nullable ? '->nullable()' : '';
-            return "            \$table->{$dbType}('{$field->name}'){$nullable};";
+            $modifiers = '';
+            if ($field->nullable) {
+                $modifiers .= '->nullable()';
+            }
+            if ($field->unique) {
+                $modifiers .= '->unique()';
+            }
+            if ($field->default !== null) {
+                $modifiers .= "->default('{$field->default}')";
+            }
+            return "            \$table->{$dbType}('{$field->name}'){$modifiers};";
         })->toArray();
 
         return implode("\n", $fields);

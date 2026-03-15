@@ -64,10 +64,26 @@ php artisan make:fullapi Post --fields="title:string,content:text" --postman
 
 Generates a `postman_collection.json` at the project root, ready to import. Each entity gets a folder with List, Create, Show, Update, and Delete requests pre-configured with sample data.
 
+### With Sanctum authentication
+
+```bash
+php artisan make:fullapi Post --fields="title:string,content:text" --auth
+```
+
+This scaffolds a complete Sanctum-based auth system: `AuthController` (register, login, logout, user), `LoginRequest`, `RegisterRequest`, auth routes, and wraps your API resource routes inside `auth:sanctum` middleware.
+
+### Interactive wizard
+
+```bash
+php artisan make:fullapi --interactive
+```
+
+A step-by-step guided setup that lets you define the entity name, add fields one by one (with type, nullable, unique, and default value options), configure relationships, and preview everything before generation.
+
 ### All options combined
 
 ```bash
-php artisan make:fullapi Post --fields="title:string,content:text" --soft-deletes --postman
+php artisan make:fullapi Post --fields="title:string,content:text" --soft-deletes --postman --auth
 ```
 
 ### Bulk generation from JSON
@@ -120,7 +136,7 @@ php artisan delete:fullapi
 ## Command reference
 
 ```
-php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman}
+php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive}
 ```
 
 | Argument / Option | Description |
@@ -129,6 +145,8 @@ php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman}
 | `--fields` | Field definitions in `name:type` format, comma-separated. |
 | `--soft-deletes` | Add SoftDeletes trait, migration column, restore/forceDelete endpoints. |
 | `--postman` | Export a Postman v2.1 collection after generation. |
+| `--auth` | Scaffold Sanctum authentication (AuthController, requests, routes, middleware). |
+| `--interactive` | Launch the step-by-step wizard for guided entity creation. |
 
 ---
 
@@ -341,6 +359,60 @@ The `--postman` flag generates a `postman_collection.json` file at the project r
 - A `base_url` variable (defaults to `http://localhost:8000/api`)
 
 Import the file directly into Postman to start testing immediately.
+
+---
+
+## Sanctum authentication
+
+The `--auth` flag scaffolds a complete token-based authentication system using Laravel Sanctum:
+
+**Generated files:**
+
+- `app/Http/Controllers/AuthController.php` -- register, login, logout, user endpoints
+- `app/Http/Requests/LoginRequest.php` -- email + password validation
+- `app/Http/Requests/RegisterRequest.php` -- name, email, password + confirmation validation
+
+**Generated routes:**
+
+```php
+// Public
+POST /api/register
+POST /api/login
+
+// Protected (auth:sanctum)
+POST /api/logout
+GET  /api/user
+
+// Your API resources are also wrapped in auth:sanctum
+GET  /api/posts          (requires token)
+POST /api/posts          (requires token)
+// ...
+```
+
+After running with `--auth`, install Sanctum if not already present:
+
+```bash
+composer require laravel/sanctum
+php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
+php artisan migrate
+```
+
+Add the `HasApiTokens` trait to your `User` model, and your API is secured.
+
+---
+
+## Interactive mode
+
+The `--interactive` flag launches a step-by-step wizard that guides you through entity creation:
+
+1. **Entity name** -- enter the model name in PascalCase
+2. **Fields** -- add fields one by one, choosing type, nullable, unique, and default value for each
+3. **Relationships** -- optionally add belongsTo, hasMany, hasOne, or belongsToMany relations
+4. **Options** -- enable soft deletes, Sanctum auth, Postman export
+5. **Preview** -- review the full entity definition and file list before confirming
+6. **Generate** -- confirm and generate all files
+
+This mode is ideal for developers who prefer a guided experience or want to configure field constraints (unique, defaults) that aren't available in the `--fields` string syntax.
 
 ---
 
