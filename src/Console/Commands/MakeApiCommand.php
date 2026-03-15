@@ -7,6 +7,7 @@ namespace nameless\CodeGenerator\Console\Commands;
 use Illuminate\Console\Command;
 use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
 use nameless\CodeGenerator\Services\PostmanExporter;
+use nameless\CodeGenerator\Services\AuthGenerator;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
@@ -17,12 +18,13 @@ use Illuminate\Support\Facades\File;
 
 class MakeApiCommand extends Command
 {
-    protected $signature = 'make:fullapi {name?} {--fields=} {--soft-deletes} {--postman}';
+    protected $signature = 'make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive}';
     protected $description = 'Generate a complete API including model, migration, controller, resource, request, factory, seeder, DTO, service, policy, and tests';
 
     public function __construct(
         private readonly ApiGenerationServiceInterface $apiGenerationService,
-        private readonly PostmanExporter $postmanExporter
+        private readonly PostmanExporter $postmanExporter,
+        private readonly AuthGenerator $authGenerator
     ) {
         parent::__construct();
     }
@@ -30,6 +32,16 @@ class MakeApiCommand extends Command
     public function handle(): int
     {
         try {
+            // Handle auth scaffolding
+            if ($this->option('auth')) {
+                $this->scaffoldAuth();
+            }
+
+            // Interactive mode
+            if ($this->option('interactive')) {
+                return $this->handleInteractiveGeneration();
+            }
+
             $name = $this->argument('name');
 
             if (empty($name)) {
@@ -45,6 +57,213 @@ class MakeApiCommand extends Command
             return self::FAILURE;
         }
     }
+
+    // ─── Interactive wizard ─────────────────────────────────────────────
+
+    private function handleInteractiveGeneration(): int
+    {
+        $this->info('Laravel API Generator - Interactive Mode');
+        $this->line('─────────────────────────────────────────');
+        $this->newLine();
+
+        // 1. Entity name
+        $name = $this->ask('Entity name (PascalCase)');
+        if (empty($name)) {
+            $this->error('Entity name is required.');
+            return self::FAILURE;
+        }
+        $name = ucfirst($name);
+
+        // 2. Fields
+        $fields = $this->collectFields();
+        if ($fields->isEmpty()) {
+            $this->error('At least one field is required.');
+            return self::FAILURE;
+        }
+
+        // 3. Relationships
+        $relationships = $this->collectRelationships();
+
+        // 4. Options
+        $softDeletes = $this->confirm('Enable soft deletes?', false);
+        $withAuth = !$this->option('auth') && $this->confirm('Add Sanctum authentication?', false);
+        $withPostman = !$this->option('postman') && $this->confirm('Export Postman collection?', false);
+
+        // 5. Preview
+        $this->displayPreview($name, $fields, $relationships, $softDeletes, $withAuth || $this->option('auth'));
+
+        if (!$this->confirm('Confirm generation?', true)) {
+            $this->warn('Generation cancelled.');
+            return self::SUCCESS;
+        }
+
+        // 6. Generate
+        if ($withAuth || $this->option('auth')) {
+            $this->scaffoldAuth();
+        }
+
+        $definition = new EntityDefinition(
+            name: $name,
+            fields: $fields,
+            relationships: $relationships,
+            options: ['soft_deletes' => $softDeletes]
+        );
+
+        $this->info("Generating complete API for: {$name}");
+        $this->apiGenerationService->generateCompleteApi($definition);
+
+        if ($withAuth || $this->option('auth')) {
+            $this->authGenerator->wrapRoutesInAuthMiddleware();
+        }
+
+        $this->displayGeneratedFiles($definition);
+
+        if ($withPostman || $this->option('postman')) {
+            $outputPath = base_path('postman_collection.json');
+            $this->postmanExporter->export(collect([$definition]), $outputPath);
+            $this->info("Postman collection exported to: {$outputPath}");
+        }
+
+        $this->info('API generation completed successfully!');
+        return self::SUCCESS;
+    }
+
+    private function collectFields(): Collection
+    {
+        $fields = collect();
+        $allowedTypes = ['string', 'text', 'integer', 'int', 'bigint', 'boolean', 'bool', 'float', 'decimal', 'json', 'date', 'datetime', 'timestamp', 'uuid'];
+
+        $this->newLine();
+        $this->info('Define fields (press Enter with empty name to finish):');
+
+        while (true) {
+            $fieldName = $this->ask('  Field name');
+            if (empty($fieldName)) {
+                break;
+            }
+
+            $type = $this->choice('  Type', $allowedTypes, 0);
+            $nullable = $this->confirm('  Nullable?', true);
+            $unique = $this->confirm('  Unique?', false);
+
+            $default = null;
+            if ($this->confirm('  Has default value?', false)) {
+                $default = $this->ask('  Default value');
+            }
+
+            $fields->push(new FieldDefinition(
+                name: $fieldName,
+                type: $type,
+                nullable: $nullable,
+                unique: $unique,
+                default: $default
+            ));
+
+            $this->line("    Added: {$fieldName} ({$type})" .
+                ($nullable ? '' : ', required') .
+                ($unique ? ', unique' : '') .
+                ($default !== null ? ", default: {$default}" : ''));
+            $this->newLine();
+        }
+
+        return $fields;
+    }
+
+    private function collectRelationships(): Collection
+    {
+        $relationships = collect();
+
+        $this->newLine();
+        if (!$this->confirm('Add relationships?', false)) {
+            return $relationships;
+        }
+
+        $types = [
+            'belongsTo' => 'manyToOne',
+            'hasMany' => 'oneToMany',
+            'hasOne' => 'oneToOne',
+            'belongsToMany' => 'manyToMany',
+        ];
+
+        while (true) {
+            $typeChoice = $this->choice('  Relationship type', array_keys($types));
+            $relatedModel = $this->ask('  Related model (PascalCase)');
+
+            if (empty($relatedModel)) {
+                break;
+            }
+
+            $role = $this->ask('  Role/method name', lcfirst($relatedModel));
+
+            $relationships->push(new RelationshipDefinition(
+                type: $types[$typeChoice],
+                relatedModel: ucfirst($relatedModel),
+                role: $role
+            ));
+
+            $this->line("    Added: {$typeChoice} -> {$relatedModel} (as {$role})");
+            $this->newLine();
+
+            if (!$this->confirm('  Add another relationship?', false)) {
+                break;
+            }
+        }
+
+        return $relationships;
+    }
+
+    private function displayPreview(
+        string $name,
+        Collection $fields,
+        Collection $relationships,
+        bool $softDeletes,
+        bool $withAuth
+    ): void {
+        $this->newLine();
+        $this->line('── Preview ──────────────────────────────────────');
+        $this->line("  Entity:     {$name}");
+
+        $this->line('  Fields:');
+        $fields->each(function (FieldDefinition $field) {
+            $constraints = [];
+            if (!$field->nullable) {
+                $constraints[] = 'required';
+            }
+            if ($field->unique) {
+                $constraints[] = 'unique';
+            }
+            if ($field->default !== null) {
+                $constraints[] = "default: {$field->default}";
+            }
+            $extra = !empty($constraints) ? ' (' . implode(', ', $constraints) . ')' : '';
+            $this->line("              {$field->name}: {$field->type}{$extra}");
+        });
+
+        if ($relationships->isNotEmpty()) {
+            $this->line('  Relations:');
+            $relationships->each(function (RelationshipDefinition $rel) {
+                $this->line("              {$rel->getEloquentMethod()} -> {$rel->relatedModel} (as {$rel->role})");
+            });
+        }
+
+        $options = [];
+        if ($softDeletes) {
+            $options[] = 'soft deletes';
+        }
+        if ($withAuth) {
+            $options[] = 'sanctum auth';
+        }
+        if (!empty($options)) {
+            $this->line('  Options:    ' . implode(', ', $options));
+        }
+
+        $this->newLine();
+        $this->line('  Files to generate: 12 files + route');
+        $this->line('─────────────────────────────────────────────────');
+        $this->newLine();
+    }
+
+    // ─── Standard generation modes ──────────────────────────────────────
 
     private function handleJsonGeneration(): int
     {
@@ -62,6 +281,10 @@ class MakeApiCommand extends Command
         $this->info("Generating APIs from JSON data...");
         $this->apiGenerationService->generateFromJson($jsonData);
 
+        if ($this->option('auth')) {
+            $this->authGenerator->wrapRoutesInAuthMiddleware();
+        }
+
         $this->info("API generation completed successfully!");
 
         if ($this->option('postman')) {
@@ -77,6 +300,7 @@ class MakeApiCommand extends Command
 
         if (!$fieldsOption) {
             $this->error('You must specify fields with the --fields option. Example: --fields="name:string,age:integer"');
+            $this->line('Or use --interactive for guided setup.');
             return self::FAILURE;
         }
 
@@ -91,6 +315,10 @@ class MakeApiCommand extends Command
 
         $this->apiGenerationService->generateCompleteApi($definition);
 
+        if ($this->option('auth')) {
+            $this->authGenerator->wrapRoutesInAuthMiddleware();
+        }
+
         $this->displayGeneratedFiles($definition);
 
         if ($this->option('postman')) {
@@ -101,6 +329,22 @@ class MakeApiCommand extends Command
 
         $this->info("API generation completed successfully!");
         return self::SUCCESS;
+    }
+
+    // ─── Helpers ────────────────────────────────────────────────────────
+
+    private function scaffoldAuth(): void
+    {
+        $this->info('Scaffolding Sanctum authentication...');
+        $files = $this->authGenerator->generate();
+        foreach ($files as $file) {
+            $this->line("  - " . str_replace(base_path() . DIRECTORY_SEPARATOR, '', $file));
+        }
+        $this->info('Auth scaffolding complete. Make sure laravel/sanctum is installed:');
+        $this->line('  composer require laravel/sanctum');
+        $this->line('  php artisan vendor:publish --provider="Laravel\\Sanctum\\SanctumServiceProvider"');
+        $this->line('  php artisan migrate');
+        $this->newLine();
     }
 
     private function createEntityDefinition(string $name, array $fieldsArray): EntityDefinition
