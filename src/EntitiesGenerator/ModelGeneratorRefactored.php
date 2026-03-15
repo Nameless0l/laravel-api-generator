@@ -53,6 +53,7 @@ class ModelGeneratorRefactored extends AbstractGenerator
             'relationships' => $this->generateRelationships($definition),
             'parentClass' => $this->getParentClass($definition),
             'imports' => $this->generateImports($definition),
+            'traits' => $this->generateTraits($definition),
         ];
     }
 
@@ -114,7 +115,11 @@ class ModelGeneratorRefactored extends AbstractGenerator
     private function generateImports(EntityDefinition $definition): string
     {
         $imports = ['use Illuminate\Database\Eloquent\Model;'];
-        
+
+        if ($definition->hasSoftDeletes()) {
+            $imports[] = 'use Illuminate\Database\Eloquent\SoftDeletes;';
+        }
+
         if ($definition->hasParent()) {
             $imports[] = "use App\\Models\\{$definition->parent};";
         }
@@ -127,5 +132,14 @@ class ModelGeneratorRefactored extends AbstractGenerator
             ->toArray();
 
         return implode("\n", array_merge($imports, $relatedModels));
+    }
+
+    private function generateTraits(EntityDefinition $definition): string
+    {
+        if ($definition->hasSoftDeletes()) {
+            return '    use SoftDeletes;';
+        }
+
+        return '';
     }
 }

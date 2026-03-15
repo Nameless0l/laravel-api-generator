@@ -46,7 +46,7 @@ class StubLoader
     private function replacePlaceholders(string $content, array $replacements): string
     {
         foreach ($replacements as $placeholder => $value) {
-            $content = str_replace("{{$placeholder}}", $value, $content);
+            $content = str_replace("{{{$placeholder}}}", $value, $content);
         }
 
         return $content;

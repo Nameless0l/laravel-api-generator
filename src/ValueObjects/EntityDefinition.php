@@ -113,4 +113,9 @@ final readonly class EntityDefinition
     {
         return $this->parent !== null;
     }
+
+    public function hasSoftDeletes(): bool
+    {
+        return ($this->options['soft_deletes'] ?? false) === true;
+    }
 }
