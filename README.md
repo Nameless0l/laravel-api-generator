@@ -4,82 +4,75 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/nameless/laravel-api-generator.svg)](https://packagist.org/packages/nameless/laravel-api-generator)
 [![License](https://img.shields.io/packagist/l/nameless/laravel-api-generator.svg)](https://packagist.org/packages/nameless/laravel-api-generator)
 
-**Laravel API Generator** is a professional, enterprise-grade Laravel package that generates complete API structures following best practices and clean architecture principles.
+A professional Laravel package that generates complete, production-ready REST API structures from a single command. Built with clean architecture principles, PHP 8.1+ features, and Laravel best practices.
 
 ---
 
-## 🚀 Features
+## What it generates
 
-### ✨ Complete API Generation
-- **Models** with proper relationships and fillable properties
-- **RESTful Controllers** with full CRUD operations
-- **Service Layer** implementation for business logic
-- **Data Transfer Objects (DTOs)** for type-safe data handling
-- **Form Request Validations** with intelligent rules
-- **API Resources** for consistent response formatting
-- **Policies** for authorization
-- **Database Factories** with realistic fake data
-- **Seeders** for test data generation
-- **Migrations** with proper foreign keys and constraints
+From a single command, the package creates **12 files** per entity and registers the API route:
 
-### 🏗️ Architecture & Design Patterns
-- **Clean Architecture** with separated concerns
-- **Repository Pattern** with service layer
-- **Value Objects** for domain modeling
-- **Dependency Injection** throughout
-- **SOLID Principles** compliance
-- **Type Safety** with PHP 8.1+ features
-
-### 🔧 Advanced Features
-- **JSON Schema Support** for bulk generation
-- **Relationship Management** (One-to-One, One-to-Many, Many-to-Many)
-- **Inheritance Support** for model hierarchies
-- **Custom Field Types** with validation rules
-- **Extensible Generator System**
-- **Professional Error Handling**
-- **Delete generated API structures** with a single command
+| Layer | File | Location |
+|-------|------|----------|
+| Model | `Post.php` | `app/Models/` |
+| Controller | `PostController.php` | `app/Http/Controllers/` |
+| Service | `PostService.php` | `app/Services/` |
+| DTO | `PostDTO.php` | `app/DTO/` |
+| Request | `PostRequest.php` | `app/Http/Requests/` |
+| Resource | `PostResource.php` | `app/Http/Resources/` |
+| Policy | `PostPolicy.php` | `app/Policies/` |
+| Factory | `PostFactory.php` | `database/factories/` |
+| Seeder | `PostSeeder.php` | `database/seeders/` |
+| Migration | `*_create_posts_table.php` | `database/migrations/` |
+| Feature Test | `PostControllerTest.php` | `tests/Feature/` |
+| Unit Test | `PostServiceTest.php` | `tests/Unit/` |
+| Route | `apiResource` entry | `routes/api.php` |
 
 ---
 
-## 📦 Installation
-
-You can install the package via Composer:
+## Installation
 
 ```bash
 composer require nameless/laravel-api-generator
 ```
 
-The package automatically registers its service provider.
+The service provider is auto-discovered. No additional configuration required.
 
 ---
 
-## 🎯 Quick Start
+## Quick start
 
-### Single Entity Generation
-
-Generate a complete API for a single entity:
+### Single entity
 
 ```bash
-php artisan make:fullapi User --fields="name:string,email:string,age:integer,is_active:boolean"
+php artisan make:fullapi Post --fields="title:string,content:text,published:boolean"
 ```
 
-This creates:
+### With soft deletes
 
-- `app/Models/User.php`
-- `app/Http/Controllers/UserController.php`
-- `app/Http/Requests/UserRequest.php`
-- `app/Http/Resources/UserResource.php`
-- `app/Services/UserService.php`
-- `app/DTO/UserDTO.php`
-- `app/Policies/UserPolicy.php`
-- `database/factories/UserFactory.php`
-- `database/seeders/UserSeeder.php`
-- `database/migrations/xxxx_create_users_table.php`
-- API routes in `routes/api.php`
+```bash
+php artisan make:fullapi Post --fields="title:string,content:text" --soft-deletes
+```
 
-### Bulk Generation from JSON
+This adds the `SoftDeletes` trait to the model, a `softDeletes()` column in the migration, and `restore` / `forceDelete` endpoints with their routes.
 
-Create a `class_data.json` file in your project root:
+### With Postman collection export
+
+```bash
+php artisan make:fullapi Post --fields="title:string,content:text" --postman
+```
+
+Generates a `postman_collection.json` at the project root, ready to import. Each entity gets a folder with List, Create, Show, Update, and Delete requests pre-configured with sample data.
+
+### All options combined
+
+```bash
+php artisan make:fullapi Post --fields="title:string,content:text" --soft-deletes --postman
+```
+
+### Bulk generation from JSON
+
+Create a `class_data.json` file at your project root:
 
 ```json
 [
@@ -87,8 +80,7 @@ Create a `class_data.json` file in your project root:
     "name": "User",
     "attributes": [
       {"name": "name", "_type": "string"},
-      {"name": "email", "_type": "string"},
-      {"name": "email_verified_at", "_type": "timestamp"}
+      {"name": "email", "_type": "string"}
     ],
     "oneToManyRelationships": [
       {"role": "posts", "comodel": "Post"}
@@ -98,8 +90,7 @@ Create a `class_data.json` file in your project root:
     "name": "Post",
     "attributes": [
       {"name": "title", "_type": "string"},
-      {"name": "content", "_type": "text"},
-      {"name": "published_at", "_type": "timestamp"}
+      {"name": "content", "_type": "text"}
     ],
     "manyToOneRelationships": [
       {"role": "user", "comodel": "User"}
@@ -114,215 +105,80 @@ Then run:
 php artisan make:fullapi
 ```
 
-### Delete Generated API
-
-Remove all generated files for an entity:
-
----
-
-## 🏗️ Architecture Overview
-
-### Service Layer Pattern
-
-The generated code follows the Service Layer pattern for better organization:
-
-```php
-class UserController extends Controller
-{
-    public function __construct(
-        private readonly UserService $service
-    ) {}
-
-    public function store(UserRequest $request)
-    {
-        $dto = UserDTO::fromRequest($request);
-        $user = $this->service->create($dto);
-        return new UserResource($user);
-    }
-}
-```
-
-### Data Transfer Objects
-
-Type-safe data handling with DTOs:
-
-```php
-readonly class UserDTO
-{
-    public function __construct(
-        public ?string $name,
-        public ?string $email,
-        public ?int $age,
-        public ?bool $is_active,
-    ) {}
-
-    public static function fromRequest(Request $request): self
-    {
-        return new self(
-            name: $request->get('name'),
-            email: $request->get('email'),
-            age: $request->get('age'),
-            is_active: $request->get('is_active'),
-        );
-    }
-}
-```
-
-## 🛠️ Advanced Usage
-
-### Custom Field Types
-
-Supported field types:
-
-- `string` - VARCHAR(255)
-- `text` - TEXT
-- `integer`/`int` - INTEGER
-- `bigint` - BIG INTEGER
-- `boolean`/`bool` - BOOLEAN
-- `float`/`decimal` - DECIMAL
-- `json` - JSON
-- `date` - DATE
-- `datetime` - DATETIME
-- `timestamp` - TIMESTAMP
-- `uuid` - UUID
-
-### Relationship Types
-
-The generator supports all Laravel relationship types:
-
-- **One-to-One**: `oneToOneRelationships`
-- **One-to-Many**: `oneToManyRelationships`
-- **Many-to-One**: `manyToOneRelationships`
-- **Many-to-Many**: `manyToManyRelationships`
-
-### Model Inheritance
-
-Support for model inheritance:
-
-```json
-{
-  "name": "AdminUser",
-  "parent": "User",
-  "attributes": [
-    {"name": "permissions", "_type": "json"}
-  ]
-}
-```
-
-### Generated File Structure
-
-This command generates:
-
-- **Models** (`App\Models`)
-- **Controllers** (`App\Http\Controllers`)
-- **Services** (`App\Services`)
-- **DTOs** (`App\DTO`)
-- **Policies** (`App\Policies`)
-- **Requests** (`App\Http\Requests`)
-- **Resources** (`App\Http\Resources`)
-- **Factories** (`Database\Factories`)
-- **Migrations** (`Database\Migrations`)
-- **Seeders** (`Database\Seeders`)
-
-### Delete API Structure
-
-To remove the generated API structure, you can use:
+### Delete generated API
 
 ```bash
+# Delete a specific entity
+php artisan delete:fullapi Post
+
+# Delete all entities defined in class_data.json
 php artisan delete:fullapi
 ```
 
-This will remove all the generated files from the API structure.
+---
 
-To delete a specific model's API structure, use:
+## Command reference
 
-```bash
-php artisan delete:fullapi ModelName
+```
+php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman}
 ```
 
-For example:
-
-```bash
-php artisan delete:fullapi Post
-```
-
-This will delete all the generated files related to the Post model, including controllers, services, DTOs, policies, resources, factories, seeders, and migrations.
+| Argument / Option | Description |
+|-------------------|-------------|
+| `name` | Entity name (PascalCase). Omit to use JSON mode. |
+| `--fields` | Field definitions in `name:type` format, comma-separated. |
+| `--soft-deletes` | Add SoftDeletes trait, migration column, restore/forceDelete endpoints. |
+| `--postman` | Export a Postman v2.1 collection after generation. |
 
 ---
 
-## 🔧 Configuration
+## Supported field types
 
-### Custom Stubs
-
-You can customize the generated code by publishing and modifying the stubs:
-
-```bash
-php artisan vendor:publish --tag=laravel-api-generator-stubs
-```
-
-### Service Registration
-
-The package automatically registers all generators and services through dependency injection.
-
----
-
-## 🧪 Testing
-
-```bash
-composer test
-```
-
-Run static analysis:
-
-```bash
-composer analyse
-```
-
-Format code:
-
-```bash
-composer format
-```
+| Type | Database column | PHP type | Validation rule |
+|------|----------------|----------|-----------------|
+| `string` | `VARCHAR(255)` | `string` | `string\|max:255` |
+| `text` | `TEXT` | `string` | `string` |
+| `integer` / `int` | `INTEGER` | `int` | `integer` |
+| `bigint` | `BIGINTEGER` | `int` | `integer` |
+| `boolean` / `bool` | `BOOLEAN` | `bool` | `boolean` |
+| `float` / `decimal` | `DECIMAL(8,2)` | `float` | `numeric` |
+| `json` | `JSON` | `array` | `json` |
+| `date` / `datetime` / `timestamp` | `TIMESTAMP` | `DateTimeInterface` | `date` |
+| `uuid` | `UUID` | `string` | `uuid` |
 
 ---
 
-## 📖 API Documentation
+## Relationship types
 
-The package integrates with [Scramble](https://github.com/dedoc/scramble) for automatic API documentation generation.
+Supported in JSON mode via `class_data.json`:
 
-After generating your APIs, visit `/docs/api` to see the generated documentation.
+| JSON key | Eloquent method | Foreign key |
+|----------|----------------|-------------|
+| `oneToOneRelationships` | `hasOne()` | On related table |
+| `oneToManyRelationships` | `hasMany()` | On related table |
+| `manyToOneRelationships` | `belongsTo()` | On current table |
+| `manyToManyRelationships` | `belongsToMany()` | Pivot table |
+
+Model inheritance is also supported via the `"parent"` key in JSON definitions.
 
 ---
 
-## Generated Structure
+## Generated code examples
 
-### Modern Controller Example
+### Controller
+
+The generated controller uses constructor injection, DTOs, and delegates to the service layer. The `index` endpoint supports query parameter filtering out of the box.
 
 ```php
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Http\Controllers\Controller;
-use App\Http\Requests\PostRequest;
-use App\Models\Post;
-use App\Http\Resources\PostResource;
-use App\Services\PostService;
-use App\DTO\PostDTO;
-use Illuminate\Http\Response;
-
 class PostController extends Controller
 {
-    private PostService $service;
+    public function __construct(
+        private readonly PostService $service
+    ) {}
 
-    public function __construct(PostService $service)
+    public function index(Request $request)
     {
-        $this->service = $service;
-    }
-
-    public function index()
-    {
-        $posts = $this->service->getAll();
+        $posts = $this->service->getAll($request->query());
         return PostResource::collection($posts);
     }
 
@@ -355,38 +211,36 @@ class PostController extends Controller
 
 ### Service
 
+The service layer handles business logic and supports filtering on fillable fields. With `--soft-deletes`, it also includes `restore()` and `forceDelete()` methods.
+
 ```php
-<?php
-
-namespace App\Services;
-
-use App\Models\Post;
-use App\DTO\PostDTO;
-
 class PostService
 {
-    public function getAll()
+    public function getAll(array $filters = []): Collection
     {
-        return Post::all();
+        $query = Post::query();
+
+        foreach ($filters as $field => $value) {
+            if (in_array($field, (new Post())->getFillable(), true)) {
+                $query->where($field, $value);
+            }
+        }
+
+        return $query->get();
     }
 
-    public function create(PostDTO $dto)
+    public function create(PostDTO $dto): Post
     {
-        return Post::create((array) $dto);
+        return Post::create(get_object_vars($dto));
     }
 
-    public function find($id)
+    public function update(Post $post, PostDTO $dto): Post
     {
-        return Post::findOrFail($id);
+        $post->update(get_object_vars($dto));
+        return $post->fresh();
     }
 
-    public function update(Post $post, PostDTO $dto)
-    {
-        $post->update((array) $dto);
-        return $post;
-    }
-
-    public function delete(Post $post)
+    public function delete(Post $post): bool
     {
         return $post->delete();
     }
@@ -395,282 +249,191 @@ class PostService
 
 ### DTO
 
+Readonly data transfer objects with typed properties and a factory method:
+
 ```php
-<?php
-
-namespace App\DTO;
-
-use App\Http\Requests\PostRequest;
-
 readonly class PostDTO
 {
     public function __construct(
         public ?string $title,
         public ?string $content,
-        public ?bool $published,
+        public ?bool $published
     ) {}
 
     public static function fromRequest(PostRequest $request): self
     {
         return new self(
-            title: $request->get('title'),
-            content: $request->get('content'),
-            published: $request->get('published'),
+            $request->input('title'),
+            $request->input('content'),
+            (bool) $request->input('published')
         );
     }
 }
 ```
 
-### Model
+### Feature test
+
+Automatically generated PHPUnit tests covering all CRUD endpoints:
 
 ```php
-<?php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Post extends Model
+class PostControllerTest extends TestCase
 {
-    protected $fillable = ['title', 'content', 'published'];
+    use RefreshDatabase;
 
-    /** @use HasFactory<\Database\Factories\PostFactory> */
-    use HasFactory;
+    public function test_can_list_posts(): void
+    {
+        Post::factory()->count(3)->create();
+        $response = $this->getJson('/api/posts');
+        $response->assertStatus(200)->assertJsonCount(3, 'data');
+    }
+
+    public function test_can_create_post(): void
+    {
+        $data = ['title' => 'test_title', 'content' => 'Test text content'];
+        $response = $this->postJson('/api/posts', $data);
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('posts', $data);
+    }
+
+    // ... show, update, delete, validation tests
 }
-```
-
-### Resource
-
-```php
-<?php
-
-namespace App\Http\Resources;
-
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-
-class PostResource extends JsonResource
-{
-    public function toArray(Request $request): array
-    {
-        return [
-            'title' => $this->title,
-            'content' => $this->content,
-            'published' => $this->published,
-        ];
-    }
-}
-```
-
-### Request
-
-```php
-<?php
-
-namespace App\Http\Requests;
-
-use Illuminate\Foundation\Http\FormRequest;
-
-class PostRequest extends FormRequest
-{
-    public function authorize(): bool
-    {
-        return true;
-    }
-
-    public function rules(): array
-    {
-        return [
-            'title' => 'string|max:255',
-            'content' => 'string',
-            'published' => 'boolean',
-        ];
-    }
-}
-```
-
-### Factory
-
-```php
-<?php
-
-namespace Database\Factories;
-
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-class PostFactory extends Factory
-{
-    public function definition(): array
-    {
-        return [
-            'title' => fake()->word(),
-            'content' => fake()->sentence(),
-            'published' => fake()->boolean(),
-        ];
-    }
-}
-```
-
-### Seeder
-
-```php
-<?php
-
-namespace Database\Seeders;
-
-use Illuminate\Database\Seeder;
-
-class PostSeeder extends Seeder
-{
-    public function run(): void
-    {
-        \App\Models\Post::factory(10)->create();
-    }
-}
-```
-
-### Policy
-
-```php
-<?php
-
-namespace App\Policies;
-
-use App\Models\Post;
-use App\Models\User;
-use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Auth\Access\Response;
-
-class PostPolicy
-{
-    use HandlesAuthorization;
-
-    public function viewAny(User $user): Response|bool
-    {
-        return true;
-    }
-
-    public function view(User $user, Post $post): Response|bool
-    {
-        return true;
-    }
-
-    public function create(User $user): Response|bool
-    {
-        return true;
-    }
-
-    public function update(User $user, Post $post): Response|bool
-    {
-        return true;
-    }
-
-    public function delete(User $user, Post $post): Response|bool
-    {
-        return true;
-    }
-
-    public function restore(User $user, Post $post): Response|bool
-    {
-        return true;
-    }
-
-    public function forceDelete(User $user, Post $post): Response|bool
-    {
-        return true;
-    }
-}
-```
-
-### Migration
-
-```php
-<?php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    public function up(): void
-    {
-        Schema::create('posts', function (Blueprint $table) {
-            $table->id();
-            $table->string('title')->nullable();
-            $table->text('content')->nullable();
-            $table->boolean('published')->nullable();
-            $table->timestamps();
-        });
-    }
-
-    public function down(): void
-    {
-        Schema::dropIfExists('posts');
-    }
-};
 ```
 
 ---
 
-## 🤝 Contributing
+## Query parameter filtering
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+All generated `index` endpoints support filtering by any fillable field via query parameters:
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+```
+GET /api/posts?published=true
+GET /api/users?name=John
+GET /api/products?category=electronics&in_stock=true
+```
+
+Only fields declared in the model's `$fillable` array are accepted as filters. Other parameters are silently ignored.
 
 ---
 
-## 📚 Testing
+## Soft deletes
 
-Run the test suite:
+When using `--soft-deletes`, the generator adds:
+
+- `SoftDeletes` trait and import to the model
+- `$table->softDeletes()` to the migration
+- `restore()` and `forceDelete()` methods to the controller and service
+- Two additional routes:
+
+```
+POST   /api/posts/{id}/restore
+DELETE /api/posts/{id}/force-delete
+```
+
+---
+
+## Postman collection
+
+The `--postman` flag generates a `postman_collection.json` file at the project root. The collection follows the Postman v2.1 schema and includes:
+
+- A folder per entity
+- Pre-configured requests for List, Create, Show, Update, and Delete
+- Sample request bodies with appropriate field values
+- A `base_url` variable (defaults to `http://localhost:8000/api`)
+
+Import the file directly into Postman to start testing immediately.
+
+---
+
+## Architecture
+
+The generated code follows the **Service Layer pattern** with clear separation of concerns:
+
+```
+Request  -->  Controller  -->  Service  -->  Model
+                 |                |
+              Request          DTO
+              (validation)     (type-safe data)
+                 |
+              Resource
+              (response formatting)
+```
+
+The package itself is built with:
+
+- **Value Objects** (`EntityDefinition`, `FieldDefinition`, `RelationshipDefinition`) for domain modeling
+- **Abstract Generator** base class for extensibility
+- **Contracts/Interfaces** for testability
+- **Dependency Injection** throughout
+- PHP 8.1+ features: readonly classes, constructor promotion, match expressions, named arguments
+
+---
+
+## Extending the generator
+
+Create a custom generator by extending `AbstractGenerator`:
+
+```php
+use nameless\CodeGenerator\EntitiesGenerator\AbstractGenerator;
+use nameless\CodeGenerator\ValueObjects\EntityDefinition;
+
+class CustomGenerator extends AbstractGenerator
+{
+    public function getType(): string
+    {
+        return 'Custom';
+    }
+
+    public function getOutputPath(EntityDefinition $definition): string
+    {
+        return app_path("Custom/{$definition->name}Custom.php");
+    }
+
+    protected function getStubName(): string
+    {
+        return 'custom'; // loads stubs/custom.stub
+    }
+
+    protected function getReplacements(EntityDefinition $definition): array
+    {
+        return ['modelName' => $definition->name];
+    }
+
+    protected function generateContent(EntityDefinition $definition): string
+    {
+        return $this->processStub($definition);
+    }
+}
+```
+
+Register it in your service provider and it will be called automatically during generation.
+
+---
+
+## API documentation
+
+The package integrates with [Scramble](https://github.com/dedoc/scramble) for automatic API documentation. After generating your APIs, visit `/docs/api` to browse the generated documentation.
+
+---
+
+## Development
 
 ```bash
+# Install dependencies
+composer install
+
+# Run tests
 composer test
-```
 
-Run static analysis:
-
-```bash
+# Static analysis
 composer analyse
-```
 
-Format code:
-
-```bash
+# Code formatting
 composer format
 ```
 
----
+### Local testing in a Laravel project
 
-## 🚀 Local Development
-
-1. Clone this repository:
-
-```bash
-git clone https://github.com/Nameless0l/laravel-api-generator.git
-```
-
-2. Install dependencies:
-
-```bash
-composer install
-```
-
-3. Run tests:
-
-```bash
-./vendor/bin/phpunit
-```
-
-### Testing in a Laravel Project
-
-1. In your Laravel project's `composer.json`, add:
+Add the package as a path repository in your Laravel project's `composer.json`:
 
 ```json
 {
@@ -678,9 +441,7 @@ composer install
         {
             "type": "path",
             "url": "../laravel-api-generator",
-            "options": {
-                "symlink": true
-            }
+            "options": {"symlink": true}
         }
     ],
     "require": {
@@ -689,47 +450,41 @@ composer install
 }
 ```
 
-2. Run:
-
-```bash
-composer update
-```
+Then run `composer update`.
 
 ---
 
-## 🔒 Security
+## Requirements
 
-If you discover any security-related issues, please email [loicmbassi5@gmail.com](mailto:loicmbassi5@gmail.com) instead of using the issue tracker.
-
----
-
-## 🏆 Credits
-
-- **Author**: [Mbassi Loïc Aron](https://github.com/Nameless0l)
-- **Email**: loicmbassi5@gmail.com
+- PHP >= 8.1
+- Laravel 10.x or 11.x
 
 ---
 
-## 📚 Changelog
+## Contributing
 
-Please see [CHANGELOG.md](CHANGELOG.md) for more information on what has changed recently.
-
----
-
-## 💡 Why Choose Laravel API Generator?
-
-✅ **Professional Architecture** - Built with enterprise-grade patterns  
-✅ **Type Safety** - Full PHP 8.1+ type declarations  
-✅ **Clean Code** - SOLID principles and clean architecture  
-✅ **Extensible** - Easy to extend with custom generators  
-✅ **Well Tested** - Comprehensive test suite  
-✅ **Documentation** - Complete API documentation generation  
-✅ **Best Practices** - Follows Laravel and PHP best practices  
-
-Transform your Laravel development workflow with professional API generation!
+Contributions are welcome. Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ---
 
-## 📄 License
+## Security
 
-This package is open-source and distributed under the MIT License. See the [LICENSE](LICENSE.md) file for more details.
+If you discover a security vulnerability, please email loicmbassi5@gmail.com instead of using the issue tracker.
+
+---
+
+## Credits
+
+- [Mbassi Loic Aron](https://github.com/Nameless0l)
+
+---
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.
+
+---
+
+## License
+
+MIT. See [LICENSE](LICENSE.md) for details.

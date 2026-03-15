@@ -10,6 +10,7 @@ use App\Models\{{modelName}};
 use App\Http\Resources\{{modelName}}Resource;
 use App\Services\{{modelName}}Service;
 use App\DTO\{{modelName}}DTO;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class {{modelName}}Controller extends Controller
@@ -21,9 +22,9 @@ class {{modelName}}Controller extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        ${{pluralName}} = $this->service->getAll();
+        ${{pluralName}} = $this->service->getAll($request->query());
         return {{modelName}}Resource::collection(${{pluralName}});
     }
 
@@ -63,4 +64,5 @@ class {{modelName}}Controller extends Controller
         $this->service->delete(${{modelNameLower}});
         return response(null, 204);
     }
+{{softDeleteMethods}}
 }
