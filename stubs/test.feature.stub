@@ -1,0 +1,74 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\{{modelName}};
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class {{modelName}}ControllerTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_can_list_{{pluralName}}(): void
+    {
+        {{modelName}}::factory()->count(3)->create();
+
+        $response = $this->getJson('/api/{{pluralName}}');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(3, 'data');
+    }
+
+    public function test_can_create_{{modelNameLower}}(): void
+    {
+        $data = [
+            {{requestFields}}
+        ];
+
+        $response = $this->postJson('/api/{{pluralName}}', $data);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('{{tableName}}', $data);
+    }
+
+    public function test_can_show_{{modelNameLower}}(): void
+    {
+        ${{modelNameLower}} = {{modelName}}::factory()->create();
+
+        $response = $this->getJson("/api/{{pluralName}}/{${{modelNameLower}}->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonFragment(['id' => ${{modelNameLower}}->id]);
+    }
+
+    public function test_can_update_{{modelNameLower}}(): void
+    {
+        ${{modelNameLower}} = {{modelName}}::factory()->create();
+        $data = [
+            {{requestFields}}
+        ];
+
+        $response = $this->putJson("/api/{{pluralName}}/{${{modelNameLower}}->id}", $data);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('{{tableName}}', $data);
+    }
+
+    public function test_can_delete_{{modelNameLower}}(): void
+    {
+        ${{modelNameLower}} = {{modelName}}::factory()->create();
+
+        $response = $this->deleteJson("/api/{{pluralName}}/{${{modelNameLower}}->id}");
+
+        $response->assertStatus(204);
+        $this->assertDatabaseMissing('{{tableName}}', ['id' => ${{modelNameLower}}->id]);
+    }
+
+    public function test_create_{{modelNameLower}}_validates_required_fields(): void
+    {
+        $response = $this->postJson('/api/{{pluralName}}', []);
+
+        $response->assertStatus(422);
+    }
+}

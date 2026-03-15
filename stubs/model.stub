@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class {{modelName}} extends {{parentClass}}
 {
     use HasFactory;
+{{traits}}
 
     {{fillable}}
 {{relationships}}

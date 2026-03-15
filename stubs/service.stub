@@ -1,0 +1,47 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services;
+
+use App\Models\{{modelName}};
+use App\DTO\{{modelName}}DTO;
+use Illuminate\Database\Eloquent\Collection;
+
+class {{modelName}}Service
+{
+    public function getAll(array $filters = []): Collection
+    {
+        $query = {{modelName}}::query();
+
+        foreach ($filters as $field => $value) {
+            if (in_array($field, (new {{modelName}}())->getFillable(), true)) {
+                $query->where($field, $value);
+            }
+        }
+
+        return $query->get();
+    }
+
+    public function create({{modelName}}DTO $dto): {{modelName}}
+    {
+        return {{modelName}}::create(get_object_vars($dto));
+    }
+
+    public function find(int $id): {{modelName}}
+    {
+        return {{modelName}}::findOrFail($id);
+    }
+
+    public function update({{modelName}} ${{modelNameLower}}, {{modelName}}DTO $dto): {{modelName}}
+    {
+        ${{modelNameLower}}->update(get_object_vars($dto));
+        return ${{modelNameLower}}->fresh();
+    }
+
+    public function delete({{modelName}} ${{modelNameLower}}): bool
+    {
+        return ${{modelNameLower}}->delete();
+    }
+{{softDeleteMethods}}
+}

@@ -9,9 +9,6 @@ parameters:
         - '#Access to an undefined property Illuminate\\Contracts\\Foundation\\Application::#'
         - '#Undefined function#'
     
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
-    
     excludePaths:
         - vendor/*
         

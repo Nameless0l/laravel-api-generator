@@ -12,9 +12,21 @@ use nameless\CodeGenerator\Console\Commands\MakeApiWithDiagram;
 use nameless\CodeGenerator\Console\Commands\InstallPackageCommand;
 use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
 use nameless\CodeGenerator\Services\ApiGenerationService;
+use nameless\CodeGenerator\Services\PostmanExporter;
 use nameless\CodeGenerator\Support\JsonParser;
 use nameless\CodeGenerator\Support\StubLoader;
 use nameless\CodeGenerator\EntitiesGenerator\ModelGeneratorRefactored;
+use nameless\CodeGenerator\EntitiesGenerator\ControllerGenerator;
+use nameless\CodeGenerator\EntitiesGenerator\DTOGenerator;
+use nameless\CodeGenerator\EntitiesGenerator\FactoryGenerator;
+use nameless\CodeGenerator\EntitiesGenerator\MigrationGenerator;
+use nameless\CodeGenerator\EntitiesGenerator\PolicyGenerator;
+use nameless\CodeGenerator\EntitiesGenerator\RequestGenerator;
+use nameless\CodeGenerator\EntitiesGenerator\ResourceGenerator;
+use nameless\CodeGenerator\EntitiesGenerator\SeederGenerator;
+use nameless\CodeGenerator\EntitiesGenerator\ServiceGenerator;
+use nameless\CodeGenerator\EntitiesGenerator\FeatureTestGenerator;
+use nameless\CodeGenerator\EntitiesGenerator\UnitTestGenerator;
 
 class CodeGeneratorServiceProvider extends ServiceProvider
 {
@@ -22,7 +34,7 @@ class CodeGeneratorServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                \nameless\CodeGenerator\Console\Commands\MakeApi::class, // Utiliser l'ancienne commande pour l'instant
+                MakeApiCommand::class,
                 DeleteFullApi::class,
                 MakeApiWithDiagram::class,
                 InstallPackageCommand::class,
@@ -34,7 +46,7 @@ class CodeGeneratorServiceProvider extends ServiceProvider
     {
         $this->registerServices();
         $this->registerGenerators();
-        
+
         // Register Scramble for API documentation
         $this->app->register(\Dedoc\Scramble\ScrambleServiceProvider::class);
     }
@@ -49,6 +61,9 @@ class CodeGeneratorServiceProvider extends ServiceProvider
         // Register JsonParser
         $this->app->singleton(JsonParser::class);
 
+        // Register PostmanExporter
+        $this->app->singleton(PostmanExporter::class);
+
         // Register main API generation service
         $this->app->singleton(ApiGenerationServiceInterface::class, function ($app) {
             return new ApiGenerationService(
@@ -62,8 +77,18 @@ class CodeGeneratorServiceProvider extends ServiceProvider
     {
         $this->app->singleton('code_generator.generators', function ($app) {
             return collect([
+                $app->make(MigrationGenerator::class),
                 $app->make(ModelGeneratorRefactored::class),
-                // Add other generators here as they are created
+                $app->make(ControllerGenerator::class),
+                $app->make(ServiceGenerator::class),
+                $app->make(DTOGenerator::class),
+                $app->make(RequestGenerator::class),
+                $app->make(ResourceGenerator::class),
+                $app->make(PolicyGenerator::class),
+                $app->make(FactoryGenerator::class),
+                $app->make(SeederGenerator::class),
+                $app->make(FeatureTestGenerator::class),
+                $app->make(UnitTestGenerator::class),
             ]);
         });
     }

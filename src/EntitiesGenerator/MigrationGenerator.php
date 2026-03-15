@@ -1,0 +1,68 @@
+<?php
+
+declare(strict_types=1);
+
+namespace nameless\CodeGenerator\EntitiesGenerator;
+
+use nameless\CodeGenerator\ValueObjects\EntityDefinition;
+use nameless\CodeGenerator\ValueObjects\FieldDefinition;
+use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
+
+class MigrationGenerator extends AbstractGenerator
+{
+    public function getType(): string
+    {
+        return 'Migration';
+    }
+
+    public function getOutputPath(EntityDefinition $definition): string
+    {
+        $tableName = $definition->getTableName();
+        $timestamp = date('Y_m_d_His');
+        return database_path("migrations/{$timestamp}_create_{$tableName}_table.php");
+    }
+
+    protected function generateContent(EntityDefinition $definition): string
+    {
+        return $this->processStub($definition);
+    }
+
+    protected function getStubName(): string
+    {
+        return 'migrations';
+    }
+
+    protected function getReplacements(EntityDefinition $definition): array
+    {
+        return [
+            'tableName' => $definition->getTableName(),
+            'fields' => $this->generateFields($definition),
+            'foreignKeys' => $this->generateForeignKeys($definition),
+            'softDeletes' => $definition->hasSoftDeletes() ? '            $table->softDeletes();' : '',
+        ];
+    }
+
+    private function generateFields(EntityDefinition $definition): string
+    {
+        $fields = $definition->fields->map(function (FieldDefinition $field) {
+            $dbType = $field->getDatabaseType();
+            $nullable = $field->nullable ? '->nullable()' : '';
+            return "            \$table->{$dbType}('{$field->name}'){$nullable};";
+        })->toArray();
+
+        return implode("\n", $fields);
+    }
+
+    private function generateForeignKeys(EntityDefinition $definition): string
+    {
+        $foreignKeys = $definition->relationships
+            ->filter(fn(RelationshipDefinition $rel) => $rel->requiresForeignKey())
+            ->map(function (RelationshipDefinition $rel) {
+                $fk = $rel->getForeignKeyName();
+                $relatedTable = \Illuminate\Support\Str::plural(\Illuminate\Support\Str::snake($rel->relatedModel));
+                return "            \$table->foreignId('{$fk}')->constrained('{$relatedTable}')->cascadeOnDelete();";
+            })->toArray();
+
+        return implode("\n", $foreignKeys);
+    }
+}
