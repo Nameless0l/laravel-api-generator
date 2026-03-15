@@ -5,6 +5,33 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-03-15
+
+### Added
+- **Auto-generated tests** -- Feature tests (CRUD endpoints) and Unit tests (Service layer) are now generated for every entity
+- **Postman collection export** -- `--postman` flag generates a ready-to-import Postman v2.1 JSON collection with all endpoints and sample data
+- **Soft Deletes support** -- `--soft-deletes` flag adds the SoftDeletes trait, migration column, restore/forceDelete controller and service methods, and dedicated routes
+- **Query parameter filtering** -- All generated `index` endpoints now accept query parameters to filter on any fillable field
+- **Complete generator implementations** -- All 9 generator classes (Controller, DTO, Factory, Migration, Policy, Request, Resource, Seeder, Service) are now fully implemented following the AbstractGenerator pattern
+- **FeatureTestGenerator** and **UnitTestGenerator** for automatic test scaffolding
+- **PostmanExporter** service for collection generation
+- New stubs: `test.feature.stub`, `test.unit.stub`
+
+### Fixed
+- **StubLoader placeholder matching** -- Fixed a bug where `{{placeholder}}` syntax in stubs was not matched correctly (single vs double braces)
+- **DTO stub** -- Replaced legacy `{$variable}` syntax with standard `{{placeholder}}` format
+- **Policy stub** -- Removed heredoc wrapper and fixed placeholder syntax
+- Empty stubs (service, request, factory, migrations, seed) now contain proper templates
+
+### Changed
+- **MakeApiCommand** is now the active command (replaces the legacy MakeApi command)
+- Command signature updated: `make:fullapi {name?} {--fields=} {--soft-deletes} {--postman}`
+- ServiceProvider now registers all 12 generators (including test generators)
+- Generated controllers now accept `Request $request` in `index()` for filtering
+- Generated services now accept `array $filters` in `getAll()` method
+- `deleteCompleteApi()` now also cleans up generated test files
+- PHPStan configuration cleaned up (removed deprecated options)
+
 ## [3.0.1] - 2025-06-28
 
 ### 📚 Documentation & Polish

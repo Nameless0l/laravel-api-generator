@@ -1,0 +1,83 @@
+<?php
+
+namespace Tests\Unit;
+
+use App\Models\{{modelName}};
+use App\Services\{{modelName}}Service;
+use App\DTO\{{modelName}}DTO;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class {{modelName}}ServiceTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private {{modelName}}Service $service;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->service = new {{modelName}}Service();
+    }
+
+    public function test_can_get_all_{{pluralName}}(): void
+    {
+        {{modelName}}::factory()->count(5)->create();
+
+        $result = $this->service->getAll();
+
+        $this->assertCount(5, $result);
+    }
+
+    public function test_can_filter_{{pluralName}}(): void
+    {
+        {{modelName}}::factory()->count(3)->create();
+
+        $result = $this->service->getAll([]);
+
+        $this->assertCount(3, $result);
+    }
+
+    public function test_can_create_{{modelNameLower}}(): void
+    {
+        $dto = new {{modelName}}DTO(
+            {{dtoConstructorArgs}}
+        );
+
+        ${{modelNameLower}} = $this->service->create($dto);
+
+        $this->assertInstanceOf({{modelName}}::class, ${{modelNameLower}});
+        $this->assertDatabaseCount('{{tableName}}', 1);
+    }
+
+    public function test_can_find_{{modelNameLower}}(): void
+    {
+        ${{modelNameLower}} = {{modelName}}::factory()->create();
+
+        $found = $this->service->find(${{modelNameLower}}->id);
+
+        $this->assertEquals(${{modelNameLower}}->id, $found->id);
+    }
+
+    public function test_can_update_{{modelNameLower}}(): void
+    {
+        ${{modelNameLower}} = {{modelName}}::factory()->create();
+        $dto = new {{modelName}}DTO(
+            {{dtoConstructorArgs}}
+        );
+
+        $updated = $this->service->update(${{modelNameLower}}, $dto);
+
+        $this->assertInstanceOf({{modelName}}::class, $updated);
+    }
+
+    public function test_can_delete_{{modelNameLower}}(): void
+    {
+        ${{modelNameLower}} = {{modelName}}::factory()->create();
+
+        $result = $this->service->delete(${{modelNameLower}});
+
+        $this->assertTrue($result);
+        $this->assertDatabaseCount('{{tableName}}', 0);
+    }
+}

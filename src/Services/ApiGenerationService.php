@@ -77,6 +77,8 @@ class ApiGenerationService implements ApiGenerationServiceInterface
             app_path("Policies/{$entityName}Policy.php"),
             database_path("factories/{$entityName}Factory.php"),
             database_path("seeders/{$entityName}Seeder.php"),
+            base_path("tests/Feature/{$entityName}ControllerTest.php"),
+            base_path("tests/Unit/{$entityName}ServiceTest.php"),
         ];
 
         foreach ($filesToDelete as $file) {
@@ -103,7 +105,9 @@ class ApiGenerationService implements ApiGenerationServiceInterface
      */
     private function generateApiRoute(EntityDefinition $definition): void
     {
-        $route = "Route::apiResource('{$definition->getPluralName()}', App\\Http\\Controllers\\{$definition->name}Controller::class);";
+        $pluralName = $definition->getPluralName();
+        $controllerClass = "App\\Http\\Controllers\\{$definition->name}Controller";
+        $route = "Route::apiResource('{$pluralName}', {$controllerClass}::class);";
         $apiFilePath = base_path('routes/api.php');
         $phpHeader = "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n\n";
 
@@ -114,6 +118,18 @@ class ApiGenerationService implements ApiGenerationServiceInterface
         $existingRoutes = File::get($apiFilePath);
         if (!str_contains($existingRoutes, $route)) {
             File::append($apiFilePath, PHP_EOL . $route);
+        }
+
+        // Add soft delete routes if enabled
+        if ($definition->hasSoftDeletes()) {
+            $restoreRoute = "Route::post('{$pluralName}/{id}/restore', [{$controllerClass}::class, 'restore']);";
+            $forceDeleteRoute = "Route::delete('{$pluralName}/{id}/force-delete', [{$controllerClass}::class, 'forceDelete']);";
+
+            $content = File::get($apiFilePath);
+            if (!str_contains($content, $restoreRoute)) {
+                File::append($apiFilePath, PHP_EOL . $restoreRoute);
+                File::append($apiFilePath, PHP_EOL . $forceDeleteRoute);
+            }
         }
     }
 
