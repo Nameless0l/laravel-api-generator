@@ -1,10 +1,8 @@
 <?php
 
-namespace Nameless\LaravelCodeGenerator\Tests\Feature;
+namespace nameless\CodeGenerator\Tests\Feature;
 
-use nameless\LaravelCodeGenerator\Tests\TestCase;
-
-// use Nameless\LaravelCodeGenerator\Tests\TestCase;
+use nameless\CodeGenerator\Tests\TestCase;
 
 class MakeApiCommandTest extends TestCase
 {
