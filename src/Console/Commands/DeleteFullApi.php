@@ -162,7 +162,7 @@ class DeleteFullApi extends Command
         $providerPath = app_path('Providers/AuthServiceProvider.php');
 
         if (!file_exists($providerPath)) {
-            $this->warn("AuthServiceProvider n'existe pas.");
+            // AuthServiceProvider is not required since Laravel 10+ (automatic policy discovery)
             return;
         }
         $content = file_get_contents($providerPath);
