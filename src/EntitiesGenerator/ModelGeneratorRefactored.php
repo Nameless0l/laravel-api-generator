@@ -44,6 +44,8 @@ class ModelGeneratorRefactored extends AbstractGenerator
 
     /**
      * Get replacements for the stub.
+     *
+     * @return array<string, string>
      */
     protected function getReplacements(EntityDefinition $definition): array
     {
@@ -106,7 +108,7 @@ class ModelGeneratorRefactored extends AbstractGenerator
      */
     private function getParentClass(EntityDefinition $definition): string
     {
-        return $definition->hasParent() ? $definition->parent : 'Model';
+        return $definition->hasParent() ? ($definition->parent ?? 'Model') : 'Model';
     }
 
     /**

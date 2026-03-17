@@ -17,6 +17,8 @@ class StubLoader
 
     /**
      * Load a stub file and replace placeholders.
+     *
+     * @param array<string, string> $replacements
      */
     public function load(string $stubName, array $replacements = []): string
     {
@@ -42,6 +44,8 @@ class StubLoader
 
     /**
      * Replace placeholders in stub content.
+     *
+     * @param array<string, string> $replacements
      */
     private function replacePlaceholders(string $content, array $replacements): string
     {

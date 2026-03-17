@@ -28,6 +28,9 @@ class PolicyGenerator extends AbstractGenerator
         return 'policy';
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function getReplacements(EntityDefinition $definition): array
     {
         return [

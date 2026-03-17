@@ -13,6 +13,9 @@ class AuthGenerator
         private readonly StubLoader $stubLoader
     ) {}
 
+    /**
+     * @return array<int, string>
+     */
     public function generate(): array
     {
         $generatedFiles = [];

@@ -16,7 +16,7 @@ class PostmanExporter
     /**
      * Export a Postman collection for the given entities.
      *
-     * @param Collection<EntityDefinition> $entities
+     * @param Collection<int, EntityDefinition> $entities
      */
     public function export(Collection $entities, string $outputPath): string
     {
@@ -33,11 +33,18 @@ class PostmanExporter
             ],
         ];
 
-        File::put($outputPath, json_encode($collection, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        $json = json_encode($collection, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        if ($json === false) {
+            throw new \RuntimeException('Failed to encode collection to JSON: ' . json_last_error_msg());
+        }
+        File::put($outputPath, $json);
 
         return $outputPath;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function buildEntityFolder(EntityDefinition $entity): array
     {
         $pluralName = $entity->getPluralName();
@@ -54,6 +61,10 @@ class PostmanExporter
         ];
     }
 
+    /**
+     * @param array<string, mixed>|null $body
+     * @return array<string, mixed>
+     */
     private function buildRequest(string $name, string $method, string $url, ?array $body = null): array
     {
         $request = [
@@ -84,6 +95,9 @@ class PostmanExporter
         return $request;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function buildRequestBody(EntityDefinition $entity): array
     {
         $body = [];

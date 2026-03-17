@@ -52,6 +52,7 @@ final readonly class RelationshipDefinition
             'oneToMany' => 'hasMany',
             'manyToOne' => 'belongsTo',
             'manyToMany' => 'belongsToMany',
+            default => throw new InvalidArgumentException("Unknown relationship type: {$this->type}"),
         };
     }
 

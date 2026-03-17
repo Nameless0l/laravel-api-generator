@@ -28,6 +28,9 @@ class ServiceGenerator extends AbstractGenerator
         return 'service';
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function getReplacements(EntityDefinition $definition): array
     {
         $softDeleteMethods = '';

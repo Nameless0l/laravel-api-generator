@@ -48,6 +48,7 @@ class MakeApiCommand extends Command
                 return $this->handleJsonGeneration();
             }
 
+            $name = is_string($name) ? $name : '';
             return $this->handleSingleEntityGeneration($name);
         } catch (CodeGeneratorException $e) {
             $this->error($e->getMessage());
@@ -90,7 +91,7 @@ class MakeApiCommand extends Command
         $withPostman = !$this->option('postman') && $this->confirm('Export Postman collection?', false);
 
         // 5. Preview
-        $this->displayPreview($name, $fields, $relationships, $softDeletes, $withAuth || $this->option('auth'));
+        $this->displayPreview($name, $fields, $relationships, $softDeletes, $withAuth || (bool) $this->option('auth'));
 
         if (!$this->confirm('Confirm generation?', true)) {
             $this->warn('Generation cancelled.');
@@ -128,6 +129,9 @@ class MakeApiCommand extends Command
         return self::SUCCESS;
     }
 
+    /**
+     * @return Collection<int, FieldDefinition>
+     */
     private function collectFields(): Collection
     {
         $fields = collect();
@@ -142,7 +146,8 @@ class MakeApiCommand extends Command
                 break;
             }
 
-            $type = $this->choice('  Type', $allowedTypes, 0);
+            $typeChoice = $this->choice('  Type', $allowedTypes, 0);
+            $type = is_string($typeChoice) ? $typeChoice : $allowedTypes[0];
             $nullable = $this->confirm('  Nullable?', true);
             $unique = $this->confirm('  Unique?', false);
 
@@ -169,6 +174,9 @@ class MakeApiCommand extends Command
         return $fields;
     }
 
+    /**
+     * @return Collection<int, RelationshipDefinition>
+     */
     private function collectRelationships(): Collection
     {
         $relationships = collect();
@@ -186,14 +194,16 @@ class MakeApiCommand extends Command
         ];
 
         while (true) {
-            $typeChoice = $this->choice('  Relationship type', array_keys($types));
+            $rawChoice = $this->choice('  Relationship type', array_keys($types));
+            $typeChoice = is_string($rawChoice) ? $rawChoice : 'belongsTo';
             $relatedModel = $this->ask('  Related model (PascalCase)');
 
             if (empty($relatedModel)) {
                 break;
             }
 
-            $role = $this->ask('  Role/method name', lcfirst($relatedModel));
+            $roleAnswer = $this->ask('  Role/method name', lcfirst($relatedModel));
+            $role = is_string($roleAnswer) ? $roleAnswer : lcfirst($relatedModel);
 
             $relationships->push(new RelationshipDefinition(
                 type: $types[$typeChoice],
@@ -212,6 +222,10 @@ class MakeApiCommand extends Command
         return $relationships;
     }
 
+    /**
+     * @param Collection<int, FieldDefinition> $fields
+     * @param Collection<int, RelationshipDefinition> $relationships
+     */
     private function displayPreview(
         string $name,
         Collection $fields,
@@ -298,7 +312,7 @@ class MakeApiCommand extends Command
     {
         $fieldsOption = $this->option('fields');
 
-        if (!$fieldsOption) {
+        if (!$fieldsOption || !is_string($fieldsOption)) {
             $this->error('You must specify fields with the --fields option. Example: --fields="name:string,age:integer"');
             $this->line('Or use --interactive for guided setup.');
             return self::FAILURE;
@@ -347,6 +361,9 @@ class MakeApiCommand extends Command
         $this->newLine();
     }
 
+    /**
+     * @param array<string, mixed> $fieldsArray
+     */
     private function createEntityDefinition(string $name, array $fieldsArray): EntityDefinition
     {
         $fields = collect($fieldsArray)->map(function ($type, $fieldName) {
@@ -354,7 +371,7 @@ class MakeApiCommand extends Command
                 name: $fieldName,
                 type: $type
             );
-        });
+        })->values();
 
         return new EntityDefinition(
             name: ucfirst($name),

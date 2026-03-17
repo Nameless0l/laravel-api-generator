@@ -29,6 +29,9 @@ class DTOGenerator extends AbstractGenerator
         return 'dto';
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function getReplacements(EntityDefinition $definition): array
     {
         return [

@@ -29,6 +29,9 @@ class FactoryGenerator extends AbstractGenerator
         return 'factory';
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function getReplacements(EntityDefinition $definition): array
     {
         return [

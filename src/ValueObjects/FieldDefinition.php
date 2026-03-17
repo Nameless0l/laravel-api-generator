@@ -8,6 +8,10 @@ use InvalidArgumentException;
 
 final readonly class FieldDefinition
 {
+    /**
+     * @param array<int, string> $validationRules
+     * @param array<string, mixed> $attributes
+     */
     public function __construct(
         public string $name,
         public string $type,

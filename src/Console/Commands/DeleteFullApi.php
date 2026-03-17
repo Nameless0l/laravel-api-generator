@@ -11,9 +11,11 @@ class DeleteFullApi extends Command
 {
     protected $signature = 'delete:fullapi {name?}';
     protected $description = 'Supprimer un modèle, migration, contrôleur, resource, request, factory, seeder et DTO associés à une ressource spécifique';
-    protected $classes;
 
-    public function handle()
+    /** @var array<int, array<string, mixed>> */
+    protected array $classes = [];
+
+    public function handle(): int
     {
         $name = $this->argument('name');
         if (empty($name)) {
@@ -21,16 +23,20 @@ class DeleteFullApi extends Command
             $jsonFilePath = base_path('class_data.json');
             if (!file_exists($jsonFilePath)) {
                 $this->error("Le fichier class_data.json est introuvable.");
-                return;
+                return self::FAILURE;
             }
 
             $this->info("Lecture du fichier JSON...");
             $jsonData = file_get_contents($jsonFilePath);
+            if ($jsonData === false) {
+                $this->error("Impossible de lire le fichier class_data.json.");
+                return self::FAILURE;
+            }
             $this->classes = json_decode($jsonData, true);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
                 $this->error("Erreur de décodage JSON : " . json_last_error_msg());
-                return;
+                return self::FAILURE;
             }
 
             $this->info("Extraction des données JSON...");
@@ -38,8 +44,10 @@ class DeleteFullApi extends Command
 
             $this->info("Delete API with diagram...");
             $this->runDeleteApiWithDiagram();
-            return;
+            return self::SUCCESS;
         }
+
+        $name = is_string($name) ? $name : '';
         $pluralName = Str::plural(Str::snake($name));
         $className = Str::studly($name);
 
@@ -77,12 +85,15 @@ class DeleteFullApi extends Command
         $this->deleteFile(app_path("DTO/{$className}DTO.php"), "DTO");
 
         $this->info("Tous les fichiers associés à {$name} ont été supprimés.");
+        return self::SUCCESS;
     }
 
             /**
      * Extraire et formater les données JSON dans un tableau compatible.
+     *
+     * @return void
      */
-    public function jsonExtractionToArray()
+    public function jsonExtractionToArray(): void
     {
         $this->classes = array_map(function ($class) {
             return [
@@ -106,7 +117,7 @@ class DeleteFullApi extends Command
     /**
      * Parcourir les classes et exécuter les commandes Artisan pour générer les API.
      */
-    public function runDeleteApiWithDiagram()
+    public function runDeleteApiWithDiagram(): void
     {
         foreach ($this->classes as $class) {
             $className = ucfirst($class['name']);
@@ -123,7 +134,7 @@ class DeleteFullApi extends Command
         }
     }
 
-    private function deleteFile($filePath, $type)
+    private function deleteFile(string $filePath, string $type): void
     {
         if (File::exists($filePath)) {
             File::delete($filePath);
@@ -133,7 +144,7 @@ class DeleteFullApi extends Command
         }
     }
 
-    private function deleteFilesByPattern($directory, $pattern, $type)
+    private function deleteFilesByPattern(string $directory, string $pattern, string $type): void
     {
         $files = File::glob("{$directory}/{$pattern}");
         if ($files) {
@@ -146,7 +157,7 @@ class DeleteFullApi extends Command
         }
     }
 
-    private function removeFromAuthServiceProvider($className)
+    private function removeFromAuthServiceProvider(string $className): void
     {
         $providerPath = app_path('Providers/AuthServiceProvider.php');
 
@@ -155,13 +166,26 @@ class DeleteFullApi extends Command
             return;
         }
         $content = file_get_contents($providerPath);
+        if ($content === false) {
+            $this->warn("Impossible de lire AuthServiceProvider.");
+            return;
+        }
 
         // Supprimer les imports
-        $content = preg_replace("/use App\\\\Models\\\\{$className};\n/", '', $content);
-        $content = preg_replace("/use App\\\\Policies\\\\{$className}Policy;\n/", '', $content);
+        $result = preg_replace("/use App\\\\Models\\\\{$className};\n/", '', $content);
+        if (is_string($result)) {
+            $content = $result;
+        }
+        $result = preg_replace("/use App\\\\Policies\\\\{$className}Policy;\n/", '', $content);
+        if (is_string($result)) {
+            $content = $result;
+        }
 
         // Supprimer le mapping de la policy
-        $content = preg_replace("/\s*{$className}::class => {$className}Policy::class,/", '', $content);
+        $result = preg_replace("/\s*{$className}::class => {$className}Policy::class,/", '', $content);
+        if (is_string($result)) {
+            $content = $result;
+        }
 
         file_put_contents($providerPath, $content);
         $this->info("Policy supprimée de AuthServiceProvider");
