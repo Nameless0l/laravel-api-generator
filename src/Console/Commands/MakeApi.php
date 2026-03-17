@@ -763,7 +763,8 @@ EOD;
         $providerPath = app_path('Providers/AuthServiceProvider.php');
 
         if (!file_exists($providerPath)) {
-            $this->createAuthServiceProvider();
+            // AuthServiceProvider is not required since Laravel 10+ (automatic policy discovery)
+            return;
         }
 
         $content = file_get_contents($providerPath);
@@ -803,44 +804,6 @@ EOD;
         }
 
         file_put_contents($providerPath, $content);
-    }
-
-    private function createAuthServiceProvider(): void
-    {
-        $providerPath = app_path('Providers/AuthServiceProvider.php');
-        $content = <<<EOD
-<?php
-
-namespace App\Providers;
-
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Gate;
-
-class AuthServiceProvider extends ServiceProvider
-{
-    /**
-     * The model to policy mappings for the application.
-     *
-     * @var array<class-string, class-string>
-     */
-    protected \$policies = [];
-
-    /**
-     * Register any authentication / authorization services.
-     */
-    public function boot(): void
-    {
-        \$this->registerPolicies();
-    }
-}
-EOD;
-
-        if (!file_exists(app_path('Providers'))) {
-            mkdir(app_path('Providers'), 0755, true);
-        }
-
-        file_put_contents($providerPath, $content);
-        $this->info('AuthServiceProvider créé.');
     }
 
     /**
