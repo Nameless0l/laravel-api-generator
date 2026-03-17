@@ -85,8 +85,8 @@ class DeleteFullApi extends Command
         $this->deleteFile(app_path("DTO/{$className}DTO.php"), "DTO");
 
         // Supprimer les tests
-        $this->deleteFile(base_path("tests/Feature/{$className}Test.php"), "Feature Test");
-        $this->deleteFile(base_path("tests/Unit/{$className}Test.php"), "Unit Test");
+        $this->deleteFile(base_path("tests/Feature/{$className}ControllerTest.php"), "Feature Test");
+        $this->deleteFile(base_path("tests/Unit/{$className}ServiceTest.php"), "Unit Test");
 
         $this->info("Tous les fichiers associés à {$name} ont été supprimés.");
         return self::SUCCESS;

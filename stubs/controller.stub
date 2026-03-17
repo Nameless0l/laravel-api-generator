@@ -11,7 +11,6 @@ use App\Http\Resources\{{modelName}}Resource;
 use App\Services\{{modelName}}Service;
 use App\DTO\{{modelName}}DTO;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class {{modelName}}Controller extends Controller
 {
