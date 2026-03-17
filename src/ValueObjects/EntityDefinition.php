@@ -11,8 +11,9 @@ use Illuminate\Support\Str;
 final readonly class EntityDefinition
 {
     /**
-     * @param Collection<FieldDefinition> $fields
-     * @param Collection<RelationshipDefinition> $relationships
+     * @param Collection<int, FieldDefinition> $fields
+     * @param Collection<int, RelationshipDefinition> $relationships
+     * @param array<string, mixed> $options
      */
     public function __construct(
         public string $name,
@@ -37,6 +38,9 @@ final readonly class EntityDefinition
         }
     }
 
+    /**
+     * @param Collection<int, FieldDefinition> $fields
+     */
     private function validateFields(Collection $fields): void
     {
         $fieldNames = $fields->pluck('name')->toArray();
@@ -47,6 +51,9 @@ final readonly class EntityDefinition
         }
     }
 
+    /**
+     * @param Collection<int, RelationshipDefinition> $relationships
+     */
     private function validateRelationships(Collection $relationships): void
     {
         $relationshipRoles = $relationships->pluck('role')->toArray();
@@ -77,6 +84,9 @@ final readonly class EntityDefinition
         return Str::camel($this->name);
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function getFillableFields(): array
     {
         $fillable = $this->fields->pluck('name')->toArray();
@@ -90,6 +100,9 @@ final readonly class EntityDefinition
         return array_merge($fillable, $foreignKeys);
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function getFieldsArray(): array
     {
         return $this->fields->mapWithKeys(function (FieldDefinition $field) {
@@ -102,6 +115,9 @@ final readonly class EntityDefinition
         return $this->relationships->isNotEmpty();
     }
 
+    /**
+     * @return Collection<int, RelationshipDefinition>
+     */
     public function getRelationshipsByType(string $type): Collection
     {
         return $this->relationships->filter(

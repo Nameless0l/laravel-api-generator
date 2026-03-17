@@ -9,25 +9,31 @@ class MakeApiWithDiagram extends Command
 {
     protected $signature = "make:loic";
     protected $description = "Generate API resources based on JSON configuration";
-    protected $classes;
 
-    public function handle()
+    /** @var array<int, array<string, mixed>> */
+    protected array $classes = [];
+
+    public function handle(): int
     {
         // Lecture du fichier JSON
         $jsonFilePath = base_path('class_data');
         echo $jsonFilePath;
         if (!file_exists($jsonFilePath)) {
             $this->error("Le fichier class_data est introuvable.");
-            return;
+            return self::FAILURE;
         }
 
         $this->info("Lecture du fichier JSON...");
         $jsonData = file_get_contents($jsonFilePath);
+        if ($jsonData === false) {
+            $this->error("Impossible de lire le fichier class_data.");
+            return self::FAILURE;
+        }
         $this->classes = json_decode($jsonData, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             $this->error("Erreur de décodage JSON : " . json_last_error_msg());
-            return;
+            return self::FAILURE;
         }
 
         $this->info("Extraction des données JSON...");
@@ -35,12 +41,14 @@ class MakeApiWithDiagram extends Command
 
         $this->info("Génération des API avec Artisan...");
         $this->runFullApi();
+
+        return self::SUCCESS;
     }
 
     /**
      * Extraire et formater les données JSON dans un tableau compatible.
      */
-    public function jsonExtractionToArray()
+    public function jsonExtractionToArray(): void
     {
         $this->classes = array_map(function ($class) {
             return [
@@ -64,7 +72,7 @@ class MakeApiWithDiagram extends Command
     /**
      * Parcourir les classes et exécuter les commandes Artisan pour générer les API.
      */
-    public function runFullApi()
+    public function runFullApi(): void
     {
         foreach ($this->classes as $class) {
             $className = ucfirst($class['name']);

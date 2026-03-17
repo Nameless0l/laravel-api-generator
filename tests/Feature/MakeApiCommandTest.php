@@ -9,17 +9,19 @@ use nameless\LaravelCodeGenerator\Tests\TestCase;
 class MakeApiCommandTest extends TestCase
 {
     /** @test */
-    public function it_can_create_api_files()
+    public function it_can_create_api_files(): void
     {
         // Arrange
         $name = 'Post';
         $fields = 'title:string,content:text,published:boolean';
 
         // Act
-        $this->artisan('make:fullapi', [
+        /** @var \Illuminate\Testing\PendingCommand $result */
+        $result = $this->artisan('make:fullapi', [
             'name' => $name,
             '--fields' => $fields
-        ])->assertSuccessful();
+        ]);
+        $result->assertSuccessful();
 
         // Assert
         $this->assertFileExists(app_path("Models/{$name}.php"));
@@ -29,15 +31,17 @@ class MakeApiCommandTest extends TestCase
     }
 
     /** @test */
-    public function it_requires_fields_option()
+    public function it_requires_fields_option(): void
     {
-        $this->artisan('make:fullapi', [
+        /** @var \Illuminate\Testing\PendingCommand $result */
+        $result = $this->artisan('make:fullapi', [
             'name' => 'Post'
-        ])->assertFailed();
+        ]);
+        $result->assertFailed();
     }
 
     /** @test */
-    public function it_creates_valid_model_with_fillable()
+    public function it_creates_valid_model_with_fillable(): void
     {
         // Arrange
         $name = 'Post';
@@ -51,9 +55,11 @@ class MakeApiCommandTest extends TestCase
 
         // Assert
         $modelPath = app_path("Models/{$name}.php");
+        $modelContent = file_get_contents($modelPath);
+        $this->assertNotFalse($modelContent, "Failed to read model file: {$modelPath}");
         $this->assertStringContainsString(
             "protected \$fillable = ['title', 'content'];",
-            file_get_contents($modelPath)
+            $modelContent
         );
     }
 }

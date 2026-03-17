@@ -32,6 +32,9 @@ class MigrationGenerator extends AbstractGenerator
         return 'migrations';
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function getReplacements(EntityDefinition $definition): array
     {
         return [

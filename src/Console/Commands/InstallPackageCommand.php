@@ -12,21 +12,21 @@ class InstallPackageCommand extends Command
     /**
      * @var bool
      */
-    private static $isRunning = false;
-    
+    private static bool $isRunning = false;
 
-    public function handle()
+
+    public function handle(): int
     {
         if (self::$isRunning) {
-            return;
+            return self::SUCCESS;
         }
-        self::$isRunning = true; 
+        self::$isRunning = true;
         try {
             $this->info('Installing API Generator Package...');
             // $this->installBreeze();
             // Demander si l'utilisateur veut un starter kit d'authentification
             $wantsAuth = $this->confirm('Would you like to install an authentication starter kit?', true);
-            
+
             if ($wantsAuth) {
                 $authChoice = $this->choice(
                     'Which authentication starter kit would you prefer?',
@@ -50,28 +50,29 @@ class InstallPackageCommand extends Command
             }
 
             $this->publishScrambleConfig();
-    
+
             // Ajouter le provider de Scramble dans config/app.php si pas déjà présent
             $this->registerScrambleProvider();
-    
+
             // Publier les autres fichiers de configuration de votre package si nécessaire
             $this->publishPackageConfig();
-            //installation des 
-    
+            //installation des
+
             $this->info('Installation completed! 🎉');
-    
+
             // $this->call('install:api');
-    
+
             $this->showPostInstallationMessage();
         } finally {
             self::$isRunning = false;
         }
 
-       
 
+
+        return self::SUCCESS;
     }
 
-    protected function publishScrambleConfig()
+    protected function publishScrambleConfig(): void
     {
         $this->info('Publishing Scramble configuration...');
         $this->call('vendor:publish', [
@@ -80,23 +81,23 @@ class InstallPackageCommand extends Command
         ]);
     }
 
-    protected function registerScrambleProvider()
+    protected function registerScrambleProvider(): void
     {
         $this->info('Registering Scramble Service Provider...');
-        
+
         $config_app = config_path('app.php');
         $provider = \Dedoc\Scramble\ScrambleServiceProvider::class;
 
         if (File::exists($config_app)) {
             $contents = File::get($config_app);
-            
+
             if (!str_contains($contents, $provider)) {
                 $providers = str_replace(
                     'providers\' => [',
                     'providers\' => [' . PHP_EOL . '        ' . $provider . '::class,',
                     $contents
                 );
-                
+
                 File::put($config_app, $providers);
                 $this->info('Scramble Service Provider registered successfully.');
             } else {
@@ -105,7 +106,7 @@ class InstallPackageCommand extends Command
         }
     }
 
-    protected function publishPackageConfig()
+    protected function publishPackageConfig(): void
     {
         $this->info('Publishing API Generator configuration...');
         //Execute this commande : php artisan install:api
@@ -117,7 +118,7 @@ class InstallPackageCommand extends Command
         ]);
     }
 
-    protected function showPostInstallationMessage()
+    protected function showPostInstallationMessage(): void
     {
         $this->info('');
         $this->info('🚀 API Generator has been installed successfully!');
@@ -130,28 +131,28 @@ class InstallPackageCommand extends Command
         $this->info('Documentation: https://github.com/Nameless0l/laravel-api-generator');
     }
 
-    protected function installBreeze()
+    protected function installBreeze(): void
     {
         $this->info('Installing Laravel Breeze API...');
-        
+
         // Installation de Breeze via Composer
         $process = new Process(['composer', 'require', 'laravel/breeze', '--dev']);
         $process->setTimeout(null);
-        
+
         $process->run(function ($type, $buffer) {
             $this->output->write($buffer);
         });
-    
+
         if ($process->isSuccessful()) {
             $this->info('Laravel Breeze installed successfully!');
-            
+
             // Clear configuration cache
             $this->call('config:clear');
-            
+
             // Clear and rebuild cached Composer autoload files
             $composerDump = new Process(['composer', 'dump-autoload']);
             $composerDump->run();
-            
+
             // Try installing Breeze with error handling
             try {
                 $this->call('breeze:install', [
@@ -165,10 +166,10 @@ class InstallPackageCommand extends Command
                 $this->info('php artisan migrate');
                 return;
             }
-            
+
             // Run migrations if Breeze installation was successful
             $this->call('migrate');
-            
+
             $this->info('Laravel Breeze API configuration completed!');
         } else {
             $this->error('Failed to install Laravel Breeze');
@@ -176,10 +177,10 @@ class InstallPackageCommand extends Command
         }
     }
 
-    protected function installBreezeWithOptions()
+    protected function installBreezeWithOptions(): void
     {
         $this->info('Installing Laravel Breeze...');
-        
+
         // Installation de Breeze via Composer
         $process = new Process(['composer', 'require', 'laravel/breeze', '--dev']);
         $process->setTimeout(null);
@@ -196,10 +197,10 @@ class InstallPackageCommand extends Command
             $this->error($process->getErrorOutput());
         }
     }
-    protected function installLaravelUI()
+    protected function installLaravelUI(): void
     {
         $this->info('Installing Laravel UI...');
-        
+
         $process = new Process(['composer', 'require', 'laravel/ui', '--dev']);
         $process->setTimeout(null);
         $process->run(function ($type, $buffer) {
@@ -231,7 +232,10 @@ class InstallPackageCommand extends Command
         }
     }
 
-    protected function runProcess(array $command)
+    /**
+     * @param array<int, string> $command
+     */
+    protected function runProcess(array $command): bool
     {
         $process = new Process($command);
         $process->setTimeout(null);

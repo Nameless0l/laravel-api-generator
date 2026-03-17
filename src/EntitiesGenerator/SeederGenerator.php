@@ -28,6 +28,9 @@ class SeederGenerator extends AbstractGenerator
         return 'seed';
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function getReplacements(EntityDefinition $definition): array
     {
         return [

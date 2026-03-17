@@ -16,7 +16,7 @@ class JsonParser
     /**
      * Parse JSON data and convert to EntityDefinition objects.
      *
-     * @return Collection<EntityDefinition>
+     * @return Collection<int, EntityDefinition>
      */
     public function parseJsonToEntities(string $jsonData): Collection
     {
@@ -36,25 +36,33 @@ class JsonParser
 
     /**
      * Normalize JSON data to consistent format.
+     *
+     * @param array<int|string, mixed> $data
+     * @return array<int, array<string, mixed>>
      */
     private function normalizeJsonData(array $data): array
     {
         // Handle wrapped data format
         if (isset($data['data']) && is_array($data['data'])) {
+            /** @var array<int, array<string, mixed>> */
             return [$data];
         }
-        
+
         // Handle array of entities
-        if (is_array($data) && !isset($data['name'])) {
-            return $data;
+        if (!isset($data['name'])) {
+            /** @var array<int, array<string, mixed>> */
+            return array_values($data);
         }
-        
+
         // Handle single entity
+        /** @var array<int, array<string, mixed>> */
         return [$data];
     }
 
     /**
      * Create EntityDefinition from array data.
+     *
+     * @param array<string, mixed> $classData
      */
     private function createEntityDefinition(array $classData): EntityDefinition
     {
@@ -77,7 +85,8 @@ class JsonParser
     /**
      * Parse fields from attributes array.
      *
-     * @return Collection<FieldDefinition>
+     * @param array<int, array<string, mixed>> $attributes
+     * @return Collection<int, FieldDefinition>
      */
     private function parseFields(array $attributes): Collection
     {
@@ -92,7 +101,8 @@ class JsonParser
     /**
      * Parse relationships from class data.
      *
-     * @return Collection<RelationshipDefinition>
+     * @param array<string, mixed> $classData
+     * @return Collection<int, RelationshipDefinition>
      */
     private function parseRelationships(array $classData): Collection
     {

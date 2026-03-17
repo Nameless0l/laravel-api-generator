@@ -2,7 +2,7 @@
 
 namespace nameless\LaravelCodeGenerator\Tests;
 
-use nameless\CodeGenrator\Providers\CodeGeneratorServiceProvider;
+use nameless\CodeGenerator\Providers\CodeGeneratorServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra

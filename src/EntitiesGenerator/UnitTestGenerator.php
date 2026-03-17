@@ -29,6 +29,9 @@ class UnitTestGenerator extends AbstractGenerator
         return 'test.unit';
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function getReplacements(EntityDefinition $definition): array
     {
         return [

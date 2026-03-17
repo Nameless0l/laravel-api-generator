@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 class ApiGenerationService implements ApiGenerationServiceInterface
 {
     /**
-     * @param Collection<GeneratorInterface> $generators
+     * @param Collection<int, GeneratorInterface> $generators
      */
     public function __construct(
         private readonly Collection $generators,
@@ -90,6 +90,9 @@ class ApiGenerationService implements ApiGenerationServiceInterface
         // Remove migration files
         $tableName = Str::plural(Str::snake($entityName));
         $migrations = glob(database_path("migrations/*_create_{$tableName}_table.php"));
+        if ($migrations === false) {
+            $migrations = [];
+        }
         foreach ($migrations as $migration) {
             File::delete($migration);
         }

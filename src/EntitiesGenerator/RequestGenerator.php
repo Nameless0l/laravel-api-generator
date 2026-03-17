@@ -29,6 +29,9 @@ class RequestGenerator extends AbstractGenerator
         return 'request';
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function getReplacements(EntityDefinition $definition): array
     {
         return [

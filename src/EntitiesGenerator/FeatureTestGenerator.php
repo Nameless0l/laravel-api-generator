@@ -29,6 +29,9 @@ class FeatureTestGenerator extends AbstractGenerator
         return 'test.feature';
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function getReplacements(EntityDefinition $definition): array
     {
         return [

@@ -28,6 +28,9 @@ class ControllerGenerator extends AbstractGenerator
         return 'controller';
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function getReplacements(EntityDefinition $definition): array
     {
         $softDeleteMethods = '';

@@ -29,6 +29,9 @@ class ResourceGenerator extends AbstractGenerator
         return 'resource';
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function getReplacements(EntityDefinition $definition): array
     {
         return [

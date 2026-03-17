@@ -57,6 +57,8 @@ abstract class AbstractGenerator implements GeneratorInterface
 
     /**
      * Get replacements for the stub.
+     *
+     * @return array<string, string>
      */
     abstract protected function getReplacements(EntityDefinition $definition): array;
 
