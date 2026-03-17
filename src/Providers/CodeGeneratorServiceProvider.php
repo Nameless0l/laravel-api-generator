@@ -48,8 +48,10 @@ class CodeGeneratorServiceProvider extends ServiceProvider
         $this->registerServices();
         $this->registerGenerators();
 
-        // Register Scramble for API documentation
-        $this->app->register(\Dedoc\Scramble\ScrambleServiceProvider::class);
+        // Register Scramble for API documentation (only if installed)
+        if (class_exists(\Dedoc\Scramble\ScrambleServiceProvider::class)) {
+            $this->app->register(\Dedoc\Scramble\ScrambleServiceProvider::class);
+        }
     }
 
     private function registerServices(): void
