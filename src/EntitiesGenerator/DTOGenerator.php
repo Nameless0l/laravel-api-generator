@@ -45,7 +45,7 @@ class DTOGenerator extends AbstractGenerator
     {
         $attributes = $definition->fields->map(function (FieldDefinition $field) {
             $phpType = $field->nullable ? "?{$field->getPhpType()}" : $field->getPhpType();
-            return "        public {$phpType} \${$field->name},";
+            return "public {$phpType} \${$field->name},";
         })->toArray();
 
         // Remove trailing comma from last attribute
@@ -54,7 +54,7 @@ class DTOGenerator extends AbstractGenerator
             $attributes[$lastIndex] = rtrim($attributes[$lastIndex], ',');
         }
 
-        return implode("\n", $attributes);
+        return implode("\n        ", $attributes);
     }
 
     private function generateFromRequest(EntityDefinition $definition): string
@@ -66,7 +66,7 @@ class DTOGenerator extends AbstractGenerator
                 'bool' => "(bool) ",
                 default => "",
             };
-            return "            {$cast}\$request->input('{$field->name}'),";
+            return "{$cast}\$request->input('{$field->name}'),";
         })->toArray();
 
         if (!empty($fromRequest)) {
@@ -74,6 +74,6 @@ class DTOGenerator extends AbstractGenerator
             $fromRequest[$lastIndex] = rtrim($fromRequest[$lastIndex], ',');
         }
 
-        return implode("\n", $fromRequest);
+        return implode("\n            ", $fromRequest);
     }
 }

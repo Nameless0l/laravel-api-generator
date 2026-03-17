@@ -116,7 +116,7 @@ class ModelGeneratorRefactored extends AbstractGenerator
      */
     private function generateImports(EntityDefinition $definition): string
     {
-        $imports = ['use Illuminate\Database\Eloquent\Model;'];
+        $imports = [];
 
         if ($definition->hasSoftDeletes()) {
             $imports[] = 'use Illuminate\Database\Eloquent\SoftDeletes;';
