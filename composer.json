@@ -1,7 +1,6 @@
 {
     "name": "nameless/laravel-api-generator",
     "description": "A professional Laravel API generator that automatically creates complete API structures with clean architecture, type safety, and best practices",
-    "version": "3.0.1",
     "type": "library",
     "license": "MIT",
     "keywords": [
@@ -24,10 +23,10 @@
     ],
     "require": {
         "php": "^8.1",
-        "laravel/framework": "^10.0 || ^11.0",
-        "dedoc/scramble": "^0.11.31"
+        "laravel/framework": "^10.0 || ^11.0"
     },
     "require-dev": {
+        "dedoc/scramble": "^0.11.31",
         "phpunit/phpunit": "^10.0",
         "orchestra/testbench": "^8.0 || ^9.0",
         "phpstan/phpstan": "^2.1",
