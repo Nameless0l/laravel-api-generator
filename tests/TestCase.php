@@ -1,6 +1,6 @@
 <?php
 
-namespace nameless\LaravelCodeGenerator\Tests;
+namespace nameless\CodeGenerator\Tests;
 
 use nameless\CodeGenerator\Providers\CodeGeneratorServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
