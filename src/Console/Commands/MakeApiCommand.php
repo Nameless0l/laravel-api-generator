@@ -126,6 +126,7 @@ class MakeApiCommand extends Command
         }
 
         $this->info('API generation completed successfully!');
+        $this->checkApiRoutesRegistered();
         return self::SUCCESS;
     }
 
@@ -305,6 +306,7 @@ class MakeApiCommand extends Command
             $this->exportPostmanCollection($jsonData);
         }
 
+        $this->checkApiRoutesRegistered();
         return self::SUCCESS;
     }
 
@@ -342,6 +344,7 @@ class MakeApiCommand extends Command
         }
 
         $this->info("API generation completed successfully!");
+        $this->checkApiRoutesRegistered();
         return self::SUCCESS;
     }
 
@@ -410,5 +413,31 @@ class MakeApiCommand extends Command
         $this->line("  - Test:       tests/Unit/{$definition->name}ServiceTest.php");
         $this->line("  - Route:      routes/api.php");
         $this->newLine();
+    }
+
+    private function checkApiRoutesRegistered(): void
+    {
+        $bootstrapApp = base_path('bootstrap/app.php');
+
+        if (!File::exists($bootstrapApp)) {
+            return;
+        }
+
+        $content = File::get($bootstrapApp);
+
+        // Check if API routes are registered in bootstrap/app.php (Laravel 11+)
+        if (str_contains($content, 'api:') || str_contains($content, 'api.php')) {
+            return;
+        }
+
+        // Check if routes/api.php exists but isn't loaded
+        if (File::exists(base_path('routes/api.php'))) {
+            $this->newLine();
+            $this->warn('⚠ API routes file exists but may not be loaded by your application.');
+            $this->line('  If your API returns 404, run:');
+            $this->line('    php artisan install:api');
+            $this->line('  This registers routes/api.php in bootstrap/app.php.');
+            $this->newLine();
+        }
     }
 }
