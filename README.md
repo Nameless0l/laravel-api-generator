@@ -494,6 +494,8 @@ Scramble automatically analyzes your generated controllers, requests, and resour
 - **Request/response examples** -- sample JSON bodies are generated automatically
 - **Grouped endpoints** -- each entity (Product, Post, etc.) gets its own section with all CRUD operations
 
+![Scramble Schemas](docs/scramble-schemas.png)
+
 ### Endpoints
 
 | URL | Description |
@@ -514,6 +516,8 @@ php artisan migrate:fresh --seed
 ```
 
 Each entity seeder creates **10 records** using the generated factory. The `delete:fullapi` command also cleans up the seeder registration.
+
+![Seeded Database](docs/seeded-database.png)
 
 ---
 
