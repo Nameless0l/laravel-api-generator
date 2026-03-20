@@ -10,7 +10,17 @@ A professional Laravel package that generates complete, production-ready REST AP
 
 ### v3.3 -- Generate, seed, test, and document in seconds
 
-![v3.3 Demo](docs/demo-v3.3.svg)
+**Swagger UI** -- automatic interactive API documentation with Scramble:
+
+![Scramble Endpoints](docs/scramble-docs.png)
+
+**Validation schemas** -- your FormRequest rules become typed, documented constraints:
+
+![Scramble Schemas](docs/scramble-schemas.png)
+
+**Database seeding** -- 10 records per entity, ready to use:
+
+![Seeded Database](docs/seeded-database.png)
 
 ---
 
