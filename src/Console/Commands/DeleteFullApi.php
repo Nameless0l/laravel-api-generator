@@ -88,6 +88,9 @@ class DeleteFullApi extends Command
         $this->deleteFile(base_path("tests/Feature/{$className}ControllerTest.php"), "Feature Test");
         $this->deleteFile(base_path("tests/Unit/{$className}ServiceTest.php"), "Unit Test");
 
+        // Supprimer la route dans api.php
+        $this->removeApiRoute($className, $pluralName);
+
         $this->info("Tous les fichiers associés à {$name} ont été supprimés.");
         return self::SUCCESS;
     }
@@ -158,6 +161,50 @@ class DeleteFullApi extends Command
             }
         } else {
             $this->warn("Aucun fichier {$type} correspondant au motif : {$pattern}");
+        }
+    }
+
+    private function removeApiRoute(string $className, string $pluralName): void
+    {
+        $apiFilePath = base_path('routes/api.php');
+
+        if (!File::exists($apiFilePath)) {
+            return;
+        }
+
+        $content = File::get($apiFilePath);
+        $originalContent = $content;
+
+        // Remove the apiResource route line
+        $routePattern = "/\n?Route::apiResource\('{$pluralName}',\s*App\\\\Http\\\\Controllers\\\\{$className}Controller::class\);/";
+        $content = preg_replace($routePattern, '', $content);
+        if (!is_string($content)) {
+            $content = $originalContent;
+        }
+
+        // Remove soft-delete routes (restore + force-delete)
+        $restorePattern = "/\n?Route::post\('{$pluralName}\/\{id\}\/restore'.*?\);/";
+        $content = preg_replace($restorePattern, '', $content);
+        if (!is_string($content)) {
+            $content = $originalContent;
+        }
+
+        $forceDeletePattern = "/\n?Route::delete\('{$pluralName}\/\{id\}\/force-delete'.*?\);/";
+        $content = preg_replace($forceDeletePattern, '', $content);
+        if (!is_string($content)) {
+            $content = $originalContent;
+        }
+
+        // Clean up multiple blank lines
+        $result = preg_replace("/\n{3,}/", "\n\n", $content);
+        if (is_string($result)) {
+            $content = $result;
+        }
+
+        File::put($apiFilePath, $content);
+
+        if ($content !== $originalContent) {
+            $this->info("Route API supprimée de routes/api.php");
         }
     }
 

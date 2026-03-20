@@ -8,6 +8,10 @@ A professional Laravel package that generates complete, production-ready REST AP
 
 ![Demo](docs/demo.gif)
 
+### v3.3 -- Generate, seed, test, and document in seconds
+
+![v3.3 Demo](docs/demo-v3.3.svg)
+
 ---
 
 ## Architecture
@@ -465,9 +469,51 @@ Register it in your service provider and it will be called automatically during 
 
 ---
 
-## API documentation
+## API documentation with Scramble
 
-The package integrates with [Scramble](https://github.com/dedoc/scramble) for automatic API documentation. After generating your APIs, visit `/docs/api` to browse the generated documentation.
+The package integrates seamlessly with [Scramble](https://github.com/dedoc/scramble) to provide **automatic, interactive API documentation** -- no annotations or manual setup required.
+
+![Scramble API Docs](docs/scramble-docs.png)
+
+### Setup
+
+```bash
+composer require dedoc/scramble --dev
+php artisan serve
+```
+
+Then open [http://localhost:8000/docs/api](http://localhost:8000/docs/api) in your browser.
+
+### What you get
+
+Scramble automatically analyzes your generated controllers, requests, and resources to produce a full **OpenAPI 3.x specification** with:
+
+- **Interactive Swagger UI** -- test endpoints directly from the browser with "Send API Request"
+- **Auto-detected schemas** -- `ProductRequest`, `ProductResource`, etc. are inferred from your FormRequest rules and API Resource structure
+- **Validation rules as constraints** -- `required|string|max:255` becomes a required string field with `<= 255 characters` in the docs
+- **Request/response examples** -- sample JSON bodies are generated automatically
+- **Grouped endpoints** -- each entity (Product, Post, etc.) gets its own section with all CRUD operations
+
+### Endpoints
+
+| URL | Description |
+|-----|-------------|
+| `/docs/api` | Interactive Swagger UI |
+| `/docs/api.json` | Raw OpenAPI 3.x JSON specification |
+
+> **Note:** Scramble is a dev dependency. It won't affect your production deployment.
+
+---
+
+## Database seeding
+
+Generated seeders are automatically registered in `DatabaseSeeder.php`. After generating your API and running migrations:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+Each entity seeder creates **10 records** using the generated factory. The `delete:fullapi` command also cleans up the seeder registration.
 
 ---
 
@@ -513,7 +559,7 @@ Then run `composer update`.
 ## Requirements
 
 - PHP >= 8.1
-- Laravel 10.x or 11.x
+- Laravel 10.x, 11.x, or 12.x
 
 ---
 
