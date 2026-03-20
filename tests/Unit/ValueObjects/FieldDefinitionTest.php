@@ -19,7 +19,7 @@ class FieldDefinitionTest extends TestCase
 
         $this->assertEquals('email', $field->name);
         $this->assertEquals('string', $field->type);
-        $this->assertTrue($field->nullable);
+        $this->assertFalse($field->nullable);
     }
 
     public function test_throws_exception_for_empty_field_name(): void
@@ -73,9 +73,12 @@ class FieldDefinitionTest extends TestCase
     public function test_gets_correct_validation_rule(): void
     {
         $stringField = new FieldDefinition('name', 'string');
-        $this->assertEquals('sometimes|string|max:255', $stringField->getValidationRule());
+        $this->assertEquals('required|string|max:255', $stringField->getValidationRule());
 
-        $requiredField = new FieldDefinition('email', 'string', false);
+        $nullableField = new FieldDefinition('email', 'string', nullable: true);
+        $this->assertEquals('sometimes|string|max:255', $nullableField->getValidationRule());
+
+        $requiredField = new FieldDefinition('email', 'string', nullable: false);
         $this->assertEquals('required|string|max:255', $requiredField->getValidationRule());
     }
 

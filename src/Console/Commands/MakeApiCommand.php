@@ -425,19 +425,55 @@ class MakeApiCommand extends Command
 
         $content = File::get($bootstrapApp);
 
-        // Check if API routes are registered in bootstrap/app.php (Laravel 11+)
-        if (str_contains($content, 'api:') || str_contains($content, 'api.php')) {
+        // Check if API routes are already registered in bootstrap/app.php (Laravel 11+)
+        if (str_contains($content, 'api:') || str_contains($content, "'api.php'") || str_contains($content, '"api.php"')) {
             return;
         }
 
-        // Check if routes/api.php exists but isn't loaded
-        if (File::exists(base_path('routes/api.php'))) {
+        // Only proceed if routes/api.php exists but isn't loaded
+        if (!File::exists(base_path('routes/api.php'))) {
+            return;
+        }
+
+        // Try to auto-register API routes in bootstrap/app.php
+        if ($this->registerApiRoutes($content, $bootstrapApp)) {
+            $this->info('✔ API routes registered in bootstrap/app.php');
+        } else {
             $this->newLine();
             $this->warn('⚠ API routes file exists but may not be loaded by your application.');
-            $this->line('  If your API returns 404, run:');
+            $this->line('  Run the following command to register API routes:');
             $this->line('    php artisan install:api');
-            $this->line('  This registers routes/api.php in bootstrap/app.php.');
             $this->newLine();
         }
+    }
+
+    /**
+     * Try to auto-register API routes in bootstrap/app.php.
+     */
+    private function registerApiRoutes(string $content, string $bootstrapApp): bool
+    {
+        // Pattern: withRouting( ... web: ... )
+        // Add api: line after the web: line
+        $pattern = '/(->withRouting\([^)]*)(web:\s*__DIR__\s*\.\s*\'[^\']*\/routes\/web\.php\',?)/s';
+
+        if (preg_match($pattern, $content, $matches)) {
+            $webLine = $matches[2];
+            // Ensure the web line ends with a comma
+            $webLineWithComma = rtrim($webLine, ', ') . ',';
+            $apiLine = "\n        api: __DIR__.'/../routes/api.php',";
+
+            $newContent = str_replace(
+                $webLine,
+                $webLineWithComma . $apiLine,
+                $content
+            );
+
+            if ($newContent !== $content) {
+                File::put($bootstrapApp, $newContent);
+                return true;
+            }
+        }
+
+        return false;
     }
 }

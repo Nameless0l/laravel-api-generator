@@ -15,7 +15,7 @@ final readonly class FieldDefinition
     public function __construct(
         public string $name,
         public string $type,
-        public bool $nullable = true,
+        public bool $nullable = false,
         public bool $unique = false,
         public ?string $default = null,
         public array $validationRules = [],

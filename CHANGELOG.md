@@ -5,6 +5,26 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-03-20
+
+### Added
+- **Auto-register API routes in `bootstrap/app.php`** -- On Laravel 11+/12, the generator automatically adds `api: __DIR__.'/../routes/api.php'` to `withRouting()`. No more manual `php artisan install:api` needed.
+- **Auto-register seeders in `DatabaseSeeder.php`** -- Generated seeders are now automatically registered with `$this->call()`, so `php artisan db:seed` works out of the box.
+- **Migration duplicate detection** -- If a migration for the same table already exists, it is overwritten instead of creating a duplicate that crashes on migrate.
+- **Route cleanup on delete** -- `delete:fullapi` now removes the `Route::apiResource()` line (and soft-delete routes) from `routes/api.php`.
+- **Seeder cleanup on delete** -- `delete:fullapi` also removes the seeder registration from `DatabaseSeeder.php`.
+- **Scramble integration docs** -- README now includes full setup guide and feature overview for automatic API documentation with Scramble.
+- **Database seeding section** in README.
+
+### Fixed
+- **Validation rules default to `required`** -- Fields now default to `nullable: false`, generating `required|string|max:255` instead of `sometimes|string|max:255`. This fixes the bug where POSTing an empty body returned 201 instead of 422.
+- **`delete:fullapi` did not clean `routes/api.php`** -- Routes were left behind after deleting an entity, causing "undefined controller" errors.
+
+### Changed
+- `FieldDefinition` constructor: `nullable` parameter default changed from `true` to `false`.
+- Laravel 12 added to supported versions (`^12.0` in composer.json).
+- Updated requirements in README: PHP >= 8.1, Laravel 10.x / 11.x / 12.x.
+
 ## [3.2.0] - 2026-03-15
 
 ### Added

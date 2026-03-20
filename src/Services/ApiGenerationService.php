@@ -39,6 +39,9 @@ class ApiGenerationService implements ApiGenerationServiceInterface
                 }
             }
 
+            // Register seeder in DatabaseSeeder
+            $this->registerSeederInDatabaseSeeder($definition->name);
+
             return true;
         } catch (\Exception $e) {
             throw CodeGeneratorException::generationFailed('API', $e->getMessage());
@@ -100,6 +103,9 @@ class ApiGenerationService implements ApiGenerationServiceInterface
         // Remove route from api.php
         $this->removeApiRoute($entityName);
 
+        // Remove seeder from DatabaseSeeder
+        $this->unregisterSeederFromDatabaseSeeder($entityName);
+
         return true;
     }
 
@@ -134,6 +140,106 @@ class ApiGenerationService implements ApiGenerationServiceInterface
                 File::append($apiFilePath, PHP_EOL . $forceDeleteRoute);
             }
         }
+    }
+
+    /**
+     * Register the entity seeder in DatabaseSeeder.php.
+     */
+    private function registerSeederInDatabaseSeeder(string $entityName): void
+    {
+        $databaseSeederPath = database_path('seeders/DatabaseSeeder.php');
+
+        if (!File::exists($databaseSeederPath)) {
+            return;
+        }
+
+        $content = File::get($databaseSeederPath);
+        $seederCall = "{$entityName}Seeder::class";
+
+        // Already registered
+        if (str_contains($content, $seederCall)) {
+            return;
+        }
+
+        // Add the use statement if not present
+        $useStatement = "use Database\\Seeders\\{$entityName}Seeder;";
+        if (!str_contains($content, $useStatement)) {
+            // Add use statement after the last existing use statement
+            $result = preg_replace(
+                '/(use [^;]+;\n)(?!use )/',
+                "$1{$useStatement}\n",
+                $content,
+                1
+            );
+            if (is_string($result)) {
+                $content = $result;
+            }
+        }
+
+        // Add $this->call() in the run() method
+        $callLine = "        \$this->call({$seederCall});";
+
+        // Try to add before the closing brace of the run() method
+        if (preg_match('/public function run\(\)[^{]*\{/s', $content)) {
+            // Check if there's already a $this->call() block
+            if (str_contains($content, '$this->call(')) {
+                // Add after the last $this->call() line
+                $result = preg_replace(
+                    '/(\$this->call\([^)]+\);)(?![\s\S]*\$this->call\()/',
+                    "$1\n{$callLine}",
+                    $content
+                );
+            } else {
+                // Add as first line in the run() method
+                $result = preg_replace(
+                    '/(public function run\(\)[^{]*\{)\n/',
+                    "$1\n{$callLine}\n",
+                    $content
+                );
+            }
+
+            if (is_string($result)) {
+                $content = $result;
+            }
+        }
+
+        File::put($databaseSeederPath, $content);
+    }
+
+    /**
+     * Remove the entity seeder from DatabaseSeeder.php.
+     */
+    private function unregisterSeederFromDatabaseSeeder(string $entityName): void
+    {
+        $databaseSeederPath = database_path('seeders/DatabaseSeeder.php');
+
+        if (!File::exists($databaseSeederPath)) {
+            return;
+        }
+
+        $content = File::get($databaseSeederPath);
+
+        // Remove the $this->call() line
+        $result = preg_replace(
+            "/\n?\s*\\\$this->call\({$entityName}Seeder::class\);/",
+            '',
+            $content
+        );
+        if (is_string($result)) {
+            $content = $result;
+        }
+
+        // Remove the use statement
+        $result = preg_replace(
+            "/use Database\\\\Seeders\\\\{$entityName}Seeder;\n?/",
+            '',
+            $content
+        );
+        if (is_string($result)) {
+            $content = $result;
+        }
+
+        File::put($databaseSeederPath, $content);
     }
 
     /**

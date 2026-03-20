@@ -7,6 +7,7 @@ namespace nameless\CodeGenerator\EntitiesGenerator;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
+use Illuminate\Support\Facades\File;
 
 class MigrationGenerator extends AbstractGenerator
 {
@@ -18,8 +19,35 @@ class MigrationGenerator extends AbstractGenerator
     public function getOutputPath(EntityDefinition $definition): string
     {
         $tableName = $definition->getTableName();
+
+        // Check if a migration for this table already exists
+        $existing = $this->findExistingMigration($tableName);
+        if ($existing !== null) {
+            return $existing;
+        }
+
         $timestamp = date('Y_m_d_His');
         return database_path("migrations/{$timestamp}_create_{$tableName}_table.php");
+    }
+
+    /**
+     * Find an existing migration file for the given table name.
+     */
+    private function findExistingMigration(string $tableName): ?string
+    {
+        $migrationsPath = database_path('migrations');
+        if (!File::isDirectory($migrationsPath)) {
+            return null;
+        }
+
+        $pattern = $migrationsPath . DIRECTORY_SEPARATOR . "*_create_{$tableName}_table.php";
+        $files = glob($pattern);
+
+        if ($files !== false && count($files) > 0) {
+            return $files[0];
+        }
+
+        return null;
     }
 
     protected function generateContent(EntityDefinition $definition): string
