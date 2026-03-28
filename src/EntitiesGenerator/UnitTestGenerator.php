@@ -34,12 +34,17 @@ class UnitTestGenerator extends AbstractGenerator
      */
     protected function getReplacements(EntityDefinition $definition): array
     {
+        $deleteAssertion = $definition->hasSoftDeletes()
+            ? "\$this->assertSoftDeleted('{$definition->getTableName()}', ['id' => \${$definition->getNameLower()}->id]);"
+            : "\$this->assertDatabaseCount('{$definition->getTableName()}', 0);";
+
         return [
             'modelName' => $definition->name,
             'modelNameLower' => $definition->getNameLower(),
             'pluralName' => $definition->getPluralName(),
             'tableName' => $definition->getTableName(),
             'dtoConstructorArgs' => $this->generateDtoArgs($definition),
+            'deleteAssertion' => $deleteAssertion,
         ];
     }
 

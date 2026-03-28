@@ -62,7 +62,7 @@ class {{modelName}}ControllerTest extends TestCase
         $response = $this->deleteJson("/api/{{pluralName}}/{${{modelNameLower}}->id}");
 
         $response->assertStatus(204);
-        $this->assertDatabaseMissing('{{tableName}}', ['id' => ${{modelNameLower}}->id]);
+        {{deleteAssertion}}
     }
 
     public function test_create_{{modelNameLower}}_validates_required_fields(): void
