@@ -34,12 +34,17 @@ class FeatureTestGenerator extends AbstractGenerator
      */
     protected function getReplacements(EntityDefinition $definition): array
     {
+        $deleteAssertion = $definition->hasSoftDeletes()
+            ? "\$this->assertSoftDeleted('{$definition->getTableName()}', ['id' => \${$definition->getNameLower()}->id]);"
+            : "\$this->assertDatabaseMissing('{$definition->getTableName()}', ['id' => \${$definition->getNameLower()}->id]);";
+
         return [
             'modelName' => $definition->name,
             'modelNameLower' => $definition->getNameLower(),
             'pluralName' => $definition->getPluralName(),
             'tableName' => $definition->getTableName(),
             'requestFields' => $this->generateRequestFields($definition),
+            'deleteAssertion' => $deleteAssertion,
         ];
     }
 

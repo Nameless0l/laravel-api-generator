@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Artisan;
 
 class DeleteFullApi extends Command
 {
-    protected $signature = 'delete:fullapi {name?}';
+    protected $signature = 'delete:fullapi {name?} {--force : Skip confirmation}';
     protected $description = 'Supprimer un modèle, migration, contrôleur, resource, request, factory, seeder et DTO associés à une ressource spécifique';
 
     /** @var array<int, array<string, mixed>> */

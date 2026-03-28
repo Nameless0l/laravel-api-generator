@@ -78,6 +78,6 @@ class {{modelName}}ServiceTest extends TestCase
         $result = $this->service->delete(${{modelNameLower}});
 
         $this->assertTrue($result);
-        $this->assertDatabaseCount('{{tableName}}', 0);
+        {{deleteAssertion}}
     }
 }
