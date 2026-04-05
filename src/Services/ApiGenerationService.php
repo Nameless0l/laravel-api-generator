@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\Services;
 
-use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
-use nameless\CodeGenerator\Contracts\GeneratorInterface;
-use nameless\CodeGenerator\ValueObjects\EntityDefinition;
-use nameless\CodeGenerator\Support\JsonParser;
-use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
+use nameless\CodeGenerator\Contracts\GeneratorInterface;
+use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
+use nameless\CodeGenerator\Support\JsonParser;
+use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 
 class ApiGenerationService implements ApiGenerationServiceInterface
 {
     /**
-     * @param Collection<int, GeneratorInterface> $generators
+     * @param  Collection<int, GeneratorInterface>  $generators
      */
     public function __construct(
         private readonly Collection $generators,
@@ -69,7 +69,7 @@ class ApiGenerationService implements ApiGenerationServiceInterface
     {
         // Implementation for deleting generated files
         // This would involve removing all generated files for the entity
-        
+
         $filesToDelete = [
             app_path("Models/{$entityName}.php"),
             app_path("Http/Controllers/{$entityName}Controller.php"),
@@ -120,13 +120,13 @@ class ApiGenerationService implements ApiGenerationServiceInterface
         $apiFilePath = base_path('routes/api.php');
         $phpHeader = "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n\n";
 
-        if (!File::exists($apiFilePath)) {
+        if (! File::exists($apiFilePath)) {
             File::put($apiFilePath, $phpHeader);
         }
 
         $existingRoutes = File::get($apiFilePath);
-        if (!str_contains($existingRoutes, $route)) {
-            File::append($apiFilePath, PHP_EOL . $route);
+        if (! str_contains($existingRoutes, $route)) {
+            File::append($apiFilePath, PHP_EOL.$route);
         }
 
         // Add soft delete routes if enabled
@@ -135,9 +135,9 @@ class ApiGenerationService implements ApiGenerationServiceInterface
             $forceDeleteRoute = "Route::delete('{$pluralName}/{id}/force-delete', [{$controllerClass}::class, 'forceDelete']);";
 
             $content = File::get($apiFilePath);
-            if (!str_contains($content, $restoreRoute)) {
-                File::append($apiFilePath, PHP_EOL . $restoreRoute);
-                File::append($apiFilePath, PHP_EOL . $forceDeleteRoute);
+            if (! str_contains($content, $restoreRoute)) {
+                File::append($apiFilePath, PHP_EOL.$restoreRoute);
+                File::append($apiFilePath, PHP_EOL.$forceDeleteRoute);
             }
         }
     }
@@ -149,7 +149,7 @@ class ApiGenerationService implements ApiGenerationServiceInterface
     {
         $databaseSeederPath = database_path('seeders/DatabaseSeeder.php');
 
-        if (!File::exists($databaseSeederPath)) {
+        if (! File::exists($databaseSeederPath)) {
             return;
         }
 
@@ -163,7 +163,7 @@ class ApiGenerationService implements ApiGenerationServiceInterface
 
         // Add the use statement if not present
         $useStatement = "use Database\\Seeders\\{$entityName}Seeder;";
-        if (!str_contains($content, $useStatement)) {
+        if (! str_contains($content, $useStatement)) {
             // Add use statement after the last existing use statement
             $result = preg_replace(
                 '/(use [^;]+;\n)(?!use )/',
@@ -213,7 +213,7 @@ class ApiGenerationService implements ApiGenerationServiceInterface
     {
         $databaseSeederPath = database_path('seeders/DatabaseSeeder.php');
 
-        if (!File::exists($databaseSeederPath)) {
+        if (! File::exists($databaseSeederPath)) {
             return;
         }
 
@@ -248,18 +248,18 @@ class ApiGenerationService implements ApiGenerationServiceInterface
     private function removeApiRoute(string $entityName): void
     {
         $apiFilePath = base_path('routes/api.php');
-        
-        if (!File::exists($apiFilePath)) {
+
+        if (! File::exists($apiFilePath)) {
             return;
         }
 
         $content = File::get($apiFilePath);
         $pluralName = Str::plural(Str::lower($entityName));
         $route = "Route::apiResource('{$pluralName}', App\\Http\\Controllers\\{$entityName}Controller::class);";
-        
+
         $content = str_replace($route, '', $content);
-        $content = str_replace(PHP_EOL . PHP_EOL, PHP_EOL, $content); // Remove double newlines
-        
+        $content = str_replace(PHP_EOL.PHP_EOL, PHP_EOL, $content); // Remove double newlines
+
         File::put($apiFilePath, $content);
     }
 }

@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\ValueObjects;
 
-use InvalidArgumentException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 final readonly class EntityDefinition
 {
     /**
-     * @param Collection<int, FieldDefinition> $fields
-     * @param Collection<int, RelationshipDefinition> $relationships
-     * @param array<string, mixed> $options
+     * @param  Collection<int, FieldDefinition>  $fields
+     * @param  Collection<int, RelationshipDefinition>  $relationships
+     * @param  array<string, mixed>  $options
      */
     public function __construct(
         public string $name,
@@ -33,34 +33,34 @@ final readonly class EntityDefinition
             throw new InvalidArgumentException('Entity name cannot be empty');
         }
 
-        if (!preg_match('/^[A-Z][a-zA-Z0-9]*$/', $name)) {
+        if (! preg_match('/^[A-Z][a-zA-Z0-9]*$/', $name)) {
             throw new InvalidArgumentException("Invalid entity name: {$name}. Must start with uppercase letter.");
         }
     }
 
     /**
-     * @param Collection<int, FieldDefinition> $fields
+     * @param  Collection<int, FieldDefinition>  $fields
      */
     private function validateFields(Collection $fields): void
     {
         $fieldNames = $fields->pluck('name')->toArray();
-        $duplicates = array_filter(array_count_values($fieldNames), fn($count) => $count > 1);
-        
-        if (!empty($duplicates)) {
-            throw new InvalidArgumentException('Duplicate field names found: ' . implode(', ', array_keys($duplicates)));
+        $duplicates = array_filter(array_count_values($fieldNames), fn ($count) => $count > 1);
+
+        if (! empty($duplicates)) {
+            throw new InvalidArgumentException('Duplicate field names found: '.implode(', ', array_keys($duplicates)));
         }
     }
 
     /**
-     * @param Collection<int, RelationshipDefinition> $relationships
+     * @param  Collection<int, RelationshipDefinition>  $relationships
      */
     private function validateRelationships(Collection $relationships): void
     {
         $relationshipRoles = $relationships->pluck('role')->toArray();
-        $duplicates = array_filter(array_count_values($relationshipRoles), fn($count) => $count > 1);
-        
-        if (!empty($duplicates)) {
-            throw new InvalidArgumentException('Duplicate relationship roles found: ' . implode(', ', array_keys($duplicates)));
+        $duplicates = array_filter(array_count_values($relationshipRoles), fn ($count) => $count > 1);
+
+        if (! empty($duplicates)) {
+            throw new InvalidArgumentException('Duplicate relationship roles found: '.implode(', ', array_keys($duplicates)));
         }
     }
 
@@ -90,13 +90,13 @@ final readonly class EntityDefinition
     public function getFillableFields(): array
     {
         $fillable = $this->fields->pluck('name')->toArray();
-        
+
         // Add foreign keys from relationships
         $foreignKeys = $this->relationships
-            ->filter(fn(RelationshipDefinition $rel) => $rel->requiresForeignKey())
-            ->map(fn(RelationshipDefinition $rel) => $rel->getForeignKeyName())
+            ->filter(fn (RelationshipDefinition $rel) => $rel->requiresForeignKey())
+            ->map(fn (RelationshipDefinition $rel) => $rel->getForeignKeyName())
             ->toArray();
-            
+
         return array_merge($fillable, $foreignKeys);
     }
 
@@ -121,7 +121,7 @@ final readonly class EntityDefinition
     public function getRelationshipsByType(string $type): Collection
     {
         return $this->relationships->filter(
-            fn(RelationshipDefinition $rel) => $rel->type === $type
+            fn (RelationshipDefinition $rel) => $rel->type === $type
         );
     }
 

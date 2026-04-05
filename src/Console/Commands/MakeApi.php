@@ -2,16 +2,15 @@
 
 namespace nameless\CodeGenerator\Console\Commands;
 
-use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Artisan;
-
-
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class MakeApi extends Command
 {
     protected $signature = 'make:fullapi {name?} {--fields=}';
+
     protected $description = 'Créer un modèle, migration, controller, resource, request, factory, seeder et DTO avec champs dynamiques et relations';
 
     /** @var array<int, array<string, mixed>> */
@@ -19,29 +18,33 @@ class MakeApi extends Command
 
     private string $nameLower = '';
 
-    const BASE_STUB_PATH = "vendor/nameless/laravel-api-generator/stubs/";
+    const BASE_STUB_PATH = 'vendor/nameless/laravel-api-generator/stubs/';
+
     public function handle(): int
     {
         $name = $this->argument('name');
 
         if (empty($this->argument('name'))) {
             $this->callDiagramsMethods();
+
             return self::SUCCESS;
         }
         $fields = $this->option('fields');
         $name = is_string($name) ? $name : '';
         $this->nameLower = strtolower($name);
-        if (!$fields) {
+        if (! $fields) {
             $this->error('Vous devez spécifier des champs avec l\'option --fields="champ1:type1,champ2:type2"');
+
             return self::FAILURE;
         }
         $fields = is_string($fields) ? $fields : '';
         $this->callDefaulttMethods($name, $fields);
+
         return self::SUCCESS;
     }
 
     /**
-     * @param array<string, mixed>|null $classData
+     * @param  array<string, mixed>|null  $classData
      */
     private function callDefaulttMethods(string $name, string $fields, ?array $classData = null): void
     {
@@ -55,22 +58,22 @@ class MakeApi extends Command
         $apiFilePath = base_path('routes/api.php');
         $phpHeader = "<?php\n\nuse Illuminate\Support\Facades\Route;\n\n";
 
-        if (!File::exists($apiFilePath)) {
+        if (! File::exists($apiFilePath)) {
             File::put($apiFilePath, $phpHeader);
         }
 
         $existingRoutes = File::get($apiFilePath);
-        if (!str_contains($existingRoutes, $route)) {
-            File::append($apiFilePath, PHP_EOL . $route);
+        if (! str_contains($existingRoutes, $route)) {
+            File::append($apiFilePath, PHP_EOL.$route);
         }
 
         // Créer le modèle avec la migration et le factory
         Artisan::call("make:model {$name} -mf");
-        info("Modèle, migration et factory créés.");
+        info('Modèle, migration et factory créés.');
 
         // Mettre à jour le modèle avec les fillable et les relations
         $this->updateModel($name, $fieldsArray, $classData);
-        $this->info("Modèle mis à jour avec les fillable et les relations.");
+        $this->info('Modèle mis à jour avec les fillable et les relations.');
 
         // Ajouter les champs et les clés étrangères dans la migration
         $this->updateMigration($name, $fieldsArray, $classData);
@@ -80,35 +83,35 @@ class MakeApi extends Command
 
         // Créer le service
         $this->createService($name, $this->nameLower);
-        $this->info("Service créé.");
+        $this->info('Service créé.');
 
         // Créer la policy
         Artisan::call("make:policy {$name}Policy --model={$name}");
         $this->updatePolicy($name);
-        $this->info("Policy créée et configurée.");
+        $this->info('Policy créée et configurée.');
 
         // Créer le contrôleur avec CRUD
         Artisan::call("make:controller {$name}Controller");
-        $this->info("Contrôleur API créé.");
+        $this->info('Contrôleur API créé.');
 
         // Créer la resource
         Artisan::call("make:resource {$name}Resource");
-        $this->info("Resource créée.");
+        $this->info('Resource créée.');
 
         $this->updateResource($name, $fieldsArray);
         // Créer la requête (FormRequest)
         Artisan::call("make:request {$name}Request");
         $this->updateRequest($name, $fieldsArray);
-        $this->info("Requête créée.");
+        $this->info('Requête créée.');
 
         // Créer le seeder
         Artisan::call("make:seeder {$name}Seeder");
         $this->updateSeeder($name, $fieldsArray);
-        $this->info("Seeder créé.");
+        $this->info('Seeder créé.');
 
         // Créer un DTO
         $this->createDTO($name, $fieldsArray);
-        $this->info("DTO créé.");
+        $this->info('DTO créé.');
 
         // Ajouter les méthodes CRUD au contrôleur
         $this->addCrudToController($name, $this->nameLower, $pluralName);
@@ -119,42 +122,46 @@ class MakeApi extends Command
         $this->info("API complète créée pour : {$name} !");
         $this->updateFactory($name, $fieldsArray);
     }
+
     private function callDiagramsMethods(): void
     {
-        $this->warn("Aucun nom fourni. Utilisation par défaut du fichier JSON...");
+        $this->warn('Aucun nom fourni. Utilisation par défaut du fichier JSON...');
         $jsonFilePath = base_path('class_data.json');
-        if (!file_exists($jsonFilePath)) {
-            $this->error("Le fichier class_data.json est introuvable.");
+        if (! file_exists($jsonFilePath)) {
+            $this->error('Le fichier class_data.json est introuvable.');
+
             return;
         }
 
-        $this->info("Lecture du fichier JSON...");
+        $this->info('Lecture du fichier JSON...');
         $jsonData = file_get_contents($jsonFilePath);
         if ($jsonData === false) {
-            $this->error("Impossible de lire le fichier class_data.json.");
+            $this->error('Impossible de lire le fichier class_data.json.');
+
             return;
         }
         // Le JSON peut être un tableau d'objets ou un seul objet avec une clé "data"
         $rawClasses = json_decode($jsonData, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->error("Erreur de décodage JSON : " . json_last_error_msg());
+            $this->error('Erreur de décodage JSON : '.json_last_error_msg());
+
             return;
         }
 
         // S'assurer que nous travaillons avec un tableau
         if (isset($rawClasses['data']) && is_array($rawClasses['data'])) {
-             $this->classes = [$rawClasses];
+            $this->classes = [$rawClasses];
         } else {
-             $this->classes = $rawClasses;
+            $this->classes = $rawClasses;
         }
 
-        $this->info("Extraction des données JSON...");
+        $this->info('Extraction des données JSON...');
         $this->jsonExtractionToArray();
 
-        $this->info("Génération des API avec Artisan...");
+        $this->info('Génération des API avec Artisan...');
         $this->runFullApiWithDiagram();
-        return;
+
     }
 
     /**
@@ -211,41 +218,43 @@ class MakeApi extends Command
                 $this->callDefaulttMethods($className, $fieldsString, $class);
                 $this->info("API pour la classe $className générée avec succès !");
             } catch (\Exception $e) {
-                $this->error("Erreur lors de la génération de l'API pour la classe $className : " . $e->getMessage());
+                $this->error("Erreur lors de la génération de l'API pour la classe $className : ".$e->getMessage());
             }
         }
     }
 
     /**
-     * @param array<string, string> $fieldsArray
+     * @param  array<string, string>  $fieldsArray
      */
     private function updateFactory(string $name, array $fieldsArray): void
     {
         $factoryPath = database_path("factories/{$name}Factory.php");
 
-        if (!file_exists($factoryPath)) {
+        if (! file_exists($factoryPath)) {
             $this->error("Le fichier Factory pour {$name} n'existe pas.");
+
             return;
         }
 
         $factoryFile = file_get_contents($factoryPath);
         if ($factoryFile === false) {
             $this->error("Impossible de lire le fichier Factory pour {$name}.");
+
             return;
         }
 
         $fields = [];
         foreach ($fieldsArray as $field => $type) {
             $value = match ($type) {
-                'string' => "fake()->word()",
-                'integer', 'int' => "fake()->randomNumber()",
-                'boolean', 'bool' => "fake()->boolean()",
-                'text' => "fake()->sentence()",
-                'uuid', 'UUID' => "fake()->uuid()",
-                'float' => "fake()->randomFloat(2, 1, 1000)",
+                'string' => 'fake()->word()',
+                'integer', 'int' => 'fake()->randomNumber()',
+                'boolean', 'bool' => 'fake()->boolean()',
+                'text' => 'fake()->sentence()',
+                'uuid', 'UUID' => 'fake()->uuid()',
+                'float' => 'fake()->randomFloat(2, 1, 1000)',
                 'json' => "json_encode(['key' => 'value'])",
-                'date', 'datetime', 'timestamp', 'time' => "fake()->dateTime()",
-                default => "fake()->word()"
+                'date', 'datetime', 'timestamp', 'time' => 'fake()->dateTime()',
+                default => 'fake()->word()'
             };
             $fields[] = "'{$field}' => {$value}";
         }
@@ -275,16 +284,17 @@ class MakeApi extends Command
         $fieldsArray = [];
         foreach (explode(',', $fields) as $field) {
             $parts = explode(':', $field);
-            if(count($parts) == 2){
+            if (count($parts) == 2) {
                 $fieldsArray[$parts[0]] = strtolower($parts[1]);
             }
         }
+
         return $fieldsArray;
     }
 
     /**
-     * @param array<string, string> $fieldsArray
-     * @param array<string, mixed>|null $classData
+     * @param  array<string, string>  $fieldsArray
+     * @param  array<string, mixed>|null  $classData
      */
     private function updateMigration(string $name, array $fieldsArray, ?array $classData = null): void
     {
@@ -293,6 +303,7 @@ class MakeApi extends Command
 
         if (empty($migrations)) {
             $this->error("Impossible de trouver une migration pour {$name}.");
+
             return;
         }
 
@@ -300,12 +311,13 @@ class MakeApi extends Command
         $migrationFile = file_get_contents($migrationPath);
         if ($migrationFile === false) {
             $this->error("Impossible de lire la migration pour {$name}.");
+
             return;
         }
 
         $fieldLines = '';
         foreach ($fieldsArray as $field => $type) {
-             $type = match ($type) {
+            $type = match ($type) {
                 'string' => 'string',
                 'integer', 'int' => 'integer',
                 'boolean', 'bool' => 'boolean',
@@ -316,10 +328,10 @@ class MakeApi extends Command
                 'uuid', 'UUID' => 'uuid',
                 default => 'string'
             };
-            if($type === 'decimal'){
-                 $fieldLines .= "\$table->{$type}('{$field}', 8, 2)->nullable();\n            ";
+            if ($type === 'decimal') {
+                $fieldLines .= "\$table->{$type}('{$field}', 8, 2)->nullable();\n            ";
             } else {
-                 $fieldLines .= "\$table->{$type}('{$field}')->nullable();\n            ";
+                $fieldLines .= "\$table->{$type}('{$field}')->nullable();\n            ";
             }
         }
 
@@ -328,7 +340,7 @@ class MakeApi extends Command
             // Les relations Many-to-One et One-to-One (côté "enfant") impliquent une clé étrangère
             $relations = array_merge($classData['manyToOneRelationships'], $classData['oneToOneRelationships']);
             foreach ($relations as $relation) {
-                $foreignKeyColumn = Str::snake($relation['role']) . '_id';
+                $foreignKeyColumn = Str::snake($relation['role']).'_id';
                 // Assumer que le nom de la table est le pluriel du nom du modèle lié
                 $relatedTable = Str::plural(Str::snake($relation['comodel']));
                 $foreignKeyLines .= "\$table->foreignId('{$foreignKeyColumn}')->nullable()->constrained('{$relatedTable}')->onDelete('set null');\n            ";
@@ -339,18 +351,18 @@ class MakeApi extends Command
         $pattern = '/\$table->id\(\);(.*?)\$table->timestamps\(\);/s';
         $replacement = "\$table->id();\n            {$fieldLines}{$foreignKeyLines}\$table->timestamps();";
 
-        if(preg_match($pattern, $migrationFile)) {
+        if (preg_match($pattern, $migrationFile)) {
             $result = preg_replace($pattern, $replacement, $migrationFile);
             if (is_string($result)) {
                 $migrationFile = $result;
             }
         } else {
-             $pattern = '/Schema::create\([\'"]' . preg_quote($pluralName, '/') . '[\'"],\s*function\s*\(Blueprint\s*\$table\)\s*\{.*?id\(\);/s';
-             $replacement = "Schema::create('{$pluralName}', function (Blueprint \$table) {\n            \$table->id();\n            {$fieldLines}{$foreignKeyLines}";
-             $result = preg_replace($pattern, $replacement, $migrationFile);
-             if (is_string($result)) {
-                 $migrationFile = $result;
-             }
+            $pattern = '/Schema::create\([\'"]'.preg_quote($pluralName, '/').'[\'"],\s*function\s*\(Blueprint\s*\$table\)\s*\{.*?id\(\);/s';
+            $replacement = "Schema::create('{$pluralName}', function (Blueprint \$table) {\n            \$table->id();\n            {$fieldLines}{$foreignKeyLines}";
+            $result = preg_replace($pattern, $replacement, $migrationFile);
+            if (is_string($result)) {
+                $migrationFile = $result;
+            }
         }
 
         file_put_contents($migrationPath, $migrationFile);
@@ -358,11 +370,11 @@ class MakeApi extends Command
     }
 
     /**
-     * @param array<string, mixed>|null $classData
+     * @param  array<string, mixed>|null  $classData
      */
     private function createPivotMigrations(string $name, ?array $classData = null): void
     {
-        if (!$classData || empty($classData['manyToManyRelationships'])) {
+        if (! $classData || empty($classData['manyToManyRelationships'])) {
             return;
         }
 
@@ -377,8 +389,9 @@ class MakeApi extends Command
             $pivotTableName = implode('_', $tableParts);
 
             $existingMigrations = File::glob(database_path("migrations/*_create_{$pivotTableName}_table.php"));
-            if (!empty($existingMigrations)) {
+            if (! empty($existingMigrations)) {
                 $this->warn("La migration de la table pivot '{$pivotTableName}' existe déjà. Ignorée.");
+
                 continue;
             }
 
@@ -392,19 +405,20 @@ class MakeApi extends Command
                 $upMethodContent = "
         Schema::create('{$pivotTableName}', function (Blueprint \$table) {
             \$table->primary(['{$tableParts[0]}_id', '{$tableParts[1]}_id']);
-            \$table->foreignId('{$tableParts[0]}_id')->constrained('" . Str::plural($tableParts[0]) . "')->onDelete('cascade');
-            \$table->foreignId('{$tableParts[1]}_id')->constrained('" . Str::plural($tableParts[1]) . "')->onDelete('cascade');
+            \$table->foreignId('{$tableParts[0]}_id')->constrained('".Str::plural($tableParts[0])."')->onDelete('cascade');
+            \$table->foreignId('{$tableParts[1]}_id')->constrained('".Str::plural($tableParts[1])."')->onDelete('cascade');
             \$table->timestamps();
         });";
 
                 $migrationContent = file_get_contents($migrationFile);
                 if ($migrationContent === false) {
                     $this->error("Impossible de lire la migration pivot : {$migrationFile}");
+
                     continue;
                 }
                 $result = preg_replace(
                     '/(public function up\(\): void\s*{)/s',
-                    "$1" . $upMethodContent,
+                    '$1'.$upMethodContent,
                     $migrationContent
                 );
                 if (is_string($result)) {
@@ -417,61 +431,62 @@ class MakeApi extends Command
         }
     }
 
-
     /**
-     * @param array<string, string> $fieldsArray
+     * @param  array<string, string>  $fieldsArray
      */
-   private function updateRequest(string $name, array $fieldsArray): void
-{
-    $requestPath = app_path("Http/Requests/{$name}Request.php");
-    $requestFile = file_get_contents($requestPath);
-    if ($requestFile === false) {
-        $this->error("Impossible de lire le fichier Request pour {$name}.");
-        return;
+    private function updateRequest(string $name, array $fieldsArray): void
+    {
+        $requestPath = app_path("Http/Requests/{$name}Request.php");
+        $requestFile = file_get_contents($requestPath);
+        if ($requestFile === false) {
+            $this->error("Impossible de lire le fichier Request pour {$name}.");
+
+            return;
+        }
+
+        // Ajouter la méthode authorize qui retourne true
+        $requestFile = str_replace(
+            "public function authorize(): bool\n    {\n        return false;\n    }",
+            "public function authorize(): bool\n    {\n        return true;\n    }",
+            $requestFile
+        );
+
+        $rules = '';
+        foreach ($fieldsArray as $field => $type) {
+            $rule = match ($type) {
+                'string' => 'string|max:255',
+                'integer', 'int' => 'integer',
+                'boolean', 'bool' => 'boolean',
+                'text' => 'string',
+                'uuid', 'UUID' => 'uuid',
+                'float' => 'numeric',
+                'json' => 'json',
+                'date', 'datetime', 'timestamp' => 'date',
+                default => 'sometimes|string'
+            };
+            // CORRECTION : Pas de guillemets dans le match, on les ajoute ici
+            $rules .= "'{$field}' => 'sometimes|{$rule}',\n            ";
+        }
+
+        $result = preg_replace(
+            "/public function rules\(\).*?\{.*?\n.*?\}/s",
+            "public function rules(): array\n    {\n        return [\n            {$rules}\n        ];\n    }",
+            $requestFile
+        );
+        if (is_string($result)) {
+            $requestFile = $result;
+        }
+
+        file_put_contents($requestPath, $requestFile);
     }
-
-    // Ajouter la méthode authorize qui retourne true
-    $requestFile = str_replace(
-        "public function authorize(): bool\n    {\n        return false;\n    }",
-        "public function authorize(): bool\n    {\n        return true;\n    }",
-        $requestFile
-    );
-
-    $rules = '';
-    foreach ($fieldsArray as $field => $type) {
-        $rule = match ($type) {
-            'string' => 'string|max:255',
-            'integer', 'int' => 'integer',
-            'boolean', 'bool' => 'boolean',
-            'text' => 'string',
-            'uuid', 'UUID' => 'uuid',
-            'float' => 'numeric',
-            'json' => 'json',
-            'date', 'datetime', 'timestamp' => 'date',
-            default => 'sometimes|string'
-        };
-        // CORRECTION : Pas de guillemets dans le match, on les ajoute ici
-        $rules .= "'{$field}' => 'sometimes|{$rule}',\n            ";
-    }
-
-    $result = preg_replace(
-        "/public function rules\(\).*?\{.*?\n.*?\}/s",
-        "public function rules(): array\n    {\n        return [\n            {$rules}\n        ];\n    }",
-        $requestFile
-    );
-    if (is_string($result)) {
-        $requestFile = $result;
-    }
-
-    file_put_contents($requestPath, $requestFile);
-}
 
     private function addCrudToController(string $name, string $nameLower, string $pluralName): void
     {
         $controllerPath = app_path("Http/Controllers/{$name}Controller.php");
 
-        if (!file_exists($controllerPath)) {
+        if (! file_exists($controllerPath)) {
             $this->error("Le contrôleur {$name}Controller n'existe pas.");
+
             return;
         }
 
@@ -479,6 +494,7 @@ class MakeApi extends Command
         $content = file_get_contents($controllerPath);
         if ($content === false) {
             $this->error("Impossible de lire le contrôleur {$name}Controller.");
+
             return;
         }
 
@@ -493,8 +509,8 @@ class MakeApi extends Command
 
         // Remplacer la déclaration de classe
         $result = preg_replace(
-            '/class\s+' . $name . 'Controller\s*{/',
-            'class ' . $name . 'Controller extends Controller {',
+            '/class\s+'.$name.'Controller\s*{/',
+            'class '.$name.'Controller extends Controller {',
             $content
         );
         if (is_string($result)) {
@@ -543,7 +559,6 @@ class MakeApi extends Command
 
     EOD;
 
-
         // Ajouter les imports nécessaires
         $content = str_replace(
             'use Illuminate\Http\Request;',
@@ -552,13 +567,12 @@ class MakeApi extends Command
         );
 
         // Vider la classe avant d'ajouter les nouvelles méthodes
-        $pattern = '/class ' . $name . 'Controller extends Controller\s*{[^}]*}/';
-        $replacement = 'class ' . $name . 'Controller extends Controller {' . $methods . '}';
+        $pattern = '/class '.$name.'Controller extends Controller\s*{[^}]*}/';
+        $replacement = 'class '.$name.'Controller extends Controller {'.$methods.'}';
         $result = preg_replace($pattern, $replacement, $content, 1);
         if (is_string($result)) {
             $content = $result;
         }
-
 
         file_put_contents($controllerPath, $content);
 
@@ -566,7 +580,7 @@ class MakeApi extends Command
     }
 
     /**
-     * @param array<string, string> $fieldsArray
+     * @param  array<string, string>  $fieldsArray
      */
     private function updateSeeder(string $name, array $fieldsArray): void
     {
@@ -574,20 +588,21 @@ class MakeApi extends Command
         $seederFile = file_get_contents($seederPath);
         if ($seederFile === false) {
             $this->error("Impossible de lire le fichier Seeder pour {$name}.");
+
             return;
         }
 
         $factoryFields = [];
         foreach ($fieldsArray as $field => $type) {
             $value = match ($type) {
-                'string' => "fake()->word()",
-                'integer' => "fake()->randomNumber()",
-                'boolean' => "fake()->boolean()",
-                'uuid','UUID'=>"fake()->uuid()",
-                'bigint' => "fake()->randomNumber()",
-                'date', 'datetime', 'timestamp', 'time' => "fake()->dateTime()",
-                'text' => "fake()->paragraph()",
-                default => "fake()->word()"
+                'string' => 'fake()->word()',
+                'integer' => 'fake()->randomNumber()',
+                'boolean' => 'fake()->boolean()',
+                'uuid','UUID' => 'fake()->uuid()',
+                'bigint' => 'fake()->randomNumber()',
+                'date', 'datetime', 'timestamp', 'time' => 'fake()->dateTime()',
+                'text' => 'fake()->paragraph()',
+                default => 'fake()->word()'
             };
             $factoryFields[] = "'{$field}' => {$value}";
         }
@@ -606,12 +621,12 @@ class MakeApi extends Command
     }
 
     /**
-     * @param array<string, string> $fieldsArray
+     * @param  array<string, string>  $fieldsArray
      */
     private function createDTO(string $name, array $fieldsArray): void
     {
         $dtoPath = app_path("DTO/{$name}DTO.php");
-        if (!file_exists(app_path('DTO'))) {
+        if (! file_exists(app_path('DTO'))) {
             mkdir(app_path('DTO'), 0755, true);
         }
 
@@ -627,16 +642,16 @@ class MakeApi extends Command
             if ($type == 'integer' || $type == 'bigint') {
                 $type = 'int';
             }
-            if ($type == 'float'){
-                 $type = 'float';
+            if ($type == 'float') {
+                $type = 'float';
             }
-            if($type == 'json'){
-                 $type = 'array';
+            if ($type == 'json') {
+                $type = 'array';
             }
             if ($type == 'date' || $type == 'datetime' || $type == 'timestamp' || $type == 'time') {
                 $type = '\DateTimeInterface';
             }
-            if($type == 'uuid' || $type == 'UUID'){
+            if ($type == 'uuid' || $type == 'UUID') {
                 $type = 'string';
             }
 
@@ -651,10 +666,10 @@ class MakeApi extends Command
                 $atributsFromRequest .= "$field: \$request->get('{$field}'),\n            ";
             }
         }
-        $attributes = rtrim($attributes, ",
-        ");
-        $atributsFromRequest = rtrim($atributsFromRequest, ",
-            ");
+        $attributes = rtrim($attributes, ',
+        ');
+        $atributsFromRequest = rtrim($atributsFromRequest, ',
+            ');
 
         $content = <<<EOD
 <?php
@@ -685,7 +700,7 @@ EOD;
 
     private function createService(string $name, string $nameLower): void
     {
-        if (!file_exists(app_path('Services'))) {
+        if (! file_exists(app_path('Services'))) {
             mkdir(app_path('Services'), 0755, true);
         }
 
@@ -737,14 +752,16 @@ EOD;
     {
         $policyPath = app_path("Policies/{$name}Policy.php");
 
-        if (!file_exists($policyPath)) {
+        if (! file_exists($policyPath)) {
             $this->error("Le fichier Policy pour {$name} n'existe pas.");
+
             return;
         }
 
         $policyContent = file_get_contents($policyPath);
         if ($policyContent === false) {
             $this->error("Impossible de lire le fichier Policy pour {$name}.");
+
             return;
         }
 
@@ -754,7 +771,6 @@ EOD;
             $policyContent = $result;
         }
 
-
         file_put_contents($policyPath, $policyContent);
     }
 
@@ -762,14 +778,15 @@ EOD;
     {
         $providerPath = app_path('Providers/AuthServiceProvider.php');
 
-        if (!file_exists($providerPath)) {
+        if (! file_exists($providerPath)) {
             // AuthServiceProvider is not required since Laravel 10+ (automatic policy discovery)
             return;
         }
 
         $content = file_get_contents($providerPath);
         if ($content === false) {
-            $this->error("Impossible de lire AuthServiceProvider.");
+            $this->error('Impossible de lire AuthServiceProvider.');
+
             return;
         }
 
@@ -779,16 +796,16 @@ EOD;
         $mapping = "        {$name}::class => {$name}Policy::class,";
 
         if (strpos($content, $modelImport) === false) {
-             $result = preg_replace('/(namespace App\\\\Providers;)/', "$1\n{$modelImport}", $content, 1);
-             if (is_string($result)) {
-                 $content = $result;
-             }
+            $result = preg_replace('/(namespace App\\\\Providers;)/', "$1\n{$modelImport}", $content, 1);
+            if (is_string($result)) {
+                $content = $result;
+            }
         }
         if (strpos($content, $policyImport) === false) {
-             $result = preg_replace('/(namespace App\\\\Providers;)/', "$1\n{$policyImport}", $content, 1);
-             if (is_string($result)) {
-                 $content = $result;
-             }
+            $result = preg_replace('/(namespace App\\\\Providers;)/', "$1\n{$policyImport}", $content, 1);
+            if (is_string($result)) {
+                $content = $result;
+            }
         }
 
         if (strpos($content, $mapping) === false) {
@@ -807,15 +824,16 @@ EOD;
     }
 
     /**
-     * @param array<string, string> $fieldsArray
-     * @param array<string, mixed>|null $classData
+     * @param  array<string, string>  $fieldsArray
+     * @param  array<string, mixed>|null  $classData
      */
     private function updateModel(string $name, array $fieldsArray, ?array $classData = null): void
     {
         $modelPath = app_path("Models/{$name}.php");
 
-        if (!file_exists($modelPath)) {
+        if (! file_exists($modelPath)) {
             $this->error("Le modèle {$name} n'existe pas.");
+
             return;
         }
 
@@ -829,11 +847,11 @@ EOD;
                 $classData['oneToOneRelationships'] ?? []
             );
             foreach ($relations as $relation) {
-                $fillableFields[] = Str::snake($relation['role']) . '_id';
+                $fillableFields[] = Str::snake($relation['role']).'_id';
             }
         }
 
-        $fillableString = "'" . implode("', '", $fillableFields) . "'";
+        $fillableString = "'".implode("', '", $fillableFields)."'";
         $fillableProperty = "protected \$fillable = [{$fillableString}];";
 
         // Générer les relations
@@ -849,7 +867,7 @@ EOD;
                 'oneToOne' => $classData['oneToOneRelationships'] ?? [],
                 'oneToMany' => $classData['oneToManyRelationships'] ?? [],
                 'manyToOne' => $classData['manyToOneRelationships'] ?? [],
-                'manyToMany' => $classData['manyToManyRelationships'] ?? []
+                'manyToMany' => $classData['manyToManyRelationships'] ?? [],
             ];
 
             $relatedModels = [];
@@ -892,15 +910,17 @@ EOD;
         }
 
         // Charger le stub et remplacer les placeholders
-        $stubPath = base_path(self::BASE_STUB_PATH . 'model.stub');
-        if (!file_exists($stubPath)) {
+        $stubPath = base_path(self::BASE_STUB_PATH.'model.stub');
+        if (! file_exists($stubPath)) {
             $this->error("Stub model.stub introuvable: {$stubPath}");
+
             return;
         }
 
         $modelContent = file_get_contents($stubPath);
         if ($modelContent === false) {
-            $this->error("Impossible de lire le stub model.stub.");
+            $this->error('Impossible de lire le stub model.stub.');
+
             return;
         }
         $modelContent = str_replace('{{modelName}}', $name, $modelContent);
@@ -913,12 +933,12 @@ EOD;
     }
 
     /**
-     * @param array<string, string> $fieldsArray
+     * @param  array<string, string>  $fieldsArray
      */
     private function updateResource(string $name, array $fieldsArray): void
     {
         $resourcePath = app_path("Http/Resources/{$name}Resource.php");
-        if (!file_exists(app_path('Http/Resources'))) {
+        if (! file_exists(app_path('Http/Resources'))) {
             mkdir(app_path('Http/Resources'), 0755, true);
         }
 
@@ -927,9 +947,10 @@ EOD;
             $fieldsCode .= "            '{$field}' => \$this->{$field},\n";
         }
 
-        $stub = file_get_contents(base_path(MakeApi::BASE_STUB_PATH . 'resource.stub'));
+        $stub = file_get_contents(base_path(MakeApi::BASE_STUB_PATH.'resource.stub'));
         if ($stub === false) {
-            $this->error("Impossible de lire le stub resource.stub.");
+            $this->error('Impossible de lire le stub resource.stub.');
+
             return;
         }
         $template = str_replace(

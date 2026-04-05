@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\Tests\Unit\ValueObjects;
 
+use InvalidArgumentException;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 use PHPUnit\Framework\TestCase;
-use InvalidArgumentException;
 
 class FieldDefinitionTest extends TestCase
 {

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\ValueObjects;
 
-use InvalidArgumentException;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 final readonly class RelationshipDefinition
 {
@@ -25,8 +25,8 @@ final readonly class RelationshipDefinition
     private function validateType(string $type): void
     {
         $allowedTypes = ['oneToOne', 'oneToMany', 'manyToOne', 'manyToMany'];
-        
-        if (!in_array($type, $allowedTypes, true)) {
+
+        if (! in_array($type, $allowedTypes, true)) {
             throw new InvalidArgumentException("Invalid relationship type: {$type}");
         }
     }
@@ -67,7 +67,7 @@ final readonly class RelationshipDefinition
             return $this->foreignKey;
         }
 
-        return Str::snake($this->role) . '_id';
+        return Str::snake($this->role).'_id';
     }
 
     public function getMethodName(): string

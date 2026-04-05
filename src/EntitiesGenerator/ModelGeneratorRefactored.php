@@ -6,7 +6,6 @@ namespace nameless\CodeGenerator\EntitiesGenerator;
 
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
-use Illuminate\Support\Str;
 
 class ModelGeneratorRefactored extends AbstractGenerator
 {
@@ -51,7 +50,7 @@ class ModelGeneratorRefactored extends AbstractGenerator
     {
         return [
             'modelName' => $definition->name,
-            'fillable' => $this->generateFillableArray($definition) . $this->generateCasts($definition),
+            'fillable' => $this->generateFillableArray($definition).$this->generateCasts($definition),
             'relationships' => $this->generateRelationships($definition),
             'parentClass' => $this->getParentClass($definition),
             'imports' => $this->generateImports($definition),
@@ -65,8 +64,8 @@ class ModelGeneratorRefactored extends AbstractGenerator
     private function generateFillableArray(EntityDefinition $definition): string
     {
         $fillable = $definition->getFillableFields();
-        $fillableString = "'" . implode("', '", $fillable) . "'";
-        
+        $fillableString = "'".implode("', '", $fillable)."'";
+
         return "protected \$fillable = [{$fillableString}];";
     }
 
@@ -75,12 +74,12 @@ class ModelGeneratorRefactored extends AbstractGenerator
      */
     private function generateRelationships(EntityDefinition $definition): string
     {
-        if (!$definition->hasRelationships()) {
+        if (! $definition->hasRelationships()) {
             return '';
         }
 
         $methods = [];
-        
+
         foreach ($definition->relationships as $relationship) {
             $methods[] = $this->generateRelationshipMethod($relationship);
         }
@@ -130,7 +129,7 @@ class ModelGeneratorRefactored extends AbstractGenerator
         $relatedModels = $definition->relationships
             ->pluck('relatedModel')
             ->unique()
-            ->map(fn($model) => "use App\\Models\\{$model};")
+            ->map(fn ($model) => "use App\\Models\\{$model};")
             ->toArray();
 
         return implode("\n", array_merge($imports, $relatedModels));
@@ -163,6 +162,7 @@ class ModelGeneratorRefactored extends AbstractGenerator
         }
 
         $castsString = implode(",\n        ", $casts);
+
         return "\n\n    protected \$casts = [\n        {$castsString},\n    ];";
     }
 

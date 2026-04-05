@@ -10,7 +10,7 @@ use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 class StubLoader
 {
     private const STUB_EXTENSION = '.stub';
-    
+
     public function __construct(
         private readonly string $stubsPath
     ) {}
@@ -18,18 +18,18 @@ class StubLoader
     /**
      * Load a stub file and replace placeholders.
      *
-     * @param array<string, string> $replacements
+     * @param  array<string, string>  $replacements
      */
     public function load(string $stubName, array $replacements = []): string
     {
         $stubPath = $this->getStubPath($stubName);
-        
-        if (!File::exists($stubPath)) {
+
+        if (! File::exists($stubPath)) {
             throw CodeGeneratorException::fileNotFound($stubPath);
         }
 
         $content = File::get($stubPath);
-        
+
         return $this->replacePlaceholders($content, $replacements);
     }
 
@@ -39,13 +39,14 @@ class StubLoader
     private function getStubPath(string $stubName): string
     {
         $stubName = str_replace(self::STUB_EXTENSION, '', $stubName);
-        return $this->stubsPath . DIRECTORY_SEPARATOR . $stubName . self::STUB_EXTENSION;
+
+        return $this->stubsPath.DIRECTORY_SEPARATOR.$stubName.self::STUB_EXTENSION;
     }
 
     /**
      * Replace placeholders in stub content.
      *
-     * @param array<string, string> $replacements
+     * @param  array<string, string>  $replacements
      */
     private function replacePlaceholders(string $content, array $replacements): string
     {

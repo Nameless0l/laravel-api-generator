@@ -45,11 +45,12 @@ class DTOGenerator extends AbstractGenerator
     {
         $attributes = $definition->fields->map(function (FieldDefinition $field) {
             $phpType = $field->nullable ? "?{$field->getPhpType()}" : $field->getPhpType();
+
             return "public {$phpType} \${$field->name},";
         })->toArray();
 
         // Remove trailing comma from last attribute
-        if (!empty($attributes)) {
+        if (! empty($attributes)) {
             $lastIndex = count($attributes) - 1;
             $attributes[$lastIndex] = rtrim($attributes[$lastIndex], ',');
         }
@@ -64,15 +65,16 @@ class DTOGenerator extends AbstractGenerator
                 return "is_array(\$request->input('{$field->name}')) ? \$request->input('{$field->name}') : (array) json_decode(\$request->input('{$field->name}'), true),";
             }
             $cast = match ($field->getPhpType()) {
-                'int' => "(int) ",
-                'float' => "(float) ",
-                'bool' => "(bool) ",
-                default => "",
+                'int' => '(int) ',
+                'float' => '(float) ',
+                'bool' => '(bool) ',
+                default => '',
             };
+
             return "{$cast}\$request->input('{$field->name}'),";
         })->toArray();
 
-        if (!empty($fromRequest)) {
+        if (! empty($fromRequest)) {
             $lastIndex = count($fromRequest) - 1;
             $fromRequest[$lastIndex] = rtrim($fromRequest[$lastIndex], ',');
         }

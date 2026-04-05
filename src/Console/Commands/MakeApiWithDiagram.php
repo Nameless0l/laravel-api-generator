@@ -7,8 +7,9 @@ use Illuminate\Support\Facades\Artisan;
 
 class MakeApiWithDiagram extends Command
 {
-    protected $signature = "make:loic";
-    protected $description = "Generate API resources based on JSON configuration";
+    protected $signature = 'make:loic';
+
+    protected $description = 'Generate API resources based on JSON configuration';
 
     /** @var array<int, array<string, mixed>> */
     protected array $classes = [];
@@ -18,28 +19,31 @@ class MakeApiWithDiagram extends Command
         // Lecture du fichier JSON
         $jsonFilePath = base_path('class_data');
         echo $jsonFilePath;
-        if (!file_exists($jsonFilePath)) {
-            $this->error("Le fichier class_data est introuvable.");
+        if (! file_exists($jsonFilePath)) {
+            $this->error('Le fichier class_data est introuvable.');
+
             return self::FAILURE;
         }
 
-        $this->info("Lecture du fichier JSON...");
+        $this->info('Lecture du fichier JSON...');
         $jsonData = file_get_contents($jsonFilePath);
         if ($jsonData === false) {
-            $this->error("Impossible de lire le fichier class_data.");
+            $this->error('Impossible de lire le fichier class_data.');
+
             return self::FAILURE;
         }
         $this->classes = json_decode($jsonData, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->error("Erreur de décodage JSON : " . json_last_error_msg());
+            $this->error('Erreur de décodage JSON : '.json_last_error_msg());
+
             return self::FAILURE;
         }
 
-        $this->info("Extraction des données JSON...");
+        $this->info('Extraction des données JSON...');
         $this->jsonExtractionToArray();
 
-        $this->info("Génération des API avec Artisan...");
+        $this->info('Génération des API avec Artisan...');
         $this->runFullApi();
 
         return self::SUCCESS;
@@ -83,14 +87,14 @@ class MakeApiWithDiagram extends Command
             }
 
             $fieldsString = implode(',', $fields);
-            echo "Ici les parametres : ".$fieldsString. "\n";
+            echo 'Ici les parametres : '.$fieldsString."\n";
 
             try {
                 Artisan::call("make:fullapi {$className} --fields={$fieldsString}");
 
                 $this->info("API pour la classe $className générée avec succès !");
             } catch (\Exception $e) {
-                $this->error("Erreur lors de la génération de l'API pour la classe $className : " . $e->getMessage());
+                $this->error("Erreur lors de la génération de l'API pour la classe $className : ".$e->getMessage());
             }
         }
     }

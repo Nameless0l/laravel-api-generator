@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\Services;
 
-use nameless\CodeGenerator\Support\StubLoader;
 use Illuminate\Support\Facades\File;
+use nameless\CodeGenerator\Support\StubLoader;
 
 class AuthGenerator
 {
@@ -49,16 +49,16 @@ class AuthGenerator
         $apiFilePath = base_path('routes/api.php');
         $phpHeader = "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\nuse App\\Http\\Controllers\\AuthController;\n\n";
 
-        if (!File::exists($apiFilePath)) {
+        if (! File::exists($apiFilePath)) {
             File::put($apiFilePath, $phpHeader);
         }
 
         $content = File::get($apiFilePath);
 
         // Add AuthController import if missing
-        if (!str_contains($content, 'use App\\Http\\Controllers\\AuthController')) {
+        if (! str_contains($content, 'use App\\Http\\Controllers\\AuthController')) {
             $content = str_replace(
-                "use Illuminate\\Support\\Facades\\Route;",
+                'use Illuminate\\Support\\Facades\\Route;',
                 "use Illuminate\\Support\\Facades\\Route;\nuse App\\Http\\Controllers\\AuthController;",
                 $content
             );
@@ -79,8 +79,8 @@ Route::middleware('auth:sanctum')->group(function () {
 ROUTES;
 
         $content = File::get($apiFilePath);
-        if (!str_contains($content, "AuthController::class, 'register'")) {
-            File::append($apiFilePath, PHP_EOL . $authRoutes);
+        if (! str_contains($content, "AuthController::class, 'register'")) {
+            File::append($apiFilePath, PHP_EOL.$authRoutes);
         }
     }
 
@@ -88,7 +88,7 @@ ROUTES;
     {
         $apiFilePath = base_path('routes/api.php');
 
-        if (!File::exists($apiFilePath)) {
+        if (! File::exists($apiFilePath)) {
             return;
         }
 
@@ -103,18 +103,18 @@ ROUTES;
             $otherLines = [];
 
             foreach ($lines as $line) {
-                if (str_contains($line, 'Route::apiResource(') && !str_contains($line, '//')) {
-                    $apiResourceLines[] = '    ' . trim($line);
+                if (str_contains($line, 'Route::apiResource(') && ! str_contains($line, '//')) {
+                    $apiResourceLines[] = '    '.trim($line);
                 } elseif (str_contains($line, 'Route::post(') && str_contains($line, 'restore')) {
-                    $apiResourceLines[] = '    ' . trim($line);
+                    $apiResourceLines[] = '    '.trim($line);
                 } elseif (str_contains($line, 'Route::delete(') && str_contains($line, 'force-delete')) {
-                    $apiResourceLines[] = '    ' . trim($line);
+                    $apiResourceLines[] = '    '.trim($line);
                 } else {
                     $otherLines[] = $line;
                 }
             }
 
-            if (!empty($apiResourceLines)) {
+            if (! empty($apiResourceLines)) {
                 $content = implode("\n", $otherLines);
                 // Insert apiResource lines before the closing of the middleware group
                 $apiResourceBlock = implode("\n", $apiResourceLines);
@@ -132,7 +132,7 @@ ROUTES;
     {
         $directory = dirname($filePath);
 
-        if (!File::isDirectory($directory)) {
+        if (! File::isDirectory($directory)) {
             File::makeDirectory($directory, 0755, true);
         }
     }

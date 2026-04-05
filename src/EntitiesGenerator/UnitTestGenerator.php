@@ -62,10 +62,11 @@ class UnitTestGenerator extends AbstractGenerator
                 'uuid', 'UUID' => "'550e8400-e29b-41d4-a716-446655440000'",
                 default => "'test'",
             };
+
             return "            {$field->name}: {$value},";
         })->toArray();
 
-        if (!empty($args)) {
+        if (! empty($args)) {
             $lastIndex = count($args) - 1;
             $args[$lastIndex] = rtrim($args[$lastIndex], ',');
         }

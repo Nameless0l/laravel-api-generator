@@ -2,18 +2,18 @@
 
 namespace nameless\CodeGenerator\Console\Commands;
 
+use Dedoc\Scramble\ScrambleServiceProvider;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Process\Process;
+
 class InstallPackageCommand extends Command
 {
     protected $signature = 'api-generator:install';
-    protected $description = 'Install and configure the API Generator package and its dependencies';
-    /**
-     * @var bool
-     */
-    private static bool $isRunning = false;
 
+    protected $description = 'Install and configure the API Generator package and its dependencies';
+
+    private static bool $isRunning = false;
 
     public function handle(): int
     {
@@ -33,7 +33,7 @@ class InstallPackageCommand extends Command
                     [
                         'breeze' => 'Laravel Breeze (Lightweight, minimal)',
                         'ui' => 'Laravel UI (Traditional Bootstrap)',
-                        'none' => 'No authentication starter kit'
+                        'none' => 'No authentication starter kit',
                     ],
                     'breeze'
                 );
@@ -43,7 +43,7 @@ class InstallPackageCommand extends Command
                 } elseif ($authChoice === 'ui') {
                     $this->installLaravelUI();
                 }
-            }else{
+            } else {
                 $this->info('No authentication starter kit installed.');
                 $this->call('install:api');
 
@@ -56,7 +56,7 @@ class InstallPackageCommand extends Command
 
             // Publier les autres fichiers de configuration de votre package si nécessaire
             $this->publishPackageConfig();
-            //installation des
+            // installation des
 
             $this->info('Installation completed! 🎉');
 
@@ -67,8 +67,6 @@ class InstallPackageCommand extends Command
             self::$isRunning = false;
         }
 
-
-
         return self::SUCCESS;
     }
 
@@ -77,7 +75,7 @@ class InstallPackageCommand extends Command
         $this->info('Publishing Scramble configuration...');
         $this->call('vendor:publish', [
             '--provider' => 'Dedoc\Scramble\ScrambleServiceProvider',
-            '--force' => true
+            '--force' => true,
         ]);
     }
 
@@ -86,15 +84,15 @@ class InstallPackageCommand extends Command
         $this->info('Registering Scramble Service Provider...');
 
         $config_app = config_path('app.php');
-        $provider = \Dedoc\Scramble\ScrambleServiceProvider::class;
+        $provider = ScrambleServiceProvider::class;
 
         if (File::exists($config_app)) {
             $contents = File::get($config_app);
 
-            if (!str_contains($contents, $provider)) {
+            if (! str_contains($contents, $provider)) {
                 $providers = str_replace(
                     'providers\' => [',
-                    'providers\' => [' . PHP_EOL . '        ' . $provider . '::class,',
+                    'providers\' => ['.PHP_EOL.'        '.$provider.'::class,',
                     $contents
                 );
 
@@ -109,12 +107,12 @@ class InstallPackageCommand extends Command
     protected function publishPackageConfig(): void
     {
         $this->info('Publishing API Generator configuration...');
-        //Execute this commande : php artisan install:api
+        // Execute this commande : php artisan install:api
 
         $this->call('vendor:publish', [
             '--provider' => 'nameless\CodeGenerator\Providers\CodeGeneratorServiceProvider',
             '--tag' => 'config',
-            '--force' => true
+            '--force' => true,
         ]);
     }
 
@@ -158,12 +156,13 @@ class InstallPackageCommand extends Command
                 $this->call('breeze:install', [
                     'stack' => 'api',
                     '--api' => true,
-                    '--pest' => false
+                    '--pest' => false,
                 ]);
             } catch (\Exception $e) {
                 $this->warn('Could not run breeze:install automatically. Please run the following commands manually:');
                 $this->info('php artisan breeze:install api --api');
                 $this->info('php artisan migrate');
+
                 return;
             }
 
@@ -197,6 +196,7 @@ class InstallPackageCommand extends Command
             $this->error($process->getErrorOutput());
         }
     }
+
     protected function installLaravelUI(): void
     {
         $this->info('Installing Laravel UI...');
@@ -213,7 +213,7 @@ class InstallPackageCommand extends Command
                 [
                     'bootstrap' => 'Bootstrap',
                     'vue' => 'Vue.js',
-                    'react' => 'React'
+                    'react' => 'React',
                 ],
                 'bootstrap'
             );
@@ -233,7 +233,7 @@ class InstallPackageCommand extends Command
     }
 
     /**
-     * @param array<int, string> $command
+     * @param  array<int, string>  $command
      */
     protected function runProcess(array $command): bool
     {
@@ -242,7 +242,7 @@ class InstallPackageCommand extends Command
         $process->run(function ($type, $buffer) {
             $this->output->write($buffer);
         });
+
         return $process->isSuccessful();
     }
-
 }

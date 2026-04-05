@@ -44,6 +44,7 @@ class RequestGenerator extends AbstractGenerator
     {
         $rules = $definition->fields->map(function (FieldDefinition $field) {
             $rule = $field->getValidationRule();
+
             return "'{$field->name}' => '{$rule}',";
         })->toArray();
 

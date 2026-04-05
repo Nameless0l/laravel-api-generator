@@ -5,20 +5,22 @@ declare(strict_types=1);
 namespace nameless\CodeGenerator\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
-use nameless\CodeGenerator\Services\PostmanExporter;
+use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\Services\AuthGenerator;
+use nameless\CodeGenerator\Services\PostmanExporter;
+use nameless\CodeGenerator\Support\FieldParser;
+use nameless\CodeGenerator\Support\JsonParser;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
-use nameless\CodeGenerator\Support\FieldParser;
-use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\File;
 
 class MakeApiCommand extends Command
 {
     protected $signature = 'make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive}';
+
     protected $description = 'Generate a complete API including model, migration, controller, resource, request, factory, seeder, DTO, service, policy, and tests';
 
     public function __construct(
@@ -49,12 +51,15 @@ class MakeApiCommand extends Command
             }
 
             $name = is_string($name) ? $name : '';
+
             return $this->handleSingleEntityGeneration($name);
         } catch (CodeGeneratorException $e) {
             $this->error($e->getMessage());
+
             return self::FAILURE;
         } catch (\Exception $e) {
             $this->error("An unexpected error occurred: {$e->getMessage()}");
+
             return self::FAILURE;
         }
     }
@@ -71,6 +76,7 @@ class MakeApiCommand extends Command
         $name = $this->ask('Entity name (PascalCase)');
         if (empty($name)) {
             $this->error('Entity name is required.');
+
             return self::FAILURE;
         }
         $name = ucfirst($name);
@@ -79,6 +85,7 @@ class MakeApiCommand extends Command
         $fields = $this->collectFields();
         if ($fields->isEmpty()) {
             $this->error('At least one field is required.');
+
             return self::FAILURE;
         }
 
@@ -87,14 +94,15 @@ class MakeApiCommand extends Command
 
         // 4. Options
         $softDeletes = $this->confirm('Enable soft deletes?', false);
-        $withAuth = !$this->option('auth') && $this->confirm('Add Sanctum authentication?', false);
-        $withPostman = !$this->option('postman') && $this->confirm('Export Postman collection?', false);
+        $withAuth = ! $this->option('auth') && $this->confirm('Add Sanctum authentication?', false);
+        $withPostman = ! $this->option('postman') && $this->confirm('Export Postman collection?', false);
 
         // 5. Preview
         $this->displayPreview($name, $fields, $relationships, $softDeletes, $withAuth || (bool) $this->option('auth'));
 
-        if (!$this->confirm('Confirm generation?', true)) {
+        if (! $this->confirm('Confirm generation?', true)) {
             $this->warn('Generation cancelled.');
+
             return self::SUCCESS;
         }
 
@@ -127,6 +135,7 @@ class MakeApiCommand extends Command
 
         $this->info('API generation completed successfully!');
         $this->checkApiRoutesRegistered();
+
         return self::SUCCESS;
     }
 
@@ -165,9 +174,9 @@ class MakeApiCommand extends Command
                 default: $default
             ));
 
-            $this->line("    Added: {$fieldName} ({$type})" .
-                ($nullable ? '' : ', required') .
-                ($unique ? ', unique' : '') .
+            $this->line("    Added: {$fieldName} ({$type})".
+                ($nullable ? '' : ', required').
+                ($unique ? ', unique' : '').
                 ($default !== null ? ", default: {$default}" : ''));
             $this->newLine();
         }
@@ -183,7 +192,7 @@ class MakeApiCommand extends Command
         $relationships = collect();
 
         $this->newLine();
-        if (!$this->confirm('Add relationships?', false)) {
+        if (! $this->confirm('Add relationships?', false)) {
             return $relationships;
         }
 
@@ -215,7 +224,7 @@ class MakeApiCommand extends Command
             $this->line("    Added: {$typeChoice} -> {$relatedModel} (as {$role})");
             $this->newLine();
 
-            if (!$this->confirm('  Add another relationship?', false)) {
+            if (! $this->confirm('  Add another relationship?', false)) {
                 break;
             }
         }
@@ -224,8 +233,8 @@ class MakeApiCommand extends Command
     }
 
     /**
-     * @param Collection<int, FieldDefinition> $fields
-     * @param Collection<int, RelationshipDefinition> $relationships
+     * @param  Collection<int, FieldDefinition>  $fields
+     * @param  Collection<int, RelationshipDefinition>  $relationships
      */
     private function displayPreview(
         string $name,
@@ -241,7 +250,7 @@ class MakeApiCommand extends Command
         $this->line('  Fields:');
         $fields->each(function (FieldDefinition $field) {
             $constraints = [];
-            if (!$field->nullable) {
+            if (! $field->nullable) {
                 $constraints[] = 'required';
             }
             if ($field->unique) {
@@ -250,7 +259,7 @@ class MakeApiCommand extends Command
             if ($field->default !== null) {
                 $constraints[] = "default: {$field->default}";
             }
-            $extra = !empty($constraints) ? ' (' . implode(', ', $constraints) . ')' : '';
+            $extra = ! empty($constraints) ? ' ('.implode(', ', $constraints).')' : '';
             $this->line("              {$field->name}: {$field->type}{$extra}");
         });
 
@@ -268,8 +277,8 @@ class MakeApiCommand extends Command
         if ($withAuth) {
             $options[] = 'sanctum auth';
         }
-        if (!empty($options)) {
-            $this->line('  Options:    ' . implode(', ', $options));
+        if (! empty($options)) {
+            $this->line('  Options:    '.implode(', ', $options));
         }
 
         $this->newLine();
@@ -282,31 +291,33 @@ class MakeApiCommand extends Command
 
     private function handleJsonGeneration(): int
     {
-        $this->warn("No entity name provided. Using JSON file for generation...");
+        $this->warn('No entity name provided. Using JSON file for generation...');
 
         $jsonFilePath = base_path('class_data.json');
 
-        if (!File::exists($jsonFilePath)) {
+        if (! File::exists($jsonFilePath)) {
             $this->error("JSON file not found: {$jsonFilePath}");
+
             return self::FAILURE;
         }
 
         $jsonData = File::get($jsonFilePath);
 
-        $this->info("Generating APIs from JSON data...");
+        $this->info('Generating APIs from JSON data...');
         $this->apiGenerationService->generateFromJson($jsonData);
 
         if ($this->option('auth')) {
             $this->authGenerator->wrapRoutesInAuthMiddleware();
         }
 
-        $this->info("API generation completed successfully!");
+        $this->info('API generation completed successfully!');
 
         if ($this->option('postman')) {
             $this->exportPostmanCollection($jsonData);
         }
 
         $this->checkApiRoutesRegistered();
+
         return self::SUCCESS;
     }
 
@@ -314,9 +325,10 @@ class MakeApiCommand extends Command
     {
         $fieldsOption = $this->option('fields');
 
-        if (!$fieldsOption || !is_string($fieldsOption)) {
+        if (! $fieldsOption || ! is_string($fieldsOption)) {
             $this->error('You must specify fields with the --fields option. Example: --fields="name:string,age:integer"');
             $this->line('Or use --interactive for guided setup.');
+
             return self::FAILURE;
         }
 
@@ -326,7 +338,7 @@ class MakeApiCommand extends Command
         $this->info("Generating complete API for: {$name}");
 
         if ($definition->hasSoftDeletes()) {
-            $this->info("  -> Soft Deletes enabled");
+            $this->info('  -> Soft Deletes enabled');
         }
 
         $this->apiGenerationService->generateCompleteApi($definition);
@@ -343,8 +355,9 @@ class MakeApiCommand extends Command
             $this->info("Postman collection exported to: {$outputPath}");
         }
 
-        $this->info("API generation completed successfully!");
+        $this->info('API generation completed successfully!');
         $this->checkApiRoutesRegistered();
+
         return self::SUCCESS;
     }
 
@@ -355,7 +368,7 @@ class MakeApiCommand extends Command
         $this->info('Scaffolding Sanctum authentication...');
         $files = $this->authGenerator->generate();
         foreach ($files as $file) {
-            $this->line("  - " . str_replace(base_path() . DIRECTORY_SEPARATOR, '', $file));
+            $this->line('  - '.str_replace(base_path().DIRECTORY_SEPARATOR, '', $file));
         }
         $this->info('Auth scaffolding complete. Make sure laravel/sanctum is installed:');
         $this->line('  composer require laravel/sanctum');
@@ -365,7 +378,7 @@ class MakeApiCommand extends Command
     }
 
     /**
-     * @param array<string, mixed> $fieldsArray
+     * @param  array<string, mixed>  $fieldsArray
      */
     private function createEntityDefinition(string $name, array $fieldsArray): EntityDefinition
     {
@@ -388,7 +401,7 @@ class MakeApiCommand extends Command
 
     private function exportPostmanCollection(string $jsonData): void
     {
-        $parser = app(\nameless\CodeGenerator\Support\JsonParser::class);
+        $parser = app(JsonParser::class);
         $entities = $parser->parseJsonToEntities($jsonData);
         $outputPath = base_path('postman_collection.json');
         $this->postmanExporter->export($entities, $outputPath);
@@ -398,7 +411,7 @@ class MakeApiCommand extends Command
     private function displayGeneratedFiles(EntityDefinition $definition): void
     {
         $this->newLine();
-        $this->info("Generated files:");
+        $this->info('Generated files:');
         $this->line("  - Model:      app/Models/{$definition->name}.php");
         $this->line("  - Controller: app/Http/Controllers/{$definition->name}Controller.php");
         $this->line("  - Service:    app/Services/{$definition->name}Service.php");
@@ -411,7 +424,7 @@ class MakeApiCommand extends Command
         $this->line("  - Migration:  database/migrations/*_create_{$definition->getTableName()}_table.php");
         $this->line("  - Test:       tests/Feature/{$definition->name}ControllerTest.php");
         $this->line("  - Test:       tests/Unit/{$definition->name}ServiceTest.php");
-        $this->line("  - Route:      routes/api.php");
+        $this->line('  - Route:      routes/api.php');
         $this->newLine();
     }
 
@@ -419,7 +432,7 @@ class MakeApiCommand extends Command
     {
         $bootstrapApp = base_path('bootstrap/app.php');
 
-        if (!File::exists($bootstrapApp)) {
+        if (! File::exists($bootstrapApp)) {
             return;
         }
 
@@ -431,7 +444,7 @@ class MakeApiCommand extends Command
         }
 
         // Only proceed if routes/api.php exists but isn't loaded
-        if (!File::exists(base_path('routes/api.php'))) {
+        if (! File::exists(base_path('routes/api.php'))) {
             return;
         }
 
@@ -459,17 +472,18 @@ class MakeApiCommand extends Command
         if (preg_match($pattern, $content, $matches)) {
             $webLine = $matches[2];
             // Ensure the web line ends with a comma
-            $webLineWithComma = rtrim($webLine, ', ') . ',';
+            $webLineWithComma = rtrim($webLine, ', ').',';
             $apiLine = "\n        api: __DIR__.'/../routes/api.php',";
 
             $newContent = str_replace(
                 $webLine,
-                $webLineWithComma . $apiLine,
+                $webLineWithComma.$apiLine,
                 $content
             );
 
             if ($newContent !== $content) {
                 File::put($bootstrapApp, $newContent);
+
                 return true;
             }
         }
