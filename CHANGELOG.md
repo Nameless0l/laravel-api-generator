@@ -5,6 +5,18 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.1] - 2026-04-05
+
+### Fixed
+- **Strict typing compatibility** -- Changed `int $id` to `int|string $id` in service stubs, controller generators, and service generators. This fixes `TypeError` when using `declare(strict_types=1)` since Laravel route parameters are always strings.
+- **JSON test value formatting** -- Fixed feature test generator to use compact JSON (`{"key":"value"}`) instead of pretty-printed JSON (`{"key": "value"}`), matching how databases store JSON columns.
+
+### Added
+- **`.gitignore`** -- Added proper `.gitignore` to exclude `vendor/`, `composer.lock`, `.phpunit.result.cache`, `.claude/`, and IDE files.
+
+### Changed
+- Updated README with VS Code extension reference and `int|string` service method signatures.
+
 ## [3.3.0] - 2026-03-20
 
 ### Added

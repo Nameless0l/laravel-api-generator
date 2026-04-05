@@ -8,6 +8,10 @@ A professional Laravel package that generates complete, production-ready REST AP
 
 ![Demo](docs/demo.gif)
 
+### VS Code Extension
+
+A visual interface is available: [laravel-api-generator-vscode](https://github.com/Nameless0l/laravel-api-generator-vscode). Generate APIs, run migrations, tests, and browse documentation -- all from VS Code without touching the terminal.
+
 ### v3.3 -- Generate, seed, test, and document in seconds
 
 **Swagger UI** -- automatic interactive API documentation with Scramble:
@@ -251,7 +255,7 @@ class PostController extends Controller
 
 ### Service
 
-The service layer handles business logic and supports filtering on fillable fields. With `--soft-deletes`, it also includes `restore()` and `forceDelete()` methods.
+The service layer handles business logic and supports filtering on fillable fields. Route parameters are accepted as `int|string` to work seamlessly with `declare(strict_types=1)`. With `--soft-deletes`, it also includes `restore()` and `forceDelete()` methods.
 
 ```php
 class PostService
@@ -267,6 +271,11 @@ class PostService
         }
 
         return $query->get();
+    }
+
+    public function find(int|string $id): Post
+    {
+        return Post::findOrFail($id);
     }
 
     public function create(PostDTO $dto): Post
