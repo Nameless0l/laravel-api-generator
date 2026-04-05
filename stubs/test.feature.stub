@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\{{modelName}};
+use App\Models\{{modelName}};{{relatedImports}}
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -22,14 +22,14 @@ class {{modelName}}ControllerTest extends TestCase
 
     public function test_can_create_{{modelNameLower}}(): void
     {
-        $data = [
-            {{requestFields}}
+{{createRelatedModels}}        $data = [
+{{relatedFkFields}}{{requestFields}}
         ];
 
         $response = $this->postJson('/api/{{pluralName}}', $data);
 
         $response->assertStatus(201);
-        $this->assertDatabaseHas('{{tableName}}', $data);
+        {{assertFields}}
     }
 
     public function test_can_show_{{modelNameLower}}(): void
@@ -46,13 +46,13 @@ class {{modelName}}ControllerTest extends TestCase
     {
         ${{modelNameLower}} = {{modelName}}::factory()->create();
         $data = [
-            {{requestFields}}
+{{updateRelatedFkFields}}{{requestFields}}
         ];
 
         $response = $this->putJson("/api/{{pluralName}}/{${{modelNameLower}}->id}", $data);
 
         $response->assertStatus(200);
-        $this->assertDatabaseHas('{{tableName}}', $data);
+        {{updateAssertFields}}
     }
 
     public function test_can_delete_{{modelNameLower}}(): void

@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Models\{{modelName}};
+use App\Models\{{modelName}};{{relatedImports}}
 use App\Services\{{modelName}}Service;
 use App\DTO\{{modelName}}DTO;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -39,9 +39,9 @@ class {{modelName}}ServiceTest extends TestCase
     }
 
     public function test_can_create_{{modelNameLower}}(): void
-    {
+    {{{createRelatedModels}}
         $dto = new {{modelName}}DTO(
-            {{dtoConstructorArgs}}
+{{dtoConstructorArgs}}{{dtoFkArgs}}
         );
 
         ${{modelNameLower}} = $this->service->create($dto);
@@ -63,7 +63,7 @@ class {{modelName}}ServiceTest extends TestCase
     {
         ${{modelNameLower}} = {{modelName}}::factory()->create();
         $dto = new {{modelName}}DTO(
-            {{dtoConstructorArgs}}
+{{dtoConstructorArgs}}{{updateDtoFkArgs}}
         );
 
         $updated = $this->service->update(${{modelNameLower}}, $dto);
