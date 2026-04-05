@@ -1,0 +1,54 @@
+[
+    {
+        "name": "Author",
+        "attributes": [
+            { "name": "name", "_type": "string" },
+            { "name": "email", "_type": "string" },
+            { "name": "bio", "_type": "text" },
+            { "name": "is_active", "_type": "boolean" }
+        ],
+        "oneToManyRelationships": [
+            { "comodel": "Article", "role": "articles" }
+        ]
+    },
+    {
+        "name": "Category",
+        "attributes": [
+            { "name": "name", "_type": "string" },
+            { "name": "slug", "_type": "string" },
+            { "name": "description", "_type": "text" }
+        ],
+        "oneToManyRelationships": [
+            { "comodel": "Article", "role": "articles" }
+        ]
+    },
+    {
+        "name": "Article",
+        "attributes": [
+            { "name": "title", "_type": "string" },
+            { "name": "content", "_type": "text" },
+            { "name": "slug", "_type": "string" },
+            { "name": "published_at", "_type": "datetime" },
+            { "name": "is_featured", "_type": "boolean" },
+            { "name": "views_count", "_type": "integer" },
+            { "name": "metadata", "_type": "json" }
+        ],
+        "manyToOneRelationships": [
+            { "comodel": "Author", "role": "author" },
+            { "comodel": "Category", "role": "category" }
+        ],
+        "manyToManyRelationships": [
+            { "comodel": "Tag", "role": "tags" }
+        ]
+    },
+    {
+        "name": "Tag",
+        "attributes": [
+            { "name": "name", "_type": "string" },
+            { "name": "color", "_type": "string" }
+        ],
+        "manyToManyRelationships": [
+            { "comodel": "Article", "role": "articles" }
+        ]
+    }
+]

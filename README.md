@@ -114,7 +114,7 @@ php artisan make:fullapi Post --fields="title:string,content:text" --soft-delete
 
 ### Bulk generation from JSON
 
-Create a `class_data.json` file at your project root:
+Create a `class_data.json` file at your project root (or [download the sample Blog schema](examples/class_data.json) with Author, Category, Article, and Tag entities):
 
 ```json
 [
