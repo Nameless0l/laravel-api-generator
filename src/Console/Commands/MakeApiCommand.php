@@ -381,7 +381,7 @@ class MakeApiCommand extends Command
             fields: $fields,
             relationships: collect(),
             options: [
-                'soft_deletes' => $this->option('soft-deletes'),
+                'soft_deletes' => (bool) $this->option('soft-deletes'),
             ]
         );
     }

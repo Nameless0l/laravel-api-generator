@@ -51,7 +51,7 @@ class ModelGeneratorRefactored extends AbstractGenerator
     {
         return [
             'modelName' => $definition->name,
-            'fillable' => $this->generateFillableArray($definition),
+            'fillable' => $this->generateFillableArray($definition) . $this->generateCasts($definition),
             'relationships' => $this->generateRelationships($definition),
             'parentClass' => $this->getParentClass($definition),
             'imports' => $this->generateImports($definition),
@@ -134,6 +134,36 @@ class ModelGeneratorRefactored extends AbstractGenerator
             ->toArray();
 
         return implode("\n", array_merge($imports, $relatedModels));
+    }
+
+    /**
+     * Generate $casts array for JSON and other special field types.
+     */
+    private function generateCasts(EntityDefinition $definition): string
+    {
+        $casts = [];
+
+        foreach ($definition->fields as $field) {
+            $cast = match ($field->type) {
+                'json' => 'array',
+                'date' => 'date',
+                'datetime', 'timestamp' => 'datetime',
+                'boolean', 'bool' => 'boolean',
+                'decimal' => 'decimal:2',
+                default => null,
+            };
+
+            if ($cast !== null) {
+                $casts[] = "'{$field->name}' => '{$cast}'";
+            }
+        }
+
+        if (empty($casts)) {
+            return '';
+        }
+
+        $castsString = implode(",\n        ", $casts);
+        return "\n\n    protected \$casts = [\n        {$castsString},\n    ];";
     }
 
     private function generateTraits(EntityDefinition $definition): string

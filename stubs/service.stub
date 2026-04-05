@@ -28,7 +28,7 @@ class {{modelName}}Service
         return {{modelName}}::create(get_object_vars($dto));
     }
 
-    public function find(int $id): {{modelName}}
+    public function find(int|string $id): {{modelName}}
     {
         return {{modelName}}::findOrFail($id);
     }

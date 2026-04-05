@@ -74,7 +74,7 @@ final readonly class FieldDefinition
             'boolean', 'bool' => 'bool',
             'float', 'decimal' => 'float',
             'json' => 'array',
-            'date', 'datetime', 'timestamp', 'time' => '\DateTimeInterface',
+            'date', 'datetime', 'timestamp', 'time' => 'string',
             default => 'string'
         };
     }
@@ -117,7 +117,7 @@ final readonly class FieldDefinition
             'uuid', 'UUID' => "fake()->uuid()",
             'float', 'decimal' => "fake()->randomFloat(2, 1, 1000)",
             'json' => "json_encode(['key' => 'value'])",
-            'date', 'datetime', 'timestamp', 'time' => "fake()->dateTime()",
+            'date', 'datetime', 'timestamp', 'time' => "fake()->dateTime()->format('Y-m-d H:i:s')",
             default => "fake()->word()"
         };
     }

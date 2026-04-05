@@ -58,7 +58,7 @@ class UnitTestGenerator extends AbstractGenerator
                 'boolean', 'bool' => 'true',
                 'float', 'decimal' => '10.50',
                 'json' => "['key' => 'value']",
-                'date', 'datetime', 'timestamp', 'time' => "new \\DateTime('2025-01-01')",
+                'date', 'datetime', 'timestamp', 'time' => "'2025-01-01 00:00:00'",
                 'uuid', 'UUID' => "'550e8400-e29b-41d4-a716-446655440000'",
                 default => "'test'",
             };

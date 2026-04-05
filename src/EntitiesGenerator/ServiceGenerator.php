@@ -37,14 +37,14 @@ class ServiceGenerator extends AbstractGenerator
         if ($definition->hasSoftDeletes()) {
             $softDeleteMethods = <<<PHP
 
-    public function restore(int \$id): {$definition->name}
+    public function restore(int|string \$id): {$definition->name}
     {
         \${$definition->getNameLower()} = {$definition->name}::withTrashed()->findOrFail(\$id);
         \${$definition->getNameLower()}->restore();
         return \${$definition->getNameLower()};
     }
 
-    public function forceDelete(int \$id): bool
+    public function forceDelete(int|string \$id): bool
     {
         \${$definition->getNameLower()} = {$definition->name}::withTrashed()->findOrFail(\$id);
         return \${$definition->getNameLower()}->forceDelete();

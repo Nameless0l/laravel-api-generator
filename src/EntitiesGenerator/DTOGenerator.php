@@ -60,8 +60,8 @@ class DTOGenerator extends AbstractGenerator
     private function generateFromRequest(EntityDefinition $definition): string
     {
         $fromRequest = $definition->fields->map(function (FieldDefinition $field) {
-            if ($field->getPhpType() === '\DateTimeInterface') {
-                return "new \\DateTimeImmutable(\$request->input('{$field->name}')),";
+            if ($field->getPhpType() === 'array') {
+                return "is_array(\$request->input('{$field->name}')) ? \$request->input('{$field->name}') : (array) json_decode(\$request->input('{$field->name}'), true),";
             }
             $cast = match ($field->getPhpType()) {
                 'int' => "(int) ",
