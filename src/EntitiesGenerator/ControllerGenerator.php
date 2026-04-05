@@ -40,7 +40,7 @@ class ControllerGenerator extends AbstractGenerator
     /**
      * Restore the specified soft-deleted resource.
      */
-    public function restore(int \$id)
+    public function restore(int|string \$id)
     {
         \$this->service->restore(\$id);
         return response()->json(['message' => '{$definition->name} restored successfully.']);
@@ -49,7 +49,7 @@ class ControllerGenerator extends AbstractGenerator
     /**
      * Permanently delete the specified resource.
      */
-    public function forceDelete(int \$id)
+    public function forceDelete(int|string \$id)
     {
         \$this->service->forceDelete(\$id);
         return response(null, 204);

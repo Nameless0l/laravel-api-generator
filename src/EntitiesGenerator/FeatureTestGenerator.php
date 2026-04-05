@@ -57,7 +57,7 @@ class FeatureTestGenerator extends AbstractGenerator
                 'integer', 'int', 'bigint' => '1',
                 'boolean', 'bool' => 'true',
                 'float', 'decimal' => '10.50',
-                'json' => "'{\"key\": \"value\"}'",
+                'json' => "'{\"key\":\"value\"}'",
                 'date', 'datetime', 'timestamp' => "'2025-01-01 00:00:00'",
                 'uuid', 'UUID' => "'550e8400-e29b-41d4-a716-446655440000'",
                 default => "'test'",

@@ -175,25 +175,30 @@ class DeleteFullApi extends Command
         $content = File::get($apiFilePath);
         $originalContent = $content;
 
-        // Remove the apiResource route line
-        $routePattern = "/\n?Route::apiResource\('{$pluralName}',\s*App\\\\Http\\\\Controllers\\\\{$className}Controller::class\);/";
-        $content = preg_replace($routePattern, '', $content);
-        if (!is_string($content)) {
-            $content = $originalContent;
+        // Remove lines containing this entity's routes (line by line for reliability)
+        $lines = explode("\n", $content);
+        $filteredLines = [];
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+            // Skip apiResource route for this entity
+            if (str_contains($trimmed, "apiResource('{$pluralName}'") && str_contains($trimmed, "{$className}Controller")) {
+                $this->info("Route apiResource supprimée : {$trimmed}");
+                continue;
+            }
+            // Skip restore route for this entity
+            if (str_contains($trimmed, "'{$pluralName}/{id}/restore'") || str_contains($trimmed, "\"{$pluralName}/{id}/restore\"")) {
+                $this->info("Route restore supprimée : {$trimmed}");
+                continue;
+            }
+            // Skip force-delete route for this entity
+            if (str_contains($trimmed, "'{$pluralName}/{id}/force-delete'") || str_contains($trimmed, "\"{$pluralName}/{id}/force-delete\"")) {
+                $this->info("Route force-delete supprimée : {$trimmed}");
+                continue;
+            }
+            $filteredLines[] = $line;
         }
 
-        // Remove soft-delete routes (restore + force-delete)
-        $restorePattern = "/\n?Route::post\('{$pluralName}\/\{id\}\/restore'.*?\);/";
-        $content = preg_replace($restorePattern, '', $content);
-        if (!is_string($content)) {
-            $content = $originalContent;
-        }
-
-        $forceDeletePattern = "/\n?Route::delete\('{$pluralName}\/\{id\}\/force-delete'.*?\);/";
-        $content = preg_replace($forceDeletePattern, '', $content);
-        if (!is_string($content)) {
-            $content = $originalContent;
-        }
+        $content = implode("\n", $filteredLines);
 
         // Clean up multiple blank lines
         $result = preg_replace("/\n{3,}/", "\n\n", $content);

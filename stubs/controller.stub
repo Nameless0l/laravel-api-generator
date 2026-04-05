@@ -40,16 +40,18 @@ class {{modelName}}Controller extends Controller
     /**
      * Display the specified resource.
      */
-    public function show({{modelName}} ${{modelNameLower}})
+    public function show(int|string $id)
     {
+        ${{modelNameLower}} = $this->service->find($id);
         return new {{modelName}}Resource(${{modelNameLower}});
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update({{modelName}}Request $request, {{modelName}} ${{modelNameLower}})
+    public function update({{modelName}}Request $request, int|string $id)
     {
+        ${{modelNameLower}} = $this->service->find($id);
         $dto = {{modelName}}DTO::fromRequest($request);
         $updated{{modelName}} = $this->service->update(${{modelNameLower}}, $dto);
         return new {{modelName}}Resource($updated{{modelName}});
@@ -58,8 +60,9 @@ class {{modelName}}Controller extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy({{modelName}} ${{modelNameLower}})
+    public function destroy(int|string $id)
     {
+        ${{modelNameLower}} = $this->service->find($id);
         $this->service->delete(${{modelNameLower}});
         return response(null, 204);
     }
