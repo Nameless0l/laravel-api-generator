@@ -9,8 +9,8 @@ use InvalidArgumentException;
 final readonly class FieldDefinition
 {
     /**
-     * @param array<int, string> $validationRules
-     * @param array<string, mixed> $attributes
+     * @param  array<int, string>  $validationRules
+     * @param  array<string, mixed>  $attributes
      */
     public function __construct(
         public string $name,
@@ -31,7 +31,7 @@ final readonly class FieldDefinition
             throw new InvalidArgumentException('Field name cannot be empty');
         }
 
-        if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $name)) {
+        if (! preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $name)) {
             throw new InvalidArgumentException("Invalid field name: {$name}");
         }
     }
@@ -41,10 +41,10 @@ final readonly class FieldDefinition
         $allowedTypes = [
             'string', 'integer', 'int', 'boolean', 'bool', 'text', 'float',
             'decimal', 'json', 'date', 'datetime', 'timestamp', 'time',
-            'uuid', 'UUID', 'bigint'
+            'uuid', 'UUID', 'bigint',
         ];
 
-        if (!in_array($type, $allowedTypes, true)) {
+        if (! in_array($type, $allowedTypes, true)) {
             throw new InvalidArgumentException("Unsupported field type: {$type}");
         }
     }
@@ -81,7 +81,7 @@ final readonly class FieldDefinition
 
     public function getValidationRule(): string
     {
-        if (!empty($this->validationRules)) {
+        if (! empty($this->validationRules)) {
             return implode('|', $this->validationRules);
         }
 
@@ -110,15 +110,15 @@ final readonly class FieldDefinition
     public function getFakeValue(): string
     {
         return match ($this->type) {
-            'string' => "fake()->word()",
-            'integer', 'int', 'bigint' => "fake()->randomNumber()",
-            'boolean', 'bool' => "fake()->boolean()",
-            'text' => "fake()->sentence()",
-            'uuid', 'UUID' => "fake()->uuid()",
-            'float', 'decimal' => "fake()->randomFloat(2, 1, 1000)",
+            'string' => 'fake()->word()',
+            'integer', 'int', 'bigint' => 'fake()->randomNumber()',
+            'boolean', 'bool' => 'fake()->boolean()',
+            'text' => 'fake()->sentence()',
+            'uuid', 'UUID' => 'fake()->uuid()',
+            'float', 'decimal' => 'fake()->randomFloat(2, 1, 1000)',
             'json' => "json_encode(['key' => 'value'])",
             'date', 'datetime', 'timestamp', 'time' => "fake()->dateTime()->format('Y-m-d H:i:s')",
-            default => "fake()->word()"
+            default => 'fake()->word()'
         };
     }
 }

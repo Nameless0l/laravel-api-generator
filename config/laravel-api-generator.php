@@ -13,7 +13,7 @@ return [
     | customizing them according to your needs.
     |
     */
-    'stub_path' => __DIR__ . '/../stubs',
+    'stub_path' => __DIR__.'/../stubs',
 
     /*
     |--------------------------------------------------------------------------

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\Support;
 
-use nameless\CodeGenerator\ValueObjects\FieldDefinition;
-use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
-use nameless\CodeGenerator\ValueObjects\EntityDefinition;
-use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
+use nameless\CodeGenerator\ValueObjects\EntityDefinition;
+use nameless\CodeGenerator\ValueObjects\FieldDefinition;
+use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
 
 class JsonParser
 {
@@ -21,7 +21,7 @@ class JsonParser
     public function parseJsonToEntities(string $jsonData): Collection
     {
         $data = json_decode($jsonData, true);
-        
+
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw CodeGeneratorException::invalidJsonData(json_last_error_msg());
         }
@@ -43,7 +43,7 @@ class JsonParser
     /**
      * Normalize JSON data to consistent format.
      *
-     * @param array<int|string, mixed> $data
+     * @param  array<int|string, mixed>  $data
      * @return array<int, array<string, mixed>>
      */
     private function normalizeJsonData(array $data): array
@@ -55,7 +55,7 @@ class JsonParser
         }
 
         // Handle array of entities
-        if (!isset($data['name'])) {
+        if (! isset($data['name'])) {
             /** @var array<int, array<string, mixed>> */
             return array_values($data);
         }
@@ -68,18 +68,18 @@ class JsonParser
     /**
      * Create EntityDefinition from array data.
      *
-     * @param array<string, mixed> $classData
+     * @param  array<string, mixed>  $classData
      */
     private function createEntityDefinition(array $classData): EntityDefinition
     {
         $class = isset($classData['data']) ? $classData['data'] : $classData;
-        
+
         $name = ucfirst($class['name']);
         $parent = isset($class['parent']) ? ucfirst($class['parent']) : null;
-        
+
         $fields = $this->parseFields($class['attributes'] ?? []);
         $relationships = $this->parseRelationships($class);
-        
+
         return new EntityDefinition(
             name: $name,
             fields: $fields,
@@ -92,7 +92,7 @@ class JsonParser
      * Parse fields from attributes array.
      * Filters out id fields, void types, and duplicates.
      *
-     * @param array<int, array<string, mixed>> $attributes
+     * @param  array<int, array<string, mixed>>  $attributes
      * @return Collection<int, FieldDefinition>
      */
     private function parseFields(array $attributes): Collection
@@ -119,6 +119,7 @@ class JsonParser
             }
 
             $seenNames[] = $name;
+
             return true;
         })->map(function (array $attribute) {
             return new FieldDefinition(
@@ -132,7 +133,7 @@ class JsonParser
      * Parse relationships from class data.
      * Supports explicit relationships, compositions, and aggregations.
      *
-     * @param array<string, mixed> $classData
+     * @param  array<string, mixed>  $classData
      * @return Collection<int, RelationshipDefinition>
      */
     private function parseRelationships(array $classData): Collection

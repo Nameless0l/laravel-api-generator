@@ -4,30 +4,30 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\Providers;
 
+use Dedoc\Scramble\ScrambleServiceProvider;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Collection;
-use nameless\CodeGenerator\Console\Commands\MakeApiCommand;
 use nameless\CodeGenerator\Console\Commands\DeleteFullApi;
-use nameless\CodeGenerator\Console\Commands\MakeApiWithDiagram;
 use nameless\CodeGenerator\Console\Commands\InstallPackageCommand;
+use nameless\CodeGenerator\Console\Commands\MakeApiCommand;
+use nameless\CodeGenerator\Console\Commands\MakeApiWithDiagram;
 use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
-use nameless\CodeGenerator\Services\ApiGenerationService;
-use nameless\CodeGenerator\Services\PostmanExporter;
-use nameless\CodeGenerator\Services\AuthGenerator;
-use nameless\CodeGenerator\Support\JsonParser;
-use nameless\CodeGenerator\Support\StubLoader;
-use nameless\CodeGenerator\EntitiesGenerator\ModelGeneratorRefactored;
 use nameless\CodeGenerator\EntitiesGenerator\ControllerGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\DTOGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\FactoryGenerator;
+use nameless\CodeGenerator\EntitiesGenerator\FeatureTestGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\MigrationGenerator;
+use nameless\CodeGenerator\EntitiesGenerator\ModelGeneratorRefactored;
 use nameless\CodeGenerator\EntitiesGenerator\PolicyGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\RequestGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\ResourceGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\SeederGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\ServiceGenerator;
-use nameless\CodeGenerator\EntitiesGenerator\FeatureTestGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\UnitTestGenerator;
+use nameless\CodeGenerator\Services\ApiGenerationService;
+use nameless\CodeGenerator\Services\AuthGenerator;
+use nameless\CodeGenerator\Services\PostmanExporter;
+use nameless\CodeGenerator\Support\JsonParser;
+use nameless\CodeGenerator\Support\StubLoader;
 
 class CodeGeneratorServiceProvider extends ServiceProvider
 {
@@ -49,8 +49,8 @@ class CodeGeneratorServiceProvider extends ServiceProvider
         $this->registerGenerators();
 
         // Register Scramble for API documentation (only if installed)
-        if (class_exists(\Dedoc\Scramble\ScrambleServiceProvider::class)) {
-            $this->app->register(\Dedoc\Scramble\ScrambleServiceProvider::class);
+        if (class_exists(ScrambleServiceProvider::class)) {
+            $this->app->register(ScrambleServiceProvider::class);
         }
     }
 
@@ -58,7 +58,7 @@ class CodeGeneratorServiceProvider extends ServiceProvider
     {
         // Register StubLoader
         $this->app->singleton(StubLoader::class, function () {
-            return new StubLoader(__DIR__ . '/../../stubs');
+            return new StubLoader(__DIR__.'/../../stubs');
         });
 
         // Register JsonParser

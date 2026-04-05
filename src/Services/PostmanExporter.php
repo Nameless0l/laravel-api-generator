@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\Services;
 
-use nameless\CodeGenerator\ValueObjects\EntityDefinition;
-use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
+use nameless\CodeGenerator\ValueObjects\EntityDefinition;
+use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 
 class PostmanExporter
 {
@@ -16,7 +16,7 @@ class PostmanExporter
     /**
      * Export a Postman collection for the given entities.
      *
-     * @param Collection<int, EntityDefinition> $entities
+     * @param  Collection<int, EntityDefinition>  $entities
      */
     public function export(Collection $entities, string $outputPath): string
     {
@@ -27,7 +27,7 @@ class PostmanExporter
                 'description' => 'Auto-generated API collection by Laravel API Generator',
                 'schema' => self::SCHEMA,
             ],
-            'item' => $entities->map(fn(EntityDefinition $entity) => $this->buildEntityFolder($entity))->values()->toArray(),
+            'item' => $entities->map(fn (EntityDefinition $entity) => $this->buildEntityFolder($entity))->values()->toArray(),
             'variable' => [
                 ['key' => 'base_url', 'value' => 'http://localhost:8000/api'],
             ],
@@ -35,7 +35,7 @@ class PostmanExporter
 
         $json = json_encode($collection, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         if ($json === false) {
-            throw new \RuntimeException('Failed to encode collection to JSON: ' . json_last_error_msg());
+            throw new \RuntimeException('Failed to encode collection to JSON: '.json_last_error_msg());
         }
         File::put($outputPath, $json);
 
@@ -62,7 +62,7 @@ class PostmanExporter
     }
 
     /**
-     * @param array<string, mixed>|null $body
+     * @param  array<string, mixed>|null  $body
      * @return array<string, mixed>
      */
     private function buildRequest(string $name, string $method, string $url, ?array $body = null): array
@@ -128,11 +128,11 @@ class PostmanExporter
     {
         return sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0x0fff) | 0x4000,
-            mt_rand(0, 0x3fff) | 0x8000,
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+            mt_rand(0, 0xFFFF), mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0x0FFF) | 0x4000,
+            mt_rand(0, 0x3FFF) | 0x8000,
+            mt_rand(0, 0xFFFF), mt_rand(0, 0xFFFF), mt_rand(0, 0xFFFF)
         );
     }
 }

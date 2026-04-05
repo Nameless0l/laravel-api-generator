@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\EntitiesGenerator;
 
-use nameless\CodeGenerator\Contracts\GeneratorInterface;
-use nameless\CodeGenerator\ValueObjects\EntityDefinition;
-use nameless\CodeGenerator\Support\StubLoader;
-use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use Illuminate\Support\Facades\File;
+use nameless\CodeGenerator\Contracts\GeneratorInterface;
+use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
+use nameless\CodeGenerator\Support\StubLoader;
+use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 
 abstract class AbstractGenerator implements GeneratorInterface
 {
@@ -24,13 +24,13 @@ abstract class AbstractGenerator implements GeneratorInterface
         try {
             $content = $this->generateContent($definition);
             $outputPath = $this->getOutputPath($definition);
-            
+
             $this->ensureDirectoryExists($outputPath);
-            
-            if (!File::put($outputPath, $content)) {
+
+            if (! File::put($outputPath, $content)) {
                 throw CodeGeneratorException::fileCreationFailed($outputPath);
             }
-            
+
             return true;
         } catch (\Exception $e) {
             throw CodeGeneratorException::generationFailed($this->getType(), $e->getMessage());
@@ -68,8 +68,8 @@ abstract class AbstractGenerator implements GeneratorInterface
     protected function ensureDirectoryExists(string $filePath): void
     {
         $directory = dirname($filePath);
-        
-        if (!File::isDirectory($directory)) {
+
+        if (! File::isDirectory($directory)) {
             File::makeDirectory($directory, 0755, true);
         }
     }
@@ -80,6 +80,7 @@ abstract class AbstractGenerator implements GeneratorInterface
     protected function processStub(EntityDefinition $definition): string
     {
         $replacements = $this->getReplacements($definition);
+
         return $this->stubLoader->load($this->getStubName(), $replacements);
     }
 }

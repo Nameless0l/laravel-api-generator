@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\EntitiesGenerator;
 
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
-use Illuminate\Support\Facades\File;
 
 class MigrationGenerator extends AbstractGenerator
 {
@@ -27,6 +28,7 @@ class MigrationGenerator extends AbstractGenerator
         }
 
         $timestamp = date('Y_m_d_His');
+
         return database_path("migrations/{$timestamp}_create_{$tableName}_table.php");
     }
 
@@ -36,11 +38,11 @@ class MigrationGenerator extends AbstractGenerator
     private function findExistingMigration(string $tableName): ?string
     {
         $migrationsPath = database_path('migrations');
-        if (!File::isDirectory($migrationsPath)) {
+        if (! File::isDirectory($migrationsPath)) {
             return null;
         }
 
-        $pattern = $migrationsPath . DIRECTORY_SEPARATOR . "*_create_{$tableName}_table.php";
+        $pattern = $migrationsPath.DIRECTORY_SEPARATOR."*_create_{$tableName}_table.php";
         $files = glob($pattern);
 
         if ($files !== false && count($files) > 0) {
@@ -87,6 +89,7 @@ class MigrationGenerator extends AbstractGenerator
             if ($field->default !== null) {
                 $modifiers .= "->default('{$field->default}')";
             }
+
             return "            \$table->{$dbType}('{$field->name}'){$modifiers};";
         })->toArray();
 
@@ -96,10 +99,11 @@ class MigrationGenerator extends AbstractGenerator
     private function generateForeignKeys(EntityDefinition $definition): string
     {
         $foreignKeys = $definition->relationships
-            ->filter(fn(RelationshipDefinition $rel) => $rel->requiresForeignKey())
+            ->filter(fn (RelationshipDefinition $rel) => $rel->requiresForeignKey())
             ->map(function (RelationshipDefinition $rel) {
                 $fk = $rel->getForeignKeyName();
-                $relatedTable = \Illuminate\Support\Str::plural(\Illuminate\Support\Str::snake($rel->relatedModel));
+                $relatedTable = Str::plural(Str::snake($rel->relatedModel));
+
                 return "            \$table->foreignId('{$fk}')->constrained('{$relatedTable}')->cascadeOnDelete();";
             })->toArray();
 

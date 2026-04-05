@@ -2,6 +2,7 @@
 
 namespace nameless\CodeGenerator\Tests\Feature;
 
+use Illuminate\Testing\PendingCommand;
 use nameless\CodeGenerator\Tests\TestCase;
 
 class MakeApiCommandTest extends TestCase
@@ -14,10 +15,10 @@ class MakeApiCommandTest extends TestCase
         $fields = 'title:string,content:text,published:boolean';
 
         // Act
-        /** @var \Illuminate\Testing\PendingCommand $result */
+        /** @var PendingCommand $result */
         $result = $this->artisan('make:fullapi', [
             'name' => $name,
-            '--fields' => $fields
+            '--fields' => $fields,
         ]);
         $result->assertSuccessful();
 
@@ -31,9 +32,9 @@ class MakeApiCommandTest extends TestCase
     /** @test */
     public function it_requires_fields_option(): void
     {
-        /** @var \Illuminate\Testing\PendingCommand $result */
+        /** @var PendingCommand $result */
         $result = $this->artisan('make:fullapi', [
-            'name' => 'Post'
+            'name' => 'Post',
         ]);
         $result->assertFailed();
     }
@@ -48,7 +49,7 @@ class MakeApiCommandTest extends TestCase
         // Act
         $this->artisan('make:fullapi', [
             'name' => $name,
-            '--fields' => $fields
+            '--fields' => $fields,
         ]);
 
         // Assert

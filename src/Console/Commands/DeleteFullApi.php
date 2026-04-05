@@ -2,14 +2,15 @@
 
 namespace nameless\CodeGenerator\Console\Commands;
 
-use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class DeleteFullApi extends Command
 {
     protected $signature = 'delete:fullapi {name?} {--force : Skip confirmation}';
+
     protected $description = 'Supprimer un modèle, migration, contrôleur, resource, request, factory, seeder et DTO associés à une ressource spécifique';
 
     /** @var array<int, array<string, mixed>> */
@@ -19,31 +20,35 @@ class DeleteFullApi extends Command
     {
         $name = $this->argument('name');
         if (empty($name)) {
-            $this->warn("Aucun nom fourni. Utilisation du nom par défaut du fichier JSON.");
+            $this->warn('Aucun nom fourni. Utilisation du nom par défaut du fichier JSON.');
             $jsonFilePath = base_path('class_data.json');
-            if (!file_exists($jsonFilePath)) {
-                $this->error("Le fichier class_data.json est introuvable.");
+            if (! file_exists($jsonFilePath)) {
+                $this->error('Le fichier class_data.json est introuvable.');
+
                 return self::FAILURE;
             }
 
-            $this->info("Lecture du fichier JSON...");
+            $this->info('Lecture du fichier JSON...');
             $jsonData = file_get_contents($jsonFilePath);
             if ($jsonData === false) {
-                $this->error("Impossible de lire le fichier class_data.json.");
+                $this->error('Impossible de lire le fichier class_data.json.');
+
                 return self::FAILURE;
             }
             $this->classes = json_decode($jsonData, true);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
-                $this->error("Erreur de décodage JSON : " . json_last_error_msg());
+                $this->error('Erreur de décodage JSON : '.json_last_error_msg());
+
                 return self::FAILURE;
             }
 
-            $this->info("Extraction des données JSON...");
+            $this->info('Extraction des données JSON...');
             $this->jsonExtractionToArray();
 
-            $this->info("Delete API with diagram...");
+            $this->info('Delete API with diagram...');
             $this->runDeleteApiWithDiagram();
+
             return self::SUCCESS;
         }
 
@@ -54,51 +59,50 @@ class DeleteFullApi extends Command
         $this->info("Suppression des fichiers pour : {$name}");
 
         // Supprimer le modèle
-        $this->deleteFile(app_path("Models/{$className}.php"), "Modèle");
+        $this->deleteFile(app_path("Models/{$className}.php"), 'Modèle');
 
         // Supprimer les migrations
-        $this->deleteFilesByPattern(database_path('migrations'), "*_create_{$pluralName}_table.php", "Migration");
+        $this->deleteFilesByPattern(database_path('migrations'), "*_create_{$pluralName}_table.php", 'Migration');
 
         // Supprimer le service
-        $this->deleteFile(app_path("Services/{$className}Service.php"), "Service");
+        $this->deleteFile(app_path("Services/{$className}Service.php"), 'Service');
 
         // Supprimer la policy
-        $this->deleteFile(app_path("Policies/{$className}Policy.php"), "Policy");
+        $this->deleteFile(app_path("Policies/{$className}Policy.php"), 'Policy');
         $this->removeFromAuthServiceProvider($className);
 
         // Supprimer le contrôleur
-        $this->deleteFile(app_path("Http/Controllers/{$className}Controller.php"), "Contrôleur");
+        $this->deleteFile(app_path("Http/Controllers/{$className}Controller.php"), 'Contrôleur');
 
         // Supprimer la resource
-        $this->deleteFile(app_path("Http/Resources/{$className}Resource.php"), "Resource");
+        $this->deleteFile(app_path("Http/Resources/{$className}Resource.php"), 'Resource');
 
         // Supprimer la requête
-        $this->deleteFile(app_path("Http/Requests/{$className}Request.php"), "Requête");
+        $this->deleteFile(app_path("Http/Requests/{$className}Request.php"), 'Requête');
 
         // Supprimer le seeder
-        $this->deleteFile(database_path("seeders/{$className}Seeder.php"), "Seeder");
+        $this->deleteFile(database_path("seeders/{$className}Seeder.php"), 'Seeder');
 
         // Supprimer le factory
-        $this->deleteFile(database_path("factories/{$className}Factory.php"), "Factory");
+        $this->deleteFile(database_path("factories/{$className}Factory.php"), 'Factory');
 
         // Supprimer le DTO
-        $this->deleteFile(app_path("DTO/{$className}DTO.php"), "DTO");
+        $this->deleteFile(app_path("DTO/{$className}DTO.php"), 'DTO');
 
         // Supprimer les tests
-        $this->deleteFile(base_path("tests/Feature/{$className}ControllerTest.php"), "Feature Test");
-        $this->deleteFile(base_path("tests/Unit/{$className}ServiceTest.php"), "Unit Test");
+        $this->deleteFile(base_path("tests/Feature/{$className}ControllerTest.php"), 'Feature Test');
+        $this->deleteFile(base_path("tests/Unit/{$className}ServiceTest.php"), 'Unit Test');
 
         // Supprimer la route dans api.php
         $this->removeApiRoute($className, $pluralName);
 
         $this->info("Tous les fichiers associés à {$name} ont été supprimés.");
+
         return self::SUCCESS;
     }
 
-            /**
+    /**
      * Extraire et formater les données JSON dans un tableau compatible.
-     *
-     * @return void
      */
     public function jsonExtractionToArray(): void
     {
@@ -129,14 +133,14 @@ class DeleteFullApi extends Command
         foreach ($this->classes as $class) {
             $className = ucfirst($class['name']);
 
-            echo "Ici les parametres : ".$className. "\n";
+            echo 'Ici les parametres : '.$className."\n";
 
             try {
                 Artisan::call("delete:fullapi {$className}");
 
                 $this->info("API pour la classe $className générée avec succès !");
             } catch (\Exception $e) {
-                $this->error("Erreur lors de la génération de l'API pour la classe $className : " . $e->getMessage());
+                $this->error("Erreur lors de la génération de l'API pour la classe $className : ".$e->getMessage());
             }
         }
     }
@@ -168,7 +172,7 @@ class DeleteFullApi extends Command
     {
         $apiFilePath = base_path('routes/api.php');
 
-        if (!File::exists($apiFilePath)) {
+        if (! File::exists($apiFilePath)) {
             return;
         }
 
@@ -183,16 +187,19 @@ class DeleteFullApi extends Command
             // Skip apiResource route for this entity
             if (str_contains($trimmed, "apiResource('{$pluralName}'") && str_contains($trimmed, "{$className}Controller")) {
                 $this->info("Route apiResource supprimée : {$trimmed}");
+
                 continue;
             }
             // Skip restore route for this entity
             if (str_contains($trimmed, "'{$pluralName}/{id}/restore'") || str_contains($trimmed, "\"{$pluralName}/{id}/restore\"")) {
                 $this->info("Route restore supprimée : {$trimmed}");
+
                 continue;
             }
             // Skip force-delete route for this entity
             if (str_contains($trimmed, "'{$pluralName}/{id}/force-delete'") || str_contains($trimmed, "\"{$pluralName}/{id}/force-delete\"")) {
                 $this->info("Route force-delete supprimée : {$trimmed}");
+
                 continue;
             }
             $filteredLines[] = $line;
@@ -209,7 +216,7 @@ class DeleteFullApi extends Command
         File::put($apiFilePath, $content);
 
         if ($content !== $originalContent) {
-            $this->info("Route API supprimée de routes/api.php");
+            $this->info('Route API supprimée de routes/api.php');
         }
     }
 
@@ -217,13 +224,14 @@ class DeleteFullApi extends Command
     {
         $providerPath = app_path('Providers/AuthServiceProvider.php');
 
-        if (!file_exists($providerPath)) {
+        if (! file_exists($providerPath)) {
             // AuthServiceProvider is not required since Laravel 10+ (automatic policy discovery)
             return;
         }
         $content = file_get_contents($providerPath);
         if ($content === false) {
-            $this->warn("Impossible de lire AuthServiceProvider.");
+            $this->warn('Impossible de lire AuthServiceProvider.');
+
             return;
         }
 
@@ -244,6 +252,6 @@ class DeleteFullApi extends Command
         }
 
         file_put_contents($providerPath, $content);
-        $this->info("Policy supprimée de AuthServiceProvider");
+        $this->info('Policy supprimée de AuthServiceProvider');
     }
 }
