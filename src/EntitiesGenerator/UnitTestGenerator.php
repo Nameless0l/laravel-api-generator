@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\EntitiesGenerator;
 
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
+use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
 
 class UnitTestGenerator extends AbstractGenerator
 {
@@ -38,6 +41,9 @@ class UnitTestGenerator extends AbstractGenerator
             ? "\$this->assertSoftDeleted('{$definition->getTableName()}', ['id' => \${$definition->getNameLower()}->id]);"
             : "\$this->assertDatabaseCount('{$definition->getTableName()}', 0);";
 
+        $belongsToRels = $definition->relationships
+            ->filter(fn (RelationshipDefinition $rel) => $rel->requiresForeignKey());
+
         return [
             'modelName' => $definition->name,
             'modelNameLower' => $definition->getNameLower(),
@@ -45,6 +51,11 @@ class UnitTestGenerator extends AbstractGenerator
             'tableName' => $definition->getTableName(),
             'dtoConstructorArgs' => $this->generateDtoArgs($definition),
             'deleteAssertion' => $deleteAssertion,
+            'relatedImports' => $this->generateRelatedImports($belongsToRels),
+            'createRelatedModels' => $this->generateCreateRelatedModels($belongsToRels),
+            'dtoFkArgs' => $this->generateDtoFkArgs($belongsToRels),
+            'updateCreateRelatedOrUseExisting' => $this->generateUpdateRelatedSetup($definition, $belongsToRels),
+            'updateDtoFkArgs' => $this->generateUpdateDtoFkArgs($definition, $belongsToRels),
         ];
     }
 
@@ -66,11 +77,87 @@ class UnitTestGenerator extends AbstractGenerator
             return "            {$field->name}: {$value},";
         })->toArray();
 
-        if (! empty($args)) {
-            $lastIndex = count($args) - 1;
-            $args[$lastIndex] = rtrim($args[$lastIndex], ',');
+        return implode("\n", $args);
+    }
+
+    /**
+     * @param  Collection<int, RelationshipDefinition>  $belongsToRels
+     */
+    private function generateRelatedImports($belongsToRels): string
+    {
+        if ($belongsToRels->isEmpty()) {
+            return '';
         }
 
-        return implode("\n", $args);
+        return $belongsToRels
+            ->map(fn (RelationshipDefinition $rel) => "use App\\Models\\{$rel->relatedModel};")
+            ->unique()
+            ->map(fn (string $import) => "\n".$import)
+            ->implode('');
+    }
+
+    /**
+     * @param  Collection<int, RelationshipDefinition>  $belongsToRels
+     */
+    private function generateCreateRelatedModels($belongsToRels): string
+    {
+        if ($belongsToRels->isEmpty()) {
+            return '';
+        }
+
+        return "\n".$belongsToRels
+            ->map(function (RelationshipDefinition $rel) {
+                $varName = Str::camel($rel->relatedModel);
+
+                return "        \${$varName} = {$rel->relatedModel}::factory()->create();";
+            })
+            ->implode("\n")."\n";
+    }
+
+    /**
+     * @param  Collection<int, RelationshipDefinition>  $belongsToRels
+     */
+    private function generateDtoFkArgs($belongsToRels): string
+    {
+        if ($belongsToRels->isEmpty()) {
+            return '';
+        }
+
+        return "\n".$belongsToRels
+            ->map(function (RelationshipDefinition $rel) {
+                $varName = Str::camel($rel->relatedModel);
+
+                return "            {$rel->getForeignKeyName()}: \${$varName}->id,";
+            })
+            ->implode("\n");
+    }
+
+    /**
+     * @param  Collection<int, RelationshipDefinition>  $belongsToRels
+     */
+    private function generateUpdateRelatedSetup(EntityDefinition $definition, $belongsToRels): string
+    {
+        if ($belongsToRels->isEmpty()) {
+            return '';
+        }
+
+        // For update tests, we reuse FKs from the existing model created by factory
+        return '';
+    }
+
+    /**
+     * @param  Collection<int, RelationshipDefinition>  $belongsToRels
+     */
+    private function generateUpdateDtoFkArgs(EntityDefinition $definition, $belongsToRels): string
+    {
+        if ($belongsToRels->isEmpty()) {
+            return '';
+        }
+
+        $modelVar = $definition->getNameLower();
+
+        return "\n".$belongsToRels
+            ->map(fn (RelationshipDefinition $rel) => "            {$rel->getForeignKeyName()}: \${$modelVar}->{$rel->getForeignKeyName()},")
+            ->implode("\n");
     }
 }

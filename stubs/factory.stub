@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\{{modelName}};
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Factories\Factory;{{factoryImports}}
 
 /**
  * @extends Factory<{{modelName}}>

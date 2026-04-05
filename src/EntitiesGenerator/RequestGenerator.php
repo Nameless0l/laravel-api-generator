@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\EntitiesGenerator;
 
+use Illuminate\Support\Str;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
+use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
 
 class RequestGenerator extends AbstractGenerator
 {
@@ -42,12 +44,22 @@ class RequestGenerator extends AbstractGenerator
 
     private function generateRules(EntityDefinition $definition): string
     {
+        // Add foreign key validation rules from belongsTo relationships first
+        $fkRules = $definition->relationships
+            ->filter(fn (RelationshipDefinition $rel) => $rel->requiresForeignKey())
+            ->map(function (RelationshipDefinition $rel) {
+                $fk = $rel->getForeignKeyName();
+                $table = Str::plural(Str::snake($rel->relatedModel));
+
+                return "'{$fk}' => 'required|integer|exists:{$table},id',";
+            })->toArray();
+
         $rules = $definition->fields->map(function (FieldDefinition $field) {
             $rule = $field->getValidationRule();
 
             return "'{$field->name}' => '{$rule}',";
         })->toArray();
 
-        return implode("\n            ", $rules);
+        return implode("\n            ", array_merge($fkRules, $rules));
     }
 }
