@@ -581,7 +581,7 @@ Then run `composer update`.
 
 ## Requirements
 
-- PHP >= 8.1
+- PHP >= 8.2
 - Laravel 10.x, 11.x, or 12.x
 
 ---
