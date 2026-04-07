@@ -80,8 +80,9 @@ class DeleteFullApi extends Command
         // Supprimer la requête
         $this->deleteFile(app_path("Http/Requests/{$className}Request.php"), 'Requête');
 
-        // Supprimer le seeder
+        // Supprimer le seeder + retirer du DatabaseSeeder
         $this->deleteFile(database_path("seeders/{$className}Seeder.php"), 'Seeder');
+        $this->unregisterSeederFromDatabaseSeeder($className);
 
         // Supprimer le factory
         $this->deleteFile(database_path("factories/{$className}Factory.php"), 'Factory');
@@ -218,6 +219,40 @@ class DeleteFullApi extends Command
         if ($content !== $originalContent) {
             $this->info('Route API supprimée de routes/api.php');
         }
+    }
+
+    private function unregisterSeederFromDatabaseSeeder(string $className): void
+    {
+        $databaseSeederPath = database_path('seeders/DatabaseSeeder.php');
+
+        if (! File::exists($databaseSeederPath)) {
+            return;
+        }
+
+        $content = File::get($databaseSeederPath);
+
+        // Remove the $this->call() line
+        $result = preg_replace(
+            "/\n?\s*\\\$this->call\({$className}Seeder::class\);/",
+            '',
+            $content
+        );
+        if (is_string($result)) {
+            $content = $result;
+        }
+
+        // Remove the use statement
+        $result = preg_replace(
+            "/use Database\\\\Seeders\\\\{$className}Seeder;\r?\n?/",
+            '',
+            $content
+        );
+        if (is_string($result)) {
+            $content = $result;
+        }
+
+        File::put($databaseSeederPath, $content);
+        $this->info("Seeder {$className} retiré de DatabaseSeeder.php");
     }
 
     private function removeFromAuthServiceProvider(string $className): void
