@@ -25,22 +25,32 @@ class ApiGenerationService implements ApiGenerationServiceInterface
 
     /**
      * Generate a complete API for the given entity.
+     *
+     * @param  array<int, string>|null  $onlyTypes
      */
-    public function generateCompleteApi(EntityDefinition $definition): bool
+    public function generateCompleteApi(EntityDefinition $definition, ?array $onlyTypes = null): bool
     {
         try {
-            // Generate route first
-            $this->generateApiRoute($definition);
+            // Only touch routes & seeder registration when generating the full set
+            $isFullGeneration = $onlyTypes === null;
 
-            // Generate all components using registered generators
-            foreach ($this->generators as $generator) {
-                if ($generator->supports($definition)) {
-                    $generator->generate($definition);
-                }
+            if ($isFullGeneration) {
+                $this->generateApiRoute($definition);
             }
 
-            // Register seeder in DatabaseSeeder
-            $this->registerSeederInDatabaseSeeder($definition->name);
+            foreach ($this->generators as $generator) {
+                if (! $generator->supports($definition)) {
+                    continue;
+                }
+                if ($onlyTypes !== null && ! in_array($generator->getType(), $onlyTypes, true)) {
+                    continue;
+                }
+                $generator->generate($definition);
+            }
+
+            if ($isFullGeneration) {
+                $this->registerSeederInDatabaseSeeder($definition->name);
+            }
 
             return true;
         } catch (\Exception $e) {
