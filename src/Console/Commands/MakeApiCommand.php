@@ -19,7 +19,7 @@ use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
 
 class MakeApiCommand extends Command
 {
-    protected $signature = 'make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive}';
+    protected $signature = 'make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}';
 
     protected $description = 'Generate a complete API including model, migration, controller, resource, request, factory, seeder, DTO, service, policy, and tests';
 
@@ -335,13 +335,22 @@ class MakeApiCommand extends Command
         $fieldsArray = FieldParser::parseFieldsString($fieldsOption);
         $definition = $this->createEntityDefinition($name, $fieldsArray);
 
-        $this->info("Generating complete API for: {$name}");
+        $only = $this->option('only');
+        $onlyTypes = is_string($only) && $only !== ''
+            ? array_map('trim', explode(',', $only))
+            : null;
+
+        if ($onlyTypes !== null) {
+            $this->info("Regenerating only: ".implode(', ', $onlyTypes)." for: {$name}");
+        } else {
+            $this->info("Generating complete API for: {$name}");
+        }
 
         if ($definition->hasSoftDeletes()) {
             $this->info('  -> Soft Deletes enabled');
         }
 
-        $this->apiGenerationService->generateCompleteApi($definition);
+        $this->apiGenerationService->generateCompleteApi($definition, $onlyTypes);
 
         if ($this->option('auth')) {
             $this->authGenerator->wrapRoutesInAuthMiddleware();

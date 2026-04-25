@@ -10,8 +10,12 @@ interface ApiGenerationServiceInterface
 {
     /**
      * Generate a complete API for the given entity.
+     *
+     * @param  array<int, string>|null  $onlyTypes  When provided, only generators
+     *                                              whose getType() matches one of
+     *                                              these names are run.
      */
-    public function generateCompleteApi(EntityDefinition $definition): bool;
+    public function generateCompleteApi(EntityDefinition $definition, ?array $onlyTypes = null): bool;
 
     /**
      * Generate APIs from JSON data.
