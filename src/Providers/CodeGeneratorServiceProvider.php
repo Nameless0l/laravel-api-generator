@@ -11,6 +11,7 @@ use nameless\CodeGenerator\Console\Commands\InstallPackageCommand;
 use nameless\CodeGenerator\Console\Commands\IntrospectCommand;
 use nameless\CodeGenerator\Console\Commands\MakeApiCommand;
 use nameless\CodeGenerator\Console\Commands\MakeApiWithDiagram;
+use nameless\CodeGenerator\Console\Commands\ValidateStubsCommand;
 use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
 use nameless\CodeGenerator\EntitiesGenerator\ControllerGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\DTOGenerator;
@@ -41,6 +42,7 @@ class CodeGeneratorServiceProvider extends ServiceProvider
                 MakeApiWithDiagram::class,
                 InstallPackageCommand::class,
                 IntrospectCommand::class,
+                ValidateStubsCommand::class,
             ]);
 
             $this->publishes([
