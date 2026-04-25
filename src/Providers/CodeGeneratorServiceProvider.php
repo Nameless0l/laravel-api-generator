@@ -8,6 +8,7 @@ use Dedoc\Scramble\ScrambleServiceProvider;
 use Illuminate\Support\ServiceProvider;
 use nameless\CodeGenerator\Console\Commands\DeleteFullApi;
 use nameless\CodeGenerator\Console\Commands\InstallPackageCommand;
+use nameless\CodeGenerator\Console\Commands\IntrospectCommand;
 use nameless\CodeGenerator\Console\Commands\MakeApiCommand;
 use nameless\CodeGenerator\Console\Commands\MakeApiWithDiagram;
 use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
@@ -39,6 +40,7 @@ class CodeGeneratorServiceProvider extends ServiceProvider
                 DeleteFullApi::class,
                 MakeApiWithDiagram::class,
                 InstallPackageCommand::class,
+                IntrospectCommand::class,
             ]);
 
             $this->publishes([
