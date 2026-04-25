@@ -12,7 +12,7 @@ A professional Laravel package that generates complete, production-ready REST AP
 
 A visual interface is available: [laravel-api-generator-vscode](https://github.com/Nameless0l/laravel-api-generator-vscode). Generate APIs, run migrations, tests, and browse documentation -- all from VS Code without touching the terminal.
 
-### v3.3 -- Generate, seed, test, and document in seconds
+### v3.4 -- Generate, seed, test, document, regenerate, introspect, customize
 
 **Swagger UI** -- automatic interactive API documentation with Scramble:
 
@@ -157,12 +157,73 @@ php artisan delete:fullapi Post
 php artisan delete:fullapi
 ```
 
+The delete command also unregisters the seeder from `DatabaseSeeder.php` and removes the API route, so your codebase stays clean.
+
+### Regenerate selected files (`--only=`)
+
+Modified your migration and want a fresh `Resource` or `Test` without retyping everything? Use `--only=Type[,Type]` to run only specific generators:
+
+```bash
+# Regenerate only the feature & unit tests
+php artisan make:fullapi Post --fields="title:string,content:text" --only=FeatureTest,UnitTest
+
+# Regenerate just the Resource
+php artisan make:fullapi Post --fields="title:string,content:text" --only=Resource
+```
+
+When `--only=` is set, the migration, the `apiResource` route and the `DatabaseSeeder` registration are **left untouched** -- only the listed artifacts are rewritten.
+
+Available types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.
+
+### Introspect an existing database
+
+The `api-generator:introspect` command emits the project's database schema as JSON, so any tooling can scaffold APIs on top of legacy databases without retyping the schema:
+
+```bash
+# List all user tables (system tables like migrations / sessions / personal_access_tokens are filtered out)
+php artisan api-generator:introspect
+
+# Describe one table (column names, normalized types, soft_deletes flag)
+php artisan api-generator:introspect --table=products
+```
+
+This powers the **Import from Database** feature in the [VS Code extension](https://github.com/Nameless0l/laravel-api-generator-vscode).
+
+### Validate customized stubs
+
+If you customize stubs (see below), `api-generator:validate-stubs` checks that every required `{{placeholder}}` is still present so generation cannot silently produce broken code:
+
+```bash
+php artisan api-generator:validate-stubs
+php artisan api-generator:validate-stubs --json   # machine-readable, exit code 1 on error
+```
+
+Wire this into your CI to catch broken stubs before they reach production.
+
+---
+
+## Customize the generated code (stubs)
+
+Publish the package's stubs to your project so you can edit the templates the generators inject into:
+
+```bash
+php artisan vendor:publish --tag=api-generator-stubs
+```
+
+This copies every `.stub` into `stubs/vendor/laravel-api-generator/`. The `StubLoader` always checks this folder first and falls back to the package's defaults, so you can override only the stubs you need.
+
+After editing, run `api-generator:validate-stubs` (or let the VS Code extension run it automatically before each generation) to verify your customizations.
+
 ---
 
 ## Command reference
 
 ```
-php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive}
+php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
+php artisan delete:fullapi {name?} {--force}
+php artisan api-generator:introspect {--table=}
+php artisan api-generator:validate-stubs {--json}
+php artisan api-generator:install
 ```
 
 | Argument / Option | Description |
@@ -173,6 +234,7 @@ php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--aut
 | `--postman` | Export a Postman v2.1 collection after generation. |
 | `--auth` | Scaffold Sanctum authentication (AuthController, requests, routes, middleware). |
 | `--interactive` | Launch the step-by-step wizard for guided entity creation. |
+| `--only=Type,Type` | Regenerate only the listed artifacts; skip route + seeder registration. |
 
 ---
 
