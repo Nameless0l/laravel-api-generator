@@ -40,6 +40,10 @@ class CodeGeneratorServiceProvider extends ServiceProvider
                 MakeApiWithDiagram::class,
                 InstallPackageCommand::class,
             ]);
+
+            $this->publishes([
+                __DIR__.'/../../stubs' => base_path('stubs/vendor/laravel-api-generator'),
+            ], 'api-generator-stubs');
         }
     }
 
