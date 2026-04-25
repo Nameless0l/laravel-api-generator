@@ -44,6 +44,8 @@ class FeatureTestGenerator extends AbstractGenerator
         $belongsToRels = $definition->relationships
             ->filter(fn (RelationshipDefinition $rel) => $rel->requiresForeignKey());
 
+        $hasAuth = $definition->hasAuth();
+
         return [
             'modelName' => $definition->name,
             'modelNameLower' => $definition->getNameLower(),
@@ -57,7 +59,20 @@ class FeatureTestGenerator extends AbstractGenerator
             'updateRelatedFkFields' => $this->generateUpdateRelatedFkFields($definition, $belongsToRels),
             'assertFields' => $this->generateAssertFields($definition, $belongsToRels),
             'updateAssertFields' => $this->generateUpdateAssertFields($definition, $belongsToRels),
+            'userImport' => $hasAuth ? "\nuse App\\Models\\User;" : '',
+            'userSetup' => $hasAuth ? $this->generateUserSetup() : '',
+            'actingAs' => $hasAuth ? '$this->actingAs($this->user)->' : '',
         ];
+    }
+
+    private function generateUserSetup(): string
+    {
+        return "\n    private User \$user;\n\n".
+            "    protected function setUp(): void\n".
+            "    {\n".
+            "        parent::setUp();\n".
+            "        \$this->user = User::factory()->create();\n".
+            "    }\n";
     }
 
     private function generateRequestFields(EntityDefinition $definition): string

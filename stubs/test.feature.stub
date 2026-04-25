@@ -2,19 +2,19 @@
 
 namespace Tests\Feature;
 
-use App\Models\{{modelName}};{{relatedImports}}
+use App\Models\{{modelName}};{{relatedImports}}{{userImport}}
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class {{modelName}}ControllerTest extends TestCase
 {
     use RefreshDatabase;
-
+{{userSetup}}
     public function test_can_list_{{pluralName}}(): void
     {
         {{modelName}}::factory()->count(3)->create();
 
-        $response = $this->getJson('/api/{{pluralName}}');
+        $response = {{actingAs}}$this->getJson('/api/{{pluralName}}');
 
         $response->assertStatus(200)
             ->assertJsonCount(3, 'data');
@@ -26,7 +26,7 @@ class {{modelName}}ControllerTest extends TestCase
 {{relatedFkFields}}{{requestFields}}
         ];
 
-        $response = $this->postJson('/api/{{pluralName}}', $data);
+        $response = {{actingAs}}$this->postJson('/api/{{pluralName}}', $data);
 
         $response->assertStatus(201);
         {{assertFields}}
@@ -36,7 +36,7 @@ class {{modelName}}ControllerTest extends TestCase
     {
         ${{modelNameLower}} = {{modelName}}::factory()->create();
 
-        $response = $this->getJson("/api/{{pluralName}}/{${{modelNameLower}}->id}");
+        $response = {{actingAs}}$this->getJson("/api/{{pluralName}}/{${{modelNameLower}}->id}");
 
         $response->assertStatus(200)
             ->assertJsonFragment(['id' => ${{modelNameLower}}->id]);
@@ -49,7 +49,7 @@ class {{modelName}}ControllerTest extends TestCase
 {{updateRelatedFkFields}}{{requestFields}}
         ];
 
-        $response = $this->putJson("/api/{{pluralName}}/{${{modelNameLower}}->id}", $data);
+        $response = {{actingAs}}$this->putJson("/api/{{pluralName}}/{${{modelNameLower}}->id}", $data);
 
         $response->assertStatus(200);
         {{updateAssertFields}}
@@ -59,7 +59,7 @@ class {{modelName}}ControllerTest extends TestCase
     {
         ${{modelNameLower}} = {{modelName}}::factory()->create();
 
-        $response = $this->deleteJson("/api/{{pluralName}}/{${{modelNameLower}}->id}");
+        $response = {{actingAs}}$this->deleteJson("/api/{{pluralName}}/{${{modelNameLower}}->id}");
 
         $response->assertStatus(204);
         {{deleteAssertion}}
@@ -67,7 +67,7 @@ class {{modelName}}ControllerTest extends TestCase
 
     public function test_create_{{modelNameLower}}_validates_required_fields(): void
     {
-        $response = $this->postJson('/api/{{pluralName}}', []);
+        $response = {{actingAs}}$this->postJson('/api/{{pluralName}}', []);
 
         $response->assertStatus(422);
     }
