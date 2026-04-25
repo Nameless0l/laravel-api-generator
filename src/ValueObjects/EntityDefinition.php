@@ -134,4 +134,9 @@ final readonly class EntityDefinition
     {
         return ($this->options['soft_deletes'] ?? false) === true;
     }
+
+    public function hasAuth(): bool
+    {
+        return ($this->options['auth'] ?? false) === true;
+    }
 }
