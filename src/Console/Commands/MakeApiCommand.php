@@ -341,7 +341,7 @@ class MakeApiCommand extends Command
             : null;
 
         if ($onlyTypes !== null) {
-            $this->info("Regenerating only: ".implode(', ', $onlyTypes)." for: {$name}");
+            $this->info('Regenerating only: '.implode(', ', $onlyTypes)." for: {$name}");
         } else {
             $this->info("Generating complete API for: {$name}");
         }
