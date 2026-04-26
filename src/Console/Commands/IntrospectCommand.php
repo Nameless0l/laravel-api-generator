@@ -45,13 +45,18 @@ class IntrospectCommand extends Command
     {
         $table = $this->option('table');
 
-        if (is_string($table) && $table !== '') {
-            $this->line(json_encode($this->describeTable($table), JSON_UNESCAPED_SLASHES));
+        $payload = (is_string($table) && $table !== '')
+            ? $this->describeTable($table)
+            : $this->listTables();
 
-            return self::SUCCESS;
+        $json = json_encode($payload, JSON_UNESCAPED_SLASHES);
+        if ($json === false) {
+            $this->error('Failed to encode JSON: '.json_last_error_msg());
+
+            return self::FAILURE;
         }
 
-        $this->line(json_encode($this->listTables(), JSON_UNESCAPED_SLASHES));
+        $this->line($json);
 
         return self::SUCCESS;
     }
@@ -138,9 +143,14 @@ class IntrospectCommand extends Command
      */
     private function getAllTableNames(): array
     {
-        // Laravel 11+ has a portable Schema::getTables()
-        if (method_exists(Schema::class, 'getTables')) {
-            return collect(Schema::getTables())->pluck('name')->all();
+        // Laravel 11+ has a portable Schema::getTables(). Use the runtime
+        // application version instead of method_exists() so PHPStan can't
+        // narrow the branch away on the latest Laravel installed for analysis.
+        if (version_compare(app()->version(), '11', '>=')) {
+            /** @var array<int, array{name: string}> $tables */
+            $tables = Schema::getTables();
+
+            return collect($tables)->pluck('name')->all();
         }
 
         // Fallback for Laravel 10: query per driver

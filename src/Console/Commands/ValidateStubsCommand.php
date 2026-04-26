@@ -117,7 +117,13 @@ class ValidateStubsCommand extends Command
     private function emit(array $payload): void
     {
         if ($this->option('json')) {
-            $this->line(json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+            $json = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+            if ($json === false) {
+                $this->error('Failed to encode JSON: '.json_last_error_msg());
+
+                return;
+            }
+            $this->line($json);
 
             return;
         }
