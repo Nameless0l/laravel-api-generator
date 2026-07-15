@@ -11,3 +11,5 @@ composer.lock
 *.swo
 .DS_Store
 Thumbs.db
+
+TEST_SCENARIO_v35.md
