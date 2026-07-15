@@ -200,39 +200,6 @@ class JsonParser
      */
     private function normalizeType(string $type): string
     {
-        return match (strtolower($type)) {
-            // Integer variants
-            'integer', 'long', 'tinyint', 'smallint', 'mediumint', 'short', 'byte' => 'int',
-            'bigint', 'biginteger' => 'bigint',
-
-            // String variants
-            'str', 'string', 'varchar', 'char', 'enum', 'set',
-            'java.time.offsetdatetime', 'java.time.localdate' => 'string',
-
-            // Text
-            'text', 'longtext', 'mediumtext', 'tinytext', 'clob' => 'text',
-
-            // Boolean
-            'boolean', 'bool' => 'bool',
-
-            // Float/Decimal variants
-            'float', 'double', 'real', 'number' => 'float',
-            'decimal', 'java.math.bigdecimal', 'money' => 'decimal',
-
-            // Date/Time
-            'date', 'localdate' => 'date',
-            'datetime', 'timestamp', 'localdatetime' => 'datetime',
-            'time', 'localtime' => 'time',
-
-            // JSON / Array
-            'json', 'jsonb', 'array', 'list', 'map', 'object',
-            'java.util.map', 'java.util.list' => 'json',
-
-            // UUID
-            'uuid' => 'uuid',
-
-            // Catch-all: types like list_uuid, list_string, etc.
-            default => str_starts_with(strtolower($type), 'list_') ? 'json' : 'string',
-        };
+        return TypeNormalizer::fromSchemaType($type);
     }
 }

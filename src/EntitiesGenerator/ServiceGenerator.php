@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace nameless\CodeGenerator\EntitiesGenerator;
 
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
+use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 
 class ServiceGenerator extends AbstractGenerator
 {
@@ -20,7 +21,9 @@ class ServiceGenerator extends AbstractGenerator
 
     protected function generateContent(EntityDefinition $definition): string
     {
-        return $this->processStub($definition);
+        $stubName = $definition->usesQueryBuilder() ? 'service.query-builder' : 'service';
+
+        return $this->stubLoader->load($stubName, $this->getReplacements($definition));
     }
 
     protected function getStubName(): string
@@ -52,10 +55,27 @@ class ServiceGenerator extends AbstractGenerator
 PHP;
         }
 
+        $filterable = $definition->getFillableFields();
+        $sortable = array_values(array_unique(array_merge(['id'], $filterable, ['created_at'])));
+        $firstFieldDefinition = $definition->fields->first();
+        $firstField = $firstFieldDefinition instanceof FieldDefinition ? $firstFieldDefinition->name : 'id';
+
         return [
             'modelName' => $definition->name,
             'modelNameLower' => $definition->getNameLower(),
+            'pluralName' => $definition->getPluralName(),
             'softDeleteMethods' => $softDeleteMethods,
+            'allowedFilters' => $this->quoteList($filterable),
+            'allowedSorts' => $this->quoteList($sortable),
+            'firstField' => $firstField,
         ];
+    }
+
+    /**
+     * @param  array<int, string>  $values
+     */
+    private function quoteList(array $values): string
+    {
+        return implode(', ', array_map(fn (string $v) => "'{$v}'", $values));
     }
 }

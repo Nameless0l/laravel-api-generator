@@ -9,9 +9,13 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
 use nameless\CodeGenerator\Contracts\GeneratorInterface;
+use nameless\CodeGenerator\EntitiesGenerator\MigrationGenerator;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
+use nameless\CodeGenerator\Support\EntitySorter;
 use nameless\CodeGenerator\Support\JsonParser;
+use nameless\CodeGenerator\Support\StubLoader;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
+use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
 
 class ApiGenerationService implements ApiGenerationServiceInterface
 {
@@ -20,7 +24,8 @@ class ApiGenerationService implements ApiGenerationServiceInterface
      */
     public function __construct(
         private readonly Collection $generators,
-        private readonly JsonParser $jsonParser
+        private readonly JsonParser $jsonParser,
+        private readonly StubLoader $stubLoader
     ) {}
 
     /**
@@ -63,13 +68,82 @@ class ApiGenerationService implements ApiGenerationServiceInterface
      */
     public function generateFromJson(string $jsonData): bool
     {
-        $entities = $this->jsonParser->parseJsonToEntities($jsonData);
+        $entities = EntitySorter::sortByDependencies(
+            $this->jsonParser->parseJsonToEntities($jsonData)
+        );
 
         foreach ($entities as $entity) {
             $this->generateCompleteApi($entity);
         }
 
+        $this->generatePivotMigrations($entities);
+
         return true;
+    }
+
+    /**
+     * Create the pivot table migrations required by manyToMany relationships.
+     * Called after every entity of a batch has been generated so the pivot
+     * migrations run after both referenced tables exist.
+     *
+     * @param  Collection<int, EntityDefinition>  $definitions
+     * @return array<int, string> created migration file paths
+     */
+    public function generatePivotMigrations(Collection $definitions): array
+    {
+        $created = [];
+        $seen = [];
+
+        foreach ($definitions as $definition) {
+            if ($definition->skipsMigration()) {
+                continue;
+            }
+
+            foreach ($definition->getRelationshipsByType('manyToMany') as $relation) {
+                /** @var RelationshipDefinition $relation */
+                $pivotTable = $relation->pivotTable
+                    ?? $this->defaultPivotTableName($definition->name, $relation->relatedModel);
+
+                if (isset($seen[$pivotTable])) {
+                    continue;
+                }
+                $seen[$pivotTable] = true;
+
+                $existing = glob(database_path("migrations/*_create_{$pivotTable}_table.php"));
+                if (! empty($existing)) {
+                    continue;
+                }
+
+                $created[] = $this->createPivotMigration($pivotTable, $definition->name, $relation->relatedModel);
+            }
+        }
+
+        return $created;
+    }
+
+    private function defaultPivotTableName(string $modelA, string $modelB): string
+    {
+        return collect([Str::snake($modelA), Str::snake($modelB)])->sort()->implode('_');
+    }
+
+    private function createPivotMigration(string $pivotTable, string $modelA, string $modelB): string
+    {
+        [$first, $second] = collect([Str::snake($modelA), Str::snake($modelB)])->sort()->values()->all();
+
+        $content = $this->stubLoader->load('migration.pivot', [
+            'pivotTable' => $pivotTable,
+            'columnA' => "{$first}_id",
+            'columnB' => "{$second}_id",
+            'tableA' => Str::plural($first),
+            'tableB' => Str::plural($second),
+        ]);
+
+        $timestamp = MigrationGenerator::nextTimestamp();
+        $path = database_path("migrations/{$timestamp}_create_{$pivotTable}_table.php");
+
+        File::put($path, $content);
+
+        return $path;
     }
 
     /**

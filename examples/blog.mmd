@@ -1,0 +1,26 @@
+erDiagram
+    USER ||--o{ POST : writes
+    POST ||--o{ COMMENT : has
+    POST }o--o{ TAG : tagged
+
+    USER {
+        string name
+        string email UK
+        string password
+    }
+
+    POST {
+        string title
+        text content
+        datetime published_at
+        datetime deleted_at
+    }
+
+    COMMENT {
+        string author_name
+        text body
+    }
+
+    TAG {
+        string name UK
+    }

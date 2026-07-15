@@ -139,4 +139,14 @@ final readonly class EntityDefinition
     {
         return ($this->options['auth'] ?? false) === true;
     }
+
+    public function usesQueryBuilder(): bool
+    {
+        return ($this->options['query_builder'] ?? false) === true;
+    }
+
+    public function skipsMigration(): bool
+    {
+        return ($this->options['skip_migration'] ?? false) === true;
+    }
 }

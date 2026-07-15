@@ -5,6 +5,23 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.0] - 2026-07-15
+
+### Added
+- **Generate from an existing database (`--from-database`)** -- Introspects the project database and generates a complete API for every table: columns become typed fields, foreign keys become `belongsTo` relations (with the inverse `hasMany` on generated parents), pure pivot tables become `belongsToMany` on both sides, and `deleted_at` columns enable soft deletes. Real FK constraints are read on Laravel 11+, with a `<singular>_id` naming-convention fallback for databases without declared constraints. Migrations are skipped by default (`--with-migrations` opts in) and the `users` table is protected unless explicitly requested via `--tables=`.
+- **Declarative schema file (`--schema=api-schema.yaml`)** -- Describe every entity (fields with shorthand `string nullable unique default=x` or mapping form, Eloquent-style relations, global/per-entity options) in a single versionable YAML or JSON file. `make:fullapi` with no arguments now auto-detects `api-schema.yaml` / `.yml` / `.json` at the project root before falling back to `class_data.json`. Example in `examples/api-schema.yaml`.
+- **Mermaid diagram import (`--mermaid=diagram.mmd`)** -- Generates entities from Mermaid `erDiagram` (cardinality symbols `||--o{`, `}o--o{`, attribute blocks with PK/FK/UK markers) and `classDiagram` (typed members, cardinalities, composition/aggregation, inheritance) definitions. Markdown fences and `%%` comments are stripped so diagrams can be pasted as-is; dropped entities/relations produce explicit warnings. Example in `examples/blog.mmd`.
+- **Spatie QueryBuilder integration (`--query-builder`)** -- Generates the service and controller on top of `spatie/laravel-query-builder` (`allowedFilters` / `allowedSorts` for every fillable field, `?filter[field]=value&sort=-created_at`). Available as a CLI flag on every generation mode and as a `query_builder` option in the schema file; warns when the spatie package is not installed. New publishable stubs: `service.query-builder.stub`, `controller.query-builder.stub`.
+- **Pivot table migrations for `belongsToMany`** -- Every generation mode now creates the pivot migration (composite primary key, cascading FKs, deduplicated across both sides) after the entity migrations. New publishable stub: `migration.pivot.stub`.
+- **Foreign-key-safe migration ordering** -- Entities are sorted parents-first (topological sort on `belongsTo`/`hasOne` dependencies) and migration timestamps are sequenced, so `php artisan migrate` runs cleanly on schemas with relations.
+- **`DatabaseIntrospector` support class** -- The schema-reading logic behind `api-generator:introspect` and `--from-database`, reusable by tooling.
+
+### Changed
+- `symfony/yaml` added as a runtime dependency (YAML schema file support).
+- `api-generator:introspect` now delegates to `DatabaseIntrospector` (output unchanged).
+- `ApiGenerationService` constructor now takes a `StubLoader`; `ApiGenerationServiceInterface` gains `generatePivotMigrations()`.
+- JSON bulk generation (`class_data.json`) also benefits from dependency-sorted generation and pivot migrations.
+
 ## [3.3.1] - 2026-04-05
 
 ### Fixed

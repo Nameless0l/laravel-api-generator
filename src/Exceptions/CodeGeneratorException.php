@@ -32,4 +32,14 @@ class CodeGeneratorException extends Exception
     {
         return new self("Failed to generate {$type}: {$reason}");
     }
+
+    public static function invalidSchema(string $source, string $reason): self
+    {
+        return new self("Invalid schema in {$source}: {$reason}");
+    }
+
+    public static function invalidDiagram(string $source, string $reason): self
+    {
+        return new self("Invalid Mermaid diagram in {$source}: {$reason}");
+    }
 }

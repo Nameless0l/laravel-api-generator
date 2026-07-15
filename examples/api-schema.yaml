@@ -1,0 +1,44 @@
+# Declarative API schema for laravel-api-generator.
+#
+# Commit this file to your repository, then (re)generate the whole API with:
+#
+#   php artisan make:fullapi --schema=api-schema.yaml
+#
+# Field shorthand:  <type> [nullable] [unique] [default=<value>]
+# Field mapping:    { type: string, nullable: true, unique: false, default: x, rules: [min:3] }
+# Relations:        <role>: <belongsTo|hasOne|hasMany|belongsToMany> <Model>
+
+options:
+  # Applied to every entity (can be overridden per entity):
+  # query_builder: true
+  # soft_deletes: false
+
+entities:
+  Category:
+    fields:
+      name: string unique
+      description: text nullable
+
+  Tag:
+    fields:
+      name: string unique
+
+  Post:
+    soft_deletes: true
+    fields:
+      title: string
+      slug: { type: string, unique: true }
+      content: text
+      published_at: datetime nullable
+      views: { type: integer, default: 0 }
+    relations:
+      category: belongsTo Category
+      tags: belongsToMany Tag
+      comments: hasMany Comment
+
+  Comment:
+    fields:
+      author_name: string
+      body: text
+    relations:
+      post: belongsTo Post

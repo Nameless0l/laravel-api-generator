@@ -12,9 +12,30 @@ use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
 
 class MigrationGenerator extends AbstractGenerator
 {
+    /**
+     * Offset added to each generated migration timestamp so migrations
+     * created in the same second keep their generation order (parents
+     * before children, pivots last), which foreign keys rely on.
+     */
+    private static int $sequence = 0;
+
     public function getType(): string
     {
         return 'Migration';
+    }
+
+    /**
+     * Skipped when the entity is generated from an existing database
+     * (--from-database without --with-migrations).
+     */
+    public function supports(EntityDefinition $definition): bool
+    {
+        return ! $definition->skipsMigration();
+    }
+
+    public static function nextTimestamp(): string
+    {
+        return date('Y_m_d_His', time() + self::$sequence++);
     }
 
     public function getOutputPath(EntityDefinition $definition): string
@@ -27,7 +48,7 @@ class MigrationGenerator extends AbstractGenerator
             return $existing;
         }
 
-        $timestamp = date('Y_m_d_His');
+        $timestamp = self::nextTimestamp();
 
         return database_path("migrations/{$timestamp}_create_{$tableName}_table.php");
     }

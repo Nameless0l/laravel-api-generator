@@ -20,7 +20,9 @@ class ControllerGenerator extends AbstractGenerator
 
     protected function generateContent(EntityDefinition $definition): string
     {
-        return $this->processStub($definition);
+        $stubName = $definition->usesQueryBuilder() ? 'controller.query-builder' : 'controller';
+
+        return $this->stubLoader->load($stubName, $this->getReplacements($definition));
     }
 
     protected function getStubName(): string

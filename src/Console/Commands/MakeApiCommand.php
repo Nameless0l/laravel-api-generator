@@ -11,22 +11,36 @@ use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\Services\AuthGenerator;
 use nameless\CodeGenerator\Services\PostmanExporter;
+use nameless\CodeGenerator\Support\DatabaseIntrospector;
+use nameless\CodeGenerator\Support\EntitySorter;
 use nameless\CodeGenerator\Support\FieldParser;
 use nameless\CodeGenerator\Support\JsonParser;
+use nameless\CodeGenerator\Support\MermaidParser;
+use nameless\CodeGenerator\Support\SchemaParser;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class MakeApiCommand extends Command
 {
-    protected $signature = 'make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}';
+    protected $signature = 'make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
+        {--schema= : Generate from a declarative YAML/JSON schema file}
+        {--mermaid= : Generate from a Mermaid classDiagram or erDiagram file}
+        {--from-database : Generate from the existing database schema}
+        {--tables= : Comma-separated list of tables to use with --from-database}
+        {--with-migrations : Also generate migrations when using --from-database}
+        {--query-builder : Use spatie/laravel-query-builder for index filtering and sorting}';
 
     protected $description = 'Generate a complete API including model, migration, controller, resource, request, factory, seeder, DTO, service, policy, and tests';
 
     public function __construct(
         private readonly ApiGenerationServiceInterface $apiGenerationService,
         private readonly PostmanExporter $postmanExporter,
-        private readonly AuthGenerator $authGenerator
+        private readonly AuthGenerator $authGenerator,
+        private readonly DatabaseIntrospector $databaseIntrospector,
+        private readonly SchemaParser $schemaParser,
+        private readonly MermaidParser $mermaidParser
     ) {
         parent::__construct();
     }
@@ -44,10 +58,24 @@ class MakeApiCommand extends Command
                 return $this->handleInteractiveGeneration();
             }
 
+            if ($this->option('from-database')) {
+                return $this->handleDatabaseGeneration();
+            }
+
+            $schema = $this->option('schema');
+            if (is_string($schema) && $schema !== '') {
+                return $this->handleSchemaGeneration($schema);
+            }
+
+            $mermaid = $this->option('mermaid');
+            if (is_string($mermaid) && $mermaid !== '') {
+                return $this->handleMermaidGeneration($mermaid);
+            }
+
             $name = $this->argument('name');
 
             if (empty($name)) {
-                return $this->handleJsonGeneration();
+                return $this->handleAutoDetectedGeneration();
             }
 
             $name = is_string($name) ? $name : '';
@@ -61,6 +89,161 @@ class MakeApiCommand extends Command
             $this->error("An unexpected error occurred: {$e->getMessage()}");
 
             return self::FAILURE;
+        }
+    }
+
+    // ─── Schema / Mermaid / Database generation modes ───────────────────
+
+    private function handleDatabaseGeneration(): int
+    {
+        $tablesOption = $this->option('tables');
+        $onlyTables = is_string($tablesOption) && $tablesOption !== ''
+            ? array_map('trim', explode(',', $tablesOption))
+            : null;
+
+        $options = $this->cliEntityOptions();
+        if (! $this->option('with-migrations')) {
+            $options['skip_migration'] = true;
+        }
+
+        $this->info('Introspecting database schema...');
+        $entities = $this->databaseIntrospector->buildEntityDefinitions($onlyTables, $options);
+
+        if ($entities->isEmpty()) {
+            $this->error('No matching tables found in the database.');
+
+            return self::FAILURE;
+        }
+
+        if ($onlyTables === null) {
+            $this->line('Note: the users table is skipped by default (it would overwrite app/Models/User.php). Use --tables=users to include it.');
+        }
+
+        return $this->generateEntities($entities, 'the database');
+    }
+
+    private function handleSchemaGeneration(string $path): int
+    {
+        $resolved = File::exists($path) ? $path : base_path($path);
+        $entities = $this->schemaParser->parseFile($resolved, $this->cliEntityOptions());
+
+        return $this->generateEntities($entities, basename($resolved));
+    }
+
+    private function handleMermaidGeneration(string $path): int
+    {
+        $resolved = File::exists($path) ? $path : base_path($path);
+        $entities = $this->mermaidParser->parseFile($resolved, $this->cliEntityOptions());
+
+        foreach ($this->mermaidParser->getWarnings() as $warning) {
+            $this->warn('  ! '.$warning);
+        }
+
+        return $this->generateEntities($entities, basename($resolved));
+    }
+
+    /**
+     * No name and no source option: look for a schema file at the project
+     * root, then fall back to the legacy class_data.json flow.
+     */
+    private function handleAutoDetectedGeneration(): int
+    {
+        foreach (SchemaParser::DEFAULT_FILES as $file) {
+            if (File::exists(base_path($file))) {
+                $this->info("Found {$file}, generating from schema...");
+
+                return $this->handleSchemaGeneration(base_path($file));
+            }
+        }
+
+        return $this->handleJsonGeneration();
+    }
+
+    /**
+     * Shared pipeline for every multi-entity source (database, schema
+     * file, Mermaid diagram): generate each entity, create pivot
+     * migrations, then apply auth/postman options.
+     *
+     * @param  Collection<int, EntityDefinition>  $entities
+     */
+    private function generateEntities(Collection $entities, string $sourceLabel): int
+    {
+        $this->info("Generating {$entities->count()} API(s) from {$sourceLabel}:");
+        foreach ($entities as $entity) {
+            $flags = [];
+            if ($entity->hasSoftDeletes()) {
+                $flags[] = 'soft deletes';
+            }
+            if ($entity->usesQueryBuilder()) {
+                $flags[] = 'query builder';
+            }
+            if ($entity->skipsMigration()) {
+                $flags[] = 'no migration';
+            }
+            if ($entity->relationships->isNotEmpty()) {
+                $flags[] = $entity->relationships->count().' relation(s)';
+            }
+            $this->line("  - {$entity->name}".($flags !== [] ? ' ('.implode(', ', $flags).')' : ''));
+        }
+        $this->newLine();
+
+        foreach ($entities as $entity) {
+            $this->apiGenerationService->generateCompleteApi($entity);
+            $this->info("  ✔ {$entity->name}");
+        }
+
+        $pivots = $this->apiGenerationService->generatePivotMigrations($entities);
+        foreach ($pivots as $pivot) {
+            $this->line('  - Pivot migration: '.basename($pivot));
+        }
+
+        if ($this->option('auth')) {
+            $this->authGenerator->wrapRoutesInAuthMiddleware();
+        }
+
+        if ($this->option('postman')) {
+            $outputPath = base_path('postman_collection.json');
+            $this->postmanExporter->export($entities, $outputPath);
+            $this->info("Postman collection exported to: {$outputPath}");
+        }
+
+        $this->warnIfQueryBuilderMissing($entities);
+
+        $this->info('API generation completed successfully!');
+        $this->checkApiRoutesRegistered();
+
+        return self::SUCCESS;
+    }
+
+    /**
+     * Entity options driven by CLI flags, merged into every generated entity.
+     *
+     * @return array<string, mixed>
+     */
+    private function cliEntityOptions(): array
+    {
+        $options = [];
+        if ($this->option('query-builder')) {
+            $options['query_builder'] = true;
+        }
+
+        return $options;
+    }
+
+    /**
+     * @param  Collection<int, EntityDefinition>  $entities
+     */
+    private function warnIfQueryBuilderMissing(Collection $entities): void
+    {
+        $usesQueryBuilder = $entities->contains(
+            fn (EntityDefinition $entity) => $entity->usesQueryBuilder()
+        );
+
+        if ($usesQueryBuilder && ! class_exists(QueryBuilder::class)) {
+            $this->newLine();
+            $this->warn('The generated services use Spatie QueryBuilder. Install it with:');
+            $this->line('  composer require spatie/laravel-query-builder');
+            $this->newLine();
         }
     }
 
@@ -115,11 +298,12 @@ class MakeApiCommand extends Command
             name: $name,
             fields: $fields,
             relationships: $relationships,
-            options: ['soft_deletes' => $softDeletes]
+            options: array_merge($this->cliEntityOptions(), ['soft_deletes' => $softDeletes])
         );
 
         $this->info("Generating complete API for: {$name}");
         $this->apiGenerationService->generateCompleteApi($definition);
+        $this->apiGenerationService->generatePivotMigrations(collect([$definition]));
 
         if ($withAuth || $this->option('auth')) {
             $this->authGenerator->wrapRoutesInAuthMiddleware();
@@ -303,22 +487,25 @@ class MakeApiCommand extends Command
 
         $jsonData = File::get($jsonFilePath);
 
-        $this->info('Generating APIs from JSON data...');
-        $this->apiGenerationService->generateFromJson($jsonData);
+        $parser = app(JsonParser::class);
+        $entities = $parser->parseJsonToEntities($jsonData);
 
-        if ($this->option('auth')) {
-            $this->authGenerator->wrapRoutesInAuthMiddleware();
+        // Apply CLI flags (e.g. --query-builder) to every parsed entity
+        $cliOptions = $this->cliEntityOptions();
+        if ($cliOptions !== []) {
+            $entities = $entities->map(fn (EntityDefinition $entity) => new EntityDefinition(
+                name: $entity->name,
+                fields: $entity->fields,
+                relationships: $entity->relationships,
+                parent: $entity->parent,
+                options: array_merge($cliOptions, $entity->options)
+            ));
         }
 
-        $this->info('API generation completed successfully!');
-
-        if ($this->option('postman')) {
-            $this->exportPostmanCollection($jsonData);
-        }
-
-        $this->checkApiRoutesRegistered();
-
-        return self::SUCCESS;
+        return $this->generateEntities(
+            EntitySorter::sortByDependencies($entities),
+            'class_data.json'
+        );
     }
 
     private function handleSingleEntityGeneration(string $name): int
@@ -364,6 +551,8 @@ class MakeApiCommand extends Command
             $this->info("Postman collection exported to: {$outputPath}");
         }
 
+        $this->warnIfQueryBuilderMissing(collect([$definition]));
+
         $this->info('API generation completed successfully!');
         $this->checkApiRoutesRegistered();
 
@@ -402,19 +591,10 @@ class MakeApiCommand extends Command
             name: ucfirst($name),
             fields: $fields,
             relationships: collect(),
-            options: [
+            options: array_merge($this->cliEntityOptions(), [
                 'soft_deletes' => (bool) $this->option('soft-deletes'),
-            ]
+            ])
         );
-    }
-
-    private function exportPostmanCollection(string $jsonData): void
-    {
-        $parser = app(JsonParser::class);
-        $entities = $parser->parseJsonToEntities($jsonData);
-        $outputPath = base_path('postman_collection.json');
-        $this->postmanExporter->export($entities, $outputPath);
-        $this->info("Postman collection exported to: {$outputPath}");
     }
 
     private function displayGeneratedFiles(EntityDefinition $definition): void

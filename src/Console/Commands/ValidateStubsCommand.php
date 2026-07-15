@@ -35,7 +35,9 @@ class ValidateStubsCommand extends Command
     private const REQUIRED = [
         'model' => ['modelName', 'fillable'],
         'controller' => ['modelName', 'modelNameLower', 'pluralName'],
+        'controller.query-builder' => ['modelName', 'modelNameLower', 'pluralName'],
         'service' => ['modelName', 'modelNameLower'],
+        'service.query-builder' => ['modelName', 'modelNameLower', 'allowedFilters', 'allowedSorts'],
         'dto' => ['modelName', 'attributes', 'attributesFromRequest'],
         'request' => ['modelName', 'rules'],
         'resource' => ['modelName', 'fields'],

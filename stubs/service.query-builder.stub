@@ -1,0 +1,48 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services;
+
+use App\Models\{{modelName}};
+use App\DTO\{{modelName}}DTO;
+use Illuminate\Database\Eloquent\Collection;
+use Spatie\QueryBuilder\QueryBuilder;
+
+class {{modelName}}Service
+{
+    /**
+     * Supports Spatie QueryBuilder filters and sorts, e.g.:
+     *   GET /api/{{pluralName}}?filter[{{firstField}}]=value&sort=-created_at
+     */
+    public function getAll(): Collection
+    {
+        return QueryBuilder::for({{modelName}}::class)
+            ->allowedFilters([{{allowedFilters}}])
+            ->allowedSorts([{{allowedSorts}}])
+            ->defaultSort('-id')
+            ->get();
+    }
+
+    public function create({{modelName}}DTO $dto): {{modelName}}
+    {
+        return {{modelName}}::create(get_object_vars($dto));
+    }
+
+    public function find(int|string $id): {{modelName}}
+    {
+        return {{modelName}}::findOrFail($id);
+    }
+
+    public function update({{modelName}} ${{modelNameLower}}, {{modelName}}DTO $dto): {{modelName}}
+    {
+        ${{modelNameLower}}->update(get_object_vars($dto));
+        return ${{modelNameLower}}->fresh();
+    }
+
+    public function delete({{modelName}} ${{modelNameLower}}): bool
+    {
+        return ${{modelNameLower}}->delete();
+    }
+{{softDeleteMethods}}
+}
