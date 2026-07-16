@@ -6,6 +6,8 @@
 
 A professional Laravel package that generates complete, production-ready REST API structures from a single command. Built with clean architecture principles, PHP 8.1+ features, and Laravel best practices.
 
+**📖 Documentation: [nameless0l.github.io/laravel-api-generator](https://nameless0l.github.io/laravel-api-generator/)**
+
 ![Demo](docs/demo.gif)
 
 ### VS Code Extension
