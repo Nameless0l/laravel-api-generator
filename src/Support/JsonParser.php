@@ -122,9 +122,22 @@ class JsonParser
 
             return true;
         })->map(function (array $attribute) {
+            $rawType = $attribute['_type'] ?? 'string';
+            $attributes = ($attribute['primary'] ?? $attribute['_primary'] ?? false) ? ['primary' => true] : [];
+
+            $enumValues = FieldParser::parseEnumType($rawType);
+            if ($enumValues !== null) {
+                return new FieldDefinition(
+                    name: $attribute['name'],
+                    type: 'string',
+                    attributes: array_merge($attributes, ['enum' => $enumValues])
+                );
+            }
+
             return new FieldDefinition(
                 name: $attribute['name'],
-                type: $this->normalizeType($attribute['_type'] ?? 'string')
+                type: $this->normalizeType($rawType),
+                attributes: $attributes
             );
         })->values();
     }

@@ -149,4 +149,21 @@ final readonly class EntityDefinition
     {
         return ($this->options['skip_migration'] ?? false) === true;
     }
+
+    public function usesPest(): bool
+    {
+        return ($this->options['pest'] ?? false) === true;
+    }
+
+    public function getPrimaryField(): ?FieldDefinition
+    {
+        return $this->fields->first(fn (FieldDefinition $field) => $field->isPrimary());
+    }
+
+    public function getPrimaryKeyName(): string
+    {
+        $primary = $this->getPrimaryField();
+
+        return $primary === null ? 'id' : $primary->name;
+    }
 }

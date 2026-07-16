@@ -6,6 +6,7 @@ namespace nameless\CodeGenerator\Support;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
@@ -54,6 +55,9 @@ class SchemaParser
         'onetomany' => 'oneToMany',
         'onetoone' => 'oneToOne',
         'manytomany' => 'manyToMany',
+        'morphto' => 'morphTo',
+        'morphone' => 'morphOne',
+        'morphmany' => 'morphMany',
     ];
 
     /**
@@ -120,7 +124,9 @@ class SchemaParser
             ));
         }
 
-        return EntitySorter::sortByDependencies($entities);
+        return EntitySorter::sortByDependencies(
+            RelationshipSynthesizer::resolveRelatedKeys(RelationshipSynthesizer::addInverses($entities))
+        );
     }
 
     /**
@@ -171,13 +177,22 @@ class SchemaParser
         $unique = false;
         $default = null;
         $rules = [];
+        $enumValues = null;
+        $primary = false;
 
         if (is_string($fieldDef)) {
             $tokens = preg_split('/\s+/', trim($fieldDef)) ?: [];
             if ($tokens === [] || $tokens[0] === '') {
                 throw CodeGeneratorException::invalidSchema($source, "field '{$entity}.{$fieldName}' has an empty definition");
             }
-            $type = $tokens[0];
+
+            if (preg_match('/^enum\((.*)\)$/', $tokens[0], $matches)) {
+                $type = 'string';
+                $enumValues = array_map('trim', explode(',', $matches[1]));
+            } else {
+                $type = $tokens[0];
+            }
+
             foreach (array_slice($tokens, 1) as $token) {
                 $lower = strtolower($token);
                 if ($lower === 'nullable') {
@@ -186,8 +201,12 @@ class SchemaParser
                     $nullable = false;
                 } elseif ($lower === 'unique') {
                     $unique = true;
+                } elseif ($lower === 'primary' || $lower === 'pk') {
+                    $primary = true;
                 } elseif (str_starts_with($lower, 'default=')) {
                     $default = substr($token, strlen('default='));
+                } elseif (preg_match('/^enum\((.*)\)$/', $token, $matches)) {
+                    $enumValues = array_map('trim', explode(',', $matches[1]));
                 } else {
                     throw CodeGeneratorException::invalidSchema($source, "field '{$entity}.{$fieldName}': unknown modifier '{$token}'");
                 }
@@ -196,11 +215,22 @@ class SchemaParser
             $type = (string) ($fieldDef['type'] ?? 'string');
             $nullable = (bool) ($fieldDef['nullable'] ?? false);
             $unique = (bool) ($fieldDef['unique'] ?? false);
+            $primary = (bool) ($fieldDef['primary'] ?? false);
             $default = $this->stringifyDefault($fieldDef['default'] ?? null);
             $rulesDef = $fieldDef['rules'] ?? [];
             $rules = is_array($rulesDef) ? array_map('strval', $rulesDef) : explode('|', (string) $rulesDef);
+
+            if (isset($fieldDef['enum']) && is_array($fieldDef['enum'])) {
+                $enumValues = array_map('strval', $fieldDef['enum']);
+                $type = 'string';
+            }
         } else {
             throw CodeGeneratorException::invalidSchema($source, "field '{$entity}.{$fieldName}' must be a string or a mapping");
+        }
+
+        $attributes = $enumValues ? ['enum' => $enumValues] : [];
+        if ($primary) {
+            $attributes['primary'] = true;
         }
 
         return new FieldDefinition(
@@ -209,7 +239,8 @@ class SchemaParser
             nullable: $nullable,
             unique: $unique,
             default: $default,
-            validationRules: $rules
+            validationRules: $rules,
+            attributes: $attributes
         );
     }
 
@@ -223,26 +254,41 @@ class SchemaParser
         $model = null;
         $foreignKey = null;
         $pivotTable = null;
+        $morphName = null;
 
         if (is_string($relationDef)) {
             $parts = preg_split('/[\s:]+/', trim($relationDef)) ?: [];
-            if (count($parts) === 2) {
+            if (count($parts) === 1) {
+                [$type] = $parts;
+            } elseif (count($parts) === 2) {
                 [$type, $model] = $parts;
+            } elseif (count($parts) === 3) {
+                [$type, $model, $morphName] = $parts;
             }
         } elseif (is_array($relationDef)) {
             $type = $relationDef['type'] ?? null;
             $model = $relationDef['model'] ?? $relationDef['relatedModel'] ?? null;
             $foreignKey = isset($relationDef['foreignKey']) ? (string) $relationDef['foreignKey'] : null;
             $pivotTable = isset($relationDef['pivotTable']) ? (string) $relationDef['pivotTable'] : null;
+            $morphName = isset($relationDef['name']) ? (string) $relationDef['name'] : null;
         }
 
-        if (! is_string($type) || ! is_string($model) || $model === '') {
+        if (! is_string($type)) {
             throw CodeGeneratorException::invalidSchema($source, "relation '{$entity}.{$role}' must look like 'belongsTo ModelName'");
         }
 
         $normalized = self::RELATION_TYPES[strtolower($type)] ?? null;
         if ($normalized === null) {
-            throw CodeGeneratorException::invalidSchema($source, "relation '{$entity}.{$role}': unknown type '{$type}' (expected belongsTo, hasOne, hasMany or belongsToMany)");
+            throw CodeGeneratorException::invalidSchema($source, "relation '{$entity}.{$role}': unknown type '{$type}' (expected belongsTo, hasOne, hasMany, belongsToMany, morphTo, morphOne or morphMany)");
+        }
+
+        // morphTo has no target model: the morph name is the role itself
+        if ($normalized === 'morphTo') {
+            $model = is_string($model) && $model !== '' ? $model : Str::studly($role);
+        }
+
+        if (! is_string($model) || $model === '') {
+            throw CodeGeneratorException::invalidSchema($source, "relation '{$entity}.{$role}' must look like 'belongsTo ModelName'");
         }
 
         return new RelationshipDefinition(
@@ -250,7 +296,8 @@ class SchemaParser
             relatedModel: ucfirst($model),
             role: $role,
             foreignKey: $foreignKey,
-            pivotTable: $pivotTable
+            pivotTable: $pivotTable,
+            morphName: $morphName
         );
     }
 
@@ -266,7 +313,7 @@ class SchemaParser
     {
         $options = [];
 
-        foreach (['soft_deletes' => 'softDeletes', 'query_builder' => 'queryBuilder'] as $snake => $camel) {
+        foreach (['soft_deletes' => 'softDeletes', 'query_builder' => 'queryBuilder', 'pest' => 'pest'] as $snake => $camel) {
             if (array_key_exists($snake, $data)) {
                 $options[$snake] = (bool) $data[$snake];
             } elseif (array_key_exists($camel, $data)) {

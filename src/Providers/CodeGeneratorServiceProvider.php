@@ -6,6 +6,7 @@ namespace nameless\CodeGenerator\Providers;
 
 use Dedoc\Scramble\ScrambleServiceProvider;
 use Illuminate\Support\ServiceProvider;
+use nameless\CodeGenerator\Console\Commands\CleanRoutesCommand;
 use nameless\CodeGenerator\Console\Commands\DeleteFullApi;
 use nameless\CodeGenerator\Console\Commands\InstallPackageCommand;
 use nameless\CodeGenerator\Console\Commands\IntrospectCommand;
@@ -15,6 +16,7 @@ use nameless\CodeGenerator\Console\Commands\ValidateStubsCommand;
 use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
 use nameless\CodeGenerator\EntitiesGenerator\ControllerGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\DTOGenerator;
+use nameless\CodeGenerator\EntitiesGenerator\EnumGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\FactoryGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\FeatureTestGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\MigrationGenerator;
@@ -39,6 +41,7 @@ class CodeGeneratorServiceProvider extends ServiceProvider
             $this->commands([
                 MakeApiCommand::class,
                 DeleteFullApi::class,
+                CleanRoutesCommand::class,
                 MakeApiWithDiagram::class,
                 InstallPackageCommand::class,
                 IntrospectCommand::class,
@@ -92,6 +95,7 @@ class CodeGeneratorServiceProvider extends ServiceProvider
     {
         $this->app->singleton('code_generator.generators', function ($app) {
             return collect([
+                $app->make(EnumGenerator::class),
                 $app->make(MigrationGenerator::class),
                 $app->make(ModelGeneratorRefactored::class),
                 $app->make(ControllerGenerator::class),

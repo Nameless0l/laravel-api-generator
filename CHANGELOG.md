@@ -5,6 +5,25 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0] - 2026-07-16
+
+### Added
+- **Model PHPDoc** -- Every generated model now carries a full `@property` / `@property-read` docblock (fields with real PHP types, nullability, FK columns, relations as `Category` or `Collection<int, Comment>`, timestamps, soft-delete column). IDE autocompletion works out of the box in VS Code (Intelephense) and PhpStorm -- no `barryvdh/laravel-ide-helper` needed.
+- **Native enum fields** -- `status:enum(draft,published)` (CLI) or `status: enum(draft,published)` (schema file) generates a backed `App\Enums\Status` enum, casts it on the model, validates with `Rule::enum()` in the Request, fakes with `fake()->randomElement(Status::cases())` in the factory and emits a real `$table->enum()` column in the migration.
+- **`--pest`** -- Generates Pest tests (`it(...)`, `expect(...)`, `beforeEach`) instead of PHPUnit classes. Also available as a `pest: true` option in schema files. New publishable stubs: `test.feature.pest.stub`, `test.unit.pest.stub`.
+- **Automatic inverse relations on schema/Mermaid sources** -- Declaring one side is now enough: `hasMany` synthesizes the `belongsTo` (and its FK column in the migration), `belongsTo` synthesizes the `hasMany`, `belongsToMany` synthesizes the other side. Same behaviour as `--from-database`, now shared via `RelationshipSynthesizer`.
+- **Polymorphic relations** -- `morphTo`, `morphOne` and `morphMany` in schema files (`commentable: morphTo`, `comments: morphMany Comment`): `$table->morphs()` in the migration, correct Eloquent methods and PHPDoc on both models. `--from-database` detects `*_type`/`*_id` column pairs as `morphTo`.
+- **Entity evolution (`--add-fields`)** -- `make:fullapi Post --add-fields="excerpt:text,status:enum(draft,published)"` adds fields to an already generated entity without touching manual changes: incremental `Schema::table` migration, in-place patches of `$fillable`/`$casts`/PHPDoc, validation rules, factory definition and resource fields. Fields that already exist are skipped; DTO and tests are reported as manual follow-ups. New publishable stub: `migration.add-fields.stub`.
+- **Custom primary keys (`primary`)** -- `code:string:primary` (CLI) or `code: string primary` (schema file) replaces the default `id`: the migration emits `->primary()` and drops `$table->id()`, the model declares `$primaryKey`/`$incrementing`/`$keyType`, and every relation targeting the entity follows automatically (FK column named `country_code`, typed after the key, `->references('code')`, `exists:countries,code` validation, unique factory fakes). Generated tests use `getKey()` so they pass with either key style.
+- **`api-generator:clean-routes`** -- removes route lines (and imports) referencing controllers whose file no longer exists, the leftovers that crash `route:list` and IDE tooling with a ReflectionException. Supports `--dry-run`.
+
+### Changed
+- `delete:fullapi` route cleanup is now reference-based: any `Route::` line or import mentioning the entity's controller is removed, in `routes/api.php` and `routes/web.php` both.
+
+### Fixed
+- Generated models no longer import their own class on self-referential relations.
+- Models with `hasMany`/`belongsToMany`/`morphMany` relations now import `Illuminate\Database\Eloquent\Collection` for the PHPDoc types.
+
 ## [3.5.1] - 2026-07-16
 
 ### Fixed

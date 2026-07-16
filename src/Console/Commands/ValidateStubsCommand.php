@@ -47,6 +47,9 @@ class ValidateStubsCommand extends Command
         'policy' => ['modelName', 'modelNameLower'],
         'test.feature' => ['modelName', 'modelNameLower', 'pluralName'],
         'test.unit' => ['modelName', 'modelNameLower'],
+        'test.feature.pest' => ['modelName', 'modelNameLower', 'pluralName'],
+        'test.unit.pest' => ['modelName', 'modelNameLower'],
+        'migration.add-fields' => ['tableName', 'columns', 'dropColumns'],
     ];
 
     public function handle(): int

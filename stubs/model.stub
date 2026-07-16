@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 {{imports}}
 
+{{phpdoc}}
 class {{modelName}} extends {{parentClass}}
 {
     use HasFactory;

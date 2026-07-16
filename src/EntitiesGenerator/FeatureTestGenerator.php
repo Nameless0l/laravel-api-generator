@@ -24,7 +24,9 @@ class FeatureTestGenerator extends AbstractGenerator
 
     protected function generateContent(EntityDefinition $definition): string
     {
-        return $this->processStub($definition);
+        $stubName = $definition->usesPest() ? 'test.feature.pest' : 'test.feature';
+
+        return $this->stubLoader->load($stubName, $this->getReplacements($definition));
     }
 
     protected function getStubName(): string
@@ -37,9 +39,10 @@ class FeatureTestGenerator extends AbstractGenerator
      */
     protected function getReplacements(EntityDefinition $definition): array
     {
+        $pk = $definition->getPrimaryKeyName();
         $deleteAssertion = $definition->hasSoftDeletes()
-            ? "\$this->assertSoftDeleted('{$definition->getTableName()}', ['id' => \${$definition->getNameLower()}->id]);"
-            : "\$this->assertDatabaseMissing('{$definition->getTableName()}', ['id' => \${$definition->getNameLower()}->id]);";
+            ? "\$this->assertSoftDeleted('{$definition->getTableName()}', ['{$pk}' => \${$definition->getNameLower()}->getKey()]);"
+            : "\$this->assertDatabaseMissing('{$definition->getTableName()}', ['{$pk}' => \${$definition->getNameLower()}->getKey()]);";
 
         $belongsToRels = $definition->relationships
             ->filter(fn (RelationshipDefinition $rel) => $rel->requiresForeignKey());
@@ -51,6 +54,7 @@ class FeatureTestGenerator extends AbstractGenerator
             'modelNameLower' => $definition->getNameLower(),
             'pluralName' => $definition->getPluralName(),
             'tableName' => $definition->getTableName(),
+            'pkFieldQuoted' => "'{$pk}'",
             'requestFields' => $this->generateRequestFields($definition),
             'deleteAssertion' => $deleteAssertion,
             'relatedImports' => $this->generateRelatedImports($belongsToRels, $definition->name),
@@ -60,13 +64,19 @@ class FeatureTestGenerator extends AbstractGenerator
             'assertFields' => $this->generateAssertFields($definition, $belongsToRels),
             'updateAssertFields' => $this->generateUpdateAssertFields($definition, $belongsToRels),
             'userImport' => $hasAuth ? "\nuse App\\Models\\User;" : '',
-            'userSetup' => $hasAuth ? $this->generateUserSetup() : '',
+            'userSetup' => $hasAuth ? $this->generateUserSetup($definition->usesPest()) : '',
             'actingAs' => $hasAuth ? '$this->actingAs($this->user)->' : '',
         ];
     }
 
-    private function generateUserSetup(): string
+    private function generateUserSetup(bool $pest): string
     {
+        if ($pest) {
+            return "\nbeforeEach(function () {\n".
+                "    \$this->user = User::factory()->create();\n".
+                "});\n";
+        }
+
         return "\n    private User \$user;\n\n".
             "    protected function setUp(): void\n".
             "    {\n".
@@ -146,7 +156,7 @@ class FeatureTestGenerator extends AbstractGenerator
             ->map(function (RelationshipDefinition $rel) {
                 $varName = Str::camel($rel->relatedModel);
 
-                return "            '{$rel->getForeignKeyName()}' => \${$varName}->id,";
+                return "            '{$rel->getForeignKeyName()}' => \${$varName}->getKey(),";
             })
             ->implode("\n")."\n";
     }
@@ -197,7 +207,7 @@ class FeatureTestGenerator extends AbstractGenerator
         // Add FK assertions
         foreach ($belongsToRels as $rel) {
             $varName = Str::camel($rel->relatedModel);
-            $lines[] = "            '{$rel->getForeignKeyName()}' => \${$varName}->id,";
+            $lines[] = "            '{$rel->getForeignKeyName()}' => \${$varName}->getKey(),";
         }
 
         $lines[] = '        ]);';

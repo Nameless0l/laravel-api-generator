@@ -202,6 +202,23 @@ class DatabaseIntrospector
         $relations = [];
         $softDeletes = false;
 
+        $columnNames = array_column($columns, 'name');
+        $morphNames = [];
+        foreach ($columnNames as $name) {
+            if (str_ends_with($name, '_type') && in_array(Str::beforeLast($name, '_type').'_id', $columnNames, true)) {
+                $morphNames[] = Str::beforeLast($name, '_type');
+            }
+        }
+
+        foreach ($morphNames as $morphName) {
+            $relations[] = new RelationshipDefinition(
+                type: 'morphTo',
+                relatedModel: Str::studly($morphName),
+                role: Str::camel($morphName),
+                morphName: $morphName
+            );
+        }
+
         foreach ($columns as $column) {
             $name = $column['name'];
 
@@ -210,6 +227,12 @@ class DatabaseIntrospector
             }
             if (in_array($name, $skip, true)) {
                 continue;
+            }
+
+            foreach ($morphNames as $morphName) {
+                if ($name === "{$morphName}_type" || $name === "{$morphName}_id") {
+                    continue 2;
+                }
             }
 
             if (isset($foreignKeys[$name])) {

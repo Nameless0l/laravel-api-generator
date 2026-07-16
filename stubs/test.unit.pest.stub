@@ -1,0 +1,68 @@
+<?php
+
+use App\Models\{{modelName}};{{relatedImports}}
+use App\Services\{{modelName}}Service;
+use App\DTO\{{modelName}}DTO;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(Tests\TestCase::class, RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->service = new {{modelName}}Service();
+});
+
+it('gets all {{pluralName}}', function () {
+    {{modelName}}::factory()->count(5)->create();
+
+    $result = $this->service->getAll();
+
+    expect($result)->toHaveCount(5);
+});
+
+it('filters {{pluralName}}', function () {
+    {{modelName}}::factory()->count(3)->create();
+
+    $result = $this->service->getAll([]);
+
+    expect($result)->toHaveCount(3);
+});
+
+it('creates a {{modelNameLower}}', function () {
+{{createRelatedModels}}
+    $dto = new {{modelName}}DTO(
+{{dtoConstructorArgs}}{{dtoFkArgs}}
+    );
+
+    ${{modelNameLower}} = $this->service->create($dto);
+
+    expect(${{modelNameLower}})->toBeInstanceOf({{modelName}}::class);
+    $this->assertDatabaseCount('{{tableName}}', 1);
+});
+
+it('finds a {{modelNameLower}}', function () {
+    ${{modelNameLower}} = {{modelName}}::factory()->create();
+
+    $found = $this->service->find(${{modelNameLower}}->getKey());
+
+    expect($found->getKey())->toBe(${{modelNameLower}}->getKey());
+});
+
+it('updates a {{modelNameLower}}', function () {
+    ${{modelNameLower}} = {{modelName}}::factory()->create();
+    $dto = new {{modelName}}DTO(
+{{dtoConstructorArgs}}{{updateDtoFkArgs}}
+    );
+
+    $updated = $this->service->update(${{modelNameLower}}, $dto);
+
+    expect($updated)->toBeInstanceOf({{modelName}}::class);
+});
+
+it('deletes a {{modelNameLower}}', function () {
+    ${{modelNameLower}} = {{modelName}}::factory()->create();
+
+    $result = $this->service->delete(${{modelNameLower}});
+
+    expect($result)->toBeTrue();
+    {{deleteAssertion}}
+});

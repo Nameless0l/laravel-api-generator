@@ -171,35 +171,36 @@ class DeleteFullApi extends Command
 
     private function removeApiRoute(string $className, string $pluralName): void
     {
-        $apiFilePath = base_path('routes/api.php');
+        foreach (['routes/api.php', 'routes/web.php'] as $routeFile) {
+            $this->removeRoutesFromFile(base_path($routeFile), $className, $pluralName);
+        }
+    }
 
-        if (! File::exists($apiFilePath)) {
+    private function removeRoutesFromFile(string $path, string $className, string $pluralName): void
+    {
+        if (! File::exists($path)) {
             return;
         }
 
-        $content = File::get($apiFilePath);
+        $content = File::get($path);
         $originalContent = $content;
 
-        // Remove lines containing this entity's routes (line by line for reliability)
         $lines = explode("\n", $content);
         $filteredLines = [];
         foreach ($lines as $line) {
             $trimmed = trim($line);
-            // Skip apiResource route for this entity
-            if (str_contains($trimmed, "apiResource('{$pluralName}'") && str_contains($trimmed, "{$className}Controller")) {
-                $this->info("Route apiResource supprimée : {$trimmed}");
+
+            // Any route or import referencing this entity's controller
+            if (preg_match('/\b'.preg_quote($className, '/').'Controller\b/', $trimmed)
+                && (str_contains($trimmed, 'Route::') || str_starts_with($trimmed, 'use '))) {
+                $this->info("Ligne supprimée : {$trimmed}");
 
                 continue;
             }
-            // Skip restore route for this entity
-            if (str_contains($trimmed, "'{$pluralName}/{id}/restore'") || str_contains($trimmed, "\"{$pluralName}/{id}/restore\"")) {
-                $this->info("Route restore supprimée : {$trimmed}");
-
-                continue;
-            }
-            // Skip force-delete route for this entity
-            if (str_contains($trimmed, "'{$pluralName}/{id}/force-delete'") || str_contains($trimmed, "\"{$pluralName}/{id}/force-delete\"")) {
-                $this->info("Route force-delete supprimée : {$trimmed}");
+            // Soft-delete companion routes registered with URI strings only
+            if (str_contains($trimmed, "'{$pluralName}/{id}/restore'") || str_contains($trimmed, "\"{$pluralName}/{id}/restore\"")
+                || str_contains($trimmed, "'{$pluralName}/{id}/force-delete'") || str_contains($trimmed, "\"{$pluralName}/{id}/force-delete\"")) {
+                $this->info("Ligne supprimée : {$trimmed}");
 
                 continue;
             }
@@ -208,16 +209,15 @@ class DeleteFullApi extends Command
 
         $content = implode("\n", $filteredLines);
 
-        // Clean up multiple blank lines
         $result = preg_replace("/\n{3,}/", "\n\n", $content);
         if (is_string($result)) {
             $content = $result;
         }
 
-        File::put($apiFilePath, $content);
+        File::put($path, $content);
 
         if ($content !== $originalContent) {
-            $this->info('Route API supprimée de routes/api.php');
+            $this->info('Routes nettoyées : '.basename($path));
         }
     }
 

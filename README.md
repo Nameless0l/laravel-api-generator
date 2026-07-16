@@ -12,6 +12,15 @@ A professional Laravel package that generates complete, production-ready REST AP
 
 A visual interface is available: [laravel-api-generator-vscode](https://github.com/Nameless0l/laravel-api-generator-vscode). Generate APIs, run migrations, tests, and browse documentation -- all from VS Code without touching the terminal.
 
+### v3.6 -- Models your IDE understands, native enums, Pest tests
+
+- **Model PHPDoc** -- every generated model ships a full `@property` docblock (fields, FK columns, relations, timestamps). Autocompletion works instantly in VS Code and PhpStorm, no ide-helper required.
+- **Enum fields** -- `status:enum(draft,published)` generates a backed PHP enum, the model cast, `Rule::enum()` validation and a faked factory value.
+- **`--pest`** -- generate Pest tests instead of PHPUnit.
+- **Inverse relations everywhere** -- declare one side in YAML/Mermaid, get both sides (and the FK migration) automatically.
+- **Polymorphic relations** -- `morphTo` / `morphOne` / `morphMany` in schema files and database introspection.
+- **`--add-fields`** -- evolve an existing entity day 30: incremental migration + in-place patches, manual code untouched.
+
 ### v3.5 -- Generate from your database, a schema file, or a Mermaid diagram
 
 - **`--from-database`** -- point the generator at an existing (legacy) database and get a complete API for every table: fields, `belongsTo`/`hasMany` from foreign keys, `belongsToMany` from pivot tables, soft deletes from `deleted_at`.
@@ -260,6 +269,47 @@ GET /api/posts?filter[title]=laravel&sort=-created_at
 
 The flag works with every generation mode (`--from-database`, `--schema`, `--mermaid`, interactive), and `query_builder: true` can also be set globally or per entity in the schema file.
 
+### Native enum fields
+
+```bash
+php artisan make:fullapi Article --fields="title:string,status:enum(draft,published,archived)"
+```
+
+One field definition produces the whole chain:
+
+- `app/Enums/Status.php` -- a backed `enum Status: string` with a case per value
+- Model -- `'status' => \App\Enums\Status::class` in `$casts` and `@property \App\Enums\Status $status` in the PHPDoc
+- Request -- `Rule::enum(Status::class)` validation
+- Factory -- `fake()->randomElement(Status::cases())`
+- Migration -- `$table->enum('status', ['draft', 'published', 'archived'])`
+
+In a schema file: `status: enum(draft,published) default=draft`.
+
+### Pest tests (`--pest`)
+
+```bash
+php artisan make:fullapi Post --fields="title:string" --pest
+```
+
+Generates `it(...)` / `expect(...)` style tests instead of PHPUnit classes -- the same coverage (CRUD endpoints, validation, service layer), in the style new Laravel projects use by default. Also available as `pest: true` in the schema file's global or per-entity options.
+
+### Evolve an existing entity (`--add-fields`)
+
+Generators are great on day 1 and useless on day 30, because regenerating wipes your manual changes. `--add-fields` patches instead of regenerating:
+
+```bash
+php artisan make:fullapi Post --add-fields="excerpt:text,status:enum(draft,published)"
+php artisan migrate
+```
+
+- Creates an incremental `Schema::table()` migration (with `down()`)
+- Appends to `$fillable`, `$casts` and the PHPDoc block of the existing model
+- Inserts the validation rules, factory values and resource fields in place
+- Generates the enum class when needed
+- Skips fields that already exist; never touches your custom methods
+
+The DTO (constructor promotion) and the generated tests are left alone and reported as manual follow-ups.
+
 ### Delete generated API
 
 ```bash
@@ -334,7 +384,9 @@ After editing, run `api-generator:validate-stubs` (or let the VS Code extension 
 ```
 php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
                          {--schema=} {--mermaid=} {--from-database} {--tables=} {--with-migrations} {--query-builder}
+                         {--pest} {--add-fields=}
 php artisan delete:fullapi {name?} {--force}
+php artisan api-generator:clean-routes {--dry-run}
 php artisan api-generator:introspect {--table=}
 php artisan api-generator:validate-stubs {--json}
 php artisan api-generator:install
@@ -355,6 +407,8 @@ php artisan api-generator:install
 | `--tables=a,b` | Restrict `--from-database` to specific tables. |
 | `--with-migrations` | With `--from-database`: also generate the migration files. |
 | `--query-builder` | Use spatie/laravel-query-builder for index filtering and sorting. |
+| `--pest` | Generate Pest tests instead of PHPUnit. |
+| `--add-fields=a:type,b:type` | Add fields to an existing entity: incremental migration + in-place patches. |
 
 ---
 
@@ -371,6 +425,13 @@ php artisan api-generator:install
 | `json` | `JSON` | `array` | `json` |
 | `date` / `datetime` / `timestamp` | `TIMESTAMP` | `DateTimeInterface` | `date` |
 | `uuid` | `UUID` | `string` | `uuid` |
+| `enum(a,b,...)` | `ENUM('a','b')` | `App\Enums\FieldName` (backed enum + cast) | `Rule::enum()` |
+
+Append `:primary` (CLI) or the `primary` modifier (schema file) to make a field the primary key instead of the default `id` -- the model, migration and every incoming relation (FK name, column type, `references()`, `exists` rule) follow automatically:
+
+```bash
+php artisan make:fullapi Country --fields="code:string:primary,name:string"
+```
 
 ---
 
@@ -386,6 +447,24 @@ Supported in JSON mode via `class_data.json`:
 | `manyToManyRelationships` | `belongsToMany()` | Pivot table |
 
 Model inheritance is also supported via the `"parent"` key in JSON definitions.
+
+Schema files (`--schema=`) additionally support polymorphic relations:
+
+```yaml
+entities:
+  Post:
+    fields:
+      title: string
+    relations:
+      comments: morphMany Comment
+  Comment:
+    fields:
+      body: text
+    relations:
+      commentable: morphTo
+```
+
+`morphTo` emits `$table->morphs('commentable')` in the migration and `morphTo()` on the model; `morphOne` / `morphMany` point back with the right morph name. On every schema and Mermaid source, declaring one side of a `belongsTo` / `hasMany` / `belongsToMany` is enough -- the inverse (and its FK column) is synthesized automatically, exactly like `--from-database` does.
 
 ---
 

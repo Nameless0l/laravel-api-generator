@@ -54,9 +54,9 @@ class {{modelName}}ServiceTest extends TestCase
     {
         ${{modelNameLower}} = {{modelName}}::factory()->create();
 
-        $found = $this->service->find(${{modelNameLower}}->id);
+        $found = $this->service->find(${{modelNameLower}}->getKey());
 
-        $this->assertEquals(${{modelNameLower}}->id, $found->id);
+        $this->assertEquals(${{modelNameLower}}->getKey(), $found->getKey());
     }
 
     public function test_can_update_{{modelNameLower}}(): void

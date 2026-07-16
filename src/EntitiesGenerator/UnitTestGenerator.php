@@ -24,7 +24,9 @@ class UnitTestGenerator extends AbstractGenerator
 
     protected function generateContent(EntityDefinition $definition): string
     {
-        return $this->processStub($definition);
+        $stubName = $definition->usesPest() ? 'test.unit.pest' : 'test.unit';
+
+        return $this->stubLoader->load($stubName, $this->getReplacements($definition));
     }
 
     protected function getStubName(): string
@@ -38,7 +40,7 @@ class UnitTestGenerator extends AbstractGenerator
     protected function getReplacements(EntityDefinition $definition): array
     {
         $deleteAssertion = $definition->hasSoftDeletes()
-            ? "\$this->assertSoftDeleted('{$definition->getTableName()}', ['id' => \${$definition->getNameLower()}->id]);"
+            ? "\$this->assertSoftDeleted('{$definition->getTableName()}', ['{$definition->getPrimaryKeyName()}' => \${$definition->getNameLower()}->getKey()]);"
             : "\$this->assertDatabaseCount('{$definition->getTableName()}', 0);";
 
         $belongsToRels = $definition->relationships
@@ -130,7 +132,7 @@ class UnitTestGenerator extends AbstractGenerator
             ->map(function (RelationshipDefinition $rel) {
                 $varName = Str::camel($rel->relatedModel);
 
-                return "            {$rel->getForeignKeyName()}: \${$varName}->id,";
+                return "            {$rel->getForeignKeyName()}: \${$varName}->getKey(),";
             })
             ->implode("\n");
     }

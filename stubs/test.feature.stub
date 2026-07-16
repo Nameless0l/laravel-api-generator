@@ -36,10 +36,10 @@ class {{modelName}}ControllerTest extends TestCase
     {
         ${{modelNameLower}} = {{modelName}}::factory()->create();
 
-        $response = {{actingAs}}$this->getJson("/api/{{pluralName}}/{${{modelNameLower}}->id}");
+        $response = {{actingAs}}$this->getJson("/api/{{pluralName}}/{${{modelNameLower}}->getKey()}");
 
         $response->assertStatus(200)
-            ->assertJsonFragment(['id' => ${{modelNameLower}}->id]);
+            ->assertJsonFragment([{{pkFieldQuoted}} => ${{modelNameLower}}->getKey()]);
     }
 
     public function test_can_update_{{modelNameLower}}(): void
@@ -49,7 +49,7 @@ class {{modelName}}ControllerTest extends TestCase
 {{updateRelatedFkFields}}{{requestFields}}
         ];
 
-        $response = {{actingAs}}$this->putJson("/api/{{pluralName}}/{${{modelNameLower}}->id}", $data);
+        $response = {{actingAs}}$this->putJson("/api/{{pluralName}}/{${{modelNameLower}}->getKey()}", $data);
 
         $response->assertStatus(200);
         {{updateAssertFields}}
@@ -59,7 +59,7 @@ class {{modelName}}ControllerTest extends TestCase
     {
         ${{modelNameLower}} = {{modelName}}::factory()->create();
 
-        $response = {{actingAs}}$this->deleteJson("/api/{{pluralName}}/{${{modelNameLower}}->id}");
+        $response = {{actingAs}}$this->deleteJson("/api/{{pluralName}}/{${{modelNameLower}}->getKey()}");
 
         $response->assertStatus(204);
         {{deleteAssertion}}

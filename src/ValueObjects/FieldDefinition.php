@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\ValueObjects;
 
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 final readonly class FieldDefinition
@@ -105,8 +106,61 @@ final readonly class FieldDefinition
         return "{$prefix}|{$rule}";
     }
 
+    public function isEnum(): bool
+    {
+        return isset($this->attributes['enum']) && is_array($this->attributes['enum']);
+    }
+
+    public function isPrimary(): bool
+    {
+        return ($this->attributes['primary'] ?? false) === true;
+    }
+
+    public function getKeyType(): string
+    {
+        return match ($this->type) {
+            'integer', 'int', 'bigint' => 'int',
+            default => 'string',
+        };
+    }
+
+    public function getEnumClass(): string
+    {
+        return Str::studly($this->name);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getEnumValues(): array
+    {
+        $values = $this->isEnum() ? $this->attributes['enum'] : [];
+
+        return array_values(array_map('strval', is_array($values) ? $values : []));
+    }
+
+    public function getCastType(): ?string
+    {
+        if ($this->isEnum()) {
+            return '\\App\\Enums\\'.$this->getEnumClass().'::class';
+        }
+
+        return match ($this->type) {
+            'json' => "'array'",
+            'date' => "'date'",
+            'datetime', 'timestamp' => "'datetime'",
+            'boolean', 'bool' => "'boolean'",
+            'decimal' => "'decimal:2'",
+            default => null,
+        };
+    }
+
     public function getFakeValue(): string
     {
+        if ($this->isEnum()) {
+            return 'fake()->randomElement(\\App\\Enums\\'.$this->getEnumClass().'::cases())';
+        }
+
         $fake = match ($this->type) {
             'string' => $this->name === 'slug' ? 'fake()->slug()' : 'fake()->word()',
             'integer', 'int', 'bigint' => 'fake()->randomNumber()',
@@ -119,9 +173,9 @@ final readonly class FieldDefinition
             default => 'fake()->word()'
         };
 
-        // Unique columns need unique fakes, otherwise factories collide as
-        // soon as a test creates a few rows (e.g. posts.slug).
-        if ($this->unique && str_starts_with($fake, 'fake()->')) {
+        // Unique columns (and custom primary keys) need unique fakes,
+        // otherwise factories collide as soon as a test creates a few rows.
+        if (($this->unique || $this->isPrimary()) && str_starts_with($fake, 'fake()->')) {
             return 'fake()->unique()->'.substr($fake, strlen('fake()->'));
         }
 

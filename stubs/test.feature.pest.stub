@@ -1,0 +1,62 @@
+<?php
+
+use App\Models\{{modelName}};{{relatedImports}}{{userImport}}
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(Tests\TestCase::class, RefreshDatabase::class);
+{{userSetup}}
+it('lists {{pluralName}}', function () {
+    {{modelName}}::factory()->count(3)->create();
+
+    $response = {{actingAs}}$this->getJson('/api/{{pluralName}}');
+
+    $response->assertStatus(200)
+        ->assertJsonCount(3, 'data');
+});
+
+it('creates a {{modelNameLower}}', function () {
+{{createRelatedModels}}    $data = [
+{{relatedFkFields}}{{requestFields}}
+    ];
+
+    $response = {{actingAs}}$this->postJson('/api/{{pluralName}}', $data);
+
+    $response->assertStatus(201);
+    {{assertFields}}
+});
+
+it('shows a {{modelNameLower}}', function () {
+    ${{modelNameLower}} = {{modelName}}::factory()->create();
+
+    $response = {{actingAs}}$this->getJson("/api/{{pluralName}}/{${{modelNameLower}}->getKey()}");
+
+    $response->assertStatus(200)
+        ->assertJsonFragment([{{pkFieldQuoted}} => ${{modelNameLower}}->getKey()]);
+});
+
+it('updates a {{modelNameLower}}', function () {
+    ${{modelNameLower}} = {{modelName}}::factory()->create();
+    $data = [
+{{updateRelatedFkFields}}{{requestFields}}
+    ];
+
+    $response = {{actingAs}}$this->putJson("/api/{{pluralName}}/{${{modelNameLower}}->getKey()}", $data);
+
+    $response->assertStatus(200);
+    {{updateAssertFields}}
+});
+
+it('deletes a {{modelNameLower}}', function () {
+    ${{modelNameLower}} = {{modelName}}::factory()->create();
+
+    $response = {{actingAs}}$this->deleteJson("/api/{{pluralName}}/{${{modelNameLower}}->getKey()}");
+
+    $response->assertStatus(204);
+    {{deleteAssertion}}
+});
+
+it('validates required fields on create', function () {
+    $response = {{actingAs}}$this->postJson('/api/{{pluralName}}', []);
+
+    $response->assertStatus(422);
+});

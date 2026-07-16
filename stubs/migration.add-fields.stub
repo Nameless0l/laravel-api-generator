@@ -8,17 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('{{tableName}}', function (Blueprint $table) {
-{{idColumn}}
-            {{fields}}
-            $table->timestamps();
-{{softDeletes}}
-{{foreignKeys}}
+        Schema::table('{{tableName}}', function (Blueprint $table) {
+{{columns}}
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('{{tableName}}');
+        Schema::table('{{tableName}}', function (Blueprint $table) {
+            $table->dropColumn([{{dropColumns}}]);
+        });
     }
 };

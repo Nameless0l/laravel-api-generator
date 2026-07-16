@@ -15,7 +15,10 @@ final readonly class RelationshipDefinition
         public string $role,
         public ?string $foreignKey = null,
         public ?string $localKey = null,
-        public ?string $pivotTable = null
+        public ?string $pivotTable = null,
+        public ?string $morphName = null,
+        public ?string $relatedKey = null,
+        public ?string $relatedKeyType = null
     ) {
         $this->validateType($type);
         $this->validateRelatedModel($relatedModel);
@@ -24,7 +27,7 @@ final readonly class RelationshipDefinition
 
     private function validateType(string $type): void
     {
-        $allowedTypes = ['oneToOne', 'oneToMany', 'manyToOne', 'manyToMany'];
+        $allowedTypes = ['oneToOne', 'oneToMany', 'manyToOne', 'manyToMany', 'morphTo', 'morphOne', 'morphMany'];
 
         if (! in_array($type, $allowedTypes, true)) {
             throw new InvalidArgumentException("Invalid relationship type: {$type}");
@@ -52,6 +55,9 @@ final readonly class RelationshipDefinition
             'oneToMany' => 'hasMany',
             'manyToOne' => 'belongsTo',
             'manyToMany' => 'belongsToMany',
+            'morphTo' => 'morphTo',
+            'morphOne' => 'morphOne',
+            'morphMany' => 'morphMany',
             default => throw new InvalidArgumentException("Unknown relationship type: {$this->type}"),
         };
     }
@@ -61,13 +67,34 @@ final readonly class RelationshipDefinition
         return in_array($this->type, ['manyToOne', 'oneToOne'], true);
     }
 
+    public function isPolymorphic(): bool
+    {
+        return in_array($this->type, ['morphTo', 'morphOne', 'morphMany'], true);
+    }
+
+    public function getMorphName(): string
+    {
+        if ($this->morphName !== null) {
+            return $this->morphName;
+        }
+
+        return $this->type === 'morphTo'
+            ? Str::snake($this->role)
+            : Str::snake(Str::singular($this->relatedModel)).'able';
+    }
+
     public function getForeignKeyName(): string
     {
         if ($this->foreignKey !== null) {
             return $this->foreignKey;
         }
 
-        return Str::snake($this->role).'_id';
+        return Str::snake($this->role).'_'.($this->relatedKey ?? 'id');
+    }
+
+    public function referencesCustomKey(): bool
+    {
+        return $this->relatedKey !== null && $this->relatedKey !== 'id';
     }
 
     public function getMethodName(): string

@@ -10,12 +10,14 @@ use Illuminate\Support\Facades\File;
 use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\Services\AuthGenerator;
+use nameless\CodeGenerator\Services\EntityEvolutionService;
 use nameless\CodeGenerator\Services\PostmanExporter;
 use nameless\CodeGenerator\Support\DatabaseIntrospector;
 use nameless\CodeGenerator\Support\EntitySorter;
 use nameless\CodeGenerator\Support\FieldParser;
 use nameless\CodeGenerator\Support\JsonParser;
 use nameless\CodeGenerator\Support\MermaidParser;
+use nameless\CodeGenerator\Support\RelationshipSynthesizer;
 use nameless\CodeGenerator\Support\SchemaParser;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
@@ -30,7 +32,9 @@ class MakeApiCommand extends Command
         {--from-database : Generate from the existing database schema}
         {--tables= : Comma-separated list of tables to use with --from-database}
         {--with-migrations : Also generate migrations when using --from-database}
-        {--query-builder : Use spatie/laravel-query-builder for index filtering and sorting}';
+        {--query-builder : Use spatie/laravel-query-builder for index filtering and sorting}
+        {--pest : Generate Pest tests instead of PHPUnit}
+        {--add-fields= : Add fields to an existing entity (incremental migration + in-place patches)}';
 
     protected $description = 'Generate a complete API including model, migration, controller, resource, request, factory, seeder, DTO, service, policy, and tests';
 
@@ -40,7 +44,8 @@ class MakeApiCommand extends Command
         private readonly AuthGenerator $authGenerator,
         private readonly DatabaseIntrospector $databaseIntrospector,
         private readonly SchemaParser $schemaParser,
-        private readonly MermaidParser $mermaidParser
+        private readonly MermaidParser $mermaidParser,
+        private readonly EntityEvolutionService $entityEvolutionService
     ) {
         parent::__construct();
     }
@@ -56,6 +61,11 @@ class MakeApiCommand extends Command
             // Interactive mode
             if ($this->option('interactive')) {
                 return $this->handleInteractiveGeneration();
+            }
+
+            $addFields = $this->option('add-fields');
+            if (is_string($addFields) && $addFields !== '') {
+                return $this->handleAddFields($addFields);
             }
 
             if ($this->option('from-database')) {
@@ -177,6 +187,9 @@ class MakeApiCommand extends Command
             if ($entity->usesQueryBuilder()) {
                 $flags[] = 'query builder';
             }
+            if ($entity->usesPest()) {
+                $flags[] = 'pest';
+            }
             if ($entity->skipsMigration()) {
                 $flags[] = 'no migration';
             }
@@ -229,6 +242,9 @@ class MakeApiCommand extends Command
         $options = [];
         if ($this->option('query-builder')) {
             $options['query_builder'] = true;
+        }
+        if ($this->option('pest')) {
+            $options['pest'] = true;
         }
 
         return $options;
@@ -522,7 +538,7 @@ class MakeApiCommand extends Command
         }
 
         return $this->generateEntities(
-            EntitySorter::sortByDependencies($entities),
+            EntitySorter::sortByDependencies(RelationshipSynthesizer::resolveRelatedKeys($entities)),
             'class_data.json'
         );
     }
@@ -575,6 +591,36 @@ class MakeApiCommand extends Command
         return self::SUCCESS;
     }
 
+    private function handleAddFields(string $addFields): int
+    {
+        $name = $this->argument('name');
+        if (! is_string($name) || $name === '') {
+            $this->error('--add-fields requires an entity name: make:fullapi Post --add-fields="excerpt:string"');
+
+            return self::FAILURE;
+        }
+        $name = ucfirst($name);
+
+        $fields = collect(FieldParser::parseFieldsString($addFields))
+            ->map(fn (string $type, string $fieldName) => $this->makeFieldDefinition($fieldName, $type))
+            ->values();
+
+        $result = $this->entityEvolutionService->addFields($name, $fields);
+
+        foreach ($result['changed'] as $file) {
+            $this->info('  ✔ '.str_replace(base_path().DIRECTORY_SEPARATOR, '', $file));
+        }
+        foreach ($result['warnings'] as $warning) {
+            $this->warn('  ! '.$warning);
+        }
+
+        if ($result['changed'] !== []) {
+            $this->info("Fields added to {$name}. Run: php artisan migrate");
+        }
+
+        return self::SUCCESS;
+    }
+
     // ─── Helpers ────────────────────────────────────────────────────────
 
     private function scaffoldAuth(): void
@@ -596,12 +642,9 @@ class MakeApiCommand extends Command
      */
     private function createEntityDefinition(string $name, array $fieldsArray): EntityDefinition
     {
-        $fields = collect($fieldsArray)->map(function ($type, $fieldName) {
-            return new FieldDefinition(
-                name: $fieldName,
-                type: $type
-            );
-        })->values();
+        $fields = collect($fieldsArray)
+            ->map(fn (string $type, string $fieldName) => $this->makeFieldDefinition($fieldName, $type))
+            ->values();
 
         return new EntityDefinition(
             name: ucfirst($name),
@@ -611,6 +654,29 @@ class MakeApiCommand extends Command
                 'soft_deletes' => (bool) $this->option('soft-deletes'),
             ])
         );
+    }
+
+    private function makeFieldDefinition(string $fieldName, string $type): FieldDefinition
+    {
+        $segments = explode(':', $type);
+        $baseType = (string) array_shift($segments);
+        $modifiers = array_map('strtolower', $segments);
+
+        $attributes = [];
+        if (in_array('primary', $modifiers, true) || in_array('pk', $modifiers, true)) {
+            $attributes['primary'] = true;
+        }
+
+        $enumValues = FieldParser::parseEnumType($baseType);
+        if ($enumValues !== null) {
+            return new FieldDefinition(
+                name: $fieldName,
+                type: 'string',
+                attributes: array_merge($attributes, ['enum' => $enumValues])
+            );
+        }
+
+        return new FieldDefinition(name: $fieldName, type: $baseType, attributes: $attributes);
     }
 
     private function displayGeneratedFiles(EntityDefinition $definition): void

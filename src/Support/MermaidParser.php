@@ -448,7 +448,9 @@ class MermaidParser
             ));
         }
 
-        return EntitySorter::sortByDependencies($definitions);
+        return EntitySorter::sortByDependencies(
+            RelationshipSynthesizer::resolveRelatedKeys(RelationshipSynthesizer::addInverses($definitions))
+        );
     }
 
     // ─── Helpers ────────────────────────────────────────────────────────

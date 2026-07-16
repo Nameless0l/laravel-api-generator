@@ -90,6 +90,7 @@ class MigrationGenerator extends AbstractGenerator
     {
         return [
             'tableName' => $definition->getTableName(),
+            'idColumn' => $definition->getPrimaryField() === null ? '            $table->id();' : '',
             'fields' => $this->generateFields($definition),
             'foreignKeys' => $this->generateForeignKeys($definition),
             'softDeletes' => $definition->hasSoftDeletes() ? '            $table->softDeletes();' : '',
@@ -98,23 +99,36 @@ class MigrationGenerator extends AbstractGenerator
 
     private function generateFields(EntityDefinition $definition): string
     {
-        $fields = $definition->fields->map(function (FieldDefinition $field) {
-            $dbType = $field->getDatabaseType();
-            $modifiers = '';
-            if ($field->nullable) {
-                $modifiers .= '->nullable()';
-            }
-            if ($field->unique) {
-                $modifiers .= '->unique()';
-            }
-            if ($field->default !== null) {
-                $modifiers .= "->default('{$field->default}')";
-            }
-
-            return "            \$table->{$dbType}('{$field->name}'){$modifiers};";
-        })->toArray();
+        $fields = $definition->fields->map(
+            fn (FieldDefinition $field) => '            '.self::columnDefinition($field)
+        )->toArray();
 
         return implode("\n", $fields);
+    }
+
+    public static function columnDefinition(FieldDefinition $field): string
+    {
+        $modifiers = '';
+        if ($field->isPrimary()) {
+            $modifiers .= '->primary()';
+        }
+        if ($field->nullable) {
+            $modifiers .= '->nullable()';
+        }
+        if ($field->unique && ! $field->isPrimary()) {
+            $modifiers .= '->unique()';
+        }
+        if ($field->default !== null) {
+            $modifiers .= "->default('{$field->default}')";
+        }
+
+        if ($field->isEnum()) {
+            $values = "'".implode("', '", $field->getEnumValues())."'";
+
+            return "\$table->enum('{$field->name}', [{$values}]){$modifiers};";
+        }
+
+        return "\$table->{$field->getDatabaseType()}('{$field->name}'){$modifiers};";
     }
 
     private function generateForeignKeys(EntityDefinition $definition): string
@@ -125,9 +139,25 @@ class MigrationGenerator extends AbstractGenerator
                 $fk = $rel->getForeignKeyName();
                 $relatedTable = Str::plural(Str::snake($rel->relatedModel));
 
+                if ($rel->referencesCustomKey()) {
+                    $columnType = match ($rel->relatedKeyType) {
+                        'uuid', 'UUID' => 'uuid',
+                        'integer', 'int', 'bigint' => 'unsignedBigInteger',
+                        default => 'string',
+                    };
+
+                    return "            \$table->{$columnType}('{$fk}');\n".
+                        "            \$table->foreign('{$fk}')->references('{$rel->relatedKey}')->on('{$relatedTable}')->cascadeOnDelete();";
+                }
+
                 return "            \$table->foreignId('{$fk}')->constrained('{$relatedTable}')->cascadeOnDelete();";
             })->toArray();
 
-        return implode("\n", $foreignKeys);
+        $morphs = $definition->relationships
+            ->filter(fn (RelationshipDefinition $rel) => $rel->type === 'morphTo')
+            ->map(fn (RelationshipDefinition $rel) => "            \$table->morphs('{$rel->getMorphName()}');")
+            ->toArray();
+
+        return implode("\n", array_merge($foreignKeys, $morphs));
     }
 }
