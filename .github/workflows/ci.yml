@@ -28,7 +28,7 @@ jobs:
     name: PHP ${{ matrix.php-version }} - Laravel ${{ matrix.laravel-version }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
@@ -38,7 +38,7 @@ jobs:
         coverage: xdebug
 
     - name: Cache Composer dependencies
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ~/.composer/cache/files
         key: dependencies-laravel-${{ matrix.laravel-version }}-php-${{ matrix.php-version }}-composer-${{ hashFiles('composer.json') }}
@@ -57,7 +57,7 @@ jobs:
     name: Static Analysis (PHPStan)
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
@@ -77,7 +77,7 @@ jobs:
     name: Code Style (Pint)
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
