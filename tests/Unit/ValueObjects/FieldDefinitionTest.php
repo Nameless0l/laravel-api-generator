@@ -93,4 +93,28 @@ class FieldDefinitionTest extends TestCase
         $uuidField = new FieldDefinition('id', 'uuid');
         $this->assertEquals('fake()->uuid()', $uuidField->getFakeValue());
     }
+
+    public function test_unique_fields_do_not_emit_a_bare_unique_rule(): void
+    {
+        // A bare "unique" (without table) crashes Laravel validation with
+        // "Validation rule unique requires at least 1 parameters".
+        // The parameterized rule is added by RequestGenerator instead.
+        $field = new FieldDefinition(name: 'name', type: 'string', unique: true);
+        $this->assertEquals('required|string|max:255', $field->getValidationRule());
+    }
+
+    public function test_unique_fields_get_unique_fakes(): void
+    {
+        $field = new FieldDefinition(name: 'name', type: 'string', unique: true);
+        $this->assertEquals('fake()->unique()->word()', $field->getFakeValue());
+    }
+
+    public function test_slug_fields_use_slug_fakes(): void
+    {
+        $unique = new FieldDefinition(name: 'slug', type: 'string', unique: true);
+        $this->assertEquals('fake()->unique()->slug()', $unique->getFakeValue());
+
+        $plain = new FieldDefinition(name: 'slug', type: 'string');
+        $this->assertEquals('fake()->slug()', $plain->getFakeValue());
+    }
 }

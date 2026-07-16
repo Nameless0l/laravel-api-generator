@@ -187,14 +187,18 @@ class MakeApiCommand extends Command
         }
         $this->newLine();
 
+        $onlyTypes = $this->onlyTypesOption();
+
         foreach ($entities as $entity) {
-            $this->apiGenerationService->generateCompleteApi($entity);
+            $this->apiGenerationService->generateCompleteApi($entity, $onlyTypes);
             $this->info("  ✔ {$entity->name}");
         }
 
-        $pivots = $this->apiGenerationService->generatePivotMigrations($entities);
-        foreach ($pivots as $pivot) {
-            $this->line('  - Pivot migration: '.basename($pivot));
+        if ($onlyTypes === null || in_array('Migration', $onlyTypes, true)) {
+            $pivots = $this->apiGenerationService->generatePivotMigrations($entities);
+            foreach ($pivots as $pivot) {
+                $this->line('  - Pivot migration: '.basename($pivot));
+            }
         }
 
         if ($this->option('auth')) {
@@ -228,6 +232,21 @@ class MakeApiCommand extends Command
         }
 
         return $options;
+    }
+
+    /**
+     * Parsed --only option, shared by the single-entity and multi-entity
+     * (database/schema/Mermaid) generation paths.
+     *
+     * @return array<int, string>|null
+     */
+    private function onlyTypesOption(): ?array
+    {
+        $only = $this->option('only');
+
+        return is_string($only) && $only !== ''
+            ? array_map('trim', explode(',', $only))
+            : null;
     }
 
     /**
@@ -522,10 +541,7 @@ class MakeApiCommand extends Command
         $fieldsArray = FieldParser::parseFieldsString($fieldsOption);
         $definition = $this->createEntityDefinition($name, $fieldsArray);
 
-        $only = $this->option('only');
-        $onlyTypes = is_string($only) && $only !== ''
-            ? array_map('trim', explode(',', $only))
-            : null;
+        $onlyTypes = $this->onlyTypesOption();
 
         if ($onlyTypes !== null) {
             $this->info('Regenerating only: '.implode(', ', $onlyTypes)." for: {$name}");

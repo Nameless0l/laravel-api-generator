@@ -53,7 +53,7 @@ class FeatureTestGenerator extends AbstractGenerator
             'tableName' => $definition->getTableName(),
             'requestFields' => $this->generateRequestFields($definition),
             'deleteAssertion' => $deleteAssertion,
-            'relatedImports' => $this->generateRelatedImports($belongsToRels),
+            'relatedImports' => $this->generateRelatedImports($belongsToRels, $definition->name),
             'createRelatedModels' => $this->generateCreateRelatedModels($belongsToRels),
             'relatedFkFields' => $this->generateRelatedFkFields($belongsToRels),
             'updateRelatedFkFields' => $this->generateUpdateRelatedFkFields($definition, $belongsToRels),
@@ -99,13 +99,16 @@ class FeatureTestGenerator extends AbstractGenerator
     /**
      * @param  Collection<int, RelationshipDefinition>  $belongsToRels
      */
-    private function generateRelatedImports($belongsToRels): string
+    private function generateRelatedImports($belongsToRels, string $selfModel): string
     {
         if ($belongsToRels->isEmpty()) {
             return '';
         }
 
+        // Self-referential relations must not re-import the entity's own
+        // model: the stub already imports it, and a duplicate use is fatal.
         return $belongsToRels
+            ->filter(fn (RelationshipDefinition $rel) => $rel->relatedModel !== $selfModel)
             ->map(fn (RelationshipDefinition $rel) => "use App\\Models\\{$rel->relatedModel};")
             ->unique()
             ->map(fn (string $import) => "\n".$import)

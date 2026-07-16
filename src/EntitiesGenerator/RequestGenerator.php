@@ -54,8 +54,19 @@ class RequestGenerator extends AbstractGenerator
                 return "'{$fk}' => 'required|integer|exists:{$table},id',";
             })->toArray();
 
-        $rules = $definition->fields->map(function (FieldDefinition $field) {
+        $rules = $definition->fields->map(function (FieldDefinition $field) use ($definition) {
             $rule = $field->getValidationRule();
+
+            if ($field->unique) {
+                // Array syntax with Rule::unique() so the rule carries the
+                // table AND ignores the current model on updates.
+                $table = $definition->getTableName();
+                $routeParam = Str::singular($table);
+                $parts = array_map(fn (string $p) => "'{$p}'", explode('|', $rule));
+                $parts[] = "\\Illuminate\\Validation\\Rule::unique('{$table}')->ignore(\$this->route('{$routeParam}'))";
+
+                return "'{$field->name}' => [".implode(', ', $parts).'],';
+            }
 
             return "'{$field->name}' => '{$rule}',";
         })->toArray();

@@ -98,19 +98,17 @@ final readonly class FieldDefinition
         };
 
         $prefix = $this->nullable ? 'sometimes' : 'required';
-        $rule = "{$prefix}|{$rule}";
 
-        if ($this->unique) {
-            $rule .= '|unique';
-        }
-
-        return $rule;
+        // Note: uniqueness is NOT appended here — a bare "unique" rule is
+        // invalid in Laravel (it needs the table). RequestGenerator emits a
+        // proper Rule::unique() using the entity's table name.
+        return "{$prefix}|{$rule}";
     }
 
     public function getFakeValue(): string
     {
-        return match ($this->type) {
-            'string' => 'fake()->word()',
+        $fake = match ($this->type) {
+            'string' => $this->name === 'slug' ? 'fake()->slug()' : 'fake()->word()',
             'integer', 'int', 'bigint' => 'fake()->randomNumber()',
             'boolean', 'bool' => 'fake()->boolean()',
             'text' => 'fake()->sentence()',
@@ -120,5 +118,13 @@ final readonly class FieldDefinition
             'date', 'datetime', 'timestamp', 'time' => "fake()->dateTime()->format('Y-m-d H:i:s')",
             default => 'fake()->word()'
         };
+
+        // Unique columns need unique fakes, otherwise factories collide as
+        // soon as a test creates a few rows (e.g. posts.slug).
+        if ($this->unique && str_starts_with($fake, 'fake()->')) {
+            return 'fake()->unique()->'.substr($fake, strlen('fake()->'));
+        }
+
+        return $fake;
     }
 }

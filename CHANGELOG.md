@@ -5,6 +5,14 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.1] - 2026-07-16
+
+### Fixed
+- **Unique columns generated a broken validation rule** -- fields marked unique (typically discovered by `--from-database` or declared `unique` in a schema/Mermaid file) emitted a bare `unique` rule, making every generated store/update endpoint fail with a 500 ("Validation rule unique requires at least 1 parameters"). The generated Request now uses `Rule::unique('<table>')->ignore($this->route('<param>'))`, which also lets updates keep the current value.
+- **Factories for unique columns collided** -- generated factories now use `fake()->unique()` for unique fields (and `fake()->slug()` for `slug` fields), so seeding or tests creating several rows no longer hit unique-constraint violations.
+- **`--only` was ignored on multi-entity sources** -- `--from-database`, `--schema` and `--mermaid` regenerated every file type regardless of the filter. The filter now applies, and pivot migrations are only (re)created when `Migration` is included.
+- **Duplicate model import in generated tests** -- self-referential relations (e.g. a `parent_id` on the same table) produced a fatal duplicate `use App\Models\X;` in the generated Feature/Unit tests.
+
 ## [3.5.0] - 2026-07-15
 
 ### Added

@@ -121,6 +121,36 @@ class SchemaCommandTest extends GeneratorTestCase
     }
 
     /** @test */
+    public function it_respects_the_only_filter_on_multi_entity_sources(): void
+    {
+        File::put($this->schemaPath, <<<'YAML'
+        entities:
+          Post:
+            fields:
+              title: string
+          Tag:
+            fields:
+              name: string unique
+        YAML);
+
+        /** @var PendingCommand $result */
+        $result = $this->artisan('make:fullapi', [
+            '--schema' => $this->schemaPath,
+            '--only' => 'Request',
+        ]);
+        $result->assertSuccessful();
+        $result->run();
+
+        $this->assertFileExists(app_path('Http/Requests/PostRequest.php'));
+        $this->assertFileExists(app_path('Http/Requests/TagRequest.php'));
+        // Regression: --only used to be ignored on the schema/database/
+        // Mermaid paths and regenerated every file type.
+        $this->assertFileDoesNotExist(app_path('Models/Post.php'));
+        $this->assertFileDoesNotExist(app_path('Http/Controllers/PostController.php'));
+        $this->assertFileDoesNotExist(app_path('Services/TagService.php'));
+    }
+
+    /** @test */
     public function it_fails_on_a_missing_schema_file(): void
     {
         /** @var PendingCommand $result */
