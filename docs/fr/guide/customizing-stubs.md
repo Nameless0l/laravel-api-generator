@@ -1,6 +1,6 @@
 # Personnaliser les stubs
 
-Chaque fichier généré provient d'un template éditable. Si le style de code par défaut n'est pas le vôtre, changez les templates : pas les fichiers générés.
+Chaque fichier généré provient d'un template éditable. Si le style de code par défaut n'est pas le vôtre, changez les templates plutôt que les fichiers générés.
 
 ## Publier les stubs
 
@@ -12,13 +12,13 @@ Cela copie chaque `.stub` dans `stubs/vendor/laravel-api-generator/`. Le `StubLo
 
 ## Valider vos personnalisations
 
-`api-generator:validate-stubs` vérifie que chaque `{{placeholder}}` requis est toujours présent, pour que la génération ne puisse jamais produire silencieusement du code cassé :
+`api-generator:validate-stubs` vérifie que chaque `{{placeholder}}` requis est toujours présent dans vos templates modifiés :
 
 ```bash
 php artisan api-generator:validate-stubs
 ```
 
-Branchez la forme `--json` dans votre CI pour attraper les stubs cassés avant qu'ils n'atteignent une machine : la sortie devient lisible par un programme et la commande sort avec le code 1 en cas d'erreur. L'[extension VS Code](/fr/guide/extension/quick-actions) lance cette validation automatiquement avant chaque génération.
+La forme `--json` se branche dans une CI, avec une sortie lisible par un programme et un code de sortie 1 en cas d'erreur, de quoi attraper un stub cassé avant qu'il n'atteigne la machine d'un collègue. L'[extension VS Code](/fr/guide/extension/quick-actions) lance cette validation automatiquement avant chaque génération.
 
 ## Étendre le générateur
 

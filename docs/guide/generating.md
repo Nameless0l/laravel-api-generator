@@ -76,7 +76,7 @@ Without the flag, generated `index` endpoints still support simple filtering on 
 php artisan make:fullapi Post --fields="title:string" --pest
 ```
 
-Generates `it(...)` / `expect(...)` style tests instead of PHPUnit classes: same coverage, Pest idioms. See [Generated Tests](/guide/testing).
+Generates `it(...)` / `expect(...)` style tests instead of PHPUnit classes, with the same coverage. See [Generated Tests](/guide/testing).
 
 ## Interactive wizard
 
@@ -88,7 +88,7 @@ A step-by-step guided setup: entity name, fields one by one (type, nullable, uni
 
 ## Regenerate selected files with `--only=`
 
-Want a fresh `Resource` or `Test` without touching everything else?
+To rebuild a `Resource` or a `Test` without touching everything else:
 
 ```bash
 php artisan make:fullapi Post --fields="title:string,content:text" --only=FeatureTest,UnitTest

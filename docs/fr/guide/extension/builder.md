@@ -23,12 +23,12 @@ Les options sont des cases à cocher : Auth (Sanctum), export Postman, Soft Dele
 
 Pendant que vous éditez le formulaire, le panneau affiche le code qui sera généré (Model, Controller, Service, DTO, Request, Resource, Migration, Factory…) avec coloration syntaxique et navigation par onglets. Casts d'enum, clés primaires personnalisées et relations apparaissent dans l'aperçu avant que vous ne vous engagiez.
 
-Un **aperçu des fichiers** liste aussi ce qui sera créé : aucune surprise.
+Un **aperçu des fichiers** liste aussi ce qui sera créé, chemins compris.
 
 ## Sécurité pendant la génération
 
 Régénérer une entité qui existe déjà affiche d'abord la liste de tous les fichiers qui seraient écrasés, pour pouvoir renoncer avant que quoi que ce soit ne soit écrit. Une opération en cours n'est jamais une boîte noire non plus : recliquez sur le bouton qui tourne et le process artisan sous-jacent est tué, l'interface restaurée. Quand une génération réussit, le Model et le Controller s'ouvrent dans l'éditeur.
 
-## Sous le capot
+## La même commande que le terminal
 
-Le panneau pilote la même commande `make:fullapi` que la [référence CLI](/fr/reference/cli) : tout ce que fait le formulaire, le terminal le fait aussi, et les fichiers générés sont identiques.
+Le formulaire construit un appel `make:fullapi`, la commande de la [référence CLI](/fr/reference/cli). Une entité générée depuis l'extension, depuis le terminal ou dans un script CI donne exactement les mêmes fichiers.

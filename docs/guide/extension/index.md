@@ -21,7 +21,7 @@ A free visual interface for the generator: build entities in a form, preview the
 | [Entity Builder](/guide/extension/builder) | A form with live code preview instead of CLI flags: fields, enums, relations, options |
 | [Imports](/guide/extension/imports) | Generate from your database, a schema file, a Mermaid diagram, a JSON definition or an **OpenAPI / Swagger spec** |
 | [Diagram & Sidebar](/guide/extension/diagram-and-sidebar) | An interactive entity canvas and a tree of everything you generated |
-| [Quick Actions & Guardrails](/guide/extension/quick-actions) | Migrate, seed, test, routes, API docs in one click: with stub validation and dependency checks |
+| [Quick Actions & Guardrails](/guide/extension/quick-actions) | Migrate, seed, tests, routes and API docs in one click, server and dependencies handled for you |
 | [Commands & Settings](/guide/extension/reference) | Command palette reference, keybindings, settings, PHP snippets |
 
 The whole UI (panel labels, popups, prompts, error messages) is available in **English and French**, following VS Code's display language (forceable via the `laravelApiGenerator.locale` setting).
@@ -36,7 +36,7 @@ The whole UI (panel labels, popups, prompts, error messages) is available in **E
 composer require --dev nameless/laravel-api-generator
 ```
 
-If the package is missing, the extension offers to install it for you, as a dev dependency with zero lock-in: nothing from the generator ships to production, and the generated code doesn't depend on it. If the installed version is too old for a feature, the extension explains it and offers to run `composer update`.
+If the package is missing, the extension offers to install it for you, as a dev dependency (nothing from the generator ships to production, and the generated code doesn't depend on it). If the installed version is too old for a feature, it explains why and offers to run `composer update`.
 
 A native **Getting Started walkthrough** (Help → Get Started) covers the package install, your first generation, database import and the sidebar.
 
@@ -46,9 +46,12 @@ A native **Getting Started walkthrough** (Help → Get Started) covers the packa
 - PHP 8.2+ on your PATH (or set `laravelApiGenerator.phpPath`)
 - A Laravel 10 / 11 / 12 / 13 project
 
-## Your first API, in four clicks
+## Your first API, without a terminal
 
 1. Click the **Laravel API Generator** icon in the activity bar.
-2. Pick a Quick Start preset (Blog Post, Product…), or fill the form, or [import from somewhere](/guide/extension/imports).
-3. Watch the [live preview](/guide/extension/builder) update as you type.
-4. Click **Generate API**: the new Model and Controller open in the editor.
+2. Pick a Quick Start preset (Blog Post, Product…), fill the form, or [import](/guide/extension/imports) from your database or a spec.
+3. Watch the [live preview](/guide/extension/builder) update as you type, then click **Generate API**. The new Model and Controller open in the editor.
+4. Click **Run Migrations** (if `.env` is missing, the extension offers to create it from `.env.example`), then **Fresh + Seed** if you want sample data.
+5. Click **Open API Docs**: the extension starts the server if none is running and opens the interactive documentation of your new API in the browser.
+
+The full tour of the buttons is on the [Quick Actions](/guide/extension/quick-actions) page.

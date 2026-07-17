@@ -1,6 +1,6 @@
 # Doc API & Postman
 
-Votre API est documentée dès qu'elle existe : via Scramble pour la doc OpenAPI interactive, et des collections Postman pour votre équipe.
+Votre API est documentée dès qu'elle existe, avec Scramble pour la doc OpenAPI interactive et des collections Postman pour votre équipe.
 
 ## Scramble : doc OpenAPI instantanée
 
@@ -12,6 +12,8 @@ php artisan serve
 ```
 
 Ouvrez `http://localhost:8000/docs/api` :
+
+Depuis VS Code, le bouton **Open API Docs** de l'[extension](/fr/guide/extension/quick-actions) fait tout le trajet en un clic, y compris démarrer le serveur si aucun ne tourne et proposer l'installation de Scramble s'il manque.
 
 ![Doc API Scramble](../../scramble-docs.png)
 
@@ -31,7 +33,7 @@ Ce que vous obtenez automatiquement :
 | `/docs/api.json` | Spécification OpenAPI 3.x brute (JSON) |
 
 ::: tip
-Scramble est une dépendance de dev : il n'affecte pas votre déploiement en production. Exactement comme le générateur lui-même.
+Scramble est une dépendance de dev, comme le générateur lui-même. Rien de tout cela ne part en production.
 :::
 
 ## Collection Postman

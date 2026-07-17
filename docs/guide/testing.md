@@ -1,6 +1,6 @@
 # Generated Tests
 
-Most generators give you empty test skeletons. This one writes **real assertions**: and they pass right after generation.
+Most generators give you empty test skeletons. This one writes **real assertions**, and they pass right after generation.
 
 ## What gets covered
 
@@ -46,7 +46,7 @@ class PostControllerTest extends TestCase
 php artisan make:fullapi Post --fields="title:string" --pest
 ```
 
-Generates `it(...)` / `expect(...)` / `beforeEach(...)` style tests instead of PHPUnit classes: the same coverage, in the idiom new Laravel projects use by default:
+Generates `it(...)` / `expect(...)` / `beforeEach(...)` style tests instead of PHPUnit classes. The coverage is the same, in the idiom new Laravel projects use by default:
 
 ```php
 it('creates a post', function () {
@@ -61,7 +61,7 @@ it('creates a post', function () {
 
 Also available as `pest: true` in a schema file (globally or per entity).
 
-## Custom primary keys, handled
+## Independent of the primary key
 
 Generated tests use `getKey()` instead of hardcoding `->id`, so the same test suite passes whether the entity uses the default auto-increment `id` or a [custom primary key](/guide/field-types#custom-primary-keys).
 

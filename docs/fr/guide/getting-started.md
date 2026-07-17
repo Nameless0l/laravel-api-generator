@@ -32,7 +32,7 @@ php artisan migrate
 php artisan test
 ```
 
-Les tests passent immédiatement : ils sont générés *avec leurs assertions*, pas comme des squelettes vides.
+La suite passe dès la génération, avec de vraies assertions sur de vrais endpoints, là où la plupart des générateurs livrent des squelettes à remplir.
 
 ## Ce qui est généré
 
@@ -98,7 +98,7 @@ Chaque modèle généré embarque un bloc PHPDoc complet : champs, colonnes FK, 
 class Post extends Model
 ```
 
-L'autocomplétion fonctionne immédiatement dans VS Code et PhpStorm : pas besoin d'`ide-helper` pour le code généré.
+L'autocomplétion fonctionne immédiatement dans VS Code et PhpStorm, sans `ide-helper` pour le code généré.
 
 ## Étapes suivantes
 

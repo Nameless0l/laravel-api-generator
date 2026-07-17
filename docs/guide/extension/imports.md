@@ -1,6 +1,6 @@
 # Imports: Database, Schema, Mermaid, JSON, OpenAPI
 
-You rarely start from a blank form. The extension can generate the whole API surface from what you already have.
+You rarely start from a blank form. The extension can generate the whole API surface from what you already have, a database, a versioned schema, a diagram or a spec.
 
 ## Whole-schema commands
 
@@ -26,7 +26,7 @@ Turn a Mermaid `erDiagram` or `classDiagram` (hand-written or produced by an AI 
 
 ## Panel imports
 
-Buttons inside the generator panel, for filling the form instead of generating blind.
+Buttons inside the generator panel that pre-fill the form, so you can review and adjust before generating.
 
 ### Import from Database (single table)
 

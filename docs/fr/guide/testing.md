@@ -1,6 +1,6 @@
 # Tests générés
 
-La plupart des générateurs vous donnent des squelettes de tests vides. Celui-ci écrit de **vraies assertions** : et elles passent dès la génération.
+La plupart des générateurs livrent des squelettes de tests vides. Celui-ci écrit de **vraies assertions**, et elles passent dès la génération.
 
 ## Ce qui est couvert
 
@@ -46,7 +46,7 @@ class PostControllerTest extends TestCase
 php artisan make:fullapi Post --fields="title:string" --pest
 ```
 
-Génère des tests au style `it(...)` / `expect(...)` / `beforeEach(...)` au lieu de classes PHPUnit : la même couverture, dans l'idiome que les nouveaux projets Laravel utilisent par défaut :
+Génère des tests au style `it(...)` / `expect(...)` / `beforeEach(...)` au lieu de classes PHPUnit. La couverture est la même, dans l'idiome des nouveaux projets Laravel :
 
 ```php
 it('creates a post', function () {
@@ -61,13 +61,13 @@ it('creates a post', function () {
 
 Aussi disponible via `pest: true` dans un fichier de schéma (globalement ou par entité).
 
-## Les clés primaires personnalisées, gérées
+## Indépendants de la clé primaire
 
 Les tests générés utilisent `getKey()` au lieu de coder `->id` en dur, donc la même suite passe que l'entité utilise l'`id` auto-incrémenté par défaut ou une [clé primaire personnalisée](/fr/guide/field-types#cles-primaires-personnalisees).
 
 ## Seeding
 
-Les seeders générés sont enregistrés automatiquement dans `DatabaseSeeder.php` : chacun crée **10 enregistrements** via la factory générée :
+Les seeders générés sont enregistrés automatiquement dans `DatabaseSeeder.php`, et chacun crée **10 enregistrements** via la factory générée :
 
 ```bash
 php artisan migrate:fresh --seed

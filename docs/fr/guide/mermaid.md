@@ -60,4 +60,4 @@ erDiagram
 2. Relisez le *diagramme*, pas 40 fichiers de code généré.
 3. Mergez, puis `php artisan make:fullapi --mermaid=docs/erd.mmd`.
 
-Le diagramme **est** la source. Aucune dérive entre la doc d'architecture et le code.
+Le diagramme étant l'entrée elle-même, la doc d'architecture du dépôt décrit exactement ce qui a été généré depuis elle.

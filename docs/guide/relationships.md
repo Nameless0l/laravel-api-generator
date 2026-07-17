@@ -12,13 +12,13 @@ entities:
     fields:
       name: string unique
     relations:
-      posts: hasMany Post   # Post gets belongsTo Category + category_id column, automatically
+      posts: hasMany Post
   Post:
     fields:
       title: string
 ```
 
-If both sides are declared, they are de-duplicated.
+Here, `Post` gets the `belongsTo Category` and the `category_id` column without one more line. If both sides are declared, they are de-duplicated.
 
 ## Eloquent vocabulary
 

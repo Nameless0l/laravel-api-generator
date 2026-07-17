@@ -32,7 +32,7 @@ php artisan migrate
 php artisan test
 ```
 
-The tests pass immediately: they were generated *with assertions*, not as empty skeletons.
+The suite passes right after generation, with real assertions against real endpoints, where most generators leave you skeletons to fill in.
 
 ## What gets generated
 
@@ -98,7 +98,7 @@ Every generated model ships a complete PHPDoc block: fields, FK columns, relatio
 class Post extends Model
 ```
 
-Autocomplete works instantly in VS Code and PhpStorm: no `ide-helper` required for generated code.
+Autocomplete works instantly in VS Code and PhpStorm, without `ide-helper` for the generated code.
 
 ## Next steps
 

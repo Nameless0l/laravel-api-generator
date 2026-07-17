@@ -76,7 +76,7 @@ Sans le flag, les endpoints `index` générés supportent quand même un filtrag
 php artisan make:fullapi Post --fields="title:string" --pest
 ```
 
-Génère des tests au style `it(...)` / `expect(...)` au lieu de classes PHPUnit : même couverture, idiomes Pest. Voir [Tests générés](/fr/guide/testing).
+Génère des tests au style `it(...)` / `expect(...)` au lieu de classes PHPUnit, à couverture égale. Voir [Tests générés](/fr/guide/testing).
 
 ## Assistant interactif
 
@@ -88,7 +88,7 @@ Un assistant pas à pas : nom de l'entité, champs un par un (type, nullable, un
 
 ## Régénérer certains fichiers avec `--only=`
 
-Besoin d'une `Resource` ou d'un `Test` frais sans toucher au reste ?
+Pour reconstruire une `Resource` ou un `Test` sans toucher au reste :
 
 ```bash
 php artisan make:fullapi Post --fields="title:string,content:text" --only=FeatureTest,UnitTest

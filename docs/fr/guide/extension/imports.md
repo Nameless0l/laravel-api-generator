@@ -1,6 +1,6 @@
 # Imports : base de données, schéma, Mermaid, JSON, OpenAPI
 
-On part rarement d'un formulaire vide. L'extension peut générer toute la surface d'API depuis ce que vous avez déjà.
+On part rarement d'un formulaire vide. L'extension sait générer toute la surface d'API depuis ce que vous avez déjà, une base de données, un schéma versionné, un diagramme ou une spec.
 
 ## Commandes schéma complet
 
@@ -26,7 +26,7 @@ Transformez un `erDiagram` ou `classDiagram` Mermaid (écrit à la main ou produ
 
 ## Imports du panneau
 
-Des boutons dans le panneau générateur, pour remplir le formulaire au lieu de générer à l'aveugle.
+Des boutons dans le panneau générateur qui pré-remplissent le formulaire, pour relire et ajuster avant de générer.
 
 ### Import from Database (une table)
 

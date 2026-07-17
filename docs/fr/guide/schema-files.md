@@ -76,5 +76,5 @@ Les options peuvent être globales (sous `options:`) ou par entité :
 Le format historique de génération en masse, toujours pleinement supporté : créez `class_data.json` à la racine du projet et lancez `php artisan make:fullapi` sans argument. Voir [Relations → Mode JSON](/fr/guide/relationships#mode-json-class-data-json) pour le format, ou [téléchargez le schéma Blog d'exemple](https://github.com/Nameless0l/laravel-api-generator/blob/main/examples/class_data.json).
 
 ::: tip Compatible IA
-Un fichier YAML unique décrivant toute une API est une cible idéale pour un assistant IA : demandez un schéma à votre modèle préféré, relisez-le, générez. Pas de chemins de fichiers hallucinés : c'est le générateur qui possède la structure.
+Un fichier YAML unique décrivant toute une API est une cible idéale pour un assistant IA : demandez un schéma à votre modèle préféré, relisez-le, générez. L'assistant ne peut pas halluciner de chemins de fichiers, puisque c'est le générateur qui décide de l'arborescence.
 :::

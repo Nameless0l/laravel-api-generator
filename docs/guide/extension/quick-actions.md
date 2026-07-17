@@ -1,39 +1,39 @@
 # Quick Actions & Guardrails
 
-## Quick actions
+## From generated code to docs in the browser
 
-Common artisan commands, one click away, with loading spinners so you always know when something is running:
+Just generated an API? Click **Open API Docs**. The extension checks that [Scramble](/guide/docs-and-postman) is installed and offers the `composer require` if it is missing, looks for a Laravel server already running (ports 8000 to 8003, then 8080), starts one with `php artisan serve` otherwise, detects the actual port, and opens the interactive documentation of your new API at `/docs/api`. The server it started itself is stopped when the panel closes. At no point did you open a terminal.
 
 <!-- SCREENSHOT: the quick actions block. Save as docs/public/ext-quick-actions.png then:
 ![Quick actions](/ext-quick-actions.png)
 -->
 
-| Action | What it runs |
-|--------|--------------|
-| **Run Migrations** | `php artisan migrate` (auto-creates `.env` from `.env.example` if missing) |
-| **Fresh + Seed** | `php artisan migrate:fresh --seed`, with a confirmation first |
-| **Run Tests** | `php artisan test` |
-| **List Routes** | `php artisan route:list --path=api` |
-| **Open API Docs** | Auto-detects or starts the dev server, then opens the [Scramble docs](/guide/docs-and-postman) |
-| **Customize Stubs** | Publishes the package's stubs the first time; after that, offers Open Folder / Reset to Defaults |
+The other buttons carry the same idea, the action plus whatever it depends on.
 
-**Open API Docs** manages the server intelligently: it scans common ports (8000–8003, 8080) for a running server, starts `php artisan serve` if none is found, detects the actual port, and stops the process it started when the panel closes.
+| Action | What it does |
+|--------|--------------|
+| **Run Migrations** | Runs `php artisan migrate`; if `.env` is missing, first offers to create it from `.env.example` |
+| **Fresh + Seed** | `php artisan migrate:fresh --seed` after a confirmation; since the generated seeders are already registered, the database comes back filled, 10 records per entity |
+| **Run Tests** | `php artisan test`, which also runs the tests generated with your APIs |
+| **List Routes** | `php artisan route:list --path=api` |
+| **Open API Docs** | The flow described above |
+| **Customize Stubs** | Publishes the package's stubs the first time, then offers Open Folder / Reset to Defaults |
+
+Every button shows its progress, and clicking again while it runs cancels the operation by killing the artisan process.
 
 ## Guardrails
 
-The extension assumes things will go wrong and plans for it.
+### Stub validation
 
-### Stub validation guard
-
-If you [customized stubs](/guide/customizing-stubs), the extension runs `api-generator:validate-stubs` **before every generation**. A stub missing a required `{{placeholder}}` triggers a modal listing the offending files, with **Open Stubs Folder** / **Generate Anyway** as options: broken templates never silently produce broken code.
+If you [customized stubs](/guide/customizing-stubs), the extension runs `api-generator:validate-stubs` before every generation. A missing required `{{placeholder}}` triggers a modal listing the offending files, with **Open Stubs Folder** to fix them or **Generate Anyway** to proceed knowingly.
 
 ### Dependency detection
 
-A missing package never breaks the flow silently. If the project doesn't have `nameless/laravel-api-generator` yet, a notification offers to install it via Composer; if the installed version is too old for the feature you clicked, the extension explains it and offers `composer update`. The same logic covers the optional integrations: **Open API Docs** without `dedoc/scramble`, the **Auth (Sanctum)** checkbox without `laravel/sanctum`, or the QueryBuilder option without `spatie/laravel-query-builder` all prompt for a one-click `composer require` instead of failing later at runtime.
+Every dependency is checked at the moment it matters. Without the `nameless/laravel-api-generator` package, a notification offers to install it via Composer; when the installed version is too old for the feature you clicked, it offers `composer update`. The optional integrations follow the same rule, whether it is `dedoc/scramble` for the docs, `laravel/sanctum` for the Auth option or `spatie/laravel-query-builder` for filtering. Whatever is missing installs in one click.
 
 ### Orphan route repair
 
-When **List Routes** fails because `routes/api.php` references a deleted controller (the `ReflectionException` that also breaks other Laravel tooling), the extension explains what happened and offers to run the package's `api-generator:clean-routes`: details in [Evolving Entities](/guide/evolving).
+When **List Routes** fails because `routes/api.php` references a deleted controller (the `ReflectionException` that also breaks other Laravel tooling), the extension explains what happened and offers to run `api-generator:clean-routes`. Details in [Evolving Entities](/guide/evolving).
 
 ### Overwrite warnings
 

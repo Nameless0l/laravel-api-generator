@@ -12,13 +12,13 @@ entities:
     fields:
       name: string unique
     relations:
-      posts: hasMany Post   # Post reçoit belongsTo Category + la colonne category_id, automatiquement
+      posts: hasMany Post
   Post:
     fields:
       title: string
 ```
 
-Si les deux côtés sont déclarés, ils sont dédupliqués.
+Ici, `Post` reçoit le `belongsTo Category` et la colonne `category_id` sans une ligne de plus. Si les deux côtés sont déclarés, ils sont dédupliqués.
 
 ## Vocabulaire Eloquent
 

@@ -1,6 +1,6 @@
 # From an Existing Database
 
-Working on a legacy project? Point the generator at the database and get a complete, tested, documented API for every table: no schema to retype.
+Working on a legacy project? Point the generator at the database and get a complete, tested, documented API for every table, without retyping a single schema.
 
 ## Usage
 
@@ -24,7 +24,7 @@ The first form converts every user table; system tables are skipped automaticall
 
 ## What the introspection detects
 
-This is not a dumb column dump:
+The introspection reads far more than column names:
 
 - **Columns** with their types and nullability, mapped to validation rules, casts, factories, DTO types and the model PHPDoc. A `VARCHAR(255) NOT NULL UNIQUE` becomes `required|string|max:255|unique:...` plus a unique factory value.
 - **Foreign keys** (real constraints on Laravel 11+, plus the `<table>_id` naming convention) become `belongsTo` relations, with the inverse `hasMany` on the parent model: both sides typed in the PHPDoc.
@@ -58,7 +58,7 @@ This powers the **Import from Database** feature of the [VS Code extension](/gui
 
 ## The payoff
 
-Legacy database at 9:00: documented, tested REST API at 9:15:
+Legacy database at 9:00, documented and tested REST API at 9:15:
 
 ```bash
 php artisan make:fullapi --from-database --tables=posts,categories,comments --pest --postman

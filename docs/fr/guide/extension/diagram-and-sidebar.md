@@ -26,15 +26,15 @@ Chaque entité se déplie en trois groupes :
 - **Fields** : lus depuis le `$fillable` du modèle.
 - **Relations** : extraites des méthodes de relation du modèle, affichées `belongsTo → Author`.
 
-L'arbre **se rafraîchit tout seul** : un observateur de fichiers le garde (avec la barre de statut) synchronisé quand des API sont générées ou supprimées hors de l'extension : terminal, git pull, la branche d'un collègue.
+Un observateur de fichiers garde l'arbre et la barre de statut synchronisés quand des API sont générées ou supprimées hors de l'extension, depuis le terminal ou après un `git pull`.
 
 ## Actions sur une entité
 
 Clic droit (ou icônes en ligne) sur n'importe quelle entité :
 
 - **Add Fields to Entity…** : tapez `excerpt:text,status:enum(draft,published)` et le package crée une migration incrémentale et patch le modèle, la request, la factory et la resource en place via `--add-fields`, avec un clic pour lancer la migration ensuite. Voir [Faire évoluer les entités](/fr/guide/evolving).
-- **Regenerate File(s)…** : l'extension analyse la migration existante pour retrouver la liste des champs, puis vous laisse multi-sélectionner les artefacts à reconstruire. L'appel sous-jacent est `make:fullapi --only=…` : migration, route et enregistrement du seeder restent intacts.
-- **Delete** : nettoyage complet via `delete:fullapi` : fichiers, routes, enregistrement du seeder.
+- **Regenerate File(s)…** : l'extension analyse la migration existante pour retrouver la liste des champs, puis vous laisse multi-sélectionner les artefacts à reconstruire. L'appel sous-jacent est `make:fullapi --only=…`, donc la migration, la route et l'enregistrement du seeder restent intacts.
+- **Delete** : nettoyage complet via `delete:fullapi` (fichiers, routes, enregistrement du seeder).
 
 ## Go to Related File
 

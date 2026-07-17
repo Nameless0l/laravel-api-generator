@@ -80,7 +80,7 @@ it('shows a post', function () {
     $response->assertStatus(200)
         ->assertJsonFragment(['id' => $post->getKey()]);
 });`,
-        text: 'Not scaffolded: written. Real assertions against real endpoints, factories included, PHPUnit or Pest. This excerpt is an actual generated test, untouched.',
+        text: 'Real assertions against real endpoints, factories included, in PHPUnit or Pest. This excerpt is a generated test, untouched, where most generators stop at the skeleton.',
         link: '/guide/testing',
         linkText: 'Generated tests',
     },
@@ -138,7 +138,7 @@ php artisan make:fullapi Post --fields="title:string,status:enum(draft,published
 php artisan test
 ```
 
-Three commands, and the test suite is already green: the tests come with the API.
+Three commands, and the test suite is already green. The tests come with the API.
 
 ## See it in action
 

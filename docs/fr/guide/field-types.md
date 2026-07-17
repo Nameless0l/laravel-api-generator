@@ -33,9 +33,9 @@ Une seule définition de champ produit toute la chaîne :
 
 - `app/Enums/Status.php` : un `enum Status: string` avec un case par valeur
 - Modèle : `'status' => \App\Enums\Status::class` dans `$casts` et `@property \App\Enums\Status $status` dans le PHPDoc
-- Request: validation `Rule::enum(Status::class)`
-- Factory: `fake()->randomElement(Status::cases())`
-- Migration: `$table->enum('status', ['draft', 'published', 'archived'])`
+- Request : validation `Rule::enum(Status::class)`
+- Factory : `fake()->randomElement(Status::cases())`
+- Migration : `$table->enum('status', ['draft', 'published', 'archived'])`
 
 Dans un fichier de schéma :
 

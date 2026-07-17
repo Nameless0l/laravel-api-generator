@@ -1,6 +1,6 @@
 # Customizing Stubs
 
-Every generated file comes from an editable template. If the default code style isn't yours, change the templates: not the generated files.
+Every generated file comes from an editable template. If the default code style isn't yours, change the templates rather than the generated files.
 
 ## Publish the stubs
 
@@ -12,13 +12,13 @@ This copies every `.stub` into `stubs/vendor/laravel-api-generator/`. The `StubL
 
 ## Validate your customizations
 
-`api-generator:validate-stubs` checks that every required `{{placeholder}}` is still present, so generation can never silently produce broken code:
+`api-generator:validate-stubs` checks that every required `{{placeholder}}` is still present in your modified templates:
 
 ```bash
 php artisan api-generator:validate-stubs
 ```
 
-Wire the `--json` form into CI to catch broken stubs before they reach anyone's machine: the output becomes machine-readable and the command exits with code 1 on error. The [VS Code extension](/guide/extension/quick-actions) runs this validation automatically before each generation.
+The `--json` form fits into a CI pipeline, with machine-readable output and exit code 1 on error, enough to catch a broken stub before it reaches a teammate's machine. The [VS Code extension](/guide/extension/quick-actions) runs this validation automatically before each generation.
 
 ## Extending the generator
 

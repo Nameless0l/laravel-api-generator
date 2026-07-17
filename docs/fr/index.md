@@ -80,7 +80,7 @@ it('shows a post', function () {
     $response->assertStatus(200)
         ->assertJsonFragment(['id' => $post->getKey()]);
 });`,
-        text: "Pas des squelettes : des tests écrits. De vraies assertions contre de vrais endpoints, factories comprises, PHPUnit ou Pest. Cet extrait est un vrai test généré, non retouché.",
+        text: "De vraies assertions contre de vrais endpoints, factories comprises, en PHPUnit ou en Pest. Cet extrait est un test généré, non retouché, et la plupart des générateurs s'arrêtent au squelette.",
         link: '/fr/guide/testing',
         linkText: 'Les tests générés',
     },
@@ -138,7 +138,7 @@ php artisan make:fullapi Post --fields="title:string,status:enum(draft,published
 php artisan test
 ```
 
-Trois commandes, et la suite de tests est déjà verte : les tests arrivent avec l'API.
+Trois commandes, et la suite de tests est déjà verte. Les tests arrivent avec l'API.
 
 ## En action
 

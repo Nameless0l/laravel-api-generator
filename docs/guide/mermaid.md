@@ -60,4 +60,4 @@ Both `erDiagram` and `classDiagram` are supported:
 2. Review the *diagram*, not 40 files of generated code.
 3. Merge, then `php artisan make:fullapi --mermaid=docs/erd.mmd`.
 
-The diagram **is** the source. No drift between the architecture doc and the code.
+Since the diagram is the input itself, the architecture doc in your repo describes exactly what was generated from it.

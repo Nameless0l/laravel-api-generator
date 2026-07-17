@@ -23,12 +23,12 @@ The options are checkboxes: Auth (Sanctum), Postman collection export, Soft Dele
 
 As you edit the form, the panel renders the code that will be generated (Model, Controller, Service, DTO, Request, Resource, Migration, Factory…) with syntax highlighting and tabbed navigation. Enum casts, custom primary keys and relations all show up in the preview before you commit to anything.
 
-A **file preview** also lists which files will be created, so there are no surprises.
+A **file preview** also lists which files will be created, paths included.
 
 ## Safety while generating
 
 Regenerating an entity that already exists first shows a modal listing every file that would be overwritten, so you can back out before anything is written. A running operation is never a black box either: click the spinning button again and the underlying artisan process is killed, with the UI restored. When a generation succeeds, the new Model and Controller open in the editor.
 
-## Under the hood
+## The same command as the terminal
 
-The panel drives the same `make:fullapi` command documented in the [CLI Reference](/reference/cli): everything the form does, you can also do in the terminal, and the generated files are identical.
+The form builds a `make:fullapi` call, the command documented in the [CLI Reference](/reference/cli). An entity generated from the extension, from the terminal or in a CI script produces exactly the same files.

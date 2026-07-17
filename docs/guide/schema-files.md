@@ -76,5 +76,5 @@ Options can be global (under `options:`) or per entity:
 The original bulk format, still fully supported: create `class_data.json` at the project root and run `php artisan make:fullapi` with no arguments. See [Relationships → JSON mode](/guide/relationships#json-mode-class-data-json) for the format, or [download the sample Blog schema](https://github.com/Nameless0l/laravel-api-generator/blob/main/examples/class_data.json).
 
 ::: tip AI-friendly
-A single YAML file describing a whole API is an ideal target for AI assistants: ask your favorite model for a schema, review it, generate. No hallucinated file paths: the generator owns the layout.
+A single YAML file describing a whole API is an ideal target for AI assistants: ask your favorite model for a schema, review it, generate. The assistant cannot hallucinate file paths, since the generator decides the layout.
 :::

@@ -1,6 +1,6 @@
 # Depuis une base existante
 
-Vous travaillez sur un projet legacy ? Pointez le générateur sur la base de données et obtenez une API complète, testée et documentée pour chaque table : aucun schéma à retaper.
+Vous travaillez sur un projet legacy ? Pointez le générateur sur la base de données et obtenez une API complète, testée et documentée pour chaque table, sans retaper le moindre schéma.
 
 ## Usage
 
@@ -24,7 +24,7 @@ La première forme convertit toutes les tables utilisateur ; les tables système
 
 ## Ce que l'introspection détecte
 
-Ce n'est pas un simple déversement de colonnes :
+L'introspection lit bien plus que des noms de colonnes :
 
 - **Les colonnes** avec leurs types et leur nullabilité, converties en règles de validation, casts, factories, types de DTO et PHPDoc du modèle. Un `VARCHAR(255) NOT NULL UNIQUE` devient `required|string|max:255|unique:...` plus une valeur de factory unique.
 - **Les clés étrangères** (contraintes réelles sur Laravel 11+, plus la convention de nommage `<table>_id`) deviennent des relations `belongsTo`, avec le `hasMany` inverse sur le modèle parent : les deux côtés typés dans le PHPDoc.
@@ -58,7 +58,7 @@ C'est ce qui alimente la fonctionnalité **Import from Database** de l'[extensio
 
 ## Le gain
 
-Base legacy à 9h00 : API REST documentée et testée à 9h15 :
+Base legacy à 9h00, API REST documentée et testée à 9h15 :
 
 ```bash
 php artisan make:fullapi --from-database --tables=posts,categories,comments --pest --postman
