@@ -14,7 +14,7 @@ The generator panel replaces CLI flags with a form — and shows you the code yo
 - **Enum fields** — pick the `enum` type and type the values (`draft,published`): the generated API gets a backed PHP enum class, the model cast, `Rule::enum()` validation and a faked factory value (package ≥ 3.6).
 - **Primary key designation** — check `PK` on a field to replace the default `id`. The model (`$primaryKey`, `$incrementing`, `$keyType`), the migration and every incoming relation follow (package ≥ 3.6). See [Field Types & Primary Keys](/guide/field-types).
 - **Relationships** — add `belongsTo` / `hasMany` / `hasOne` / `belongsToMany` rows; the target model input **autocompletes from `app/Models`**, and generation routes through the package's JSON pipeline so you get full FK support, foreign-keyed factories and tests.
-- **Options** — checkboxes for Auth (Sanctum), Postman collection export, Soft Deletes, Spatie QueryBuilder and Pest tests.
+- **Options** — checkboxes for Auth (Sanctum), Postman collection export, Soft Deletes, Spatie QueryBuilder, Pest tests and JSON:API resources (Laravel 12.45+).
 
 ## Live code preview
 

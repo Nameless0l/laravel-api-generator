@@ -14,7 +14,7 @@ Le panneau générateur remplace les flags CLI par un formulaire — et vous mon
 - **Champs enum** — choisissez le type `enum` et saisissez les valeurs (`draft,published`) : l'API générée reçoit un backed enum PHP, le cast du modèle, la validation `Rule::enum()` et une valeur de factory (package ≥ 3.6).
 - **Clé primaire personnalisée** — cochez `PK` sur un champ pour remplacer l'`id` par défaut. Le modèle (`$primaryKey`, `$incrementing`, `$keyType`), la migration et chaque relation entrante suivent (package ≥ 3.6). Voir [Types de champs & clés primaires](/fr/guide/field-types).
 - **Relations** — ajoutez des lignes `belongsTo` / `hasMany` / `hasOne` / `belongsToMany` ; le modèle cible **s'autocomplète depuis `app/Models`**, et la génération passe par le pipeline JSON du package : FK complètes, factories et tests avec clés étrangères.
-- **Options** — cases à cocher pour Auth (Sanctum), export Postman, Soft Deletes, Spatie QueryBuilder et tests Pest.
+- **Options** — cases à cocher pour Auth (Sanctum), export Postman, Soft Deletes, Spatie QueryBuilder, tests Pest et resources JSON:API (Laravel 12.45+).
 
 ## Aperçu du code en direct
 
