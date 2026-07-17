@@ -845,13 +845,19 @@ Then run `composer update`.
 ## Requirements
 
 - PHP >= 8.2
-- Laravel 10.x, 11.x, or 12.x
+- Laravel 10.x, 11.x, 12.x, or 13.x
 
 ---
 
 ## Contributing
 
 Contributions are welcome. Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+---
+
+## Support the project
+
+This package is free and MIT-licensed, and will stay that way. If it saves you time, you can support its development through [GitHub Sponsors](https://github.com/sponsors/Nameless0l) or [Buy Me a Coffee](https://buymeacoffee.com/loicmbassi).
 
 ---
 
