@@ -1,6 +1,6 @@
 # Changelog
 
-Les versions récentes du package et de l'extension VS Code. Les historiques complets sont sur GitHub : [CHANGELOG du package](https://github.com/Nameless0l/laravel-api-generator/blob/main/CHANGELOG.md) · [CHANGELOG de l'extension](https://github.com/Nameless0l/laravel-api-generator-vscode/blob/main/CHANGELOG.md).
+Les versions récentes du package et de l'extension VS Code. Les historiques complets sont sur GitHub : [CHANGELOG du package](https://github.com/Nameless0l/laravel-api-generator/blob/main/CHANGELOG.md) · [CHANGELOG de l'extension](https://github.com/Nameless0l/laravel-api-generator-vscode/blob/master/CHANGELOG.md).
 
 <!-- VIDEO release (YouTube) — à chaque release majeure, embarquer ici la vidéo « vX.Y main features ». -->
 
@@ -63,4 +63,4 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ### Versions antérieures
 
-0.2.0 (spinners, gestion intelligente du serveur, import JSON en masse, aperçu temps réel), 0.1.0 (première version) — détails dans le [changelog complet](https://github.com/Nameless0l/laravel-api-generator-vscode/blob/main/CHANGELOG.md).
+0.2.0 (spinners, gestion intelligente du serveur, import JSON en masse, aperçu temps réel), 0.1.0 (première version) — détails dans le [changelog complet](https://github.com/Nameless0l/laravel-api-generator-vscode/blob/master/CHANGELOG.md).
