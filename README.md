@@ -48,7 +48,9 @@ A visual interface is available: [laravel-api-generator-vscode](https://github.c
 
 ## Architecture
 
-![Architecture Diagram](docs/architecture-diagram.png)
+Every request flows through a clean, layered structure:
+
+![Generated architecture: HTTP request, FormRequest validation, thin controller, service layer with DTOs, model, database, resource serialization](docs/architecture-flow.svg)
 
 ---
 
