@@ -8,7 +8,7 @@ Available from the command palette and the sidebar `…` menu.
 
 ### Generate APIs from Database
 
-The one for legacy projects: complete REST APIs for **every table at once**, straight from the existing schema.
+This is the legacy-project command. It generates complete REST APIs for **every table at once**, straight from the existing schema.
 
 <!-- SCREENSHOT: the multi-select table QuickPick. Save as docs/public/ext-imports-database.png then:
 ![Table selection](/ext-imports-database.png)

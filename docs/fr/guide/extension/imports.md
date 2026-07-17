@@ -8,7 +8,7 @@ Disponibles dans la palette de commandes et le menu `…` de la sidebar.
 
 ### Generate APIs from Database
 
-La commande des projets legacy : des API REST complètes pour **toutes les tables d'un coup**, directement depuis le schéma existant.
+C'est la commande des projets legacy. Elle génère des API REST complètes pour **toutes les tables d'un coup**, directement depuis le schéma existant.
 
 <!-- CAPTURE : le QuickPick multi-sélection de tables. Enregistrer sous docs/public/ext-imports-database.png puis :
 ![Sélection des tables](/ext-imports-database.png)
