@@ -863,7 +863,7 @@ This package is free and MIT-licensed, and will stay that way. If it saves you t
 
 ## Security
 
-If you discover a security vulnerability, please email loicmbassi5@gmail.com instead of using the issue tracker.
+If you discover a security vulnerability, please email loicaronmbassiewolo@gmail.com instead of using the issue tracker.
 
 ---
 

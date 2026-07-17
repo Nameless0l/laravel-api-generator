@@ -6,6 +6,10 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package — `nameless/laravel-api-generator`
 
+### 3.7.1 — July 17, 2026
+
+- Corrected the maintainer contact email (`composer.json` + README security section).
+
 ### 3.7.0 — July 17, 2026
 
 - **`--json-api`** — generates [JSON:API](https://jsonapi.org/)-compliant resources (`JsonApiResource`, Laravel 12.45+): an `$attributes` list plus a `$relationships` list from the entity's relations, the `id` becoming the JSON:API identifier. Controllers are unchanged; the generated feature test asserts `data.id`. Falls back to a standard resource on Laravel < 12.45.
@@ -48,6 +52,14 @@ Recent releases of the package and the VS Code extension. Full histories live on
 3.3.1 (strict-types fixes), 3.3.0 (auto-registered routes and seeders, required-by-default validation), 3.2.0 (interactive wizard, Sanctum auth, generated tests, Postman export, soft deletes), 3.0.0 (clean-architecture rewrite) — details in the [full changelog](https://github.com/Nameless0l/laravel-api-generator/blob/main/CHANGELOG.md).
 
 ## VS Code extension
+
+### 0.10.1 — July 17, 2026
+
+- Sponsor button on the Marketplace listing; corrected the maintainer contact email.
+
+### 0.10.0 — July 17, 2026
+
+- **JSON:API resources** — a "JSON:API resources" option in the builder form and the source generators passes `--json-api` to the package; the live preview renders the JSON:API shape. Pairs with package >= 3.7.
 
 ### 0.9.0 — July 16, 2026
 
