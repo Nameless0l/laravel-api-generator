@@ -5,6 +5,11 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.7.0] - 2026-07-17
+
+### Added
+- **`--json-api`** -- Generates [JSON:API](https://jsonapi.org/)-compliant resources extending `Illuminate\Http\Resources\JsonApi\JsonApiResource` (Laravel 12.45+): the resource declares an `$attributes` list (fields plus timestamps, the `id` becoming the JSON:API resource identifier) and a `$relationships` list built from the entity's relations. Controllers are unchanged -- `Resource::collection()` and `new Resource()` produce the JSON:API envelope automatically. The generated feature test asserts the response with `assertJsonPath('data.id', ...)` in this mode. On Laravel below 12.45 the flag warns once and falls back to a standard resource rather than emit an unresolvable class.
+
 ## [3.6.1] - 2026-07-17
 
 ### Fixed

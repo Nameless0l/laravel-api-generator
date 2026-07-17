@@ -1,0 +1,13 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\JsonApi\JsonApiResource;
+
+class {{modelName}}Resource extends JsonApiResource
+{
+    /** @var array<int, string> */
+    public $attributes = [
+{{attributes}}
+    ];
+{{relationships}}}

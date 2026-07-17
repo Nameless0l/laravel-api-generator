@@ -155,6 +155,11 @@ final readonly class EntityDefinition
         return ($this->options['pest'] ?? false) === true;
     }
 
+    public function usesJsonApi(): bool
+    {
+        return ($this->options['json_api'] ?? false) === true;
+    }
+
     public function getPrimaryField(): ?FieldDefinition
     {
         return $this->fields->first(fn (FieldDefinition $field) => $field->isPrimary());

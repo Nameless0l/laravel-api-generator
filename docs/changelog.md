@@ -6,6 +6,10 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package — `nameless/laravel-api-generator`
 
+### 3.7.0 — July 17, 2026
+
+- **`--json-api`** — generates [JSON:API](https://jsonapi.org/)-compliant resources (`JsonApiResource`, Laravel 12.45+): an `$attributes` list plus a `$relationships` list from the entity's relations, the `id` becoming the JSON:API identifier. Controllers are unchanged; the generated feature test asserts `data.id`. Falls back to a standard resource on Laravel < 12.45.
+
 ### 3.6.1 — July 17, 2026
 
 - **Laravel 13 support** — the constraint stopped at `^12`, so `composer require` was rejected on any application running Laravel 13 (released March 17, 2026). Now allows `^13.0`.

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace nameless\CodeGenerator\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Http\Resources\JsonApi\JsonApiResource;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
@@ -34,9 +35,12 @@ class MakeApiCommand extends Command
         {--with-migrations : Also generate migrations when using --from-database}
         {--query-builder : Use spatie/laravel-query-builder for index filtering and sorting}
         {--pest : Generate Pest tests instead of PHPUnit}
+        {--json-api : Generate JSON:API-compliant resources (requires Laravel 12.45+)}
         {--add-fields= : Add fields to an existing entity (incremental migration + in-place patches)}';
 
     protected $description = 'Generate a complete API including model, migration, controller, resource, request, factory, seeder, DTO, service, policy, and tests';
+
+    private ?bool $jsonApiResolved = null;
 
     public function __construct(
         private readonly ApiGenerationServiceInterface $apiGenerationService,
@@ -190,6 +194,9 @@ class MakeApiCommand extends Command
             if ($entity->usesPest()) {
                 $flags[] = 'pest';
             }
+            if ($entity->usesJsonApi()) {
+                $flags[] = 'json:api';
+            }
             if ($entity->skipsMigration()) {
                 $flags[] = 'no migration';
             }
@@ -246,8 +253,35 @@ class MakeApiCommand extends Command
         if ($this->option('pest')) {
             $options['pest'] = true;
         }
+        if ($this->wantsJsonApi()) {
+            $options['json_api'] = true;
+        }
 
         return $options;
+    }
+
+    /**
+     * Whether --json-api was requested and the runtime supports it. Laravel
+     * only ships JsonApiResource from 12.45; on older versions we warn once
+     * and fall back to standard resources rather than generate a fatal class.
+     */
+    private function wantsJsonApi(): bool
+    {
+        if ($this->jsonApiResolved !== null) {
+            return $this->jsonApiResolved;
+        }
+
+        if (! $this->option('json-api')) {
+            return $this->jsonApiResolved = false;
+        }
+
+        if (! class_exists(JsonApiResource::class)) {
+            $this->warn('  --json-api needs Laravel 12.45+ (Illuminate\\Http\\Resources\\JsonApi\\JsonApiResource); generating standard resources instead.');
+
+            return $this->jsonApiResolved = false;
+        }
+
+        return $this->jsonApiResolved = true;
     }
 
     /**

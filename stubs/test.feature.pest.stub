@@ -31,7 +31,7 @@ it('shows a {{modelNameLower}}', function () {
     $response = {{actingAs}}$this->getJson("/api/{{pluralName}}/{${{modelNameLower}}->getKey()}");
 
     $response->assertStatus(200)
-        ->assertJsonFragment([{{pkFieldQuoted}} => ${{modelNameLower}}->getKey()]);
+        {{showIdAssertion}};
 });
 
 it('updates a {{modelNameLower}}', function () {

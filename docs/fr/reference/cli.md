@@ -5,7 +5,7 @@
 ```
 php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
                          {--schema=} {--mermaid=} {--from-database} {--tables=} {--with-migrations} {--query-builder}
-                         {--pest} {--add-fields=}
+                         {--pest} {--json-api} {--add-fields=}
 php artisan delete:fullapi {name?} {--force}
 php artisan api-generator:clean-routes {--dry-run}
 php artisan api-generator:introspect {--table=}
@@ -31,6 +31,7 @@ php artisan api-generator:install
 | `--with-migrations` | Avec `--from-database` : génère aussi les fichiers de migration. |
 | `--query-builder` | Utilise spatie/laravel-query-builder pour le filtrage et le tri de l'index. |
 | `--pest` | Génère des tests Pest au lieu de PHPUnit. |
+| `--json-api` | Génère des resources conformes à JSON:API (`JsonApiResource`, Laravel 12.45+). Repli sur une resource standard sur les versions antérieures. |
 | `--add-fields=a:type,b:type` | Ajoute des champs à une entité existante : migration incrémentale + patchs en place. |
 
 Types pour `--only` : `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.

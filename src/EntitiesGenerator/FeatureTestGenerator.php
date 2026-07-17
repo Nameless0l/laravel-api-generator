@@ -48,6 +48,11 @@ class FeatureTestGenerator extends AbstractGenerator
             ->filter(fn (RelationshipDefinition $rel) => $rel->requiresForeignKey());
 
         $hasAuth = $definition->hasAuth();
+        $lower = $definition->getNameLower();
+
+        $showIdAssertion = $definition->usesJsonApi()
+            ? "->assertJsonPath('data.id', (string) \${$lower}->getKey())"
+            : "->assertJsonFragment(['{$pk}' => \${$lower}->getKey()])";
 
         return [
             'modelName' => $definition->name,
@@ -55,6 +60,7 @@ class FeatureTestGenerator extends AbstractGenerator
             'pluralName' => $definition->getPluralName(),
             'tableName' => $definition->getTableName(),
             'pkFieldQuoted' => "'{$pk}'",
+            'showIdAssertion' => $showIdAssertion,
             'requestFields' => $this->generateRequestFields($definition),
             'deleteAssertion' => $deleteAssertion,
             'relatedImports' => $this->generateRelatedImports($belongsToRels, $definition->name),

@@ -6,6 +6,7 @@ namespace nameless\CodeGenerator\EntitiesGenerator;
 
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
+use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
 
 class ResourceGenerator extends AbstractGenerator
 {
@@ -21,7 +22,9 @@ class ResourceGenerator extends AbstractGenerator
 
     protected function generateContent(EntityDefinition $definition): string
     {
-        return $this->processStub($definition);
+        $stubName = $definition->usesJsonApi() ? 'resource.json-api' : 'resource';
+
+        return $this->stubLoader->load($stubName, $this->getReplacements($definition));
     }
 
     protected function getStubName(): string
@@ -34,6 +37,14 @@ class ResourceGenerator extends AbstractGenerator
      */
     protected function getReplacements(EntityDefinition $definition): array
     {
+        if ($definition->usesJsonApi()) {
+            return [
+                'modelName' => $definition->name,
+                'attributes' => $this->generateJsonApiAttributes($definition),
+                'relationships' => $this->generateJsonApiRelationships($definition),
+            ];
+        }
+
         return [
             'modelName' => $definition->name,
             'fields' => $this->generateFields($definition),
@@ -52,5 +63,29 @@ class ResourceGenerator extends AbstractGenerator
         $fields[] = "            'updated_at' => \$this->updated_at,";
 
         return implode("\n", $fields);
+    }
+
+    private function generateJsonApiAttributes(EntityDefinition $definition): string
+    {
+        $names = $definition->fields
+            ->map(fn (FieldDefinition $field) => $field->name)
+            ->push('created_at', 'updated_at');
+
+        return $names
+            ->map(fn (string $name) => "        '{$name}',")
+            ->implode("\n");
+    }
+
+    private function generateJsonApiRelationships(EntityDefinition $definition): string
+    {
+        if ($definition->relationships->isEmpty()) {
+            return '';
+        }
+
+        $lines = $definition->relationships
+            ->map(fn (RelationshipDefinition $rel) => "        '{$rel->role}',")
+            ->implode("\n");
+
+        return "\n    /** @var array<int, string> */\n    public \$relationships = [\n{$lines}\n    ];\n";
     }
 }

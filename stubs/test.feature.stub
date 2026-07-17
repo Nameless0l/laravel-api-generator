@@ -39,7 +39,7 @@ class {{modelName}}ControllerTest extends TestCase
         $response = {{actingAs}}$this->getJson("/api/{{pluralName}}/{${{modelNameLower}}->getKey()}");
 
         $response->assertStatus(200)
-            ->assertJsonFragment([{{pkFieldQuoted}} => ${{modelNameLower}}->getKey()]);
+            {{showIdAssertion}};
     }
 
     public function test_can_update_{{modelNameLower}}(): void
