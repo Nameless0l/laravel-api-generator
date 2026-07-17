@@ -25,7 +25,7 @@ The extension assumes things will go wrong and plans for it.
 
 ### Stub validation guard
 
-If you [customized stubs](/guide/customizing-stubs), the extension runs `api-generator:validate-stubs` **before every generation**. A stub missing a required `{{placeholder}}` triggers a modal listing the offending files, with **Open Stubs Folder** / **Generate Anyway** as options — broken templates never silently produce broken code.
+If you [customized stubs](/guide/customizing-stubs), the extension runs `api-generator:validate-stubs` **before every generation**. A stub missing a required `{{placeholder}}` triggers a modal listing the offending files, with **Open Stubs Folder** / **Generate Anyway** as options: broken templates never silently produce broken code.
 
 ### Dependency detection
 
@@ -39,7 +39,7 @@ A missing package never breaks the flow silently:
 
 ### Orphan route repair
 
-When **List Routes** fails because `routes/api.php` references a deleted controller (the `ReflectionException` that also breaks other Laravel tooling), the extension explains what happened and offers to run the package's `api-generator:clean-routes` — details in [Evolving Entities](/guide/evolving).
+When **List Routes** fails because `routes/api.php` references a deleted controller (the `ReflectionException` that also breaks other Laravel tooling), the extension explains what happened and offers to run the package's `api-generator:clean-routes`: details in [Evolving Entities](/guide/evolving).
 
 ### Overwrite warnings
 

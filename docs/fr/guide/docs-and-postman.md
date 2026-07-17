@@ -1,6 +1,6 @@
 # Doc API & Postman
 
-Votre API est documentée dès qu'elle existe — via Scramble pour la doc OpenAPI interactive, et des collections Postman pour votre équipe.
+Votre API est documentée dès qu'elle existe : via Scramble pour la doc OpenAPI interactive, et des collections Postman pour votre équipe.
 
 ## Scramble : doc OpenAPI instantanée
 
@@ -17,11 +17,11 @@ Ouvrez `http://localhost:8000/docs/api` :
 
 Ce que vous obtenez automatiquement :
 
-- **Swagger UI interactif** — testez les endpoints depuis le navigateur avec *Send API Request*
-- **Schémas auto-détectés** — `PostRequest`, `PostResource`… déduits des règles de FormRequest et de la structure des Resources
-- **Les règles de validation deviennent des contraintes** — `required|string|max:255` devient un champ requis avec `<= 255 characters` dans la doc
-- **Exemples de requête/réponse** — les corps JSON d'exemple sont générés pour vous
-- **Endpoints groupés** — chaque entité a sa section avec toutes les opérations CRUD
+- **Swagger UI interactif** : testez les endpoints depuis le navigateur avec *Send API Request*
+- **Schémas auto-détectés** : `PostRequest`, `PostResource`… déduits des règles de FormRequest et de la structure des Resources
+- **Les règles de validation deviennent des contraintes** : `required|string|max:255` devient un champ requis avec `<= 255 characters` dans la doc
+- **Exemples de requête/réponse** : les corps JSON d'exemple sont générés pour vous
+- **Endpoints groupés** : chaque entité a sa section avec toutes les opérations CRUD
 
 ![Schémas Scramble](../../scramble-schemas.png)
 
@@ -31,7 +31,7 @@ Ce que vous obtenez automatiquement :
 | `/docs/api.json` | Spécification OpenAPI 3.x brute (JSON) |
 
 ::: tip
-Scramble est une dépendance de dev — il n'affecte pas votre déploiement en production. Exactement comme le générateur lui-même.
+Scramble est une dépendance de dev : il n'affecte pas votre déploiement en production. Exactement comme le générateur lui-même.
 :::
 
 ## Collection Postman

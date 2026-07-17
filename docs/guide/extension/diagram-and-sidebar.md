@@ -22,20 +22,20 @@ The **Generated Entities** view in the activity bar tracks everything the genera
 
 Each entity expands into three groups:
 
-- **Files** — a green check / red slash per artifact (Model, Controller, Service…); click to open.
-- **Fields** — read from the model's `$fillable`.
-- **Relations** — extracted from the model's relation methods, shown as `belongsTo → Author`.
+- **Files**: a green check / red slash per artifact (Model, Controller, Service…); click to open.
+- **Fields**: read from the model's `$fillable`.
+- **Relations**: extracted from the model's relation methods, shown as `belongsTo → Author`.
 
-The tree **auto-refreshes**: a file watcher keeps it (and the status bar) in sync when APIs are generated or deleted outside the extension — terminal, git pull, a teammate's branch.
+The tree **auto-refreshes**: a file watcher keeps it (and the status bar) in sync when APIs are generated or deleted outside the extension: terminal, git pull, a teammate's branch.
 
 ## Entity actions
 
 Right-click (or use the inline icons) on any entity:
 
-- **Add Fields to Entity…** — type `excerpt:text,status:enum(draft,published)` and the package creates an incremental migration and patches the model, request, factory and resource in place via `--add-fields` (package ≥ 3.6). One click to run the migration after. See [Evolving Entities](/guide/evolving).
-- **Regenerate File(s)…** — the extension parses the existing migration to recover the field list, then lets you multi-select which artifacts to rebuild. The underlying call is `make:fullapi --only=…`, so the migration, route and seeder registration are left untouched.
-- **Delete** — full cleanup via `delete:fullapi`: files, routes, seeder registration.
+- **Add Fields to Entity…**: type `excerpt:text,status:enum(draft,published)` and the package creates an incremental migration and patches the model, request, factory and resource in place via `--add-fields` (package ≥ 3.6). One click to run the migration after. See [Evolving Entities](/guide/evolving).
+- **Regenerate File(s)…**: the extension parses the existing migration to recover the field list, then lets you multi-select which artifacts to rebuild. The underlying call is `make:fullapi --only=…`, so the migration, route and seeder registration are left untouched.
+- **Delete**: full cleanup via `delete:fullapi`: files, routes, seeder registration.
 
 ## Go to Related File
 
-`Ctrl+Alt+R` (`Cmd+Alt+R` on macOS) from any generated file jumps to its siblings — model to controller to service to test — without hunting through the tree.
+`Ctrl+Alt+R` (`Cmd+Alt+R` on macOS) from any generated file jumps to its siblings (model to controller to service to test) without hunting through the tree.

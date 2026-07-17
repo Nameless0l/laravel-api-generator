@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\File;
 
 /**
  * Removes route lines (and their imports) that reference controllers whose
- * class file no longer exists — the leftovers that make `route:list` and
+ * class file no longer exists: the leftovers that make `route:list` and
  * IDE tooling crash with a ReflectionException after manual deletions.
  */
 class CleanRoutesCommand extends Command

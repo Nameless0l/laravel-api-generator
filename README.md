@@ -84,7 +84,7 @@ The service provider is auto-discovered. No additional configuration required.
 
 ### Zero lock-in
 
-The generator is a **dev dependency**: it never runs in production (`composer install --no-dev` leaves it out), and the generated code is plain Laravel with **no dependency on this package** — no base classes to extend, no runtime helpers. You can even remove the generator afterwards and everything keeps working.
+The generator is a **dev dependency**: it never runs in production (`composer install --no-dev` leaves it out), and the generated code is plain Laravel with **no dependency on this package** (no base classes to extend, no runtime helpers). You can even remove the generator afterwards and everything keeps working.
 
 ---
 

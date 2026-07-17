@@ -50,7 +50,7 @@ Tapez un préfixe `lag:` dans n'importe quel fichier PHP :
 
 ## Activation
 
-L'extension s'active quand le workspace contient un fichier `artisan` — y compris dans les monorepos où l'app Laravel vit jusqu'à deux niveaux de profondeur (`backend/`, `apps/api/`…).
+L'extension s'active quand le workspace contient un fichier `artisan` : y compris dans les monorepos où l'app Laravel vit jusqu'à deux niveaux de profondeur (`backend/`, `apps/api/`…).
 
 ## Changelog
 

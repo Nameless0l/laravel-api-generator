@@ -50,7 +50,7 @@ Type a `lag:` prefix in any PHP file:
 
 ## Activation
 
-The extension activates when the workspace contains an `artisan` file — including monorepos where the Laravel app lives up to two levels deep (`backend/`, `apps/api/`…).
+The extension activates when the workspace contains an `artisan` file: including monorepos where the Laravel app lives up to two levels deep (`backend/`, `apps/api/`…).
 
 ## Changelog
 

@@ -25,7 +25,7 @@ L'extension part du principe que les choses vont mal se passer, et le prévoit.
 
 ### Validation des stubs
 
-Si vous avez [personnalisé des stubs](/fr/guide/customizing-stubs), l'extension lance `api-generator:validate-stubs` **avant chaque génération**. Un stub auquel il manque un `{{placeholder}}` requis déclenche un modal listant les fichiers fautifs, avec **Open Stubs Folder** / **Generate Anyway** — un template cassé ne produit jamais silencieusement du code cassé.
+Si vous avez [personnalisé des stubs](/fr/guide/customizing-stubs), l'extension lance `api-generator:validate-stubs` **avant chaque génération**. Un stub auquel il manque un `{{placeholder}}` requis déclenche un modal listant les fichiers fautifs, avec **Open Stubs Folder** / **Generate Anyway** : un template cassé ne produit jamais silencieusement du code cassé.
 
 ### Détection des dépendances
 
@@ -39,7 +39,7 @@ Un package manquant ne casse jamais le flux en silence :
 
 ### Réparation des routes orphelines
 
-Quand **List Routes** échoue parce que `routes/api.php` référence un contrôleur supprimé (la `ReflectionException` qui casse aussi les autres outils Laravel), l'extension explique ce qui s'est passé et propose de lancer `api-generator:clean-routes` — détails dans [Faire évoluer les entités](/fr/guide/evolving).
+Quand **List Routes** échoue parce que `routes/api.php` référence un contrôleur supprimé (la `ReflectionException` qui casse aussi les autres outils Laravel), l'extension explique ce qui s'est passé et propose de lancer `api-generator:clean-routes` : détails dans [Faire évoluer les entités](/fr/guide/evolving).
 
 ### Avertissements d'écrasement
 

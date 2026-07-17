@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Laravel API Generator
   text: One command. Your whole Laravel API.
-  tagline: Models, services, DTOs, policies, written tests and docs — generated in 30 seconds, with zero lock-in.
+  tagline: "Models, services, DTOs, policies, written tests and docs: generated in 30 seconds, with zero lock-in."
   image:
     src: /logo.png
     alt: Laravel API Generator
@@ -22,16 +22,16 @@ hero:
 features:
   - icon: 🧪
     title: Tests written, not scaffolded
-    details: Feature and unit tests with real assertions — PHPUnit or Pest. php artisan test is green right after generation.
+    details: "Feature and unit tests with real assertions: PHPUnit or Pest. php artisan test is green right after generation."
   - icon: 🏛️
     title: An architecture, not just files
     details: Thin controller → service layer → typed DTO, plus policy, form requests and resources. Room to grow, built in.
   - icon: 🔍
     title: Models your IDE understands
-    details: Full @property PHPDoc on every model — instant autocomplete in VS Code and PhpStorm, no ide-helper needed.
+    details: "Full @property PHPDoc on every model: instant autocomplete in VS Code and PhpStorm, no ide-helper needed."
   - icon: 🗄️
     title: Starts from what you already have
-    details: --from-database reverse-engineers an existing schema — relations, morphs, uniques — into complete APIs.
+    details: --from-database reverse-engineers an existing schema (relations, morphs, uniques) into complete APIs.
   - icon: 📐
     title: Schema-as-code
     details: YAML files or Mermaid ER diagrams as input. Declare one side of a relation, the inverse and its FK are synthesized.
@@ -43,7 +43,7 @@ features:
     details: Postman collection export and Scramble-friendly controllers for instant OpenAPI documentation.
   - icon: 🔓
     title: Zero lock-in
-    details: A --dev dependency. Generated code is plain Laravel with no reference to the package — remove it, everything keeps working.
+    details: "A --dev dependency. Generated code is plain Laravel with no reference to the package: remove it, everything keeps working."
 ---
 
 <script setup>
@@ -79,7 +79,7 @@ it('shows a post', function () {
     $response->assertStatus(200)
         ->assertJsonFragment(['id' => $post->getKey()]);
 });`,
-        text: 'Not scaffolded — written. Real assertions against real endpoints, factories included, PHPUnit or Pest. This excerpt is an actual generated test, untouched.',
+        text: 'Not scaffolded: written. Real assertions against real endpoints, factories included, PHPUnit or Pest. This excerpt is an actual generated test, untouched.',
         link: '/guide/testing',
         linkText: 'Generated tests',
     },
@@ -87,7 +87,7 @@ it('shows a post', function () {
         title: 'Architecture',
         img: archImg,
         imgAlt: 'Generated architecture diagram',
-        text: 'A thin controller delegating to a service layer, typed readonly DTOs, policies, form requests and resources — the structure you would build on a good day, there from day one.',
+        text: 'A thin controller delegating to a service layer, typed readonly DTOs, policies, form requests and resources: the structure you would build on a good day, there from day one.',
         link: '/guide/generating',
         linkText: 'What gets generated',
     },
@@ -95,7 +95,7 @@ it('shows a post', function () {
         title: 'API docs',
         img: scrambleImg,
         imgAlt: 'Scramble OpenAPI documentation',
-        text: 'Generated controllers are written so Scramble can document them with zero annotations — an interactive Swagger UI at /docs/api. Postman collection export included.',
+        text: 'Generated controllers are written so Scramble can document them with zero annotations: an interactive Swagger UI at /docs/api. Postman collection export included.',
         link: '/guide/docs-and-postman',
         linkText: 'API docs & Postman',
     },
@@ -125,7 +125,7 @@ php artisan make:fullapi --from-database \\
     },
 ]
 
-// Social proof: add real quotes as they arrive — the section stays hidden while the list is empty.
+// Social proof: add real quotes as they arrive; the section stays hidden while the list is empty.
 // { quote: 'What they wrote, without quotation marks', author: 'Their Name', handle: '@handle', link: 'https://x.com/…' },
 const testimonials = []
 </script>
@@ -145,7 +145,7 @@ php artisan test   # green ✓
 
 <HomeTestimonials title="What people say" :items="testimonials" />
 
-<!-- VIDEO #1 (YouTube) — uncomment and set VIDEO_ID once the first demo video is online:
+<!-- VIDEO #1 (YouTube): uncomment and set VIDEO_ID once the first demo video is online:
 ## Watch the demo
 
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">

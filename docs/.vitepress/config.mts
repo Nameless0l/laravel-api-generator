@@ -120,7 +120,7 @@ export default defineConfig({
             'meta',
             {
                 property: 'og:description',
-                content: 'One command. Your whole Laravel API — tests written, docs included, zero lock-in.',
+                content: 'One command. Your whole Laravel API: tests written, docs included, zero lock-in.',
             },
         ],
     ],
@@ -129,7 +129,7 @@ export default defineConfig({
             label: 'English',
             lang: 'en-US',
             description:
-                'One command. Your whole Laravel API — models, services, DTOs, policies, written tests and docs, with zero lock-in.',
+                'One command. Your whole Laravel API: models, services, DTOs, policies, written tests and docs, with zero lock-in.',
             themeConfig: {
                 nav: [
                     { text: 'Guide', link: '/guide/getting-started' },
@@ -155,7 +155,7 @@ export default defineConfig({
             lang: 'fr-FR',
             link: '/fr/',
             description:
-                'Une commande. Toute votre API Laravel — modèles, services, DTO, policies, tests écrits et documentation, sans lock-in.',
+                'Une commande. Toute votre API Laravel : modèles, services, DTO, policies, tests écrits et documentation, sans lock-in.',
             themeConfig: {
                 nav: [
                     { text: 'Guide', link: '/fr/guide/getting-started' },

@@ -1,6 +1,6 @@
 # Personnaliser les stubs
 
-Chaque fichier généré provient d'un template éditable. Si le style de code par défaut n'est pas le vôtre, changez les templates — pas les fichiers générés.
+Chaque fichier généré provient d'un template éditable. Si le style de code par défaut n'est pas le vôtre, changez les templates : pas les fichiers générés.
 
 ## Publier les stubs
 
@@ -60,7 +60,7 @@ class CustomGenerator extends AbstractGenerator
 
 Enregistrez-le dans votre service provider et il sera appelé automatiquement pendant la génération.
 
-<!-- VIDEO #7 (YouTube) — décommenter et renseigner VIDEO_ID quand la vidéo est en ligne, puis la placer en haut de page :
+<!-- VIDEO #7 (YouTube) : décommenter et renseigner VIDEO_ID quand la vidéo est en ligne, puis la placer en haut de page :
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
   <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Zéro lock-in : personnaliser les stubs puis désinstaller" allowfullscreen loading="lazy"></iframe>
 </div>

@@ -14,9 +14,9 @@ The one for legacy projects (package ≥ 3.5): complete REST APIs for **every ta
 ![Table selection](/ext-imports-database.png)
 -->
 
-- Multi-select the tables — all preselected except `users`, so `app/Models/User.php` is never overwritten by accident.
+- Multi-select the tables: all preselected except `users`, so `app/Models/User.php` is never overwritten by accident.
 - Pick options: Spatie QueryBuilder filtering, Pest tests, and whether to also generate migration files.
-- Foreign keys become `belongsTo`/`hasMany`, pivot tables become `belongsToMany`, `deleted_at` enables Soft Deletes — automatically. Details in [From an Existing Database](/guide/from-database).
+- Foreign keys become `belongsTo`/`hasMany`, pivot tables become `belongsToMany`, `deleted_at` enables Soft Deletes: automatically. Details in [From an Existing Database](/guide/from-database).
 
 ### Generate APIs from Schema File
 
@@ -24,7 +24,7 @@ Describe the whole API in a declarative, versionable YAML/JSON file (package ≥
 
 ### Generate APIs from Mermaid Diagram
 
-Paste a Mermaid `erDiagram` or `classDiagram` — hand-written or produced by an AI assistant — and turn it into a working API (package ≥ 3.5). Uses the active `.mmd` file or lets you browse for one. Cardinalities (`||--o{`, `"1" --> "*"`) become the right Eloquent relations on both sides. See [Mermaid Diagrams](/guide/mermaid).
+Paste a Mermaid `erDiagram` or `classDiagram` (hand-written or produced by an AI assistant) and turn it into a working API (package ≥ 3.5). Uses the active `.mmd` file or lets you browse for one. Cardinalities (`||--o{`, `"1" --> "*"`) become the right Eloquent relations on both sides. See [Mermaid Diagrams](/guide/mermaid).
 
 ## Panel imports
 
@@ -53,4 +53,4 @@ Import an OpenAPI 3.0 or Swagger 2.0 **JSON** spec to bulk-generate entities:
 
 ### JSON bulk import
 
-Import a `class_data.json` file to generate multiple entities at once, with a visual preview of every entity, its fields and relationships before the one-click generation. Relationships (`oneToMany`, `manyToOne`, `manyToMany`, compositions, aggregations) are supported. [Download a sample class_data.json](https://github.com/Nameless0l/laravel-api-generator/blob/main/examples/class_data.json) to try it — a Blog with Author, Category, Article and Tag.
+Import a `class_data.json` file to generate multiple entities at once, with a visual preview of every entity, its fields and relationships before the one-click generation. Relationships (`oneToMany`, `manyToOne`, `manyToMany`, compositions, aggregations) are supported. [Download a sample class_data.json](https://github.com/Nameless0l/laravel-api-generator/blob/main/examples/class_data.json) to try it: a Blog with Author, Category, Article and Tag.

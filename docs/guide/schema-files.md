@@ -1,6 +1,6 @@
 # YAML & JSON Schemas
 
-Describe your whole API in one declarative, versionable file — commit it, review it in PRs, regenerate at will.
+Describe your whole API in one declarative, versionable file: commit it, review it in PRs, regenerate at will.
 
 ## YAML schema
 
@@ -66,14 +66,14 @@ Options can be global (under `options:`) or per entity:
 
 ## What you get for free
 
-- **Inverse relations synthesized** — declare `posts: hasMany Post` on `Category`, and `Post` receives the `belongsTo` and its `category_id` migration column. [Details](/guide/relationships).
-- **Foreign-key-safe ordering** — entities are generated parents-first so `php artisan migrate` never trips on a missing table.
-- **Automatic pivots** — every `belongsToMany` creates its pivot migration.
+- **Inverse relations synthesized**: declare `posts: hasMany Post` on `Category`, and `Post` receives the `belongsTo` and its `category_id` migration column. [Details](/guide/relationships).
+- **Foreign-key-safe ordering**: entities are generated parents-first so `php artisan migrate` never trips on a missing table.
+- **Automatic pivots**: every `belongsToMany` creates its pivot migration.
 
 ## JSON bulk mode (`class_data.json`)
 
-The original bulk format, still fully supported — create `class_data.json` at the project root and run `php artisan make:fullapi` with no arguments. See [Relationships → JSON mode](/guide/relationships#json-mode-class-data-json) for the format, or [download the sample Blog schema](https://github.com/Nameless0l/laravel-api-generator/blob/main/examples/class_data.json).
+The original bulk format, still fully supported: create `class_data.json` at the project root and run `php artisan make:fullapi` with no arguments. See [Relationships → JSON mode](/guide/relationships#json-mode-class-data-json) for the format, or [download the sample Blog schema](https://github.com/Nameless0l/laravel-api-generator/blob/main/examples/class_data.json).
 
 ::: tip AI-friendly
-A single YAML file describing a whole API is an ideal target for AI assistants: ask your favorite model for a schema, review it, generate. No hallucinated file paths — the generator owns the layout.
+A single YAML file describing a whole API is an ideal target for AI assistants: ask your favorite model for a schema, review it, generate. No hallucinated file paths: the generator owns the layout.
 :::

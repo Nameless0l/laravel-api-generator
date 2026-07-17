@@ -1,13 +1,13 @@
 # Tests générés
 
-La plupart des générateurs vous donnent des squelettes de tests vides. Celui-ci écrit de **vraies assertions** — et elles passent dès la génération.
+La plupart des générateurs vous donnent des squelettes de tests vides. Celui-ci écrit de **vraies assertions** : et elles passent dès la génération.
 
 ## Ce qui est couvert
 
 Chaque entité arrive avec un test feature (`tests/Feature/PostControllerTest.php`) et un test unitaire (`tests/Unit/PostServiceTest.php`) couvrant :
 
-- Index — la liste renvoie les enregistrements créés
-- Store — la création persiste et renvoie 201
+- Index : la liste renvoie les enregistrements créés
+- Store : la création persiste et renvoie 201
 - Les allers-retours Show / Update / Delete
 - Les erreurs de validation sur entrée invalide
 - La couche service isolément
@@ -46,7 +46,7 @@ class PostControllerTest extends TestCase
 php artisan make:fullapi Post --fields="title:string" --pest
 ```
 
-Génère des tests au style `it(...)` / `expect(...)` / `beforeEach(...)` au lieu de classes PHPUnit — la même couverture, dans l'idiome que les nouveaux projets Laravel utilisent par défaut :
+Génère des tests au style `it(...)` / `expect(...)` / `beforeEach(...)` au lieu de classes PHPUnit : la même couverture, dans l'idiome que les nouveaux projets Laravel utilisent par défaut :
 
 ```php
 it('creates a post', function () {
@@ -67,7 +67,7 @@ Les tests générés utilisent `getKey()` au lieu de coder `->id` en dur, donc l
 
 ## Seeding
 
-Les seeders générés sont enregistrés automatiquement dans `DatabaseSeeder.php` — chacun crée **10 enregistrements** via la factory générée :
+Les seeders générés sont enregistrés automatiquement dans `DatabaseSeeder.php` : chacun crée **10 enregistrements** via la factory générée :
 
 ```bash
 php artisan migrate:fresh --seed

@@ -100,7 +100,7 @@ final readonly class FieldDefinition
 
         $prefix = $this->nullable ? 'sometimes' : 'required';
 
-        // Note: uniqueness is NOT appended here — a bare "unique" rule is
+        // Note: uniqueness is NOT appended here; a bare "unique" rule is
         // invalid in Laravel (it needs the table). RequestGenerator emits a
         // proper Rule::unique() using the entity's table name.
         return "{$prefix}|{$rule}";

@@ -1,10 +1,10 @@
 # Relations
 
-Les relations se déclarent dans les [fichiers de schéma](/fr/guide/schema-files), les [diagrammes Mermaid](/fr/guide/mermaid), `class_data.json`, l'assistant interactif — ou sont détectées automatiquement [depuis votre base](/fr/guide/from-database).
+Les relations se déclarent dans les [fichiers de schéma](/fr/guide/schema-files), les [diagrammes Mermaid](/fr/guide/mermaid), `class_data.json`, l'assistant interactif, ou sont détectées automatiquement [depuis votre base](/fr/guide/from-database).
 
 ## Déclarez un côté, obtenez les deux
 
-Sur toutes les sources schéma et Mermaid, déclarer un seul côté d'un `belongsTo` / `hasMany` / `belongsToMany` suffit — la relation inverse **et sa colonne FK dans la migration** sont synthétisées automatiquement, exactement comme le fait `--from-database` :
+Sur toutes les sources schéma et Mermaid, déclarer un seul côté d'un `belongsTo` / `hasMany` / `belongsToMany` suffit : la relation inverse **et sa colonne FK dans la migration** sont synthétisées automatiquement, exactement comme le fait `--from-database` :
 
 ```yaml
 entities:
@@ -96,7 +96,7 @@ Chaque relation atterrit dans le docblock du modèle, donc votre IDE autocomplè
  */
 ```
 
-<!-- VIDEO #3 (YouTube) — décommenter et renseigner VIDEO_ID quand la vidéo est en ligne, puis la placer en haut de page :
+<!-- VIDEO #3 (YouTube) : décommenter et renseigner VIDEO_ID quand la vidéo est en ligne, puis la placer en haut de page :
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
   <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Les relations sans boilerplate" allowfullscreen loading="lazy"></iframe>
 </div>

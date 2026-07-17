@@ -31,11 +31,11 @@ php artisan make:fullapi Article --fields="title:string,status:enum(draft,publis
 
 One field definition produces the entire chain:
 
-- `app/Enums/Status.php` — a backed `enum Status: string` with a case per value
-- Model — `'status' => \App\Enums\Status::class` in `$casts` and `@property \App\Enums\Status $status` in the PHPDoc
-- Request — `Rule::enum(Status::class)` validation
-- Factory — `fake()->randomElement(Status::cases())`
-- Migration — `$table->enum('status', ['draft', 'published', 'archived'])`
+- `app/Enums/Status.php`: a backed `enum Status: string` with a case per value
+- Model: `'status' => \App\Enums\Status::class` in `$casts` and `@property \App\Enums\Status $status` in the PHPDoc
+- Request: `Rule::enum(Status::class)` validation
+- Factory: `fake()->randomElement(Status::cases())`
+- Migration: `$table->enum('status', ['draft', 'published', 'archived'])`
 
 In a schema file:
 
@@ -53,9 +53,9 @@ php artisan make:fullapi Country --fields="code:string:primary,name:string"
 
 The whole stack follows automatically:
 
-- Migration — `$table->string('code')->primary()`, no `$table->id()`
-- Model — `$primaryKey`, `$incrementing = false`, `$keyType` declared
-- **Incoming relations** — the FK is named `country_code`, typed like the key, with `->references('code')` in the migration and `exists:countries,code` in validation
+- Migration: `$table->string('code')->primary()`, no `$table->id()`
+- Model: `$primaryKey`, `$incrementing = false`, `$keyType` declared
+- **Incoming relations**: the FK is named `country_code`, typed like the key, with `->references('code')` in the migration and `exists:countries,code` in validation
 - Generated tests use `getKey()` so they pass with either key style
 
 ## Nullable, unique and defaults
@@ -70,7 +70,7 @@ fields:
   views: { type: integer, default: 0 }
 ```
 
-<!-- VIDEO #2 (YouTube) — uncomment and set VIDEO_ID once the video is online, then move it near the top of the page:
+<!-- VIDEO #2 (YouTube): uncomment and set VIDEO_ID once the video is online, then move it near the top of the page:
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
   <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Enums and custom primary keys done right" allowfullscreen loading="lazy"></iframe>
 </div>

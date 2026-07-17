@@ -1,10 +1,10 @@
 # Relationships
 
-Relations can be declared in [schema files](/guide/schema-files), [Mermaid diagrams](/guide/mermaid), `class_data.json`, the interactive wizard — or detected automatically [from your database](/guide/from-database).
+Relations can be declared in [schema files](/guide/schema-files), [Mermaid diagrams](/guide/mermaid), `class_data.json`, the interactive wizard, or detected automatically [from your database](/guide/from-database).
 
 ## Declare one side, get both
 
-On every schema and Mermaid source, declaring one side of a `belongsTo` / `hasMany` / `belongsToMany` is enough — the inverse relation **and its FK migration column** are synthesized automatically, exactly like `--from-database` does:
+On every schema and Mermaid source, declaring one side of a `belongsTo` / `hasMany` / `belongsToMany` is enough: the inverse relation **and its FK migration column** are synthesized automatically, exactly like `--from-database` does:
 
 ```yaml
 entities:
@@ -96,7 +96,7 @@ Every relation lands in the model's docblock, so your IDE autocompletes `$post->
  */
 ```
 
-<!-- VIDEO #3 (YouTube) — uncomment and set VIDEO_ID once the video is online, then move it near the top of the page:
+<!-- VIDEO #3 (YouTube): uncomment and set VIDEO_ID once the video is online, then move it near the top of the page:
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
   <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Relationships without the boilerplate" allowfullscreen loading="lazy"></iframe>
 </div>

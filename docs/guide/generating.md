@@ -54,7 +54,7 @@ php artisan migrate
 php artisan make:fullapi Post --fields="title:string" --postman
 ```
 
-Exports a `postman_collection.json` (v2.1 schema) at the project root — a folder per entity with List, Create, Show, Update and Delete requests pre-filled with sample data. See [API Docs & Postman](/guide/docs-and-postman).
+Exports a `postman_collection.json` (v2.1 schema) at the project root: a folder per entity with List, Create, Show, Update and Delete requests pre-filled with sample data. See [API Docs & Postman](/guide/docs-and-postman).
 
 ## Spatie QueryBuilder
 
@@ -79,7 +79,7 @@ Without the flag, generated `index` endpoints still support simple filtering on 
 php artisan make:fullapi Post --fields="title:string" --pest
 ```
 
-Generates `it(...)` / `expect(...)` style tests instead of PHPUnit classes — same coverage, Pest idioms. See [Generated Tests](/guide/testing).
+Generates `it(...)` / `expect(...)` style tests instead of PHPUnit classes: same coverage, Pest idioms. See [Generated Tests](/guide/testing).
 
 ## Interactive wizard
 
@@ -97,7 +97,7 @@ Want a fresh `Resource` or `Test` without touching everything else?
 php artisan make:fullapi Post --fields="title:string,content:text" --only=FeatureTest,UnitTest
 ```
 
-When `--only=` is set, the migration, the `apiResource` route and the `DatabaseSeeder` registration are **left untouched** — only the listed artifacts are rewritten.
+When `--only=` is set, the migration, the `apiResource` route and the `DatabaseSeeder` registration are **left untouched**: only the listed artifacts are rewritten.
 
 Available types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.
 

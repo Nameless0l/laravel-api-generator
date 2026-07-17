@@ -1,6 +1,6 @@
 # API Docs & Postman
 
-Your API is documented the moment it exists — through Scramble for interactive OpenAPI docs, and Postman collections for your team.
+Your API is documented the moment it exists: through Scramble for interactive OpenAPI docs, and Postman collections for your team.
 
 ## Scramble: instant OpenAPI docs
 
@@ -17,11 +17,11 @@ Open `http://localhost:8000/docs/api`:
 
 What you get automatically:
 
-- **Interactive Swagger UI** — test endpoints from the browser with *Send API Request*
-- **Auto-detected schemas** — `PostRequest`, `PostResource`… inferred from FormRequest rules and Resource structure
-- **Validation rules as constraints** — `required|string|max:255` becomes a required string with `<= 255 characters` in the docs
-- **Request/response examples** — sample JSON bodies generated for you
-- **Grouped endpoints** — each entity gets its own section with all CRUD operations
+- **Interactive Swagger UI**: test endpoints from the browser with *Send API Request*
+- **Auto-detected schemas**: `PostRequest`, `PostResource`… inferred from FormRequest rules and Resource structure
+- **Validation rules as constraints**: `required|string|max:255` becomes a required string with `<= 255 characters` in the docs
+- **Request/response examples**: sample JSON bodies generated for you
+- **Grouped endpoints**: each entity gets its own section with all CRUD operations
 
 ![Scramble Schemas](../scramble-schemas.png)
 
@@ -31,7 +31,7 @@ What you get automatically:
 | `/docs/api.json` | Raw OpenAPI 3.x JSON specification |
 
 ::: tip
-Scramble is a dev dependency — it won't affect your production deployment. Just like the generator itself.
+Scramble is a dev dependency: it won't affect your production deployment. Just like the generator itself.
 :::
 
 ## Postman collection

@@ -1,13 +1,13 @@
 # Generated Tests
 
-Most generators give you empty test skeletons. This one writes **real assertions** — and they pass right after generation.
+Most generators give you empty test skeletons. This one writes **real assertions**: and they pass right after generation.
 
 ## What gets covered
 
 Every entity ships with a feature test (`tests/Feature/PostControllerTest.php`) and a unit test (`tests/Unit/PostServiceTest.php`) covering:
 
-- Index — listing returns the seeded records
-- Store — creation persists and returns 201
+- Index: listing returns the seeded records
+- Store: creation persists and returns 201
 - Show / Update / Delete round-trips
 - Validation errors on bad input
 - The service layer in isolation
@@ -46,7 +46,7 @@ class PostControllerTest extends TestCase
 php artisan make:fullapi Post --fields="title:string" --pest
 ```
 
-Generates `it(...)` / `expect(...)` / `beforeEach(...)` style tests instead of PHPUnit classes — the same coverage, in the idiom new Laravel projects use by default:
+Generates `it(...)` / `expect(...)` / `beforeEach(...)` style tests instead of PHPUnit classes: the same coverage, in the idiom new Laravel projects use by default:
 
 ```php
 it('creates a post', function () {
@@ -67,7 +67,7 @@ Generated tests use `getKey()` instead of hardcoding `->id`, so the same test su
 
 ## Seeding
 
-Generated seeders are registered in `DatabaseSeeder.php` automatically — each creates **10 records** through the generated factory:
+Generated seeders are registered in `DatabaseSeeder.php` automatically: each creates **10 records** through the generated factory:
 
 ```bash
 php artisan migrate:fresh --seed

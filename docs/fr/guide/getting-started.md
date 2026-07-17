@@ -1,6 +1,6 @@
 # Démarrage rapide
 
-Laravel API Generator génère une API REST complète, structurée comme en production, depuis une seule commande artisan — modèle, migration, contrôleur, service, DTO, form request, resource, policy, factory, seeder et **tests écrits**.
+Laravel API Generator génère une API REST complète, structurée comme en production, depuis une seule commande artisan : modèle, migration, contrôleur, service, DTO, form request, resource, policy, factory, seeder et **tests écrits**.
 
 ## Prérequis
 
@@ -16,7 +16,7 @@ composer require --dev nameless/laravel-api-generator
 Le service provider est auto-découvert. Aucune configuration requise.
 
 ::: tip Zéro lock-in
-Le générateur est une **dépendance de dev** : il ne s'exécute jamais en production (`composer install --no-dev` l'exclut), et le code généré est du Laravel pur, **sans dépendance à ce package** — pas de classes de base, pas de helpers à l'exécution. Vous pouvez même supprimer le générateur ensuite : tout continue de fonctionner.
+Le générateur est une **dépendance de dev** : il ne s'exécute jamais en production (`composer install --no-dev` l'exclut), et le code généré est du Laravel pur, **sans dépendance à ce package** (pas de classes de base, pas de helpers à l'exécution). Vous pouvez même supprimer le générateur ensuite : tout continue de fonctionner.
 :::
 
 ## Votre première API
@@ -32,7 +32,7 @@ php artisan migrate
 php artisan test
 ```
 
-Les tests passent immédiatement — ils sont générés *avec leurs assertions*, pas comme des squelettes vides.
+Les tests passent immédiatement : ils sont générés *avec leurs assertions*, pas comme des squelettes vides.
 
 ## Ce qui est généré
 
@@ -80,7 +80,7 @@ La logique métier vit dans `PostService`, les données traversent les couches s
 
 ## Des modèles que votre IDE comprend
 
-Chaque modèle généré embarque un bloc PHPDoc complet — champs, colonnes FK, relations, timestamps :
+Chaque modèle généré embarque un bloc PHPDoc complet : champs, colonnes FK, relations, timestamps :
 
 ```php
 /**
@@ -93,7 +93,7 @@ Chaque modèle généré embarque un bloc PHPDoc complet — champs, colonnes FK
 class Post extends Model
 ```
 
-L'autocomplétion fonctionne immédiatement dans VS Code et PhpStorm — pas besoin d'`ide-helper` pour le code généré.
+L'autocomplétion fonctionne immédiatement dans VS Code et PhpStorm : pas besoin d'`ide-helper` pour le code généré.
 
 ## Étapes suivantes
 
@@ -102,7 +102,7 @@ L'autocomplétion fonctionne immédiatement dans VS Code et PhpStorm — pas bes
 - [Décrire toute votre API dans un schéma YAML](/fr/guide/schema-files)
 - [Utiliser l'extension VS Code](/fr/guide/extension/)
 
-<!-- VIDEO #1 (YouTube) — décommenter et renseigner VIDEO_ID quand la vidéo est en ligne, puis la placer en haut de page :
+<!-- VIDEO #1 (YouTube) : décommenter et renseigner VIDEO_ID quand la vidéo est en ligne, puis la placer en haut de page :
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
   <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Une API Laravel complète en 30 secondes" allowfullscreen loading="lazy"></iframe>
 </div>

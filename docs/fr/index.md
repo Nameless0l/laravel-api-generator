@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Laravel API Generator
   text: Une commande. Toute votre API Laravel.
-  tagline: Modèles, services, DTO, policies, tests écrits et documentation — générés en 30 secondes, sans lock-in.
+  tagline: "Modèles, services, DTO, policies, tests écrits et documentation : générés en 30 secondes, sans lock-in."
   image:
     src: /logo.png
     alt: Laravel API Generator
@@ -22,16 +22,16 @@ hero:
 features:
   - icon: 🧪
     title: Des tests écrits, pas des squelettes
-    details: Tests feature et unitaires avec de vraies assertions — PHPUnit ou Pest. php artisan test est vert dès la génération.
+    details: "Tests feature et unitaires avec de vraies assertions : PHPUnit ou Pest. php artisan test est vert dès la génération."
   - icon: 🏛️
     title: Une architecture, pas juste des fichiers
     details: Contrôleur fin → couche service → DTO typé, plus policy, form requests et resources. La place pour grandir est déjà là.
   - icon: 🔍
     title: Des modèles que votre IDE comprend
-    details: PHPDoc @property complet sur chaque modèle — autocomplétion immédiate dans VS Code et PhpStorm, sans ide-helper.
+    details: "PHPDoc @property complet sur chaque modèle : autocomplétion immédiate dans VS Code et PhpStorm, sans ide-helper."
   - icon: 🗄️
     title: Part de ce que vous avez déjà
-    details: --from-database rétro-conçoit un schéma existant — relations, morphs, uniques — en APIs complètes.
+    details: --from-database rétro-conçoit un schéma existant (relations, morphs, uniques) en APIs complètes.
   - icon: 📐
     title: Schema-as-code
     details: Fichiers YAML ou diagrammes Mermaid en entrée. Déclarez un côté d'une relation, l'inverse et sa clé étrangère sont synthétisés.
@@ -43,7 +43,7 @@ features:
     details: Export de collection Postman et contrôleurs compatibles Scramble pour une documentation OpenAPI immédiate.
   - icon: 🔓
     title: Zéro lock-in
-    details: Une dépendance --dev. Le code généré est du Laravel pur, sans référence au package — supprimez-le, tout continue de fonctionner.
+    details: "Une dépendance --dev. Le code généré est du Laravel pur, sans référence au package : supprimez-le, tout continue de fonctionner."
 ---
 
 <script setup>
@@ -79,7 +79,7 @@ it('shows a post', function () {
     $response->assertStatus(200)
         ->assertJsonFragment(['id' => $post->getKey()]);
 });`,
-        text: "Pas des squelettes — des tests écrits. De vraies assertions contre de vrais endpoints, factories comprises, PHPUnit ou Pest. Cet extrait est un vrai test généré, non retouché.",
+        text: "Pas des squelettes : des tests écrits. De vraies assertions contre de vrais endpoints, factories comprises, PHPUnit ou Pest. Cet extrait est un vrai test généré, non retouché.",
         link: '/fr/guide/testing',
         linkText: 'Les tests générés',
     },
@@ -87,7 +87,7 @@ it('shows a post', function () {
         title: 'Architecture',
         img: archImg,
         imgAlt: "Diagramme de l'architecture générée",
-        text: "Un contrôleur fin qui délègue à une couche service, des DTO readonly typés, des policies, form requests et resources — la structure qu'on construit un bon jour, présente dès le premier.",
+        text: "Un contrôleur fin qui délègue à une couche service, des DTO readonly typés, des policies, form requests et resources : la structure qu'on construit un bon jour, présente dès le premier.",
         link: '/fr/guide/generating',
         linkText: 'Ce qui est généré',
     },
@@ -95,7 +95,7 @@ it('shows a post', function () {
         title: 'Doc API',
         img: scrambleImg,
         imgAlt: 'Documentation OpenAPI Scramble',
-        text: "Les contrôleurs générés sont écrits pour que Scramble les documente sans aucune annotation — un Swagger UI interactif sur /docs/api. Export de collection Postman inclus.",
+        text: "Les contrôleurs générés sont écrits pour que Scramble les documente sans aucune annotation : un Swagger UI interactif sur /docs/api. Export de collection Postman inclus.",
         link: '/fr/guide/docs-and-postman',
         linkText: 'Doc API & Postman',
     },
@@ -125,7 +125,7 @@ php artisan make:fullapi --from-database \\
     },
 ]
 
-// Preuve sociale : ajouter les vraies citations au fil du lancement — la section reste cachée tant que la liste est vide.
+// Preuve sociale : ajouter les vraies citations au fil du lancement ; la section reste cachée tant que la liste est vide.
 // { quote: 'Ce qui a été écrit, sans guillemets', author: 'Nom', handle: '@handle', link: 'https://x.com/…' },
 const testimonials = []
 </script>
@@ -145,7 +145,7 @@ php artisan test   # vert ✓
 
 <HomeTestimonials title="Ce qu'on en dit" :items="testimonials" />
 
-<!-- VIDEO #1 (YouTube) — décommenter et renseigner VIDEO_ID quand la première vidéo de démo est en ligne :
+<!-- VIDEO #1 (YouTube) : décommenter et renseigner VIDEO_ID quand la première vidéo de démo est en ligne :
 ## Voir la démo
 
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">

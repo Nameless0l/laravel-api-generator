@@ -1,6 +1,6 @@
 # Getting Started
 
-Laravel API Generator scaffolds a complete, production-style REST API from a single artisan command — model, migration, controller, service, DTO, form request, resource, policy, factory, seeder and **written tests**.
+Laravel API Generator scaffolds a complete, production-style REST API from a single artisan command: model, migration, controller, service, DTO, form request, resource, policy, factory, seeder and **written tests**.
 
 ## Requirements
 
@@ -16,7 +16,7 @@ composer require --dev nameless/laravel-api-generator
 The service provider is auto-discovered. No configuration required.
 
 ::: tip Zero lock-in
-The generator is a **dev dependency**: it never runs in production (`composer install --no-dev` leaves it out), and the generated code is plain Laravel with **no dependency on this package** — no base classes, no runtime helpers. You can even remove the generator afterwards and everything keeps working.
+The generator is a **dev dependency**: it never runs in production (`composer install --no-dev` leaves it out), and the generated code is plain Laravel with **no dependency on this package** (no base classes, no runtime helpers). You can even remove the generator afterwards and everything keeps working.
 :::
 
 ## Your first API
@@ -32,7 +32,7 @@ php artisan migrate
 php artisan test
 ```
 
-The tests pass immediately — they were generated *with assertions*, not as empty skeletons.
+The tests pass immediately: they were generated *with assertions*, not as empty skeletons.
 
 ## What gets generated
 
@@ -80,7 +80,7 @@ Business logic lives in `PostService`, data crosses layers as a typed, `readonly
 
 ## Models your IDE understands
 
-Every generated model ships a complete PHPDoc block — fields, FK columns, relations, timestamps:
+Every generated model ships a complete PHPDoc block: fields, FK columns, relations, timestamps:
 
 ```php
 /**
@@ -93,7 +93,7 @@ Every generated model ships a complete PHPDoc block — fields, FK columns, rela
 class Post extends Model
 ```
 
-Autocomplete works instantly in VS Code and PhpStorm — no `ide-helper` required for generated code.
+Autocomplete works instantly in VS Code and PhpStorm: no `ide-helper` required for generated code.
 
 ## Next steps
 
@@ -102,7 +102,7 @@ Autocomplete works instantly in VS Code and PhpStorm — no `ide-helper` require
 - [Describe your whole API in a YAML schema](/guide/schema-files)
 - [Use the VS Code extension](/guide/extension/)
 
-<!-- VIDEO #1 (YouTube) — uncomment and set VIDEO_ID once the video is online, then move it near the top of the page:
+<!-- VIDEO #1 (YouTube): uncomment and set VIDEO_ID once the video is online, then move it near the top of the page:
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
   <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="A complete Laravel API in 30 seconds" allowfullscreen loading="lazy"></iframe>
 </div>
