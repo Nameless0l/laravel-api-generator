@@ -5,6 +5,17 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.1] - 2026-07-17
+
+### Fixed
+- **The package could not be installed on Laravel 13** -- Laravel 13.0 was released on 2026-03-17, but the `laravel/framework` constraint stopped at `^12.0`, so `composer require` was rejected on any up-to-date application. The constraint now allows `^13.0`, with `symfony/yaml` widened to `^8.0` accordingly.
+- **55 of the 68 tests were silently not collected on PHPUnit 12** -- the suite declared its tests with `/** @test */`, a doc-comment form PHPUnit 12 no longer reads; it reported 13 tests and still exited 0. Tests now use the `#[Test]` attribute. Generated stubs were never affected: they name their methods `test_*`, which every PHPUnit version collects.
+
+### Changed
+- CI now covers PHP 8.3/8.4 x Laravel 13 (and Laravel 12 was already covered), alongside the existing Laravel 10 and 11 jobs.
+- `orchestra/testbench` allows `^11.0` and `phpunit/phpunit` allows `^12.0`, both required to test against Laravel 13.
+- Fixed the author email typo (`@email.com` -> `@gmail.com`) displayed on Packagist.
+
 ## [3.6.0] - 2026-07-16
 
 ### Added

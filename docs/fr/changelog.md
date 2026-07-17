@@ -6,6 +6,12 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package — `nameless/laravel-api-generator`
 
+### 3.6.1 — 17 juillet 2026
+
+- **Support de Laravel 13** — la contrainte s'arrêtait à `^12`, donc `composer require` était refusé sur toute application en Laravel 13 (sorti le 17 mars 2026). Elle autorise désormais `^13.0`.
+- Corrigé : 55 des 68 tests du package n'étaient silencieusement plus collectés sous PHPUnit 12, qui ne lit plus les annotations `/** @test */`. Les tests utilisent maintenant l'attribut `#[Test]`. **Les stubs générés n'ont jamais été concernés.**
+- La CI couvre désormais PHP 8.3/8.4 × Laravel 13.
+
 ### 3.6.0 — 16 juillet 2026
 
 - **PHPDoc des modèles** — chaque modèle généré porte un docblock `@property` complet (vrais types PHP, nullabilité, relations, timestamps). Autocomplétion IDE immédiate, sans ide-helper.
