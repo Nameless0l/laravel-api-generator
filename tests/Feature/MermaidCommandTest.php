@@ -6,6 +6,7 @@ namespace nameless\CodeGenerator\Tests\Feature;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Testing\PendingCommand;
+use PHPUnit\Framework\Attributes\Test;
 
 class MermaidCommandTest extends GeneratorTestCase
 {
@@ -29,7 +30,7 @@ class MermaidCommandTest extends GeneratorTestCase
         parent::tearDown();
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_a_complete_api_from_an_er_diagram(): void
     {
         File::put($this->diagramPath, <<<'MERMAID'
@@ -74,7 +75,7 @@ class MermaidCommandTest extends GeneratorTestCase
         $this->assertNotEmpty($this->migrationsFor('post_tag'));
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_from_a_class_diagram(): void
     {
         File::put($this->diagramPath, <<<'MERMAID'
@@ -97,7 +98,7 @@ class MermaidCommandTest extends GeneratorTestCase
         $this->assertStringContainsString('hasMany(Comment::class', $post);
     }
 
-    /** @test */
+    #[Test]
     public function it_fails_on_an_invalid_diagram(): void
     {
         File::put($this->diagramPath, 'flowchart TD');

@@ -9,6 +9,7 @@ use nameless\CodeGenerator\Support\MermaidParser;
 use nameless\CodeGenerator\Tests\TestCase;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
+use PHPUnit\Framework\Attributes\Test;
 
 class MermaidParserTest extends TestCase
 {
@@ -20,7 +21,7 @@ class MermaidParserTest extends TestCase
         $this->parser = new MermaidParser;
     }
 
-    /** @test */
+    #[Test]
     public function it_parses_an_er_diagram(): void
     {
         $diagram = <<<'MERMAID'
@@ -81,7 +82,7 @@ class MermaidParserTest extends TestCase
         $this->assertTrue($email->unique);
     }
 
-    /** @test */
+    #[Test]
     public function it_ignores_pk_and_fk_columns_in_er_blocks(): void
     {
         $diagram = <<<'MERMAID'
@@ -109,7 +110,7 @@ class MermaidParserTest extends TestCase
         $this->assertContains('user_id', $post->getFillableFields());
     }
 
-    /** @test */
+    #[Test]
     public function it_parses_a_class_diagram_with_cardinalities(): void
     {
         $diagram = <<<'MERMAID'
@@ -149,7 +150,7 @@ class MermaidParserTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function it_treats_composition_as_one_to_many(): void
     {
         $diagram = <<<'MERMAID'
@@ -173,7 +174,7 @@ class MermaidParserTest extends TestCase
         $this->assertSame('lines', $rel->role);
     }
 
-    /** @test */
+    #[Test]
     public function it_skips_methods_and_entities_without_attributes(): void
     {
         $diagram = <<<'MERMAID'
@@ -197,14 +198,14 @@ class MermaidParserTest extends TestCase
         $this->assertNotEmpty($this->parser->getWarnings());
     }
 
-    /** @test */
+    #[Test]
     public function it_rejects_non_mermaid_content(): void
     {
         $this->expectException(CodeGeneratorException::class);
         $this->parser->parse('flowchart TD');
     }
 
-    /** @test */
+    #[Test]
     public function it_strips_markdown_fences_and_comments(): void
     {
         $diagram = <<<'MERMAID'

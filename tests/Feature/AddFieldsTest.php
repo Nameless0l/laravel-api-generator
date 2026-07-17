@@ -6,6 +6,7 @@ namespace nameless\CodeGenerator\Tests\Feature;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Testing\PendingCommand;
+use PHPUnit\Framework\Attributes\Test;
 
 class AddFieldsTest extends GeneratorTestCase
 {
@@ -36,7 +37,7 @@ class AddFieldsTest extends GeneratorTestCase
         $result->run();
     }
 
-    /** @test */
+    #[Test]
     public function it_adds_a_field_with_an_incremental_migration_and_in_place_patches(): void
     {
         $this->generateReport();
@@ -70,7 +71,7 @@ class AddFieldsTest extends GeneratorTestCase
         $this->assertStringContainsString("'excerpt' => \$this->excerpt,", $resource);
     }
 
-    /** @test */
+    #[Test]
     public function it_adds_an_enum_field_with_cast_and_enum_class(): void
     {
         $this->generateReport();
@@ -92,7 +93,7 @@ class AddFieldsTest extends GeneratorTestCase
         $this->assertStringContainsString('Rule::enum(\App\Enums\Severity::class)', $request);
     }
 
-    /** @test */
+    #[Test]
     public function it_skips_fields_that_already_exist(): void
     {
         $this->generateReport();
@@ -111,7 +112,7 @@ class AddFieldsTest extends GeneratorTestCase
         $this->assertSame(1, substr_count($model, "'title'"));
     }
 
-    /** @test */
+    #[Test]
     public function it_fails_when_the_entity_does_not_exist(): void
     {
         /** @var PendingCommand $result */

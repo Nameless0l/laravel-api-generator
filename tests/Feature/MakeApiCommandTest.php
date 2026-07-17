@@ -5,6 +5,7 @@ namespace nameless\CodeGenerator\Tests\Feature;
 use Illuminate\Support\Facades\File;
 use Illuminate\Testing\PendingCommand;
 use nameless\CodeGenerator\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class MakeApiCommandTest extends TestCase
 {
@@ -82,7 +83,7 @@ class MakeApiCommandTest extends TestCase
         parent::tearDown();
     }
 
-    /** @test */
+    #[Test]
     public function it_can_create_api_files(): void
     {
         $name = 'Post';
@@ -97,7 +98,7 @@ class MakeApiCommandTest extends TestCase
         $result->assertSuccessful();
     }
 
-    /** @test */
+    #[Test]
     public function it_requires_fields_option(): void
     {
         /** @var PendingCommand $result */
@@ -107,7 +108,7 @@ class MakeApiCommandTest extends TestCase
         $result->assertFailed();
     }
 
-    /** @test */
+    #[Test]
     public function it_creates_valid_model_with_fillable(): void
     {
         $name = 'Post';

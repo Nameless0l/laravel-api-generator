@@ -10,6 +10,7 @@ use nameless\CodeGenerator\EntitiesGenerator\RequestGenerator;
 use nameless\CodeGenerator\Support\StubLoader;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
+use PHPUnit\Framework\Attributes\Test;
 
 /**
  * Regression: fields marked unique (typically discovered by --from-database)
@@ -35,7 +36,7 @@ class UniqueRuleGenerationTest extends GeneratorTestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function unique_fields_generate_a_parameterized_rule_that_ignores_the_current_model(): void
     {
         (new RequestGenerator(app(StubLoader::class)))->generate($this->definition());
@@ -50,7 +51,7 @@ class UniqueRuleGenerationTest extends GeneratorTestCase
         $this->assertStringNotContainsString('|unique', $request);
     }
 
-    /** @test */
+    #[Test]
     public function unique_fields_generate_unique_factory_fakes(): void
     {
         (new FactoryGenerator(app(StubLoader::class)))->generate($this->definition());

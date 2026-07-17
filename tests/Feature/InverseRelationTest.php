@@ -6,6 +6,7 @@ namespace nameless\CodeGenerator\Tests\Feature;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Testing\PendingCommand;
+use PHPUnit\Framework\Attributes\Test;
 
 class InverseRelationTest extends GeneratorTestCase
 {
@@ -29,7 +30,7 @@ class InverseRelationTest extends GeneratorTestCase
         parent::tearDown();
     }
 
-    /** @test */
+    #[Test]
     public function a_declared_has_many_synthesizes_the_belongs_to_side(): void
     {
         File::put($this->schemaPath, <<<'YAML'
@@ -56,7 +57,7 @@ class InverseRelationTest extends GeneratorTestCase
         $this->assertStringContainsString("foreignId('category_id')->constrained('categories')", $postMigration);
     }
 
-    /** @test */
+    #[Test]
     public function a_declared_belongs_to_synthesizes_the_has_many_side(): void
     {
         File::put($this->schemaPath, <<<'YAML'
@@ -81,7 +82,7 @@ class InverseRelationTest extends GeneratorTestCase
         $this->assertStringContainsString('@property-read Collection<int, Post> $posts', $category);
     }
 
-    /** @test */
+    #[Test]
     public function explicitly_declared_inverses_are_not_duplicated(): void
     {
         File::put($this->schemaPath, <<<'YAML'

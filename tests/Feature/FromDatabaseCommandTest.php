@@ -7,6 +7,7 @@ namespace nameless\CodeGenerator\Tests\Feature;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Testing\PendingCommand;
+use PHPUnit\Framework\Attributes\Test;
 
 class FromDatabaseCommandTest extends GeneratorTestCase
 {
@@ -51,7 +52,7 @@ class FromDatabaseCommandTest extends GeneratorTestCase
         });
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_apis_from_the_existing_database(): void
     {
         /** @var PendingCommand $result */
@@ -67,7 +68,7 @@ class FromDatabaseCommandTest extends GeneratorTestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function it_detects_relationships_soft_deletes_and_pivot_tables(): void
     {
         /** @var PendingCommand $command */
@@ -90,7 +91,7 @@ class FromDatabaseCommandTest extends GeneratorTestCase
         $this->assertFileDoesNotExist(app_path('Models/PostTag.php'));
     }
 
-    /** @test */
+    #[Test]
     public function it_skips_migrations_and_the_users_table_by_default(): void
     {
         /** @var PendingCommand $result */
@@ -105,7 +106,7 @@ class FromDatabaseCommandTest extends GeneratorTestCase
         $this->assertFileDoesNotExist(app_path('Http/Controllers/UserController.php'));
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_migrations_when_requested(): void
     {
         /** @var PendingCommand $command */
@@ -116,7 +117,7 @@ class FromDatabaseCommandTest extends GeneratorTestCase
         $this->assertNotEmpty($this->migrationsFor('post_tag'));
     }
 
-    /** @test */
+    #[Test]
     public function it_limits_generation_to_the_requested_tables(): void
     {
         /** @var PendingCommand $command */

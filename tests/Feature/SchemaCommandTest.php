@@ -6,6 +6,7 @@ namespace nameless\CodeGenerator\Tests\Feature;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Testing\PendingCommand;
+use PHPUnit\Framework\Attributes\Test;
 
 class SchemaCommandTest extends GeneratorTestCase
 {
@@ -29,7 +30,7 @@ class SchemaCommandTest extends GeneratorTestCase
         parent::tearDown();
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_a_complete_api_from_a_yaml_schema(): void
     {
         File::put($this->schemaPath, <<<'YAML'
@@ -74,7 +75,7 @@ class SchemaCommandTest extends GeneratorTestCase
         $this->assertStringContainsString('->unique()', (string) file_get_contents($categoryMigration));
     }
 
-    /** @test */
+    #[Test]
     public function it_orders_migrations_parents_before_children(): void
     {
         File::put($this->schemaPath, <<<'YAML'
@@ -99,7 +100,7 @@ class SchemaCommandTest extends GeneratorTestCase
         $this->assertLessThan($postMigration, $categoryMigration, 'categories migration must run before posts');
     }
 
-    /** @test */
+    #[Test]
     public function it_applies_the_query_builder_global_option(): void
     {
         File::put($this->schemaPath, <<<'YAML'
@@ -120,7 +121,7 @@ class SchemaCommandTest extends GeneratorTestCase
         $this->assertStringContainsString("allowedFilters(['name'])", $service);
     }
 
-    /** @test */
+    #[Test]
     public function it_respects_the_only_filter_on_multi_entity_sources(): void
     {
         File::put($this->schemaPath, <<<'YAML'
@@ -150,7 +151,7 @@ class SchemaCommandTest extends GeneratorTestCase
         $this->assertFileDoesNotExist(app_path('Services/TagService.php'));
     }
 
-    /** @test */
+    #[Test]
     public function it_fails_on_a_missing_schema_file(): void
     {
         /** @var PendingCommand $result */
@@ -158,7 +159,7 @@ class SchemaCommandTest extends GeneratorTestCase
         $result->assertFailed();
     }
 
-    /** @test */
+    #[Test]
     public function it_auto_detects_the_default_schema_file(): void
     {
         $defaultPath = base_path('api-schema.yaml');
