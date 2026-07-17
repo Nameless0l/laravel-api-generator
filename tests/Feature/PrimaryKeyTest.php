@@ -6,6 +6,7 @@ namespace nameless\CodeGenerator\Tests\Feature;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Testing\PendingCommand;
+use PHPUnit\Framework\Attributes\Test;
 
 class PrimaryKeyTest extends GeneratorTestCase
 {
@@ -29,7 +30,7 @@ class PrimaryKeyTest extends GeneratorTestCase
         parent::tearDown();
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_a_custom_primary_key_from_the_cli(): void
     {
         /** @var PendingCommand $result */
@@ -55,7 +56,7 @@ class PrimaryKeyTest extends GeneratorTestCase
         $this->assertStringContainsString("['code' => \$country->getKey()]", $test);
     }
 
-    /** @test */
+    #[Test]
     public function relations_follow_the_parent_custom_primary_key(): void
     {
         File::put($this->schemaPath, <<<'YAML'
@@ -91,7 +92,7 @@ class PrimaryKeyTest extends GeneratorTestCase
         $this->assertStringContainsString("'code' => fake()->unique()->word()", $factory);
     }
 
-    /** @test */
+    #[Test]
     public function default_id_primary_key_is_unchanged(): void
     {
         /** @var PendingCommand $result */

@@ -6,6 +6,7 @@ namespace nameless\CodeGenerator\Tests\Feature;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Testing\PendingCommand;
+use PHPUnit\Framework\Attributes\Test;
 
 class CleanRoutesTest extends GeneratorTestCase
 {
@@ -13,7 +14,7 @@ class CleanRoutesTest extends GeneratorTestCase
 
     protected array $generatedTables = ['widgets'];
 
-    /** @test */
+    #[Test]
     public function it_removes_routes_pointing_to_missing_controllers(): void
     {
         File::put(base_path('routes/api.php'), <<<'PHP'
@@ -36,7 +37,7 @@ class CleanRoutesTest extends GeneratorTestCase
         $this->assertStringNotContainsString('OtherController', $routes);
     }
 
-    /** @test */
+    #[Test]
     public function it_keeps_routes_whose_controller_exists(): void
     {
         /** @var PendingCommand $generate */
@@ -54,7 +55,7 @@ class CleanRoutesTest extends GeneratorTestCase
         $this->assertStringNotContainsString('GhostController', $routes);
     }
 
-    /** @test */
+    #[Test]
     public function delete_fullapi_cleans_every_reference_from_route_files(): void
     {
         /** @var PendingCommand $generate */

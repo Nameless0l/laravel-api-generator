@@ -6,6 +6,7 @@ namespace nameless\CodeGenerator\Tests\Feature;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Testing\PendingCommand;
+use PHPUnit\Framework\Attributes\Test;
 
 class EnumFieldTest extends GeneratorTestCase
 {
@@ -21,7 +22,7 @@ class EnumFieldTest extends GeneratorTestCase
         parent::tearDown();
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_a_backed_enum_from_a_cli_field(): void
     {
         /** @var PendingCommand $result */
@@ -41,7 +42,7 @@ class EnumFieldTest extends GeneratorTestCase
         $this->assertStringContainsString("case Published = 'published';", $enum);
     }
 
-    /** @test */
+    #[Test]
     public function it_wires_the_enum_into_model_request_factory_and_migration(): void
     {
         /** @var PendingCommand $result */
@@ -65,7 +66,7 @@ class EnumFieldTest extends GeneratorTestCase
         $this->assertStringContainsString("\$table->enum('status', ['draft', 'published']);", $migration);
     }
 
-    /** @test */
+    #[Test]
     public function it_parses_enum_fields_from_a_yaml_schema(): void
     {
         $schemaPath = base_path('api-schema-enum-test.yaml');

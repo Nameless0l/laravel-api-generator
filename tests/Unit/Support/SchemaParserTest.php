@@ -9,6 +9,7 @@ use nameless\CodeGenerator\Support\SchemaParser;
 use nameless\CodeGenerator\Tests\TestCase;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
+use PHPUnit\Framework\Attributes\Test;
 
 class SchemaParserTest extends TestCase
 {
@@ -20,7 +21,7 @@ class SchemaParserTest extends TestCase
         $this->parser = new SchemaParser;
     }
 
-    /** @test */
+    #[Test]
     public function it_parses_shorthand_field_definitions(): void
     {
         $entities = $this->parser->parseArray([
@@ -49,7 +50,7 @@ class SchemaParserTest extends TestCase
         $this->assertSame('0', $fields['views']->default);
     }
 
-    /** @test */
+    #[Test]
     public function it_parses_mapping_field_definitions(): void
     {
         $entities = $this->parser->parseArray([
@@ -73,7 +74,7 @@ class SchemaParserTest extends TestCase
         $this->assertSame(['min:3'], $fields['sku']->validationRules);
     }
 
-    /** @test */
+    #[Test]
     public function it_parses_relations_and_sorts_parents_first(): void
     {
         $entities = $this->parser->parseArray([
@@ -114,7 +115,7 @@ class SchemaParserTest extends TestCase
         $this->assertSame('Tag', $manyToMany->relatedModel);
     }
 
-    /** @test */
+    #[Test]
     public function it_applies_global_and_entity_options(): void
     {
         $entities = $this->parser->parseArray([
@@ -141,14 +142,14 @@ class SchemaParserTest extends TestCase
         $this->assertFalse($tag->hasSoftDeletes());
     }
 
-    /** @test */
+    #[Test]
     public function it_rejects_schema_without_entities(): void
     {
         $this->expectException(CodeGeneratorException::class);
         $this->parser->parseArray(['options' => []]);
     }
 
-    /** @test */
+    #[Test]
     public function it_rejects_unknown_field_modifier(): void
     {
         $this->expectException(CodeGeneratorException::class);
@@ -159,7 +160,7 @@ class SchemaParserTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_rejects_unknown_relation_type(): void
     {
         $this->expectException(CodeGeneratorException::class);

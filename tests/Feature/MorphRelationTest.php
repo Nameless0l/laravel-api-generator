@@ -6,6 +6,7 @@ namespace nameless\CodeGenerator\Tests\Feature;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Testing\PendingCommand;
+use PHPUnit\Framework\Attributes\Test;
 
 class MorphRelationTest extends GeneratorTestCase
 {
@@ -29,7 +30,7 @@ class MorphRelationTest extends GeneratorTestCase
         parent::tearDown();
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_polymorphic_relations_from_a_schema(): void
     {
         File::put($this->schemaPath, <<<'YAML'

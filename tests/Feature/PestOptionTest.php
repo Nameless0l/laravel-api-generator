@@ -6,6 +6,7 @@ namespace nameless\CodeGenerator\Tests\Feature;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Testing\PendingCommand;
+use PHPUnit\Framework\Attributes\Test;
 
 class PestOptionTest extends GeneratorTestCase
 {
@@ -13,7 +14,7 @@ class PestOptionTest extends GeneratorTestCase
 
     protected array $generatedTables = ['gadgets'];
 
-    /** @test */
+    #[Test]
     public function it_generates_pest_tests_with_the_pest_flag(): void
     {
         /** @var PendingCommand $result */
@@ -36,7 +37,7 @@ class PestOptionTest extends GeneratorTestCase
         $this->assertStringNotContainsString('class GadgetServiceTest', $unitTest);
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_phpunit_tests_by_default(): void
     {
         /** @var PendingCommand $result */
@@ -50,7 +51,7 @@ class PestOptionTest extends GeneratorTestCase
         $this->assertStringContainsString('class GadgetControllerTest extends TestCase', $featureTest);
     }
 
-    /** @test */
+    #[Test]
     public function it_applies_the_pest_global_option_from_a_schema(): void
     {
         $schemaPath = base_path('api-schema-pest-test.yaml');

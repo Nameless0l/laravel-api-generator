@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace nameless\CodeGenerator\Tests\Feature;
 
 use Illuminate\Testing\PendingCommand;
+use PHPUnit\Framework\Attributes\Test;
 
 class QueryBuilderOptionTest extends GeneratorTestCase
 {
@@ -12,7 +13,7 @@ class QueryBuilderOptionTest extends GeneratorTestCase
 
     protected array $generatedTables = ['products'];
 
-    /** @test */
+    #[Test]
     public function it_generates_a_spatie_query_builder_service_and_controller(): void
     {
         /** @var PendingCommand $command */
@@ -34,7 +35,7 @@ class QueryBuilderOptionTest extends GeneratorTestCase
         $this->assertStringNotContainsString('use Illuminate\Http\Request;', $controller);
     }
 
-    /** @test */
+    #[Test]
     public function it_keeps_the_default_service_without_the_flag(): void
     {
         /** @var PendingCommand $command */
