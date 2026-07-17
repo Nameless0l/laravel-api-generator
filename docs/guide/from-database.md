@@ -43,7 +43,7 @@ php artisan api-generator:introspect
 php artisan api-generator:introspect --table=products
 ```
 
-This powers the **Import from Database** feature of the [VS Code extension](/guide/vscode-extension).
+This powers the **Import from Database** feature of the [VS Code extension](/guide/extension/imports).
 
 ## The payoff
 
@@ -54,3 +54,9 @@ php artisan make:fullapi --from-database --tables=posts,categories,comments --pe
 php artisan test          # green
 php artisan serve         # /docs/api is live if Scramble is installed
 ```
+
+<!-- VIDEO #4 (YouTube) — uncomment and set VIDEO_ID once the video is online, then move it near the top of the page:
+<div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
+  <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Turn an existing database into a documented API" allowfullscreen loading="lazy"></iframe>
+</div>
+-->

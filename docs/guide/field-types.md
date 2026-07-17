@@ -69,3 +69,9 @@ fields:
   content: text nullable
   views: { type: integer, default: 0 }
 ```
+
+<!-- VIDEO #2 (YouTube) — uncomment and set VIDEO_ID once the video is online, then move it near the top of the page:
+<div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
+  <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Enums and custom primary keys done right" allowfullscreen loading="lazy"></iframe>
+</div>
+-->

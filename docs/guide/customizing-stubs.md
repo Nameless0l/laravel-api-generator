@@ -19,7 +19,7 @@ php artisan api-generator:validate-stubs
 php artisan api-generator:validate-stubs --json   # machine-readable, exit code 1 on error
 ```
 
-Wire the `--json` form into CI to catch broken stubs before they reach anyone's machine. The [VS Code extension](/guide/vscode-extension) runs this validation automatically before each generation.
+Wire the `--json` form into CI to catch broken stubs before they reach anyone's machine. The [VS Code extension](/guide/extension/quick-actions) runs this validation automatically before each generation.
 
 ## Extending the generator
 
@@ -59,3 +59,9 @@ class CustomGenerator extends AbstractGenerator
 ```
 
 Register it in your service provider and it is called automatically during generation.
+
+<!-- VIDEO #7 (YouTube) — uncomment and set VIDEO_ID once the video is online, then move it near the top of the page:
+<div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
+  <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Zero lock-in: customize the stubs, then uninstall" allowfullscreen loading="lazy"></iframe>
+</div>
+-->

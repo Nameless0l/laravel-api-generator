@@ -47,4 +47,10 @@ php artisan api-generator:clean-routes --dry-run   # liste ce qui serait supprim
 php artisan api-generator:clean-routes
 ```
 
-L'[extension VS Code](/fr/guide/vscode-extension) propose cette réparation automatiquement quand *List Routes* échoue sur un contrôleur orphelin.
+L'[extension VS Code](/fr/guide/extension/quick-actions) propose cette réparation automatiquement quand *List Routes* échoue sur un contrôleur orphelin.
+
+<!-- VIDEO #6 (YouTube) — décommenter et renseigner VIDEO_ID quand la vidéo est en ligne, puis la placer en haut de page :
+<div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
+  <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Jour 30 : ajouter des champs sans rien réécrire" allowfullscreen loading="lazy"></iframe>
+</div>
+-->

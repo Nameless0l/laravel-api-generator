@@ -95,3 +95,9 @@ Chaque relation atterrit dans le docblock du modèle, donc votre IDE autocomplè
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Comment> $comments
  */
 ```
+
+<!-- VIDEO #3 (YouTube) — décommenter et renseigner VIDEO_ID quand la vidéo est en ligne, puis la placer en haut de page :
+<div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
+  <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Les relations sans boilerplate" allowfullscreen loading="lazy"></iframe>
+</div>
+-->

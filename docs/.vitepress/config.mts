@@ -31,14 +31,25 @@ const enSidebar = [
     },
     {
         text: 'Advanced',
+        items: [{ text: 'Customizing Stubs', link: '/guide/customizing-stubs' }],
+    },
+    {
+        text: 'VS Code Extension',
         items: [
-            { text: 'Customizing Stubs', link: '/guide/customizing-stubs' },
-            { text: 'VS Code Extension', link: '/guide/vscode-extension' },
+            { text: 'Overview & Install', link: '/guide/extension/' },
+            { text: 'Entity Builder', link: '/guide/extension/builder' },
+            { text: 'Imports: DB, JSON, OpenAPI', link: '/guide/extension/imports' },
+            { text: 'Diagram & Sidebar', link: '/guide/extension/diagram-and-sidebar' },
+            { text: 'Quick Actions & Guardrails', link: '/guide/extension/quick-actions' },
+            { text: 'Commands & Settings', link: '/guide/extension/reference' },
         ],
     },
     {
         text: 'Reference',
-        items: [{ text: 'CLI Reference', link: '/reference/cli' }],
+        items: [
+            { text: 'CLI Reference', link: '/reference/cli' },
+            { text: 'Changelog', link: '/changelog' },
+        ],
     },
 ]
 
@@ -73,14 +84,25 @@ const frSidebar = [
     },
     {
         text: 'Avancé',
+        items: [{ text: 'Personnaliser les stubs', link: '/fr/guide/customizing-stubs' }],
+    },
+    {
+        text: 'Extension VS Code',
         items: [
-            { text: 'Personnaliser les stubs', link: '/fr/guide/customizing-stubs' },
-            { text: 'Extension VS Code', link: '/fr/guide/vscode-extension' },
+            { text: 'Découverte & installation', link: '/fr/guide/extension/' },
+            { text: "Builder d'entités", link: '/fr/guide/extension/builder' },
+            { text: 'Imports : BDD, JSON, OpenAPI', link: '/fr/guide/extension/imports' },
+            { text: 'Diagramme & sidebar', link: '/fr/guide/extension/diagram-and-sidebar' },
+            { text: 'Actions rapides & garde-fous', link: '/fr/guide/extension/quick-actions' },
+            { text: 'Commandes & réglages', link: '/fr/guide/extension/reference' },
         ],
     },
     {
         text: 'Référence',
-        items: [{ text: 'Référence CLI', link: '/fr/reference/cli' }],
+        items: [
+            { text: 'Référence CLI', link: '/fr/reference/cli' },
+            { text: 'Changelog', link: '/fr/changelog' },
+        ],
     },
 ]
 
@@ -112,10 +134,9 @@ export default defineConfig({
                 nav: [
                     { text: 'Guide', link: '/guide/getting-started' },
                     { text: 'CLI Reference', link: '/reference/cli' },
-                    {
-                        text: 'VS Code Extension',
-                        link: 'https://marketplace.visualstudio.com/items?itemName=Nameless0l.laravel-api-generator',
-                    },
+                    { text: 'VS Code Extension', link: '/guide/extension/' },
+                    { text: 'Changelog', link: '/changelog' },
+                    { text: 'Issues', link: 'https://github.com/Nameless0l/laravel-api-generator/issues' },
                 ],
                 sidebar: enSidebar,
                 editLink: {
@@ -138,10 +159,9 @@ export default defineConfig({
                 nav: [
                     { text: 'Guide', link: '/fr/guide/getting-started' },
                     { text: 'Référence CLI', link: '/fr/reference/cli' },
-                    {
-                        text: 'Extension VS Code',
-                        link: 'https://marketplace.visualstudio.com/items?itemName=Nameless0l.laravel-api-generator',
-                    },
+                    { text: 'Extension VS Code', link: '/fr/guide/extension/' },
+                    { text: 'Changelog', link: '/fr/changelog' },
+                    { text: 'Issues', link: 'https://github.com/Nameless0l/laravel-api-generator/issues' },
                 ],
                 sidebar: frSidebar,
                 outline: { label: 'Sur cette page' },

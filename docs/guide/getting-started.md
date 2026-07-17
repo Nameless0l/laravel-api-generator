@@ -100,4 +100,10 @@ Autocomplete works instantly in VS Code and PhpStorm — no `ide-helper` require
 - [The `make:fullapi` command and its options](/guide/generating)
 - [Generate from an existing database](/guide/from-database)
 - [Describe your whole API in a YAML schema](/guide/schema-files)
-- [Use the VS Code extension](/guide/vscode-extension)
+- [Use the VS Code extension](/guide/extension/)
+
+<!-- VIDEO #1 (YouTube) — uncomment and set VIDEO_ID once the video is online, then move it near the top of the page:
+<div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
+  <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="A complete Laravel API in 30 seconds" allowfullscreen loading="lazy"></iframe>
+</div>
+-->

@@ -17,7 +17,7 @@ hero:
       link: https://github.com/Nameless0l/laravel-api-generator
     - theme: alt
       text: VS Code Extension
-      link: https://marketplace.visualstudio.com/items?itemName=Nameless0l.laravel-api-generator
+      link: /guide/extension/
 
 features:
   - icon: 🧪
@@ -46,6 +46,90 @@ features:
     details: A --dev dependency. Generated code is plain Laravel with no reference to the package — remove it, everything keeps working.
 ---
 
+<script setup>
+import demoGif from './demo.gif'
+import archImg from './architecture-diagram.png'
+import scrambleImg from './scramble-docs.png'
+
+const tabs = [
+    {
+        title: 'One command',
+        img: demoGif,
+        imgAlt: 'make:fullapi terminal demo',
+        text: 'make:fullapi turns one line into twelve files and a registered route: model, controller, service, DTO, requests, resources, policy, migration, factory, seeder and two test suites.',
+        link: '/guide/generating',
+        linkText: 'The make:fullapi command',
+    },
+    {
+        title: 'Tests included',
+        code: `it('lists posts', function () {
+    Post::factory()->count(3)->create();
+
+    $response = $this->getJson('/api/posts');
+
+    $response->assertStatus(200)
+        ->assertJsonCount(3, 'data');
+});
+
+it('shows a post', function () {
+    $post = Post::factory()->create();
+
+    $response = $this->getJson("/api/posts/{$post->getKey()}");
+
+    $response->assertStatus(200)
+        ->assertJsonFragment(['id' => $post->getKey()]);
+});`,
+        text: 'Not scaffolded — written. Real assertions against real endpoints, factories included, PHPUnit or Pest. This excerpt is an actual generated test, untouched.',
+        link: '/guide/testing',
+        linkText: 'Generated tests',
+    },
+    {
+        title: 'Architecture',
+        img: archImg,
+        imgAlt: 'Generated architecture diagram',
+        text: 'A thin controller delegating to a service layer, typed readonly DTOs, policies, form requests and resources — the structure you would build on a good day, there from day one.',
+        link: '/guide/generating',
+        linkText: 'What gets generated',
+    },
+    {
+        title: 'API docs',
+        img: scrambleImg,
+        imgAlt: 'Scramble OpenAPI documentation',
+        text: 'Generated controllers are written so Scramble can document them with zero annotations — an interactive Swagger UI at /docs/api. Postman collection export included.',
+        link: '/guide/docs-and-postman',
+        linkText: 'API docs & Postman',
+    },
+    {
+        title: 'From your database',
+        code: `# every table becomes a complete, documented API
+php artisan make:fullapi --from-database
+
+# or just some of them
+php artisan make:fullapi --from-database \\
+    --tables=products,orders`,
+        text: 'Legacy project? --from-database reads the schema: columns become typed fields, foreign keys become relations, pivot tables become belongsToMany.',
+        link: '/guide/from-database',
+        linkText: 'From an existing database',
+    },
+    {
+        title: 'VS Code extension',
+        bullets: [
+            'Visual entity builder with live code preview',
+            'Import from your database, JSON or an OpenAPI spec',
+            'Interactive entity diagram',
+            'Migrate, seed, test and open API docs in one click',
+        ],
+        text: 'The whole generator without the terminal: a free extension with a visual builder, live preview and one-click lifecycle actions.',
+        link: '/guide/extension/',
+        linkText: 'The VS Code extension',
+    },
+]
+
+// Social proof: add real quotes as they arrive — the section stays hidden while the list is empty.
+// { quote: 'What they wrote, without quotation marks', author: 'Their Name', handle: '@handle', link: 'https://x.com/…' },
+const testimonials = []
+</script>
+
 ## 30 seconds, start to finish
 
 ```bash
@@ -55,4 +139,16 @@ php artisan make:fullapi Post --fields="title:string,status:enum(draft,published
 php artisan test   # green ✓
 ```
 
-![Demo](./demo.gif)
+## See it in action
+
+<HomeFeatureTabs :items="tabs" />
+
+<HomeTestimonials title="What people say" :items="testimonials" />
+
+<!-- VIDEO #1 (YouTube) — uncomment and set VIDEO_ID once the first demo video is online:
+## Watch the demo
+
+<div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
+  <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="A complete Laravel API in 30 seconds" allowfullscreen loading="lazy"></iframe>
+</div>
+-->

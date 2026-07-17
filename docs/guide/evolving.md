@@ -47,4 +47,10 @@ php artisan api-generator:clean-routes --dry-run   # list what would be removed
 php artisan api-generator:clean-routes
 ```
 
-The [VS Code extension](/guide/vscode-extension) offers this fix automatically when *List Routes* fails on an orphan controller.
+The [VS Code extension](/guide/extension/quick-actions) offers this fix automatically when *List Routes* fails on an orphan controller.
+
+<!-- VIDEO #6 (YouTube) — uncomment and set VIDEO_ID once the video is online, then move it near the top of the page:
+<div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
+  <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Day 30: add fields without rewriting anything" allowfullscreen loading="lazy"></iframe>
+</div>
+-->

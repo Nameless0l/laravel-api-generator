@@ -17,7 +17,7 @@ hero:
       link: https://github.com/Nameless0l/laravel-api-generator
     - theme: alt
       text: Extension VS Code
-      link: https://marketplace.visualstudio.com/items?itemName=Nameless0l.laravel-api-generator
+      link: /fr/guide/extension/
 
 features:
   - icon: 🧪
@@ -46,6 +46,90 @@ features:
     details: Une dépendance --dev. Le code généré est du Laravel pur, sans référence au package — supprimez-le, tout continue de fonctionner.
 ---
 
+<script setup>
+import demoGif from '../demo.gif'
+import archImg from '../architecture-diagram.png'
+import scrambleImg from '../scramble-docs.png'
+
+const tabs = [
+    {
+        title: 'Une commande',
+        img: demoGif,
+        imgAlt: 'Démo terminal de make:fullapi',
+        text: "make:fullapi transforme une ligne en douze fichiers et une route enregistrée : modèle, contrôleur, service, DTO, requests, resources, policy, migration, factory, seeder et deux suites de tests.",
+        link: '/fr/guide/generating',
+        linkText: 'La commande make:fullapi',
+    },
+    {
+        title: 'Tests inclus',
+        code: `it('lists posts', function () {
+    Post::factory()->count(3)->create();
+
+    $response = $this->getJson('/api/posts');
+
+    $response->assertStatus(200)
+        ->assertJsonCount(3, 'data');
+});
+
+it('shows a post', function () {
+    $post = Post::factory()->create();
+
+    $response = $this->getJson("/api/posts/{$post->getKey()}");
+
+    $response->assertStatus(200)
+        ->assertJsonFragment(['id' => $post->getKey()]);
+});`,
+        text: "Pas des squelettes — des tests écrits. De vraies assertions contre de vrais endpoints, factories comprises, PHPUnit ou Pest. Cet extrait est un vrai test généré, non retouché.",
+        link: '/fr/guide/testing',
+        linkText: 'Les tests générés',
+    },
+    {
+        title: 'Architecture',
+        img: archImg,
+        imgAlt: "Diagramme de l'architecture générée",
+        text: "Un contrôleur fin qui délègue à une couche service, des DTO readonly typés, des policies, form requests et resources — la structure qu'on construit un bon jour, présente dès le premier.",
+        link: '/fr/guide/generating',
+        linkText: 'Ce qui est généré',
+    },
+    {
+        title: 'Doc API',
+        img: scrambleImg,
+        imgAlt: 'Documentation OpenAPI Scramble',
+        text: "Les contrôleurs générés sont écrits pour que Scramble les documente sans aucune annotation — un Swagger UI interactif sur /docs/api. Export de collection Postman inclus.",
+        link: '/fr/guide/docs-and-postman',
+        linkText: 'Doc API & Postman',
+    },
+    {
+        title: 'Depuis votre base',
+        code: `# chaque table devient une API complète et documentée
+php artisan make:fullapi --from-database
+
+# ou seulement certaines
+php artisan make:fullapi --from-database \\
+    --tables=products,orders`,
+        text: "Projet legacy ? --from-database lit le schéma : les colonnes deviennent des champs typés, les clés étrangères des relations, les tables pivots des belongsToMany.",
+        link: '/fr/guide/from-database',
+        linkText: 'Depuis une base existante',
+    },
+    {
+        title: 'Extension VS Code',
+        bullets: [
+            "Builder visuel avec aperçu du code en direct",
+            "Import depuis votre base, un JSON ou une spec OpenAPI",
+            "Diagramme d'entités interactif",
+            "Migrate, seed, tests et doc API en un clic",
+        ],
+        text: "Tout le générateur sans le terminal : une extension gratuite avec builder visuel, aperçu en direct et actions de cycle de vie en un clic.",
+        link: '/fr/guide/extension/',
+        linkText: "L'extension VS Code",
+    },
+]
+
+// Preuve sociale : ajouter les vraies citations au fil du lancement — la section reste cachée tant que la liste est vide.
+// { quote: 'Ce qui a été écrit, sans guillemets', author: 'Nom', handle: '@handle', link: 'https://x.com/…' },
+const testimonials = []
+</script>
+
 ## 30 secondes, chrono en main
 
 ```bash
@@ -55,4 +139,16 @@ php artisan make:fullapi Post --fields="title:string,status:enum(draft,published
 php artisan test   # vert ✓
 ```
 
-![Démo](../demo.gif)
+## En action
+
+<HomeFeatureTabs :items="tabs" />
+
+<HomeTestimonials title="Ce qu'on en dit" :items="testimonials" />
+
+<!-- VIDEO #1 (YouTube) — décommenter et renseigner VIDEO_ID quand la première vidéo de démo est en ligne :
+## Voir la démo
+
+<div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
+  <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Une API Laravel complète en 30 secondes" allowfullscreen loading="lazy"></iframe>
+</div>
+-->

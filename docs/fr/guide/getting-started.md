@@ -100,4 +100,10 @@ L'autocomplétion fonctionne immédiatement dans VS Code et PhpStorm — pas bes
 - [La commande `make:fullapi` et ses options](/fr/guide/generating)
 - [Générer depuis une base de données existante](/fr/guide/from-database)
 - [Décrire toute votre API dans un schéma YAML](/fr/guide/schema-files)
-- [Utiliser l'extension VS Code](/fr/guide/vscode-extension)
+- [Utiliser l'extension VS Code](/fr/guide/extension/)
+
+<!-- VIDEO #1 (YouTube) — décommenter et renseigner VIDEO_ID quand la vidéo est en ligne, puis la placer en haut de page :
+<div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
+  <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Une API Laravel complète en 30 secondes" allowfullscreen loading="lazy"></iframe>
+</div>
+-->
