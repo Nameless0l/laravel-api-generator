@@ -145,7 +145,7 @@ export default defineConfig({
                 },
                 footer: {
                     message:
-                        'Released under the MIT License. Free forever — <a href="https://github.com/sponsors/Nameless0l" target="_blank" rel="noopener">sponsor the project ❤</a>',
+                        'Released under the MIT License. Free forever: <a href="https://github.com/sponsors/Nameless0l" target="_blank" rel="noopener">sponsor the project ❤</a>',
                     copyright: '© Mbassi Loïc Aron (Nameless0l)',
                 },
             },
@@ -178,7 +178,7 @@ export default defineConfig({
                 },
                 footer: {
                     message:
-                        'Publié sous licence MIT. Gratuit pour toujours — <a href="https://github.com/sponsors/Nameless0l" target="_blank" rel="noopener">soutenir le projet ❤</a>',
+                        'Publié sous licence MIT. Gratuit pour toujours : <a href="https://github.com/sponsors/Nameless0l" target="_blank" rel="noopener">soutenir le projet ❤</a>',
                     copyright: '© Mbassi Loïc Aron (Nameless0l)',
                 },
             },
