@@ -24,6 +24,10 @@ jobs:
             laravel-version: '12.*'
           - php-version: '8.4'
             laravel-version: '12.*'
+          - php-version: '8.3'
+            laravel-version: '13.*'
+          - php-version: '8.4'
+            laravel-version: '13.*'
 
     name: PHP ${{ matrix.php-version }} - Laravel ${{ matrix.laravel-version }}
 
