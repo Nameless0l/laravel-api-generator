@@ -4,16 +4,23 @@ Working on a legacy project? Point the generator at the database and get a compl
 
 ## Usage
 
-```bash
-# Every user table (system tables and users are skipped automatically)
+::: code-group
+
+```bash [All tables]
 php artisan make:fullapi --from-database
+```
 
-# Only specific tables
+```bash [Specific tables]
 php artisan make:fullapi --from-database --tables=products,orders
+```
 
-# Also create the migration files (useful to version a hand-built database)
+```bash [With migrations]
 php artisan make:fullapi --from-database --with-migrations
 ```
+
+:::
+
+The first form converts every user table; system tables are skipped automatically. `--tables=` narrows the run to the tables you list, and `--with-migrations` also writes the migration files, which is useful to version a hand-built database.
 
 ## What the introspection detects
 
@@ -33,15 +40,19 @@ This is not a dumb column dump:
 
 ## Inspecting without generating
 
-The `api-generator:introspect` command emits the schema as JSON, so any tooling can build on top of it:
+The `api-generator:introspect` command emits the schema as JSON, so any tooling can build on top of it. Run it bare to list every user table (`migrations`, `sessions` and `personal_access_tokens` are filtered out), or point it at a table to get its column names, normalized types and soft-deletes flag:
 
-```bash
-# List all user tables (migrations / sessions / personal_access_tokens filtered out)
+::: code-group
+
+```bash [List tables]
 php artisan api-generator:introspect
+```
 
-# Describe one table (column names, normalized types, soft_deletes flag)
+```bash [One table]
 php artisan api-generator:introspect --table=products
 ```
+
+:::
 
 This powers the **Import from Database** feature of the [VS Code extension](/guide/extension/imports).
 
@@ -51,9 +62,11 @@ Legacy database at 9:00: documented, tested REST API at 9:15:
 
 ```bash
 php artisan make:fullapi --from-database --tables=posts,categories,comments --pest --postman
-php artisan test          # green
-php artisan serve         # /docs/api is live if Scramble is installed
+php artisan test
+php artisan serve
 ```
+
+The test suite passes as generated, and if [Scramble](/guide/docs-and-postman) is installed the interactive documentation is already live at `/docs/api`.
 
 <!-- VIDEO #4 (YouTube): uncomment and set VIDEO_ID once the video is online, then move it near the top of the page:
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">

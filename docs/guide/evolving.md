@@ -42,10 +42,17 @@ Removes every generated file, unregisters the seeder from `DatabaseSeeder.php`, 
 
 If a route file still references a deleted controller (the classic `route:list` ReflectionException), purge orphan lines:
 
-```bash
-php artisan api-generator:clean-routes --dry-run   # list what would be removed
+::: code-group
+
+```bash [Preview]
+php artisan api-generator:clean-routes --dry-run
+```
+
+```bash [Apply]
 php artisan api-generator:clean-routes
 ```
+
+:::
 
 The [VS Code extension](/guide/extension/quick-actions) offers this fix automatically when *List Routes* fails on an orphan controller.
 

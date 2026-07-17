@@ -5,10 +5,34 @@
     --vp-c-brand-soft: rgba(255, 45, 32, 0.14);
     --vp-home-hero-name-color: transparent;
     --vp-home-hero-name-background: linear-gradient(120deg, #ff2d20 30%, #ff7a6e);
+
+    /* Callouts keep their own palette instead of inheriting the red brand:
+       tip reads as "good to know" (green), not as an alert. */
+    --vp-custom-block-tip-border: transparent;
+    --vp-custom-block-tip-text: var(--vp-c-text-1);
+    --vp-custom-block-tip-bg: var(--vp-c-green-soft);
+    --vp-custom-block-tip-code-bg: var(--vp-c-green-soft);
 }
 
 .dark {
     --vp-c-brand-1: #ff6b61;
     --vp-c-brand-2: #ff2d20;
     --vp-c-brand-3: #e0281c;
+}
+
+.custom-block.tip .custom-block-title {
+    color: var(--vp-c-green-1);
+}
+
+/* Mermaid diagrams: centered, breathing room, never wider than the content */
+.vp-doc .mermaid,
+.vp-doc pre.mermaid {
+    display: flex;
+    justify-content: center;
+    margin: 24px 0;
+    background: transparent;
+}
+.vp-doc .mermaid svg {
+    max-width: 100%;
+    height: auto;
 }

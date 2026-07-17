@@ -27,6 +27,23 @@ erDiagram
 
 ([Exemple complet](https://github.com/Nameless0l/laravel-api-generator/blob/main/examples/blog.mmd))
 
+Rendue, cette source correspond à ce modèle de données, et l'API générée le suit exactement :
+
+```mermaid
+erDiagram
+    USER ||--o{ POST : writes
+    POST }o--o{ TAG : tagged
+
+    POST {
+        string title
+        text content
+        datetime deleted_at
+    }
+    TAG {
+        string name UK
+    }
+```
+
 ## Ce que le parseur comprend
 
 `erDiagram` et `classDiagram` sont tous deux supportés :

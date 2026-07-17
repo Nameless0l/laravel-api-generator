@@ -29,13 +29,7 @@ Si vous avez [personnalisé des stubs](/fr/guide/customizing-stubs), l'extension
 
 ### Détection des dépendances
 
-Un package manquant ne casse jamais le flux en silence :
-
-- Projet sans `nameless/laravel-api-generator` → une notification propose **Install via Composer**.
-- **Open API Docs** sans `dedoc/scramble` → proposition d'installation.
-- **Auth (Sanctum)** coché sans `laravel/sanctum` → proposition d'installer, ou de générer sans auth.
-- Option Spatie QueryBuilder sans `spatie/laravel-query-builder` → `composer require` en un clic.
-- Package installé trop ancien pour une fonctionnalité → proposition de `composer update`.
+Un package manquant ne casse jamais le flux en silence. Si le projet n'a pas encore `nameless/laravel-api-generator`, une notification propose de l'installer via Composer ; si la version installée est trop ancienne pour la fonctionnalité que vous venez de cliquer, l'extension l'explique et propose `composer update`. La même logique couvre les intégrations optionnelles : **Open API Docs** sans `dedoc/scramble`, la case **Auth (Sanctum)** sans `laravel/sanctum`, ou l'option QueryBuilder sans `spatie/laravel-query-builder` proposent toutes un `composer require` en un clic plutôt que d'échouer plus tard à l'exécution.
 
 ### Réparation des routes orphelines
 

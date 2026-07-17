@@ -32,7 +32,7 @@ The tree **auto-refreshes**: a file watcher keeps it (and the status bar) in syn
 
 Right-click (or use the inline icons) on any entity:
 
-- **Add Fields to Entity…**: type `excerpt:text,status:enum(draft,published)` and the package creates an incremental migration and patches the model, request, factory and resource in place via `--add-fields` (package ≥ 3.6). One click to run the migration after. See [Evolving Entities](/guide/evolving).
+- **Add Fields to Entity…**: type `excerpt:text,status:enum(draft,published)` and the package creates an incremental migration and patches the model, request, factory and resource in place via `--add-fields`, with one click to run the migration after. See [Evolving Entities](/guide/evolving).
 - **Regenerate File(s)…**: the extension parses the existing migration to recover the field list, then lets you multi-select which artifacts to rebuild. The underlying call is `make:fullapi --only=…`, so the migration, route and seeder registration are left untouched.
 - **Delete**: full cleanup via `delete:fullapi`: files, routes, seeder registration.
 

@@ -4,11 +4,12 @@ Décrivez toute votre API dans un fichier déclaratif et versionnable : committe
 
 ## Schéma YAML
 
+Créez `api-schema.yaml` à la racine du projet :
+
 ```yaml
-# api-schema.yaml
 options:
-  query_builder: true        # optionnel, s'applique à toutes les entités
-  pest: true                 # tests Pest au lieu de PHPUnit
+  query_builder: true
+  pest: true
 
 entities:
   Category:
@@ -34,25 +35,25 @@ entities:
 
 ```bash
 php artisan make:fullapi --schema=api-schema.yaml
-
-# Ou simplement : si api-schema.yaml (ou .yml / .json) existe à la racine
-# du projet, il est détecté automatiquement
-php artisan make:fullapi
 ```
+
+Quand `api-schema.yaml` (ou `.yml` / `.json`) existe à la racine du projet, le flag devient même optionnel : un simple `php artisan make:fullapi` le détecte automatiquement.
 
 ## Syntaxe des champs
 
-Les champs acceptent un raccourci ou un mapping :
+Les champs acceptent un raccourci (`title: string`) ou un mapping complet quand il faut des clés supplémentaires comme `rules` :
 
 ```yaml
 fields:
-  title: string                              # raccourci
+  title: string
   slug: string unique
   excerpt: text nullable
-  code: string primary                       # clé primaire personnalisée
+  code: string primary
   status: enum(draft,published) default=draft
-  views: { type: integer, default: 0, rules: 'min:0' }   # mapping
+  views: { type: integer, default: 0, rules: 'min:0' }
 ```
+
+`unique`, `nullable` et `default=` décorent le raccourci, et `primary` promeut le champ en [clé primaire personnalisée](/fr/guide/field-types).
 
 ## Options
 

@@ -29,13 +29,7 @@ If you [customized stubs](/guide/customizing-stubs), the extension runs `api-gen
 
 ### Dependency detection
 
-A missing package never breaks the flow silently:
-
-- Project without `nameless/laravel-api-generator` → a notification offers **Install via Composer**.
-- **Open API Docs** without `dedoc/scramble` → prompted to install.
-- **Auth (Sanctum)** checked without `laravel/sanctum` → prompted to install, or generate without auth.
-- Spatie QueryBuilder option without `spatie/laravel-query-builder` → one-click `composer require`.
-- Installed package too old for a feature → offers `composer update`.
+A missing package never breaks the flow silently. If the project doesn't have `nameless/laravel-api-generator` yet, a notification offers to install it via Composer; if the installed version is too old for the feature you clicked, the extension explains it and offers `composer update`. The same logic covers the optional integrations: **Open API Docs** without `dedoc/scramble`, the **Auth (Sanctum)** checkbox without `laravel/sanctum`, or the QueryBuilder option without `spatie/laravel-query-builder` all prompt for a one-click `composer require` instead of failing later at runtime.
 
 ### Orphan route repair
 

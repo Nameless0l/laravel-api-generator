@@ -32,7 +32,7 @@ L'arbre **se rafraîchit tout seul** : un observateur de fichiers le garde (avec
 
 Clic droit (ou icônes en ligne) sur n'importe quelle entité :
 
-- **Add Fields to Entity…** : tapez `excerpt:text,status:enum(draft,published)` et le package crée une migration incrémentale et patch le modèle, la request, la factory et la resource en place via `--add-fields` (package ≥ 3.6). Un clic pour lancer la migration ensuite. Voir [Faire évoluer les entités](/fr/guide/evolving).
+- **Add Fields to Entity…** : tapez `excerpt:text,status:enum(draft,published)` et le package crée une migration incrémentale et patch le modèle, la request, la factory et la resource en place via `--add-fields`, avec un clic pour lancer la migration ensuite. Voir [Faire évoluer les entités](/fr/guide/evolving).
 - **Regenerate File(s)…** : l'extension analyse la migration existante pour retrouver la liste des champs, puis vous laisse multi-sélectionner les artefacts à reconstruire. L'appel sous-jacent est `make:fullapi --only=…` : migration, route et enregistrement du seeder restent intacts.
 - **Delete** : nettoyage complet via `delete:fullapi` : fichiers, routes, enregistrement du seeder.
 

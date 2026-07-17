@@ -29,16 +29,13 @@ php artisan make:fullapi Post --fields="title:string" --auth
 
 Génère un système d'authentification par token complet : `AuthController` (register, login, logout, user), `LoginRequest`, `RegisterRequest`, les routes publiques d'auth, et enveloppe vos routes de ressources dans le middleware `auth:sanctum`.
 
-```php
-// Public
-POST /api/register
-POST /api/login
-
-// Protégé (auth:sanctum)
-POST /api/logout
-GET  /api/user
-GET  /api/posts   // vos ressources exigent aussi un token
-```
+| Méthode | Route | Accès |
+|---------|-------|-------|
+| `POST` | `/api/register` | Public |
+| `POST` | `/api/login` | Public |
+| `POST` | `/api/logout` | `auth:sanctum` |
+| `GET` | `/api/user` | `auth:sanctum` |
+| `GET` | `/api/posts` | `auth:sanctum` (vos ressources exigent aussi un token) |
 
 Installez ensuite Sanctum s'il n'est pas déjà présent :
 
@@ -105,17 +102,23 @@ Types disponibles : `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resourc
 
 ```bash
 php artisan delete:fullapi Post
-php artisan delete:fullapi          # toutes les entités définies dans class_data.json
 ```
 
-Supprime tous les fichiers générés, désenregistre le seeder de `DatabaseSeeder.php`, et nettoie les routes de l'entité dans `routes/api.php` et `routes/web.php`.
+Supprime tous les fichiers générés, désenregistre le seeder de `DatabaseSeeder.php`, et nettoie les routes de l'entité dans `routes/api.php` et `routes/web.php`. Appelée sans nom d'entité, la commande supprime toutes les entités définies dans `class_data.json`.
 
 Si d'anciennes suppressions ont laissé des routes pointant vers des contrôleurs disparus (la fameuse ReflectionException de `route:list`), purgez-les :
 
-```bash
-php artisan api-generator:clean-routes --dry-run   # aperçu
-php artisan api-generator:clean-routes             # supprime les routes orphelines
+::: code-group
+
+```bash [Aperçu]
+php artisan api-generator:clean-routes --dry-run
 ```
+
+```bash [Appliquer]
+php artisan api-generator:clean-routes
+```
+
+:::
 
 ## Toutes les options combinées
 

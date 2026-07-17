@@ -16,10 +16,9 @@ Cela copie chaque `.stub` dans `stubs/vendor/laravel-api-generator/`. Le `StubLo
 
 ```bash
 php artisan api-generator:validate-stubs
-php artisan api-generator:validate-stubs --json   # lisible machine, code de sortie 1 en cas d'erreur
 ```
 
-Branchez la forme `--json` dans votre CI pour attraper les stubs cassés avant qu'ils n'atteignent une machine. L'[extension VS Code](/fr/guide/extension/quick-actions) lance cette validation automatiquement avant chaque génération.
+Branchez la forme `--json` dans votre CI pour attraper les stubs cassés avant qu'ils n'atteignent une machine : la sortie devient lisible par un programme et la commande sort avec le code 1 en cas d'erreur. L'[extension VS Code](/fr/guide/extension/quick-actions) lance cette validation automatiquement avant chaque génération.
 
 ## Étendre le générateur
 

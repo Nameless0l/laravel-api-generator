@@ -4,16 +4,23 @@ Vous travaillez sur un projet legacy ? Pointez le générateur sur la base de do
 
 ## Usage
 
-```bash
-# Toutes les tables utilisateur (tables système et users sont ignorées automatiquement)
+::: code-group
+
+```bash [Toutes les tables]
 php artisan make:fullapi --from-database
+```
 
-# Seulement certaines tables
+```bash [Certaines tables]
 php artisan make:fullapi --from-database --tables=products,orders
+```
 
-# Créer aussi les fichiers de migration (utile pour versionner une base construite à la main)
+```bash [Avec migrations]
 php artisan make:fullapi --from-database --with-migrations
 ```
+
+:::
+
+La première forme convertit toutes les tables utilisateur ; les tables système sont ignorées automatiquement. `--tables=` restreint la génération aux tables listées, et `--with-migrations` écrit aussi les fichiers de migration, utile pour versionner une base construite à la main.
 
 ## Ce que l'introspection détecte
 
@@ -33,15 +40,19 @@ Ce n'est pas un simple déversement de colonnes :
 
 ## Inspecter sans générer
 
-La commande `api-generator:introspect` émet le schéma en JSON, pour que n'importe quel outillage puisse construire dessus :
+La commande `api-generator:introspect` émet le schéma en JSON, pour que n'importe quel outillage puisse construire dessus. Lancée sans argument, elle liste toutes les tables utilisateur (`migrations`, `sessions` et `personal_access_tokens` sont filtrées) ; pointée sur une table, elle en décrit les colonnes, les types normalisés et le flag soft deletes :
 
-```bash
-# Lister toutes les tables utilisateur (migrations / sessions / personal_access_tokens filtrées)
+::: code-group
+
+```bash [Lister les tables]
 php artisan api-generator:introspect
+```
 
-# Décrire une table (noms de colonnes, types normalisés, flag soft_deletes)
+```bash [Une table]
 php artisan api-generator:introspect --table=products
 ```
+
+:::
 
 C'est ce qui alimente la fonctionnalité **Import from Database** de l'[extension VS Code](/fr/guide/extension/imports).
 
@@ -51,9 +62,11 @@ Base legacy à 9h00 : API REST documentée et testée à 9h15 :
 
 ```bash
 php artisan make:fullapi --from-database --tables=posts,categories,comments --pest --postman
-php artisan test          # vert
-php artisan serve         # /docs/api est en ligne si Scramble est installé
+php artisan test
+php artisan serve
 ```
+
+La suite de tests passe telle quelle, et si [Scramble](/fr/guide/docs-and-postman) est installé la documentation interactive est déjà en ligne sur `/docs/api`.
 
 <!-- VIDEO #4 (YouTube) : décommenter et renseigner VIDEO_ID quand la vidéo est en ligne, puis la placer en haut de page :
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">

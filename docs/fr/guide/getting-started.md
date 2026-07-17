@@ -4,8 +4,8 @@ Laravel API Generator génère une API REST complète, structurée comme en prod
 
 ## Prérequis
 
-- PHP >= 8.2
-- Laravel 10.x, 11.x ou 12.x
+- PHP >= 8.2 (>= 8.3 pour Laravel 13)
+- Laravel 10.x, 11.x, 12.x ou 13.x
 
 ## Installation
 
@@ -58,10 +58,15 @@ Une commande crée **12 fichiers** par entité et enregistre la route API :
 
 Chaque requête traverse une structure en couches propre :
 
-```
-Requête HTTP → FormRequest (validation) → Contrôleur (fin) → Service (logique métier) ⇄ DTO → Modèle → BDD
-                                              ↓
-                                          Resource (sérialisation) → réponse JSON
+```mermaid
+flowchart LR
+    REQ(["Requête HTTP"]) --> FR["FormRequest<br/>validation"]
+    FR --> CTRL["Contrôleur<br/>fin"]
+    CTRL <-- "DTO" --> SVC["Service<br/>logique métier"]
+    SVC <--> MOD["Modèle"]
+    MOD <--> DB[("BDD")]
+    CTRL --> RES["Resource<br/>sérialisation"]
+    RES --> OUT(["Réponse JSON"])
 ```
 
 Le contrôleur reste fin et délègue au service :

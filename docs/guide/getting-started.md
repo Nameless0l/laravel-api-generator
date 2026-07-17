@@ -4,8 +4,8 @@ Laravel API Generator scaffolds a complete, production-style REST API from a sin
 
 ## Requirements
 
-- PHP >= 8.2
-- Laravel 10.x, 11.x or 12.x
+- PHP >= 8.2 (>= 8.3 for Laravel 13)
+- Laravel 10.x, 11.x, 12.x or 13.x
 
 ## Installation
 
@@ -58,10 +58,15 @@ One command creates **12 files** per entity and registers the API route:
 
 Every request flows through a clean, layered structure:
 
-```
-HTTP request → FormRequest (validation) → Controller (thin) → Service (business logic) ⇄ DTO → Model → DB
-                                              ↓
-                                          Resource (serialization) → JSON response
+```mermaid
+flowchart LR
+    REQ(["HTTP request"]) --> FR["FormRequest<br/>validation"]
+    FR --> CTRL["Controller<br/>thin"]
+    CTRL <-- "DTO" --> SVC["Service<br/>business logic"]
+    SVC <--> MOD["Model"]
+    MOD <--> DB[("Database")]
+    CTRL --> RES["Resource<br/>serialization"]
+    RES --> OUT(["JSON response"])
 ```
 
 The controller stays thin and delegates to the service:

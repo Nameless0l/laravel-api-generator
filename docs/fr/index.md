@@ -6,7 +6,8 @@ hero:
   text: Une commande. Toute votre API Laravel.
   tagline: "Modèles, services, DTO, policies, tests écrits et documentation : générés en 30 secondes, sans lock-in."
   image:
-    src: /logo.png
+    light: /logo_dark.png
+    dark: /logo.png
     alt: Laravel API Generator
   actions:
     - theme: brand
@@ -48,7 +49,7 @@ features:
 
 <script setup>
 import demoGif from '../demo.gif'
-import archImg from '../architecture-diagram.png'
+import archImg from '../architecture-flow-fr.svg'
 import scrambleImg from '../scramble-docs.png'
 
 const tabs = [
@@ -101,13 +102,11 @@ it('shows a post', function () {
     },
     {
         title: 'Depuis votre base',
-        code: `# chaque table devient une API complète et documentée
-php artisan make:fullapi --from-database
+        code: `php artisan make:fullapi --from-database
 
-# ou seulement certaines
 php artisan make:fullapi --from-database \\
     --tables=products,orders`,
-        text: "Projet legacy ? --from-database lit le schéma : les colonnes deviennent des champs typés, les clés étrangères des relations, les tables pivots des belongsToMany.",
+        text: "Projet legacy ? --from-database lit le schéma et transforme chaque table en API complète et documentée : les colonnes deviennent des champs typés, les clés étrangères des relations, les tables pivots des belongsToMany. Ajoutez --tables= pour n'en cibler que certaines.",
         link: '/fr/guide/from-database',
         linkText: 'Depuis une base existante',
     },
@@ -136,8 +135,10 @@ const testimonials = []
 composer require --dev nameless/laravel-api-generator
 
 php artisan make:fullapi Post --fields="title:string,status:enum(draft,published)" --pest
-php artisan test   # vert ✓
+php artisan test
 ```
+
+Trois commandes, et la suite de tests est déjà verte : les tests arrivent avec l'API.
 
 ## En action
 

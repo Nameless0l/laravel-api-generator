@@ -8,13 +8,16 @@ The generator panel replaces CLI flags with a form, and shows you the code you'r
 
 ## The form
 
-- **Entity name** with PascalCase validation and reserved-name detection.
-- **Quick Start presets**: one click fills the form: Blog Post, User Profile, E-commerce Product, Comment, Task, Article (with soft deletes).
-- **Fields**: add, remove and **drag-to-reorder** rows; each has a name and a type selector (`string`, `integer`, `text`, `float`, `boolean`, `json`, `date`, `datetime`, `uuid`…).
-- **Enum fields**: pick the `enum` type and type the values (`draft,published`); the generated API gets a backed PHP enum class, the model cast, `Rule::enum()` validation and a faked factory value (package ≥ 3.6).
-- **Primary key designation**: check `PK` on a field to replace the default `id`. The model (`$primaryKey`, `$incrementing`, `$keyType`), the migration and every incoming relation follow (package ≥ 3.6). See [Field Types & Primary Keys](/guide/field-types).
-- **Relationships**: add `belongsTo` / `hasMany` / `hasOne` / `belongsToMany` rows; the target model input **autocompletes from `app/Models`**, and generation routes through the package's JSON pipeline so you get full FK support, foreign-keyed factories and tests.
-- **Options**: checkboxes for Auth (Sanctum), Postman collection export, Soft Deletes, Spatie QueryBuilder, Pest tests and JSON:API resources (Laravel 12.45+).
+Name the entity first: the input validates PascalCase as you type and rejects reserved names. If you would rather not start from a blank form, a Quick Start preset (Blog Post, User Profile, E-commerce Product, Comment, Task, or Article with soft deletes) fills everything in one click.
+
+Fields are rows you add, remove and drag to reorder. Each row has a name and a type selector (`string`, `integer`, `text`, `float`, `boolean`, `json`, `date`, `datetime`, `uuid`…). Two of them go further than a column type:
+
+- Pick `enum` and type the values (`draft,published`): the generated API gets a backed PHP enum class, the model cast, `Rule::enum()` validation and a faked factory value.
+- Check `PK` on any row to replace the default `id` as primary key: the model (`$primaryKey`, `$incrementing`, `$keyType`), the migration and every incoming relation follow. See [Field Types & Primary Keys](/guide/field-types).
+
+Relationships get their own rows (`belongsTo`, `hasMany`, `hasOne`, `belongsToMany`), and the target model input autocompletes from `app/Models`. Generation goes through the package's JSON pipeline, so relations arrive with real foreign key columns, foreign-keyed factories and passing tests.
+
+The options are checkboxes: Auth (Sanctum), Postman collection export, Soft Deletes, Spatie QueryBuilder, Pest tests and JSON:API resources (Laravel 12.45+).
 
 ## Live code preview
 
@@ -24,9 +27,7 @@ A **file preview** also lists which files will be created, so there are no surpr
 
 ## Safety while generating
 
-- **Conflict warning**: regenerating an existing entity first shows a modal listing every file that would be overwritten, so you can opt out.
-- **Cancellable operations**: a spinning button can be clicked again to kill the underlying artisan process and restore the UI.
-- **Auto-open**: after a successful generation, the new Model and Controller open in the editor.
+Regenerating an entity that already exists first shows a modal listing every file that would be overwritten, so you can back out before anything is written. A running operation is never a black box either: click the spinning button again and the underlying artisan process is killed, with the UI restored. When a generation succeeds, the new Model and Controller open in the editor.
 
 ## Under the hood
 

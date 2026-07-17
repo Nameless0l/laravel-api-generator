@@ -4,11 +4,12 @@ Describe your whole API in one declarative, versionable file: commit it, review 
 
 ## YAML schema
 
+Create `api-schema.yaml` at the project root:
+
 ```yaml
-# api-schema.yaml
 options:
-  query_builder: true        # optional, applies to every entity
-  pest: true                 # Pest tests instead of PHPUnit
+  query_builder: true
+  pest: true
 
 entities:
   Category:
@@ -34,25 +35,25 @@ entities:
 
 ```bash
 php artisan make:fullapi --schema=api-schema.yaml
-
-# Or just: if api-schema.yaml (or .yml / .json) exists at the project root,
-# it is picked up automatically
-php artisan make:fullapi
 ```
+
+When `api-schema.yaml` (or `.yml` / `.json`) exists at the project root, you can even drop the flag: a bare `php artisan make:fullapi` picks it up automatically.
 
 ## Field syntax
 
-Fields accept a shorthand or a mapping:
+Fields accept a shorthand (`title: string`) or a full mapping when you need extra keys like `rules`:
 
 ```yaml
 fields:
-  title: string                              # shorthand
+  title: string
   slug: string unique
   excerpt: text nullable
-  code: string primary                       # custom primary key
+  code: string primary
   status: enum(draft,published) default=draft
-  views: { type: integer, default: 0, rules: 'min:0' }   # mapping
+  views: { type: integer, default: 0, rules: 'min:0' }
 ```
+
+`unique`, `nullable` and `default=` decorate the shorthand, and `primary` promotes the field to [custom primary key](/guide/field-types).
 
 ## Options
 

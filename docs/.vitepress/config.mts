@@ -1,4 +1,4 @@
-import { defineConfig } from "vitepress";
+import { withMermaid } from "vitepress-plugin-mermaid";
 
 const enSidebar = [
   {
@@ -126,7 +126,7 @@ const frSidebar = [
   },
 ];
 
-export default defineConfig({
+export default withMermaid({
   title: "Laravel API Generator",
   base: "/laravel-api-generator/",
   lastUpdated: true,
@@ -139,7 +139,7 @@ export default defineConfig({
       {
         rel: "icon",
         type: "image/png",
-        href: "/laravel-api-generator/logo_dark.png",
+        href: "/laravel-api-generator/favicon.png",
       },
     ],
     ["meta", { property: "og:title", content: "Laravel API Generator" }],

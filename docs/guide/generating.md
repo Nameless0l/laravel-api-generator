@@ -29,16 +29,13 @@ php artisan make:fullapi Post --fields="title:string" --auth
 
 Scaffolds a complete token-based auth system: `AuthController` (register, login, logout, user), `LoginRequest`, `RegisterRequest`, public auth routes, and wraps your API resource routes inside `auth:sanctum` middleware.
 
-```php
-// Public
-POST /api/register
-POST /api/login
-
-// Protected (auth:sanctum)
-POST /api/logout
-GET  /api/user
-GET  /api/posts   // your resources require a token too
-```
+| Method | Route | Access |
+|--------|-------|--------|
+| `POST` | `/api/register` | Public |
+| `POST` | `/api/login` | Public |
+| `POST` | `/api/logout` | `auth:sanctum` |
+| `GET` | `/api/user` | `auth:sanctum` |
+| `GET` | `/api/posts` | `auth:sanctum` (your resources require a token too) |
 
 Then install Sanctum if not already present:
 
@@ -105,17 +102,23 @@ Available types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`,
 
 ```bash
 php artisan delete:fullapi Post
-php artisan delete:fullapi          # every entity defined in class_data.json
 ```
 
-Removes all generated files, unregisters the seeder from `DatabaseSeeder.php`, and cleans the entity's routes from `routes/api.php` and `routes/web.php`.
+Removes all generated files, unregisters the seeder from `DatabaseSeeder.php`, and cleans the entity's routes from `routes/api.php` and `routes/web.php`. Called without an entity name, it deletes every entity defined in `class_data.json`.
 
 If older deletions left routes pointing at controllers that no longer exist (the classic `route:list` ReflectionException), purge them:
 
-```bash
-php artisan api-generator:clean-routes --dry-run   # preview
-php artisan api-generator:clean-routes             # remove orphan routes
+::: code-group
+
+```bash [Preview]
+php artisan api-generator:clean-routes --dry-run
 ```
+
+```bash [Apply]
+php artisan api-generator:clean-routes
+```
+
+:::
 
 ## All options combined
 

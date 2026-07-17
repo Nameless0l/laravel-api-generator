@@ -6,7 +6,8 @@ hero:
   text: One command. Your whole Laravel API.
   tagline: "Models, services, DTOs, policies, written tests and docs: generated in 30 seconds, with zero lock-in."
   image:
-    src: /logo.png
+    light: /logo_dark.png
+    dark: /logo.png
     alt: Laravel API Generator
   actions:
     - theme: brand
@@ -48,7 +49,7 @@ features:
 
 <script setup>
 import demoGif from './demo.gif'
-import archImg from './architecture-diagram.png'
+import archImg from './architecture-flow.svg'
 import scrambleImg from './scramble-docs.png'
 
 const tabs = [
@@ -101,13 +102,11 @@ it('shows a post', function () {
     },
     {
         title: 'From your database',
-        code: `# every table becomes a complete, documented API
-php artisan make:fullapi --from-database
+        code: `php artisan make:fullapi --from-database
 
-# or just some of them
 php artisan make:fullapi --from-database \\
     --tables=products,orders`,
-        text: 'Legacy project? --from-database reads the schema: columns become typed fields, foreign keys become relations, pivot tables become belongsToMany.',
+        text: 'Legacy project? --from-database reads the schema and turns every table into a complete, documented API: columns become typed fields, foreign keys become relations, pivot tables become belongsToMany. Add --tables= to target just some of them.',
         link: '/guide/from-database',
         linkText: 'From an existing database',
     },
@@ -136,8 +135,10 @@ const testimonials = []
 composer require --dev nameless/laravel-api-generator
 
 php artisan make:fullapi Post --fields="title:string,status:enum(draft,published)" --pest
-php artisan test   # green ✓
+php artisan test
 ```
+
+Three commands, and the test suite is already green: the tests come with the API.
 
 ## See it in action
 

@@ -42,10 +42,17 @@ Supprime chaque fichier généré, désenregistre le seeder de `DatabaseSeeder.p
 
 Si un fichier de routes référence encore un contrôleur supprimé (la fameuse ReflectionException de `route:list`), purgez les lignes orphelines :
 
-```bash
-php artisan api-generator:clean-routes --dry-run   # liste ce qui serait supprimé
+::: code-group
+
+```bash [Aperçu]
+php artisan api-generator:clean-routes --dry-run
+```
+
+```bash [Appliquer]
 php artisan api-generator:clean-routes
 ```
+
+:::
 
 L'[extension VS Code](/fr/guide/extension/quick-actions) propose cette réparation automatiquement quand *List Routes* échoue sur un contrôleur orphelin.
 
