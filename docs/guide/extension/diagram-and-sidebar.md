@@ -4,9 +4,9 @@
 
 A canvas view of every generated entity and how they relate.
 
-<!-- SCREENSHOT: the entity diagram with a few related entities. Save as docs/public/ext-diagram.png then:
+
 ![Entity diagram](/ext-diagram.png)
--->
+
 
 - Relationship links are smooth Bezier curves anchored to the nearest card edge, with arrowheads and cardinality labels in readable pills.
 - Hovering a card highlights its connections; inverse declarations (Post `hasMany` Comment + Comment `belongsTo` Post) are merged into a single link; self-referential relations render as a small loop.
@@ -16,9 +16,9 @@ A canvas view of every generated entity and how they relate.
 
 The **Generated Entities** view in the activity bar tracks everything the generator created.
 
-<!-- SCREENSHOT: the sidebar tree with an entity expanded. Save as docs/public/ext-sidebar.png then:
+
 ![Sidebar explorer](/ext-sidebar.png)
--->
+
 
 Each entity expands into three groups:
 

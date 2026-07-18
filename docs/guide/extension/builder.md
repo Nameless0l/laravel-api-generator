@@ -2,9 +2,9 @@
 
 The generator panel replaces CLI flags with a form, and shows you the code you're about to generate, live.
 
-<!-- SCREENSHOT: the generator form with fields + live preview tabs. Save as docs/public/ext-builder.png then:
+
 ![Entity Builder with live preview](/ext-builder.png)
--->
+
 
 ## The form
 

@@ -2,9 +2,8 @@
 
 Le panneau générateur remplace les flags CLI par un formulaire, et vous montre le code que vous allez générer, en direct.
 
-<!-- CAPTURE : le formulaire + les onglets d'aperçu. Enregistrer sous docs/public/ext-builder.png puis :
+
 ![Builder avec aperçu en direct](/ext-builder.png)
--->
 
 ## Le formulaire
 

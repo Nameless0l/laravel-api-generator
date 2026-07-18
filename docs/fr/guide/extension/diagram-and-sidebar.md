@@ -4,9 +4,9 @@
 
 Une vue canevas de chaque entité générée et de leurs relations.
 
-<!-- CAPTURE : le diagramme avec quelques entités reliées. Enregistrer sous docs/public/ext-diagram.png puis :
+
 ![Diagramme d'entités](/ext-diagram.png)
--->
+
 
 - Les liens de relation sont des courbes de Bézier ancrées au bord de carte le plus proche, avec flèches et cardinalités dans des pastilles lisibles.
 - Survoler une carte met ses connexions en surbrillance ; les déclarations inverses (Post `hasMany` Comment + Comment `belongsTo` Post) sont fusionnées en un seul lien ; les relations auto-référentielles se dessinent en petite boucle.
@@ -16,9 +16,9 @@ Une vue canevas de chaque entité générée et de leurs relations.
 
 La vue **Generated Entities** de la barre d'activité suit tout ce que le générateur a créé.
 
-<!-- CAPTURE : l'arborescence avec une entité dépliée. Enregistrer sous docs/public/ext-sidebar.png puis :
+
 ![Explorateur d'entités](/ext-sidebar.png)
--->
+
 
 Chaque entité se déplie en trois groupes :
 

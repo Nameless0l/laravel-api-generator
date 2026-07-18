@@ -4,9 +4,9 @@
 
 Just generated an API? Click **Open API Docs**. The extension checks that [Scramble](/guide/docs-and-postman) is installed and offers the `composer require` if it is missing, looks for a Laravel server already running (ports 8000 to 8003, then 8080), starts one with `php artisan serve` otherwise, detects the actual port, and opens the interactive documentation of your new API at `/docs/api`. The server it started itself is stopped when the panel closes. At no point did you open a terminal.
 
-<!-- SCREENSHOT: the quick actions block. Save as docs/public/ext-quick-actions.png then:
+
 ![Quick actions](/ext-quick-actions.png)
--->
+
 
 The other buttons carry the same idea, the action plus whatever it depends on.
 

@@ -109,7 +109,7 @@ type(scope): description
 
 ```
 src/
-├── Console/Commands/     # Artisan commands
+├── Console/Commands/    # Artisan commands
 ├── Contracts/           # Interfaces
 ├── EntitiesGenerator/   # Code generators
 ├── Exceptions/          # Custom exceptions
