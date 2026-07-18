@@ -31,6 +31,8 @@ php artisan make:fullapi Article --fields="title:string,status:enum(draft,publis
 
 One field definition produces the entire chain:
 
+![One enum field expands into five coherent files](/enum-chain.gif)
+
 - `app/Enums/Status.php`: a backed `enum Status: string` with a case per value
 - Model: `'status' => \App\Enums\Status::class` in `$casts` and `@property \App\Enums\Status $status` in the PHPDoc
 - Request: `Rule::enum(Status::class)` validation

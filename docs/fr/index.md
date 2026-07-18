@@ -50,6 +50,7 @@ features:
 <script setup>
 import demoGif from '../demo.gif'
 import archImg from '../architecture-flow-fr.svg'
+import archMotion from '../architecture-motion.gif'
 import scrambleImg from '../scramble-docs.png'
 
 const tabs = [
@@ -86,7 +87,7 @@ it('shows a post', function () {
     },
     {
         title: 'Architecture',
-        img: archImg,
+        img: archMotion,
         imgAlt: "Diagramme de l'architecture générée",
         text: "Un contrôleur fin qui délègue à une couche service, des DTO readonly typés, des policies, form requests et resources : la structure qu'on construit un bon jour, présente dès le premier.",
         link: '/fr/guide/generating',

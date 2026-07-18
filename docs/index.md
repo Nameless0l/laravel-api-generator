@@ -50,6 +50,7 @@ features:
 <script setup>
 import demoGif from './demo.gif'
 import archImg from './architecture-flow.svg'
+import archMotion from './architecture-motion.gif'
 import scrambleImg from './scramble-docs.png'
 
 const tabs = [
@@ -86,8 +87,8 @@ it('shows a post', function () {
     },
     {
         title: 'Architecture',
-        img: archImg,
-        imgAlt: 'Generated architecture diagram',
+        img: archMotion,
+        imgAlt: 'Generated architecture flow: request to FormRequest, thin controller, service, DTO, model, resource, JSON response',
         text: 'A thin controller delegating to a service layer, typed readonly DTOs, policies, form requests and resources: the structure you would build on a good day, there from day one.',
         link: '/guide/generating',
         linkText: 'What gets generated',

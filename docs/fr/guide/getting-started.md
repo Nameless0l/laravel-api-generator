@@ -2,6 +2,8 @@
 
 Laravel API Generator génère une API REST complète, structurée comme en production, depuis une seule commande artisan : modèle, migration, contrôleur, service, DTO, form request, resource, policy, factory, seeder et **tests écrits**.
 
+![La même entité à la main prend environ deux heures ; make:fullapi le fait en trente secondes](/before-after.gif)
+
 ## Prérequis
 
 - PHP >= 8.2 (>= 8.3 pour Laravel 13)
