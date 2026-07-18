@@ -27,7 +27,10 @@ class PestOptionTest extends GeneratorTestCase
         $result->run();
 
         $featureTest = (string) file_get_contents(base_path('tests/Feature/GadgetControllerTest.php'));
-        $this->assertStringContainsString('uses(Tests\TestCase::class, RefreshDatabase::class);', $featureTest);
+        // The default Pest.php binds Tests\TestCase to the Feature directory via
+        // ->in('Feature'); re-binding it in the file throws "already uses the test case".
+        $this->assertStringContainsString('uses(RefreshDatabase::class);', $featureTest);
+        $this->assertStringNotContainsString('uses(Tests\TestCase::class', $featureTest);
         $this->assertStringContainsString("it('lists gadgets', function () {", $featureTest);
         $this->assertStringNotContainsString('class GadgetControllerTest', $featureTest);
 

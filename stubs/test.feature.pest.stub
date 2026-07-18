@@ -3,7 +3,7 @@
 use App\Models\{{modelName}};{{relatedImports}}{{userImport}}
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(Tests\TestCase::class, RefreshDatabase::class);
+uses(RefreshDatabase::class);
 {{userSetup}}
 it('lists {{pluralName}}', function () {
     {{modelName}}::factory()->count(3)->create();

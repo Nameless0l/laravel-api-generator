@@ -64,17 +64,19 @@ class UnitTestGenerator extends AbstractGenerator
     private function generateDtoArgs(EntityDefinition $definition): string
     {
         $args = $definition->fields->map(function (FieldDefinition $field) {
-            $value = match ($field->type) {
-                'string' => "'test_{$field->name}'",
-                'text' => "'Test text'",
-                'integer', 'int', 'bigint' => '1',
-                'boolean', 'bool' => 'true',
-                'float', 'decimal' => '10.50',
-                'json' => "['key' => 'value']",
-                'date', 'datetime', 'timestamp', 'time' => "'2025-01-01 00:00:00'",
-                'uuid', 'UUID' => "'550e8400-e29b-41d4-a716-446655440000'",
-                default => "'test'",
-            };
+            $value = $field->isEnum()
+                ? "'".($field->getEnumValues()[0] ?? 'test')."'"
+                : match ($field->type) {
+                    'string' => "'test_{$field->name}'",
+                    'text' => "'Test text'",
+                    'integer', 'int', 'bigint' => '1',
+                    'boolean', 'bool' => 'true',
+                    'float', 'decimal' => '10.50',
+                    'json' => "['key' => 'value']",
+                    'date', 'datetime', 'timestamp', 'time' => "'2025-01-01 00:00:00'",
+                    'uuid', 'UUID' => "'550e8400-e29b-41d4-a716-446655440000'",
+                    default => "'test'",
+                };
 
             return "            {$field->name}: {$value},";
         })->toArray();

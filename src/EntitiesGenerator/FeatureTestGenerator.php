@@ -94,17 +94,19 @@ class FeatureTestGenerator extends AbstractGenerator
     private function generateRequestFields(EntityDefinition $definition): string
     {
         $fields = $definition->fields->map(function (FieldDefinition $field) {
-            $value = match ($field->type) {
-                'string' => "'test_{$field->name}'",
-                'text' => "'Test text content'",
-                'integer', 'int', 'bigint' => '1',
-                'boolean', 'bool' => 'true',
-                'float', 'decimal' => '10.50',
-                'json' => "'{\"key\":\"value\"}'",
-                'date', 'datetime', 'timestamp' => "'2025-01-01 00:00:00'",
-                'uuid', 'UUID' => "'550e8400-e29b-41d4-a716-446655440000'",
-                default => "'test'",
-            };
+            $value = $field->isEnum()
+                ? "'".($field->getEnumValues()[0] ?? 'test')."'"
+                : match ($field->type) {
+                    'string' => "'test_{$field->name}'",
+                    'text' => "'Test text content'",
+                    'integer', 'int', 'bigint' => '1',
+                    'boolean', 'bool' => 'true',
+                    'float', 'decimal' => '10.50',
+                    'json' => "'{\"key\":\"value\"}'",
+                    'date', 'datetime', 'timestamp' => "'2025-01-01 00:00:00'",
+                    'uuid', 'UUID' => "'550e8400-e29b-41d4-a716-446655440000'",
+                    default => "'test'",
+                };
 
             return "            '{$field->name}' => {$value},";
         })->toArray();
@@ -198,16 +200,18 @@ class FeatureTestGenerator extends AbstractGenerator
         $lines[] = "\$this->assertDatabaseHas('{$definition->getTableName()}', [";
 
         // Add first regular field for identification
-        $value = match ($firstField->type) {
-            'string' => "'test_{$firstField->name}'",
-            'text' => "'Test text content'",
-            'integer', 'int', 'bigint' => '1',
-            'boolean', 'bool' => 'true',
-            'float', 'decimal' => '10.50',
-            'date', 'datetime', 'timestamp' => "'2025-01-01 00:00:00'",
-            'uuid', 'UUID' => "'550e8400-e29b-41d4-a716-446655440000'",
-            default => "'test'",
-        };
+        $value = $firstField->isEnum()
+            ? "'".($firstField->getEnumValues()[0] ?? 'test')."'"
+            : match ($firstField->type) {
+                'string' => "'test_{$firstField->name}'",
+                'text' => "'Test text content'",
+                'integer', 'int', 'bigint' => '1',
+                'boolean', 'bool' => 'true',
+                'float', 'decimal' => '10.50',
+                'date', 'datetime', 'timestamp' => "'2025-01-01 00:00:00'",
+                'uuid', 'UUID' => "'550e8400-e29b-41d4-a716-446655440000'",
+                default => "'test'",
+            };
         $lines[] = "            '{$firstField->name}' => {$value},";
 
         // Add FK assertions
@@ -234,16 +238,18 @@ class FeatureTestGenerator extends AbstractGenerator
         $lines = [];
         $lines[] = "\$this->assertDatabaseHas('{$definition->getTableName()}', [";
 
-        $value = match ($firstField->type) {
-            'string' => "'test_{$firstField->name}'",
-            'text' => "'Test text content'",
-            'integer', 'int', 'bigint' => '1',
-            'boolean', 'bool' => 'true',
-            'float', 'decimal' => '10.50',
-            'date', 'datetime', 'timestamp' => "'2025-01-01 00:00:00'",
-            'uuid', 'UUID' => "'550e8400-e29b-41d4-a716-446655440000'",
-            default => "'test'",
-        };
+        $value = $firstField->isEnum()
+            ? "'".($firstField->getEnumValues()[0] ?? 'test')."'"
+            : match ($firstField->type) {
+                'string' => "'test_{$firstField->name}'",
+                'text' => "'Test text content'",
+                'integer', 'int', 'bigint' => '1',
+                'boolean', 'bool' => 'true',
+                'float', 'decimal' => '10.50',
+                'date', 'datetime', 'timestamp' => "'2025-01-01 00:00:00'",
+                'uuid', 'UUID' => "'550e8400-e29b-41d4-a716-446655440000'",
+                default => "'test'",
+            };
         $lines[] = "            '{$firstField->name}' => {$value},";
 
         $modelVar = $definition->getNameLower();

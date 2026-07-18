@@ -92,4 +92,26 @@ class EnumFieldTest extends GeneratorTestCase
             File::delete($schemaPath);
         }
     }
+
+    #[Test]
+    public function it_uses_a_real_enum_value_in_the_generated_tests(): void
+    {
+        /** @var PendingCommand $result */
+        $result = $this->artisan('make:fullapi', [
+            'name' => 'Article',
+            '--fields' => 'title:string,status:enum(draft,published)',
+            '--pest' => true,
+        ]);
+        $result->run();
+
+        // A placeholder like "test_status" is rejected by Rule::enum in the
+        // request and by the model cast, so the tests must post a real case.
+        $featureTest = (string) file_get_contents(base_path('tests/Feature/ArticleControllerTest.php'));
+        $this->assertStringContainsString("'status' => 'draft'", $featureTest);
+        $this->assertStringNotContainsString('test_status', $featureTest);
+
+        $unitTest = (string) file_get_contents(base_path('tests/Unit/ArticleServiceTest.php'));
+        $this->assertStringContainsString("status: 'draft'", $unitTest);
+        $this->assertStringNotContainsString('test_status', $unitTest);
+    }
 }
