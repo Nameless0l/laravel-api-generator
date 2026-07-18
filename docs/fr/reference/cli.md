@@ -2,7 +2,7 @@
 
 ## Commandes
 
-```
+```bash
 php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
                          {--schema=} {--mermaid=} {--from-database} {--tables=} {--with-migrations} {--query-builder}
                          {--pest} {--json-api} {--add-fields=}
