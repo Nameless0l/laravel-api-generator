@@ -10,11 +10,21 @@ Une vue canevas de chaque entité générée et de leurs relations.
 
 - Les liens de relation sont des courbes de Bézier ancrées au bord de carte le plus proche, avec flèches et cardinalités dans des pastilles lisibles.
 - Survoler une carte met ses connexions en surbrillance ; les déclarations inverses (Post `hasMany` Comment + Comment `belongsTo` Post) sont fusionnées en un seul lien ; les relations auto-référentielles se dessinent en petite boucle.
-- Il se comporte comme un vrai canevas : **Ctrl+molette zoome vers le curseur**, glisser le fond déplace la vue, les cartes se déplacent à n'importe quel zoom, et la barre d'outils offre −/+/100 %/Fit.
+- Le canevas est infini : glisser le fond ou faire défiler déplace la vue sur la grille en pointillés, dans toutes les directions. **Ctrl+molette zoome vers le curseur**, et les cartes restent déplaçables à tout niveau de zoom. La barre d'outils offre −/+/100 %/Fit.
+
+## L'accueil de la sidebar
+
+La vue de la barre d'activité s'ouvre sur un panneau d'accueil : chaque façon de générer reste à un clic.
+
+- **Nouvelle API** ouvre le builder visuel.
+- **Générer depuis** liste les autres sources : base existante, fichier de schéma, diagramme Mermaid.
+- **Explorer** mène au diagramme d'entités, aux snippets et à cette documentation.
+
+Le panneau suit le thème VS Code et la langue de l'extension (anglais ou français).
 
 ## L'explorateur de la sidebar
 
-La vue **Generated Entities** de la barre d'activité suit tout ce que le générateur a créé.
+Juste en dessous, la vue **Generated Entities** suit tout ce que le générateur a créé.
 
 
 ![Explorateur d'entités](/ext-sidebar.png)

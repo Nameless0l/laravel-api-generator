@@ -10,11 +10,21 @@ A canvas view of every generated entity and how they relate.
 
 - Relationship links are smooth Bezier curves anchored to the nearest card edge, with arrowheads and cardinality labels in readable pills.
 - Hovering a card highlights its connections; inverse declarations (Post `hasMany` Comment + Comment `belongsTo` Post) are merged into a single link; self-referential relations render as a small loop.
-- It behaves like a proper canvas: **Ctrl+wheel zooms toward the cursor**, dragging the background pans, cards can be dragged at any zoom level, and the toolbar has −/+/100%/Fit controls.
+- The canvas is infinite: drag or scroll to pan across the dotted grid in any direction. **Ctrl+wheel zooms toward the cursor**, and cards stay draggable at any zoom. The toolbar has −/+/100%/Fit.
+
+## The sidebar home
+
+The activity bar view opens on a home panel, so every way to generate is one click away.
+
+- **New API** opens the visual builder.
+- **Generate from** lists the other sources: existing database, schema file, Mermaid diagram.
+- **Explore** jumps to the entity diagram, the snippets picker and this documentation.
+
+The panel follows your VS Code theme and the extension's language setting (English or French).
 
 ## The sidebar explorer
 
-The **Generated Entities** view in the activity bar tracks everything the generator created.
+Below it, the **Generated Entities** view tracks everything the generator created.
 
 
 ![Sidebar explorer](/ext-sidebar.png)
