@@ -1,6 +1,6 @@
 import { withMermaid } from "vitepress-plugin-mermaid";
 
-const enSidebar = [
+const enCliSidebar = [
   {
     text: "Introduction",
     items: [{ text: "Getting Started", link: "/guide/getting-started" }],
@@ -34,23 +34,6 @@ const enSidebar = [
     items: [{ text: "Customizing Stubs", link: "/guide/customizing-stubs" }],
   },
   {
-    text: "VS Code Extension",
-    items: [
-      { text: "Overview & Install", link: "/guide/extension/" },
-      { text: "Entity Builder", link: "/guide/extension/builder" },
-      { text: "Imports: DB, JSON, OpenAPI", link: "/guide/extension/imports" },
-      {
-        text: "Diagram & Sidebar",
-        link: "/guide/extension/diagram-and-sidebar",
-      },
-      {
-        text: "Quick Actions & Guardrails",
-        link: "/guide/extension/quick-actions",
-      },
-      { text: "Commands & Settings", link: "/guide/extension/reference" },
-    ],
-  },
-  {
     text: "Reference",
     items: [
       { text: "CLI Reference", link: "/reference/cli" },
@@ -59,7 +42,41 @@ const enSidebar = [
   },
 ];
 
-const frSidebar = [
+const enExtensionSidebar = [
+  {
+    text: "Getting Started",
+    items: [{ text: "Overview & Install", link: "/guide/extension/" }],
+  },
+  {
+    text: "Generate",
+    items: [
+      { text: "Entity Builder", link: "/guide/extension/builder" },
+      { text: "Imports: DB, JSON, OpenAPI", link: "/guide/extension/imports" },
+    ],
+  },
+  {
+    text: "Explore",
+    items: [
+      {
+        text: "Diagram & Sidebar",
+        link: "/guide/extension/diagram-and-sidebar",
+      },
+      {
+        text: "Quick Actions & Guardrails",
+        link: "/guide/extension/quick-actions",
+      },
+    ],
+  },
+  {
+    text: "Reference",
+    items: [
+      { text: "Commands & Settings", link: "/guide/extension/reference" },
+      { text: "Troubleshooting", link: "/guide/extension/troubleshooting" },
+    ],
+  },
+];
+
+const frCliSidebar = [
   {
     text: "Introduction",
     items: [{ text: "Démarrage rapide", link: "/fr/guide/getting-started" }],
@@ -98,14 +115,34 @@ const frSidebar = [
     ],
   },
   {
-    text: "Extension VS Code",
+    text: "Référence",
+    items: [
+      { text: "Référence CLI", link: "/fr/reference/cli" },
+      { text: "Changelog", link: "/fr/changelog" },
+    ],
+  },
+];
+
+const frExtensionSidebar = [
+  {
+    text: "Démarrage",
     items: [
       { text: "Découverte & installation", link: "/fr/guide/extension/" },
+    ],
+  },
+  {
+    text: "Générer",
+    items: [
       { text: "Builder d'entités", link: "/fr/guide/extension/builder" },
       {
         text: "Imports : BDD, JSON, OpenAPI",
         link: "/fr/guide/extension/imports",
       },
+    ],
+  },
+  {
+    text: "Explorer",
+    items: [
       {
         text: "Diagramme & sidebar",
         link: "/fr/guide/extension/diagram-and-sidebar",
@@ -114,14 +151,13 @@ const frSidebar = [
         text: "Actions rapides & garde-fous",
         link: "/fr/guide/extension/quick-actions",
       },
-      { text: "Commandes & réglages", link: "/fr/guide/extension/reference" },
     ],
   },
   {
     text: "Référence",
     items: [
-      { text: "Référence CLI", link: "/fr/reference/cli" },
-      { text: "Changelog", link: "/fr/changelog" },
+      { text: "Commandes & réglages", link: "/fr/guide/extension/reference" },
+      { text: "Dépannage", link: "/fr/guide/extension/troubleshooting" },
     ],
   },
 ];
@@ -169,7 +205,10 @@ export default withMermaid({
             link: "https://github.com/Nameless0l/laravel-api-generator/issues",
           },
         ],
-        sidebar: enSidebar,
+        sidebar: {
+          "/guide/extension/": enExtensionSidebar,
+          "/": enCliSidebar,
+        },
         editLink: {
           pattern:
             "https://github.com/Nameless0l/laravel-api-generator/edit/main/docs/:path",
@@ -199,7 +238,10 @@ export default withMermaid({
             link: "https://github.com/Nameless0l/laravel-api-generator/issues",
           },
         ],
-        sidebar: frSidebar,
+        sidebar: {
+          "/fr/guide/extension/": frExtensionSidebar,
+          "/fr/": frCliSidebar,
+        },
         outline: { label: "Sur cette page" },
         docFooter: { prev: "Page précédente", next: "Page suivante" },
         lastUpdated: { text: "Mis à jour le" },
