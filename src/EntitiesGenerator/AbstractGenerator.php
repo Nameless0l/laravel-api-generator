@@ -39,7 +39,7 @@ abstract class AbstractGenerator implements GeneratorInterface
                 $definition->name
             );
         } catch (\Exception $e) {
-            throw CodeGeneratorException::generationFailed($this->getType(), $e->getMessage());
+            throw CodeGeneratorException::generationFailed($this->getType(), $e->getMessage(), $e);
         }
     }
 

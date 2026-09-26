@@ -46,6 +46,11 @@ class SchemaParser
      */
     public const DEFAULT_FILES = ['api-schema.yaml', 'api-schema.yml', 'api-schema.json'];
 
+    /**
+     * @var array<int, string>
+     */
+    public const RELATION_KEYWORDS = ['belongsTo', 'hasOne', 'hasMany', 'belongsToMany', 'morphTo', 'morphOne', 'morphMany'];
+
     private const RELATION_TYPES = [
         'belongsto' => 'manyToOne',
         'hasmany' => 'oneToMany',
@@ -70,31 +75,61 @@ class SchemaParser
             throw CodeGeneratorException::fileNotFound($path);
         }
 
-        $content = File::get($path);
         $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
-        if ($extension === 'json') {
-            $data = json_decode($content, true);
-            if (! is_array($data)) {
-                throw CodeGeneratorException::invalidSchema($path, json_last_error_msg());
-            }
-        } elseif (in_array($extension, ['yaml', 'yml'], true)) {
-            if (! class_exists(Yaml::class)) {
-                throw CodeGeneratorException::invalidSchema($path, 'YAML support requires symfony/yaml. Run: composer require symfony/yaml');
-            }
-            try {
-                $data = Yaml::parse($content);
-            } catch (\Throwable $e) {
-                throw CodeGeneratorException::invalidSchema($path, $e->getMessage());
-            }
-            if (! is_array($data)) {
-                throw CodeGeneratorException::invalidSchema($path, 'the document must be a YAML mapping');
-            }
-        } else {
+        if (! in_array($extension, ['json', 'yaml', 'yml'], true)) {
             throw CodeGeneratorException::invalidSchema($path, "unsupported extension .{$extension} (expected .yaml, .yml or .json)");
         }
 
-        return $this->parseArray($data, $extraOptions, $path);
+        return $this->parseArray($this->decode(File::get($path), $extension === 'json', $path), $extraOptions, $path);
+    }
+
+    /**
+     * A schema sent on stdin: JSON when it starts with "{", YAML otherwise.
+     *
+     * @param  array<string, mixed>  $extraOptions
+     * @return Collection<int, EntityDefinition>
+     */
+    public function parseString(string $content, array $extraOptions = [], string $source = 'stdin'): Collection
+    {
+        $trimmed = ltrim($content);
+
+        if ($trimmed === '') {
+            throw CodeGeneratorException::invalidSchema($source, 'the schema is empty');
+        }
+
+        return $this->parseArray($this->decode($content, str_starts_with($trimmed, '{'), $source), $extraOptions, $source);
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function decode(string $content, bool $json, string $source): array
+    {
+        if ($json) {
+            $data = json_decode($content, true);
+            if (! is_array($data)) {
+                throw CodeGeneratorException::invalidSchema($source, json_last_error_msg());
+            }
+
+            return $data;
+        }
+
+        if (! class_exists(Yaml::class)) {
+            throw CodeGeneratorException::invalidSchema($source, 'YAML support requires symfony/yaml. Run: composer require symfony/yaml');
+        }
+
+        try {
+            $data = Yaml::parse($content);
+        } catch (\Throwable $e) {
+            throw CodeGeneratorException::invalidSchema($source, $e->getMessage());
+        }
+
+        if (! is_array($data)) {
+            throw CodeGeneratorException::invalidSchema($source, 'the document must be a YAML mapping');
+        }
+
+        return $data;
     }
 
     /**

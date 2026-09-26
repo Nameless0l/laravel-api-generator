@@ -62,7 +62,7 @@ class ApiGenerationService implements ApiGenerationServiceInterface
                 $this->registerSeederInDatabaseSeeder($definition->name, $target);
             }
         } catch (\Exception $e) {
-            throw CodeGeneratorException::generationFailed('API', $e->getMessage());
+            throw CodeGeneratorException::generationFailed('API', $e->getMessage(), $e);
         }
 
         if ($workspace === null) {

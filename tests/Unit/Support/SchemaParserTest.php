@@ -196,4 +196,31 @@ class SchemaParserTest extends TestCase
             ],
         ]);
     }
+
+    #[Test]
+    public function it_parses_a_json_string(): void
+    {
+        $entities = $this->parser->parseString('{"entities":{"Book":{"fields":{"title":"string"}}}}');
+
+        $this->assertSame('Book', $entities->first()?->name);
+    }
+
+    #[Test]
+    public function it_parses_a_yaml_string(): void
+    {
+        $entities = $this->parser->parseString("entities:\n  Book:\n    fields:\n      title: string\n");
+
+        $this->assertSame('Book', $entities->first()?->name);
+    }
+
+    #[Test]
+    public function it_rejects_an_empty_string(): void
+    {
+        try {
+            $this->parser->parseString("  \n");
+            $this->fail('An empty schema was accepted.');
+        } catch (CodeGeneratorException $e) {
+            $this->assertSame('invalid_schema', $e->errorCode);
+        }
+    }
 }
