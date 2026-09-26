@@ -9,11 +9,12 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
 use nameless\CodeGenerator\Contracts\GeneratorInterface;
-use nameless\CodeGenerator\EntitiesGenerator\MigrationGenerator;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\Support\EntitySorter;
 use nameless\CodeGenerator\Support\JsonParser;
 use nameless\CodeGenerator\Support\StubLoader;
+use nameless\CodeGenerator\Support\Workspace;
+use nameless\CodeGenerator\Support\WorkspaceFactory;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
 
@@ -25,22 +26,26 @@ class ApiGenerationService implements ApiGenerationServiceInterface
     public function __construct(
         private readonly Collection $generators,
         private readonly JsonParser $jsonParser,
-        private readonly StubLoader $stubLoader
+        private readonly StubLoader $stubLoader,
+        private readonly WorkspaceFactory $workspaces
     ) {}
 
     /**
-     * Generate a complete API for the given entity.
+     * Generate a complete API for the given entity. Writes immediately
+     * unless a workspace is given.
      *
      * @param  array<int, string>|null  $onlyTypes
      */
-    public function generateCompleteApi(EntityDefinition $definition, ?array $onlyTypes = null): bool
+    public function generateCompleteApi(EntityDefinition $definition, ?array $onlyTypes = null, ?Workspace $workspace = null): bool
     {
+        $target = $workspace ?? $this->workspaces->make();
+
         try {
             // Only touch routes & seeder registration when generating the full set
             $isFullGeneration = $onlyTypes === null;
 
             if ($isFullGeneration) {
-                $this->generateApiRoute($definition);
+                $this->generateApiRoute($definition, $target);
             }
 
             foreach ($this->generators as $generator) {
@@ -50,17 +55,21 @@ class ApiGenerationService implements ApiGenerationServiceInterface
                 if ($onlyTypes !== null && ! in_array($generator->getType(), $onlyTypes, true)) {
                     continue;
                 }
-                $generator->generate($definition);
+                $generator->render($definition, $target);
             }
 
             if ($isFullGeneration) {
-                $this->registerSeederInDatabaseSeeder($definition->name);
+                $this->registerSeederInDatabaseSeeder($definition->name, $target);
             }
-
-            return true;
         } catch (\Exception $e) {
             throw CodeGeneratorException::generationFailed('API', $e->getMessage());
         }
+
+        if ($workspace === null) {
+            $target->commit();
+        }
+
+        return true;
     }
 
     /**
@@ -71,12 +80,14 @@ class ApiGenerationService implements ApiGenerationServiceInterface
         $entities = EntitySorter::sortByDependencies(
             $this->jsonParser->parseJsonToEntities($jsonData)
         );
+        $workspace = $this->workspaces->make();
 
         foreach ($entities as $entity) {
-            $this->generateCompleteApi($entity);
+            $this->generateCompleteApi($entity, null, $workspace);
         }
 
-        $this->generatePivotMigrations($entities);
+        $this->generatePivotMigrations($entities, $workspace);
+        $workspace->commit();
 
         return true;
     }
@@ -84,13 +95,15 @@ class ApiGenerationService implements ApiGenerationServiceInterface
     /**
      * Create the pivot table migrations required by manyToMany relationships.
      * Called after every entity of a batch has been generated so the pivot
-     * migrations run after both referenced tables exist.
+     * migrations run after both referenced tables exist. Writes immediately
+     * unless a workspace is given.
      *
      * @param  Collection<int, EntityDefinition>  $definitions
      * @return array<int, string> created migration file paths
      */
-    public function generatePivotMigrations(Collection $definitions): array
+    public function generatePivotMigrations(Collection $definitions, ?Workspace $workspace = null): array
     {
+        $target = $workspace ?? $this->workspaces->make();
         $created = [];
         $seen = [];
 
@@ -109,13 +122,16 @@ class ApiGenerationService implements ApiGenerationServiceInterface
                 }
                 $seen[$pivotTable] = true;
 
-                $existing = glob(database_path("migrations/*_create_{$pivotTable}_table.php"));
-                if (! empty($existing)) {
+                if ($target->glob(database_path("migrations/*_create_{$pivotTable}_table.php")) !== []) {
                     continue;
                 }
 
-                $created[] = $this->createPivotMigration($pivotTable, $definition->name, $relation->relatedModel);
+                $created[] = $this->createPivotMigration($pivotTable, $definition->name, $relation->relatedModel, $target);
             }
+        }
+
+        if ($workspace === null) {
+            $target->commit();
         }
 
         return $created;
@@ -126,7 +142,7 @@ class ApiGenerationService implements ApiGenerationServiceInterface
         return collect([Str::snake($modelA), Str::snake($modelB)])->sort()->implode('_');
     }
 
-    private function createPivotMigration(string $pivotTable, string $modelA, string $modelB): string
+    private function createPivotMigration(string $pivotTable, string $modelA, string $modelB, Workspace $workspace): string
     {
         [$first, $second] = collect([Str::snake($modelA), Str::snake($modelB)])->sort()->values()->all();
 
@@ -138,10 +154,8 @@ class ApiGenerationService implements ApiGenerationServiceInterface
             'tableB' => Str::plural($second),
         ]);
 
-        $timestamp = MigrationGenerator::nextTimestamp();
-        $path = database_path("migrations/{$timestamp}_create_{$pivotTable}_table.php");
-
-        File::put($path, $content);
+        $path = database_path("migrations/{$workspace->migrationTimestamp()}_create_{$pivotTable}_table.php");
+        $workspace->put($path, $content, 'PivotMigration');
 
         return $path;
     }
@@ -151,9 +165,6 @@ class ApiGenerationService implements ApiGenerationServiceInterface
      */
     public function deleteCompleteApi(string $entityName): bool
     {
-        // Implementation for deleting generated files
-        // This would involve removing all generated files for the entity
-
         $filesToDelete = [
             app_path("Models/{$entityName}.php"),
             app_path("Http/Controllers/{$entityName}Controller.php"),
@@ -174,7 +185,6 @@ class ApiGenerationService implements ApiGenerationServiceInterface
             }
         }
 
-        // Remove migration files
         $tableName = Str::plural(Str::snake($entityName));
         $migrations = glob(database_path("migrations/*_create_{$tableName}_table.php"));
         if ($migrations === false) {
@@ -184,11 +194,10 @@ class ApiGenerationService implements ApiGenerationServiceInterface
             File::delete($migration);
         }
 
-        // Remove route from api.php
-        $this->removeApiRoute($entityName);
-
-        // Remove seeder from DatabaseSeeder
-        $this->unregisterSeederFromDatabaseSeeder($entityName);
+        $workspace = $this->workspaces->make();
+        $this->removeApiRoute($entityName, $workspace);
+        $this->unregisterSeederFromDatabaseSeeder($entityName, $workspace);
+        $workspace->commit();
 
         return true;
     }
@@ -196,7 +205,7 @@ class ApiGenerationService implements ApiGenerationServiceInterface
     /**
      * Generate API route for the entity.
      */
-    private function generateApiRoute(EntityDefinition $definition): void
+    private function generateApiRoute(EntityDefinition $definition, Workspace $workspace): void
     {
         $pluralName = $definition->getPluralName();
         $controllerClass = "App\\Http\\Controllers\\{$definition->name}Controller";
@@ -204,24 +213,20 @@ class ApiGenerationService implements ApiGenerationServiceInterface
         $apiFilePath = base_path('routes/api.php');
         $phpHeader = "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n\n";
 
-        if (! File::exists($apiFilePath)) {
-            File::put($apiFilePath, $phpHeader);
+        if (! $workspace->exists($apiFilePath)) {
+            $workspace->put($apiFilePath, $phpHeader, 'Routes');
         }
 
-        $existingRoutes = File::get($apiFilePath);
-        if (! str_contains($existingRoutes, $route)) {
-            File::append($apiFilePath, PHP_EOL.$route);
+        if (! str_contains($workspace->get($apiFilePath), $route)) {
+            $workspace->append($apiFilePath, PHP_EOL.$route, 'Routes');
         }
 
-        // Add soft delete routes if enabled
         if ($definition->hasSoftDeletes()) {
             $restoreRoute = "Route::post('{$pluralName}/{id}/restore', [{$controllerClass}::class, 'restore']);";
             $forceDeleteRoute = "Route::delete('{$pluralName}/{id}/force-delete', [{$controllerClass}::class, 'forceDelete']);";
 
-            $content = File::get($apiFilePath);
-            if (! str_contains($content, $restoreRoute)) {
-                File::append($apiFilePath, PHP_EOL.$restoreRoute);
-                File::append($apiFilePath, PHP_EOL.$forceDeleteRoute);
+            if (! str_contains($workspace->get($apiFilePath), $restoreRoute)) {
+                $workspace->append($apiFilePath, PHP_EOL.$restoreRoute.PHP_EOL.$forceDeleteRoute, 'Routes');
             }
         }
     }
@@ -229,28 +234,25 @@ class ApiGenerationService implements ApiGenerationServiceInterface
     /**
      * Register the entity seeder in DatabaseSeeder.php.
      */
-    private function registerSeederInDatabaseSeeder(string $entityName): void
+    private function registerSeederInDatabaseSeeder(string $entityName, Workspace $workspace): void
     {
         $databaseSeederPath = database_path('seeders/DatabaseSeeder.php');
 
-        if (! File::exists($databaseSeederPath)) {
+        if (! $workspace->exists($databaseSeederPath)) {
             return;
         }
 
-        $content = File::get($databaseSeederPath);
+        $content = $workspace->get($databaseSeederPath);
         $seederCall = "{$entityName}Seeder::class";
 
-        // Already registered
         if (str_contains($content, $seederCall)) {
             return;
         }
 
         $eol = str_contains($content, "\r\n") ? "\r\n" : "\n";
 
-        // Add the use statement if not present
         $useStatement = "use Database\\Seeders\\{$entityName}Seeder;";
         if (! str_contains($content, $useStatement)) {
-            // Add use statement after the last existing use statement
             $result = preg_replace_callback(
                 '/(use [^;]+;\R)(?!use )/',
                 fn (array $match) => $match[1].$useStatement.$eol,
@@ -262,21 +264,16 @@ class ApiGenerationService implements ApiGenerationServiceInterface
             }
         }
 
-        // Add $this->call() in the run() method
         $callLine = "        \$this->call({$seederCall});";
 
-        // Try to add before the closing brace of the run() method
         if (preg_match('/public function run\(\)[^{]*\{/s', $content)) {
-            // Check if there's already a $this->call() block
             if (str_contains($content, '$this->call(')) {
-                // Add after the last $this->call() line
                 $result = preg_replace_callback(
                     '/(\$this->call\([^)]+\);)(?![\s\S]*\$this->call\()/',
                     fn (array $match) => $match[1].$eol.$callLine,
                     $content
                 );
             } else {
-                // Add as first line in the run() method
                 $result = preg_replace_callback(
                     '/(public function run\(\)[^{]*\{)\R/',
                     fn (array $match) => $match[1].$eol.$callLine.$eol,
@@ -289,23 +286,22 @@ class ApiGenerationService implements ApiGenerationServiceInterface
             }
         }
 
-        File::put($databaseSeederPath, $content);
+        $workspace->put($databaseSeederPath, $content, 'DatabaseSeeder');
     }
 
     /**
      * Remove the entity seeder from DatabaseSeeder.php.
      */
-    private function unregisterSeederFromDatabaseSeeder(string $entityName): void
+    private function unregisterSeederFromDatabaseSeeder(string $entityName, Workspace $workspace): void
     {
         $databaseSeederPath = database_path('seeders/DatabaseSeeder.php');
 
-        if (! File::exists($databaseSeederPath)) {
+        if (! $workspace->exists($databaseSeederPath)) {
             return;
         }
 
-        $content = File::get($databaseSeederPath);
+        $content = $workspace->get($databaseSeederPath);
 
-        // Remove the $this->call() line
         $result = preg_replace(
             "/\n?\s*\\\$this->call\({$entityName}Seeder::class\);/",
             '',
@@ -315,7 +311,6 @@ class ApiGenerationService implements ApiGenerationServiceInterface
             $content = $result;
         }
 
-        // Remove the use statement
         $result = preg_replace(
             "/use Database\\\\Seeders\\\\{$entityName}Seeder;\n?/",
             '',
@@ -325,27 +320,27 @@ class ApiGenerationService implements ApiGenerationServiceInterface
             $content = $result;
         }
 
-        File::put($databaseSeederPath, $content);
+        $workspace->put($databaseSeederPath, $content, 'DatabaseSeeder');
     }
 
     /**
      * Remove API route for the entity.
      */
-    private function removeApiRoute(string $entityName): void
+    private function removeApiRoute(string $entityName, Workspace $workspace): void
     {
         $apiFilePath = base_path('routes/api.php');
 
-        if (! File::exists($apiFilePath)) {
+        if (! $workspace->exists($apiFilePath)) {
             return;
         }
 
-        $content = File::get($apiFilePath);
+        $content = $workspace->get($apiFilePath);
         $pluralName = Str::plural(Str::lower($entityName));
         $route = "Route::apiResource('{$pluralName}', App\\Http\\Controllers\\{$entityName}Controller::class);";
 
         $content = str_replace($route, '', $content);
-        $content = str_replace(PHP_EOL.PHP_EOL, PHP_EOL, $content); // Remove double newlines
+        $content = str_replace(PHP_EOL.PHP_EOL, PHP_EOL, $content);
 
-        File::put($apiFilePath, $content);
+        $workspace->put($apiFilePath, $content, 'Routes');
     }
 }

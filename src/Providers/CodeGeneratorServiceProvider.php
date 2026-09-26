@@ -82,14 +82,16 @@ class CodeGeneratorServiceProvider extends ServiceProvider
         // Register AuthGenerator
         $this->app->singleton(AuthGenerator::class);
 
-        // Register main API generation service
-        $this->app->singleton(ApiGenerationServiceInterface::class, function ($app) {
+        $this->app->singleton(ApiGenerationService::class, function ($app) {
             return new ApiGenerationService(
                 $app->make('code_generator.generators'),
                 $app->make(JsonParser::class),
-                $app->make(StubLoader::class)
+                $app->make(StubLoader::class),
+                $app->make(WorkspaceFactory::class)
             );
         });
+
+        $this->app->singleton(ApiGenerationServiceInterface::class, fn ($app) => $app->make(ApiGenerationService::class));
     }
 
     private function registerGenerators(): void
