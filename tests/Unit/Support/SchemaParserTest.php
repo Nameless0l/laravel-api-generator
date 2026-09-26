@@ -143,6 +143,29 @@ class SchemaParserTest extends TestCase
     }
 
     #[Test]
+    public function it_reads_the_json_api_option_in_both_spellings(): void
+    {
+        $entities = $this->parser->parseArray([
+            'entities' => [
+                'Post' => ['json_api' => true, 'fields' => ['title' => 'string']],
+                'Tag' => ['jsonApi' => true, 'fields' => ['name' => 'string']],
+                'Page' => ['fields' => ['title' => 'string']],
+            ],
+        ]);
+
+        /** @var EntityDefinition $post */
+        $post = $entities->firstWhere('name', 'Post');
+        /** @var EntityDefinition $tag */
+        $tag = $entities->firstWhere('name', 'Tag');
+        /** @var EntityDefinition $page */
+        $page = $entities->firstWhere('name', 'Page');
+
+        $this->assertTrue($post->usesJsonApi());
+        $this->assertTrue($tag->usesJsonApi());
+        $this->assertFalse($page->usesJsonApi());
+    }
+
+    #[Test]
     public function it_rejects_schema_without_entities(): void
     {
         $this->expectException(CodeGeneratorException::class);

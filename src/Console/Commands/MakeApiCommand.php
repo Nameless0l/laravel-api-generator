@@ -42,6 +42,8 @@ class MakeApiCommand extends Command
 
     private ?bool $jsonApiResolved = null;
 
+    private bool $jsonApiWarned = false;
+
     public function __construct(
         private readonly ApiGenerationServiceInterface $apiGenerationService,
         private readonly PostmanExporter $postmanExporter,
@@ -182,6 +184,8 @@ class MakeApiCommand extends Command
      */
     private function generateEntities(Collection $entities, string $sourceLabel): int
     {
+        $entities = $this->withSupportedJsonApi($entities);
+
         $this->info("Generating {$entities->count()} API(s) from {$sourceLabel}:");
         foreach ($entities as $entity) {
             $flags = [];
@@ -275,13 +279,43 @@ class MakeApiCommand extends Command
             return $this->jsonApiResolved = false;
         }
 
-        if (! class_exists(JsonApiResource::class)) {
-            $this->warn('  --json-api needs Laravel 12.45+ (Illuminate\\Http\\Resources\\JsonApi\\JsonApiResource); generating standard resources instead.');
+        return $this->jsonApiResolved = $this->supportsJsonApi();
+    }
 
-            return $this->jsonApiResolved = false;
+    private function supportsJsonApi(): bool
+    {
+        if (class_exists(JsonApiResource::class)) {
+            return true;
         }
 
-        return $this->jsonApiResolved = true;
+        if (! $this->jsonApiWarned) {
+            $this->warn('  JSON:API resources need Laravel 12.45+ (Illuminate\\Http\\Resources\\JsonApi\\JsonApiResource); generating standard resources instead.');
+            $this->jsonApiWarned = true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Schema files can ask for JSON:API per entity, so the Laravel version
+     * check has to run on the parsed entities too, not only on --json-api.
+     *
+     * @param  Collection<int, EntityDefinition>  $entities
+     * @return Collection<int, EntityDefinition>
+     */
+    private function withSupportedJsonApi(Collection $entities): Collection
+    {
+        if (! $entities->contains(fn (EntityDefinition $entity) => $entity->usesJsonApi()) || $this->supportsJsonApi()) {
+            return $entities;
+        }
+
+        return $entities->map(fn (EntityDefinition $entity) => new EntityDefinition(
+            name: $entity->name,
+            fields: $entity->fields,
+            relationships: $entity->relationships,
+            parent: $entity->parent,
+            options: array_merge($entity->options, ['json_api' => false])
+        ));
     }
 
     /**

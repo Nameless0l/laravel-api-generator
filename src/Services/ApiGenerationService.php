@@ -245,13 +245,15 @@ class ApiGenerationService implements ApiGenerationServiceInterface
             return;
         }
 
+        $eol = str_contains($content, "\r\n") ? "\r\n" : "\n";
+
         // Add the use statement if not present
         $useStatement = "use Database\\Seeders\\{$entityName}Seeder;";
         if (! str_contains($content, $useStatement)) {
             // Add use statement after the last existing use statement
-            $result = preg_replace(
-                '/(use [^;]+;\n)(?!use )/',
-                "$1{$useStatement}\n",
+            $result = preg_replace_callback(
+                '/(use [^;]+;\R)(?!use )/',
+                fn (array $match) => $match[1].$useStatement.$eol,
                 $content,
                 1
             );
@@ -268,16 +270,16 @@ class ApiGenerationService implements ApiGenerationServiceInterface
             // Check if there's already a $this->call() block
             if (str_contains($content, '$this->call(')) {
                 // Add after the last $this->call() line
-                $result = preg_replace(
+                $result = preg_replace_callback(
                     '/(\$this->call\([^)]+\);)(?![\s\S]*\$this->call\()/',
-                    "$1\n{$callLine}",
+                    fn (array $match) => $match[1].$eol.$callLine,
                     $content
                 );
             } else {
                 // Add as first line in the run() method
-                $result = preg_replace(
-                    '/(public function run\(\)[^{]*\{)\n/',
-                    "$1\n{$callLine}\n",
+                $result = preg_replace_callback(
+                    '/(public function run\(\)[^{]*\{)\R/',
+                    fn (array $match) => $match[1].$eol.$callLine.$eol,
                     $content
                 );
             }

@@ -302,9 +302,8 @@ class SchemaParser
     }
 
     /**
-     * Extract generator options (soft_deletes, query_builder) from an
-     * entity definition or the global options block, accepting both
-     * snake_case and camelCase keys.
+     * Extract generator options from an entity definition or the global
+     * options block, accepting both snake_case and camelCase keys.
      *
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
@@ -313,7 +312,7 @@ class SchemaParser
     {
         $options = [];
 
-        foreach (['soft_deletes' => 'softDeletes', 'query_builder' => 'queryBuilder', 'pest' => 'pest'] as $snake => $camel) {
+        foreach (['soft_deletes' => 'softDeletes', 'query_builder' => 'queryBuilder', 'pest' => 'pest', 'json_api' => 'jsonApi'] as $snake => $camel) {
             if (array_key_exists($snake, $data)) {
                 $options[$snake] = (bool) $data[$snake];
             } elseif (array_key_exists($camel, $data)) {
