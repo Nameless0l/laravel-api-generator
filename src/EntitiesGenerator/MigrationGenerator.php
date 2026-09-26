@@ -6,6 +6,7 @@ namespace nameless\CodeGenerator\EntitiesGenerator;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use nameless\CodeGenerator\Support\Workspace;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
@@ -51,6 +52,15 @@ class MigrationGenerator extends AbstractGenerator
         $timestamp = self::nextTimestamp();
 
         return database_path("migrations/{$timestamp}_create_{$tableName}_table.php");
+    }
+
+    public function render(EntityDefinition $definition, Workspace $workspace): void
+    {
+        $table = $definition->getTableName();
+        $existing = $workspace->glob(database_path("migrations/*_create_{$table}_table.php"));
+        $path = $existing[0] ?? database_path("migrations/{$workspace->migrationTimestamp()}_create_{$table}_table.php");
+
+        $workspace->put($path, $this->generateContent($definition), $this->getType(), $definition->name);
     }
 
     /**

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\EntitiesGenerator;
 
-use Illuminate\Support\Facades\File;
 use nameless\CodeGenerator\Contracts\GeneratorInterface;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\Support\StubLoader;
+use nameless\CodeGenerator\Support\Workspace;
+use nameless\CodeGenerator\Support\WorkspaceFactory;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 
 abstract class AbstractGenerator implements GeneratorInterface
@@ -21,17 +22,22 @@ abstract class AbstractGenerator implements GeneratorInterface
      */
     public function generate(EntityDefinition $definition): bool
     {
+        $workspace = app(WorkspaceFactory::class)->make();
+        $this->render($definition, $workspace);
+        $workspace->commit();
+
+        return true;
+    }
+
+    public function render(EntityDefinition $definition, Workspace $workspace): void
+    {
         try {
-            $content = $this->generateContent($definition);
-            $outputPath = $this->getOutputPath($definition);
-
-            $this->ensureDirectoryExists($outputPath);
-
-            if (! File::put($outputPath, $content)) {
-                throw CodeGeneratorException::fileCreationFailed($outputPath);
-            }
-
-            return true;
+            $workspace->put(
+                $this->getOutputPath($definition),
+                $this->generateContent($definition),
+                $this->getType(),
+                $definition->name
+            );
         } catch (\Exception $e) {
             throw CodeGeneratorException::generationFailed($this->getType(), $e->getMessage());
         }
@@ -61,18 +67,6 @@ abstract class AbstractGenerator implements GeneratorInterface
      * @return array<string, string>
      */
     abstract protected function getReplacements(EntityDefinition $definition): array;
-
-    /**
-     * Ensure the directory exists for the output path.
-     */
-    protected function ensureDirectoryExists(string $filePath): void
-    {
-        $directory = dirname($filePath);
-
-        if (! File::isDirectory($directory)) {
-            File::makeDirectory($directory, 0755, true);
-        }
-    }
 
     /**
      * Load and process stub with replacements.
