@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\Tests\Feature;
 
+use nameless\CodeGenerator\Services\ApiGenerationService;
 use nameless\CodeGenerator\Services\AuthGenerator;
+use nameless\CodeGenerator\Services\EntityEvolutionService;
 use nameless\CodeGenerator\Services\PostmanExporter;
 use nameless\CodeGenerator\Support\WorkspaceFactory;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
@@ -52,5 +54,25 @@ class WorkspaceServicesTest extends GeneratorTestCase
         $collection = $first->get(base_path('postman_collection.json'));
         $this->assertSame($collection, $second->get(base_path('postman_collection.json')));
         $this->assertMatchesRegularExpression('/"_postman_id": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/', $collection);
+    }
+
+    #[Test]
+    public function adding_fields_is_recorded_without_writing(): void
+    {
+        $this->generatedEntities = ['Report'];
+        $this->generatedTables = ['reports'];
+        app(ApiGenerationService::class)->generateCompleteApi(
+            new EntityDefinition('Report', collect([new FieldDefinition('title', 'string')]), collect())
+        );
+        $modelBefore = (string) file_get_contents(app_path('Models/Report.php'));
+        $workspace = (new WorkspaceFactory(fn (): int => 1767225600))->make();
+
+        app(EntityEvolutionService::class)->addFields('Report', collect([new FieldDefinition('excerpt', 'text')]), $workspace);
+
+        $changes = collect($workspace->changes())->keyBy('path');
+        $this->assertTrue($changes->has('database/migrations/2026_01_01_000000_add_excerpt_to_reports_table.php'));
+        $this->assertSame(FileChange::UPDATE, $changes['app/Models/Report.php']->action);
+        $this->assertSame($modelBefore, file_get_contents(app_path('Models/Report.php')));
+        $this->assertEmpty((array) glob(database_path('migrations/*_add_excerpt_to_reports_table.php')));
     }
 }
