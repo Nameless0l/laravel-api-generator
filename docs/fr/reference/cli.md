@@ -5,12 +5,13 @@
 ```bash
 php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
                          {--schema=} {--mermaid=} {--from-database} {--tables=} {--with-migrations} {--query-builder}
-                         {--pest} {--json-api} {--add-fields=}
+                         {--pest} {--json-api} {--add-fields=} {--dry-run} {--json}
 php artisan delete:fullapi {name?} {--force}
 php artisan api-generator:clean-routes {--dry-run}
 php artisan api-generator:introspect {--table=}
 php artisan api-generator:validate-stubs {--json}
 php artisan api-generator:install
+php artisan api-generator:serve {--stdio}
 ```
 
 ## `make:fullapi`
@@ -24,7 +25,7 @@ php artisan api-generator:install
 | `--auth` | Génère l'authentification Sanctum (AuthController, requests, routes, middleware). |
 | `--interactive` | Lance l'assistant pas à pas de création d'entité. |
 | `--only=Type,Type` | Régénère uniquement les artefacts listés ; ignore route + seeder. |
-| `--schema=fichier` | Génère toutes les entités depuis un schéma YAML/JSON déclaratif. |
+| `--schema=fichier` | Génère toutes les entités depuis un schéma YAML/JSON déclaratif. `--schema=-` lit le schéma sur l'entrée standard. |
 | `--mermaid=fichier` | Génère toutes les entités depuis un `erDiagram` / `classDiagram` Mermaid. |
 | `--from-database` | Introspecte la base existante et génère les APIs de ses tables. |
 | `--tables=a,b` | Restreint `--from-database` à certaines tables. |
@@ -33,6 +34,8 @@ php artisan api-generator:install
 | `--pest` | Génère des tests Pest au lieu de PHPUnit. |
 | `--json-api` | Génère des resources conformes à JSON:API (`JsonApiResource`, Laravel 12.45+). Repli sur une resource standard sur les versions antérieures. |
 | `--add-fields=a:type,b:type` | Ajoute des champs à une entité existante : migration incrémentale + patchs en place. |
+| `--dry-run` | Exécute toute la génération et liste les fichiers qu'elle créerait ou modifierait, sans rien écrire. |
+| `--json` | Affiche un seul document JSON à la place du rapport texte, pour les scripts, les éditeurs et les agents. Indisponible avec `--interactive`. Voir [Outils et agents](/fr/guide/integrations). |
 
 Types pour `--only` : `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.
 
@@ -73,3 +76,11 @@ Vérifie que les stubs publiés contiennent toujours chaque `{{placeholder}}` re
 ## `api-generator:install`
 
 Prépare l'application pour les API générées. Sur Laravel 11 et plus, quand `routes/api.php` n'existe pas encore, la commande propose de lancer `php artisan install:api`, qui crée le fichier et installe Sanctum. Si Scramble est absent, elle propose de l'installer en dépendance de développement pour servir la documentation interactive sur `/docs/api`. Les deux étapes sont facultatives, et la commande se termine en affichant celle qui génère votre première API.
+
+## `api-generator:serve`
+
+Garde un processus ouvert qui répond aux aperçus de génération en JSON-RPC 2.0, un message par ligne sur l'entrée et la sortie standard. Il n'écrit jamais de fichier. L'extension VS Code s'en sert pour son aperçu en direct ; les méthodes sont décrites dans [Outils et agents](/fr/guide/integrations).
+
+| Option | Description |
+|--------|-------------|
+| `--stdio` | Obligatoire. Lit les requêtes sur l'entrée standard et écrit les réponses sur la sortie standard. |

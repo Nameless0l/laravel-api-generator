@@ -6,6 +6,15 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.10.0
+
+- `--dry-run` montre chaque fichier qu'une commande créerait ou modifierait, sans rien écrire, pour toutes les sources y compris `--add-fields`.
+- `--json` affiche un seul document lisible par les machines, pour les scripts, les éditeurs et les agents IA. Voir [Outils et agents](/fr/guide/integrations).
+- `--schema=-` lit un schéma sur l'entrée standard.
+- `api-generator:serve --stdio` garde un processus d'aperçu ouvert. L'extension VS Code s'en sert : son aperçu en direct montre exactement le code que le package écrit.
+- Une génération qui échoue ne laisse plus la moitié des fichiers derrière elle.
+- Régénérer la collection Postman conserve son identifiant.
+
 ### 3.8.0 - 26 septembre 2026
 
 - Corrigé : un PUT qui conserve une valeur unique ne renvoie plus 422 sur les entités à nom composé (`BlogPost`) ni avec une clé primaire personnalisée.

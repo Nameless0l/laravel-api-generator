@@ -5,6 +5,20 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **`--dry-run`** on `make:fullapi` runs the whole generation and lists every file it would create or update, with nothing written. It works with every source: `--fields`, schema files, Mermaid, the database, `class_data.json` and `--add-fields`.
+- **`--json`** prints a single machine-readable document (protocol 1) for scripts, editors and AI agents. Errors carry a stable code. The JSON Schema ships in `resources/protocol/v1.schema.json`.
+- **`--schema=-`** reads a YAML or JSON schema from stdin.
+- **`api-generator:serve --stdio`** keeps a read-only JSON-RPC 2.0 process running for editors (`handshake`, `plan`, `shutdown`). The VS Code extension uses it for its live preview.
+
+### Changed
+- Generation now runs in memory and writes everything at the end. A failure no longer leaves half an API behind.
+- The interactive wizard lists the real files before asking for confirmation.
+- The Postman collection keeps the same `_postman_id` when regenerated.
+- `GeneratorInterface` gains `render(EntityDefinition, Workspace)`. The interface is not a documented extension point, but custom implementations must add the method.
+
 ## [3.8.0] - 2026-09-26
 
 ### Fixed
