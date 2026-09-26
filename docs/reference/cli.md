@@ -72,4 +72,4 @@ Verifies that published stubs still contain every required `{{placeholder}}`.
 
 ## `api-generator:install`
 
-Installs and configures the package and its optional dependencies interactively.
+Prepares the application for generated APIs. On Laravel 11 and later, when `routes/api.php` does not exist yet, it offers to run `php artisan install:api`, which creates the file and installs Sanctum. When Scramble is missing, it offers to install it as a dev dependency so the interactive docs are served at `/docs/api`. Both steps are optional, and the command ends by printing the one that generates your first API.

@@ -6,6 +6,16 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.8.0 - 26 septembre 2026
+
+- Corrigé : un PUT qui conserve une valeur unique ne renvoie plus 422 sur les entités à nom composé (`BlogPost`) ni avec une clé primaire personnalisée.
+- Corrigé : le seeder est bien enregistré dans `DatabaseSeeder.php`, même quand le fichier utilise des fins de ligne Windows (CRLF).
+- `--auth` limite l'inscription et la connexion à 6 requêtes par minute.
+- `json_api: true` est désormais pris en compte dans les fichiers schema.
+- `api-generator:install` propose `install:api` et Scramble, et n'écrase plus votre configuration.
+- `delete:fullapi` demande confirmation avant de supprimer (`--force` saute la question).
+- Suppression de la commande non documentée `make:loic`. Le téléchargement Composer passe d'environ 7 Mo à moins de 0,5 Mo.
+
 ### 3.7.1 - 17 juillet 2026
 
 - Correction de l'email de contact du mainteneur (`composer.json` + section sécurité du README).
@@ -53,6 +63,15 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Extension VS Code
 
+### 0.11.1 - 26 septembre 2026
+
+- Le formulaire du builder propose désormais la mise à jour du paquet en un clic quand la version installée de `nameless/laravel-api-generator` est trop ancienne pour une option, comme le faisaient déjà les commandes d'import.
+
+### 0.11.0 - 21 juillet 2026
+
+- **Accueil dans la barre latérale** : la vue de la barre d'activité s'ouvre sur un panneau avec un bouton Nouvelle API, les trois sources d'import et des raccourcis vers le diagramme, les snippets et la documentation.
+- **Canevas infini** : le diagramme des entités se déplace dans toutes les directions sur une grille pointillée, et Ctrl+molette zoome vers le curseur.
+
 ### 0.10.1 - 17 juillet 2026
 
 - Bouton Sponsor sur la fiche Marketplace ; correction de l'email de contact du mainteneur.
@@ -75,7 +94,7 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 - **Option tests Pest** dans le formulaire et les trois commandes sources.
 - **Type de champ enum** avec saisie des valeurs, rendu dans l'aperçu.
 
-### 0.7.x - 15–16 juillet 2026
+### 0.7.x - 15 et 16 juillet 2026
 
 - Commandes **Generate APIs from Database / Schema File / Mermaid Diagram** (avec package ≥ 3.5).
 - **Option Spatie QueryBuilder** + vérification de dépendance avec `composer require` en un clic.
