@@ -31,6 +31,7 @@ use nameless\CodeGenerator\Services\AuthGenerator;
 use nameless\CodeGenerator\Services\PostmanExporter;
 use nameless\CodeGenerator\Support\JsonParser;
 use nameless\CodeGenerator\Support\StubLoader;
+use nameless\CodeGenerator\Support\WorkspaceFactory;
 
 class CodeGeneratorServiceProvider extends ServiceProvider
 {
@@ -65,6 +66,8 @@ class CodeGeneratorServiceProvider extends ServiceProvider
 
     private function registerServices(): void
     {
+        $this->app->singleton(WorkspaceFactory::class, fn () => new WorkspaceFactory);
+
         // Register StubLoader
         $this->app->singleton(StubLoader::class, function () {
             return new StubLoader(__DIR__.'/../../stubs');
