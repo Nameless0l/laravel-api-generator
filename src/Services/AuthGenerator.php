@@ -4,68 +4,64 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\Services;
 
-use Illuminate\Support\Facades\File;
 use nameless\CodeGenerator\Support\StubLoader;
+use nameless\CodeGenerator\Support\Workspace;
+use nameless\CodeGenerator\Support\WorkspaceFactory;
 
 class AuthGenerator
 {
     public function __construct(
-        private readonly StubLoader $stubLoader
+        private readonly StubLoader $stubLoader,
+        private readonly WorkspaceFactory $workspaces
     ) {}
 
     /**
+     * Writes immediately unless a workspace is given.
+     *
      * @return array<int, string>
      */
-    public function generate(): array
+    public function generate(?Workspace $workspace = null): array
     {
-        $generatedFiles = [];
+        $target = $workspace ?? $this->workspaces->make();
 
-        // Generate AuthController
-        $controllerPath = app_path('Http/Controllers/AuthController.php');
-        $this->ensureDirectoryExists($controllerPath);
-        File::put($controllerPath, $this->stubLoader->load('auth.controller'));
-        $generatedFiles[] = $controllerPath;
+        $files = [
+            app_path('Http/Controllers/AuthController.php') => 'auth.controller',
+            app_path('Http/Requests/LoginRequest.php') => 'auth.login-request',
+            app_path('Http/Requests/RegisterRequest.php') => 'auth.register-request',
+        ];
 
-        // Generate LoginRequest
-        $loginRequestPath = app_path('Http/Requests/LoginRequest.php');
-        $this->ensureDirectoryExists($loginRequestPath);
-        File::put($loginRequestPath, $this->stubLoader->load('auth.login-request'));
-        $generatedFiles[] = $loginRequestPath;
+        foreach ($files as $path => $stub) {
+            $target->put($path, $this->stubLoader->load($stub), 'Auth');
+        }
 
-        // Generate RegisterRequest
-        $registerRequestPath = app_path('Http/Requests/RegisterRequest.php');
-        $this->ensureDirectoryExists($registerRequestPath);
-        File::put($registerRequestPath, $this->stubLoader->load('auth.register-request'));
-        $generatedFiles[] = $registerRequestPath;
+        $this->generateAuthRoutes($target);
 
-        // Add auth routes
-        $this->generateAuthRoutes();
+        if ($workspace === null) {
+            $target->commit();
+        }
 
-        return $generatedFiles;
+        return array_keys($files);
     }
 
-    private function generateAuthRoutes(): void
+    private function generateAuthRoutes(Workspace $workspace): void
     {
         $apiFilePath = base_path('routes/api.php');
         $phpHeader = "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\nuse App\\Http\\Controllers\\AuthController;\n\n";
 
-        if (! File::exists($apiFilePath)) {
-            File::put($apiFilePath, $phpHeader);
+        if (! $workspace->exists($apiFilePath)) {
+            $workspace->put($apiFilePath, $phpHeader, 'Routes');
         }
 
-        $content = File::get($apiFilePath);
+        $content = $workspace->get($apiFilePath);
 
-        // Add AuthController import if missing
         if (! str_contains($content, 'use App\\Http\\Controllers\\AuthController')) {
-            $content = str_replace(
+            $workspace->put($apiFilePath, str_replace(
                 'use Illuminate\\Support\\Facades\\Route;',
                 "use Illuminate\\Support\\Facades\\Route;\nuse App\\Http\\Controllers\\AuthController;",
                 $content
-            );
-            File::put($apiFilePath, $content);
+            ), 'Routes');
         }
 
-        // Add public auth routes
         $authRoutes = <<<'ROUTES'
 
 // Authentication routes
@@ -78,26 +74,27 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 ROUTES;
 
-        $content = File::get($apiFilePath);
-        if (! str_contains($content, "AuthController::class, 'register'")) {
-            File::append($apiFilePath, PHP_EOL.$authRoutes);
+        if (! str_contains($workspace->get($apiFilePath), "AuthController::class, 'register'")) {
+            $workspace->append($apiFilePath, PHP_EOL.$authRoutes, 'Routes');
         }
     }
 
-    public function wrapRoutesInAuthMiddleware(): void
+    /**
+     * Writes immediately unless a workspace is given.
+     */
+    public function wrapRoutesInAuthMiddleware(?Workspace $workspace = null): void
     {
+        $target = $workspace ?? $this->workspaces->make();
         $apiFilePath = base_path('routes/api.php');
 
-        if (! File::exists($apiFilePath)) {
+        if (! $target->exists($apiFilePath)) {
             return;
         }
 
-        $content = File::get($apiFilePath);
+        $content = $target->get($apiFilePath);
 
-        // Find existing apiResource lines that are NOT inside a middleware group
-        // and wrap them in auth:sanctum middleware
+        // Move apiResource lines that are not inside a middleware group into the auth:sanctum group
         if (str_contains($content, "Route::middleware('auth:sanctum')->group(function ()")) {
-            // Middleware group already exists - move apiResource lines into it
             $lines = explode("\n", $content);
             $apiResourceLines = [];
             $otherLines = [];
@@ -116,24 +113,18 @@ ROUTES;
 
             if (! empty($apiResourceLines)) {
                 $content = implode("\n", $otherLines);
-                // Insert apiResource lines before the closing of the middleware group
                 $apiResourceBlock = implode("\n", $apiResourceLines);
                 $content = str_replace(
                     "Route::middleware('auth:sanctum')->group(function () {\n    Route::post('logout', [AuthController::class, 'logout']);\n    Route::get('user', [AuthController::class, 'user']);\n});",
                     "Route::middleware('auth:sanctum')->group(function () {\n    Route::post('logout', [AuthController::class, 'logout']);\n    Route::get('user', [AuthController::class, 'user']);\n\n{$apiResourceBlock}\n});",
                     $content
                 );
-                File::put($apiFilePath, $content);
+                $target->put($apiFilePath, $content, 'Routes');
             }
         }
-    }
 
-    private function ensureDirectoryExists(string $filePath): void
-    {
-        $directory = dirname($filePath);
-
-        if (! File::isDirectory($directory)) {
-            File::makeDirectory($directory, 0755, true);
+        if ($workspace === null) {
+            $target->commit();
         }
     }
 }

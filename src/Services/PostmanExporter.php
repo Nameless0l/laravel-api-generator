@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace nameless\CodeGenerator\Services;
 
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\File;
+use nameless\CodeGenerator\Support\Workspace;
+use nameless\CodeGenerator\Support\WorkspaceFactory;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 
@@ -13,17 +14,22 @@ class PostmanExporter
 {
     private const SCHEMA = 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json';
 
+    public function __construct(
+        private readonly WorkspaceFactory $workspaces
+    ) {}
+
     /**
      * Export a Postman collection for the given entities.
+     * Writes immediately unless a workspace is given.
      *
      * @param  Collection<int, EntityDefinition>  $entities
      */
-    public function export(Collection $entities, string $outputPath): string
+    public function export(Collection $entities, string $outputPath, ?Workspace $workspace = null): string
     {
         $collection = [
             'info' => [
                 'name' => 'Generated API Collection',
-                '_postman_id' => $this->generateUuid(),
+                '_postman_id' => $this->collectionId($entities),
                 'description' => 'Auto-generated API collection by Laravel API Generator',
                 'schema' => self::SCHEMA,
             ],
@@ -37,7 +43,12 @@ class PostmanExporter
         if ($json === false) {
             throw new \RuntimeException('Failed to encode collection to JSON: '.json_last_error_msg());
         }
-        File::put($outputPath, $json);
+        $target = $workspace ?? $this->workspaces->make();
+        $target->put($outputPath, $json, 'Postman');
+
+        if ($workspace === null) {
+            $target->commit();
+        }
 
         return $outputPath;
     }
@@ -124,15 +135,16 @@ class PostmanExporter
         };
     }
 
-    private function generateUuid(): string
+    /**
+     * Derived from the entity names so regenerating the same API keeps the
+     * collection id instead of rewriting the file every time.
+     *
+     * @param  Collection<int, EntityDefinition>  $entities
+     */
+    private function collectionId(Collection $entities): string
     {
-        return sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xFFFF), mt_rand(0, 0xFFFF),
-            mt_rand(0, 0xFFFF),
-            mt_rand(0, 0x0FFF) | 0x4000,
-            mt_rand(0, 0x3FFF) | 0x8000,
-            mt_rand(0, 0xFFFF), mt_rand(0, 0xFFFF), mt_rand(0, 0xFFFF)
-        );
+        $hash = md5($entities->map(fn (EntityDefinition $entity) => $entity->name)->sort()->implode(','));
+
+        return substr($hash, 0, 8).'-'.substr($hash, 8, 4).'-'.substr($hash, 12, 4).'-'.substr($hash, 16, 4).'-'.substr($hash, 20, 12);
     }
 }
