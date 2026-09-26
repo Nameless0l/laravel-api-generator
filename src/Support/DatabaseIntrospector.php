@@ -388,12 +388,14 @@ class DatabaseIntrospector
         // Fallback for Laravel 10: query per driver
         $driver = DB::connection()->getDriverName();
 
-        return match ($driver) {
-            'mysql' => collect(DB::select('SHOW TABLES'))->map(fn ($row) => array_values((array) $row)[0])->all(),
-            'pgsql' => collect(DB::select("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public'"))->pluck('tablename')->all(),
-            'sqlite' => collect(DB::select("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"))->pluck('name')->all(),
+        $rows = match ($driver) {
+            'mysql' => DB::select('SHOW TABLES'),
+            'pgsql' => DB::select("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public'"),
+            'sqlite' => DB::select("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"),
             default => [],
         };
+
+        return array_values(array_map(fn ($row): string => (string) array_values((array) $row)[0], $rows));
     }
 
     public function tableToModelName(string $table): string
