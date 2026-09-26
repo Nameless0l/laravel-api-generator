@@ -5,30 +5,31 @@ declare(strict_types=1);
 namespace nameless\CodeGenerator\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Http\Resources\JsonApi\JsonApiResource;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
-use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
-use nameless\CodeGenerator\Services\AuthGenerator;
-use nameless\CodeGenerator\Services\EntityEvolutionService;
-use nameless\CodeGenerator\Services\PostmanExporter;
+use nameless\CodeGenerator\Services\GenerationPlanner;
 use nameless\CodeGenerator\Support\DatabaseIntrospector;
 use nameless\CodeGenerator\Support\EntitySorter;
 use nameless\CodeGenerator\Support\FieldParser;
 use nameless\CodeGenerator\Support\JsonParser;
 use nameless\CodeGenerator\Support\MermaidParser;
+use nameless\CodeGenerator\Support\Protocol;
 use nameless\CodeGenerator\Support\RelationshipSynthesizer;
 use nameless\CodeGenerator\Support\SchemaParser;
+use nameless\CodeGenerator\Support\StdinReader;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
+use nameless\CodeGenerator\ValueObjects\FileChange;
+use nameless\CodeGenerator\ValueObjects\GenerationPlan;
+use nameless\CodeGenerator\ValueObjects\GenerationRequest;
 use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
-use Spatie\QueryBuilder\QueryBuilder;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class MakeApiCommand extends Command
 {
     protected $signature = 'make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
-        {--schema= : Generate from a declarative YAML/JSON schema file}
+        {--schema= : Generate from a declarative YAML/JSON schema file, or - to read it from stdin}
         {--mermaid= : Generate from a Mermaid classDiagram or erDiagram file}
         {--from-database : Generate from the existing database schema}
         {--tables= : Comma-separated list of tables to use with --from-database}
@@ -36,81 +37,147 @@ class MakeApiCommand extends Command
         {--query-builder : Use spatie/laravel-query-builder for index filtering and sorting}
         {--pest : Generate Pest tests instead of PHPUnit}
         {--json-api : Generate JSON:API-compliant resources (requires Laravel 12.45+)}
-        {--add-fields= : Add fields to an existing entity (incremental migration + in-place patches)}';
+        {--add-fields= : Add fields to an existing entity (incremental migration + in-place patches)}
+        {--dry-run : List the files that would be written, without writing anything}
+        {--json : Print one JSON document (protocol 1) instead of text}';
 
     protected $description = 'Generate a complete API including model, migration, controller, resource, request, factory, seeder, DTO, service, policy, and tests';
 
-    private ?bool $jsonApiResolved = null;
+    /** @var array<int, array{code: string, message: string}> */
+    private array $inputWarnings = [];
 
-    private bool $jsonApiWarned = false;
+    private bool $auth = false;
 
     public function __construct(
-        private readonly ApiGenerationServiceInterface $apiGenerationService,
-        private readonly PostmanExporter $postmanExporter,
-        private readonly AuthGenerator $authGenerator,
+        private readonly GenerationPlanner $planner,
         private readonly DatabaseIntrospector $databaseIntrospector,
         private readonly SchemaParser $schemaParser,
         private readonly MermaidParser $mermaidParser,
-        private readonly EntityEvolutionService $entityEvolutionService
+        private readonly StdinReader $stdin
     ) {
         parent::__construct();
     }
 
     public function handle(): int
     {
+        $dryRun = (bool) $this->option('dry-run');
+
         try {
-            // Handle auth scaffolding
-            if ($this->option('auth')) {
-                $this->scaffoldAuth();
+            if ($this->wantsJson() && $this->option('interactive')) {
+                throw CodeGeneratorException::invalidRequest('--json cannot be combined with --interactive, which asks its questions on stdout.');
             }
 
-            // Interactive mode
-            if ($this->option('interactive')) {
-                return $this->handleInteractiveGeneration();
+            $plan = $this->buildPlan();
+            if ($plan === null) {
+                return self::SUCCESS;
             }
 
-            $addFields = $this->option('add-fields');
-            if (is_string($addFields) && $addFields !== '') {
-                return $this->handleAddFields($addFields);
+            $changes = $plan->changes();
+            $warnings = array_merge($this->inputWarnings, $plan->warnings);
+
+            if (! $dryRun) {
+                $plan->apply();
             }
 
-            if ($this->option('from-database')) {
-                return $this->handleDatabaseGeneration();
+            if ($this->wantsJson()) {
+                $this->writeJson(Protocol::planDocument($changes, $warnings, $dryRun));
+            } else {
+                $this->report($changes, $warnings, $dryRun);
             }
 
-            $schema = $this->option('schema');
-            if (is_string($schema) && $schema !== '') {
-                return $this->handleSchemaGeneration($schema);
+            return self::SUCCESS;
+        } catch (\Throwable $e) {
+            if ($this->wantsJson()) {
+                $this->writeJson(Protocol::errorDocument($e, $dryRun));
+            } elseif ($e instanceof CodeGeneratorException) {
+                $this->error($e->getMessage());
+            } else {
+                $this->error("An unexpected error occurred: {$e->getMessage()}");
             }
-
-            $mermaid = $this->option('mermaid');
-            if (is_string($mermaid) && $mermaid !== '') {
-                return $this->handleMermaidGeneration($mermaid);
-            }
-
-            $name = $this->argument('name');
-
-            if (empty($name)) {
-                return $this->handleAutoDetectedGeneration();
-            }
-
-            $name = is_string($name) ? $name : '';
-
-            return $this->handleSingleEntityGeneration($name);
-        } catch (CodeGeneratorException $e) {
-            $this->error($e->getMessage());
-
-            return self::FAILURE;
-        } catch (\Exception $e) {
-            $this->error("An unexpected error occurred: {$e->getMessage()}");
 
             return self::FAILURE;
         }
     }
 
-    // ─── Schema / Mermaid / Database generation modes ───────────────────
+    /**
+     * With --json every human line is dropped so stdout carries one document.
+     */
+    public function line($string, $style = null, $verbosity = null)
+    {
+        if (! $this->wantsJson()) {
+            parent::line($string, $style, $verbosity);
+        }
+    }
 
-    private function handleDatabaseGeneration(): int
+    public function newLine($count = 1)
+    {
+        if (! $this->wantsJson()) {
+            parent::newLine($count);
+        }
+
+        return $this;
+    }
+
+    private function wantsJson(): bool
+    {
+        return (bool) $this->option('json');
+    }
+
+    private function buildPlan(): ?GenerationPlan
+    {
+        if ($this->option('interactive')) {
+            return $this->interactivePlan();
+        }
+
+        $addFields = $this->option('add-fields');
+        if (is_string($addFields) && $addFields !== '') {
+            return $this->fieldAdditionPlan($addFields);
+        }
+
+        $entities = $this->entitiesFromInput();
+        $this->auth = (bool) $this->option('auth');
+
+        return $this->planner->plan(new GenerationRequest(
+            entities: $entities,
+            auth: $this->auth,
+            postman: (bool) $this->option('postman'),
+            only: $this->onlyTypesOption(),
+        ));
+    }
+
+    // ─── Input sources ──────────────────────────────────────────────────
+
+    /**
+     * @return Collection<int, EntityDefinition>
+     */
+    private function entitiesFromInput(): Collection
+    {
+        if ($this->option('from-database')) {
+            return $this->entitiesFromDatabase();
+        }
+
+        $schema = $this->option('schema');
+        if (is_string($schema) && $schema !== '') {
+            return $this->entitiesFromSchema($schema);
+        }
+
+        $mermaid = $this->option('mermaid');
+        if (is_string($mermaid) && $mermaid !== '') {
+            return $this->entitiesFromMermaid($mermaid);
+        }
+
+        $name = $this->argument('name');
+        if (! is_string($name) || $name === '') {
+            return $this->entitiesFromDefaultFiles();
+        }
+
+        return collect([$this->entityFromFields($name)]);
+    }
+
+    /**
+     * @return Collection<int, EntityDefinition>
+     */
+    private function entitiesFromDatabase(): Collection
     {
         $tablesOption = $this->option('tables');
         $onlyTables = is_string($tablesOption) && $tablesOption !== ''
@@ -126,67 +193,149 @@ class MakeApiCommand extends Command
         $entities = $this->databaseIntrospector->buildEntityDefinitions($onlyTables, $options);
 
         if ($entities->isEmpty()) {
-            $this->error('No matching tables found in the database.');
-
-            return self::FAILURE;
+            throw CodeGeneratorException::invalidRequest('No matching tables found in the database.');
         }
 
         if ($onlyTables === null) {
             $this->line('Note: the users table is skipped by default (it would overwrite app/Models/User.php). Use --tables=users to include it.');
         }
 
-        return $this->generateEntities($entities, 'the database');
+        $this->announce($entities, 'the database');
+
+        return $entities;
     }
 
-    private function handleSchemaGeneration(string $path): int
+    /**
+     * @return Collection<int, EntityDefinition>
+     */
+    private function entitiesFromSchema(string $path): Collection
     {
+        if ($path === '-') {
+            $entities = $this->schemaParser->parseString($this->stdin->read(), $this->cliEntityOptions(), 'stdin');
+            $this->announce($entities, 'stdin');
+
+            return $entities;
+        }
+
         $resolved = File::exists($path) ? $path : base_path($path);
         $entities = $this->schemaParser->parseFile($resolved, $this->cliEntityOptions());
+        $this->announce($entities, basename($resolved));
 
-        return $this->generateEntities($entities, basename($resolved));
+        return $entities;
     }
 
-    private function handleMermaidGeneration(string $path): int
+    /**
+     * @return Collection<int, EntityDefinition>
+     */
+    private function entitiesFromMermaid(string $path): Collection
     {
         $resolved = File::exists($path) ? $path : base_path($path);
         $entities = $this->mermaidParser->parseFile($resolved, $this->cliEntityOptions());
 
         foreach ($this->mermaidParser->getWarnings() as $warning) {
-            $this->warn('  ! '.$warning);
+            $this->inputWarnings[] = ['code' => 'mermaid', 'message' => $warning];
         }
 
-        return $this->generateEntities($entities, basename($resolved));
+        $this->announce($entities, basename($resolved));
+
+        return $entities;
     }
 
     /**
      * No name and no source option: look for a schema file at the project
      * root, then fall back to the legacy class_data.json flow.
+     *
+     * @return Collection<int, EntityDefinition>
      */
-    private function handleAutoDetectedGeneration(): int
+    private function entitiesFromDefaultFiles(): Collection
     {
         foreach (SchemaParser::DEFAULT_FILES as $file) {
             if (File::exists(base_path($file))) {
                 $this->info("Found {$file}, generating from schema...");
 
-                return $this->handleSchemaGeneration(base_path($file));
+                return $this->entitiesFromSchema(base_path($file));
             }
         }
 
-        return $this->handleJsonGeneration();
+        return $this->entitiesFromClassData();
     }
 
     /**
-     * Shared pipeline for every multi-entity source (database, schema
-     * file, Mermaid diagram): generate each entity, create pivot
-     * migrations, then apply auth/postman options.
-     *
+     * @return Collection<int, EntityDefinition>
+     */
+    private function entitiesFromClassData(): Collection
+    {
+        $this->warn('No entity name provided. Using JSON file for generation...');
+
+        $jsonFilePath = base_path('class_data.json');
+        if (! File::exists($jsonFilePath)) {
+            throw new CodeGeneratorException("JSON file not found: {$jsonFilePath}", 'file_not_found');
+        }
+
+        $entities = app(JsonParser::class)->parseJsonToEntities(File::get($jsonFilePath));
+
+        $cliOptions = $this->cliEntityOptions();
+        if ($cliOptions !== []) {
+            $entities = $entities->map(fn (EntityDefinition $entity) => new EntityDefinition(
+                name: $entity->name,
+                fields: $entity->fields,
+                relationships: $entity->relationships,
+                parent: $entity->parent,
+                options: array_merge($cliOptions, $entity->options)
+            ));
+        }
+
+        $entities = EntitySorter::sortByDependencies(RelationshipSynthesizer::resolveRelatedKeys($entities));
+        $this->announce($entities, 'class_data.json');
+
+        return $entities;
+    }
+
+    private function entityFromFields(string $name): EntityDefinition
+    {
+        $fieldsOption = $this->option('fields');
+
+        if (! is_string($fieldsOption) || $fieldsOption === '') {
+            throw CodeGeneratorException::invalidRequest('You must specify fields with the --fields option. Example: --fields="name:string,age:integer". Or use --interactive for guided setup.');
+        }
+
+        $definition = $this->createEntityDefinition($name, FieldParser::parseFieldsString($fieldsOption));
+        $onlyTypes = $this->onlyTypesOption();
+
+        $this->info($onlyTypes !== null
+            ? 'Regenerating only: '.implode(', ', $onlyTypes)." for: {$name}"
+            : "Generating complete API for: {$name}");
+
+        if ($definition->hasSoftDeletes()) {
+            $this->info('  -> Soft Deletes enabled');
+        }
+
+        return $definition;
+    }
+
+    private function fieldAdditionPlan(string $addFields): GenerationPlan
+    {
+        $name = $this->argument('name');
+        if (! is_string($name) || $name === '') {
+            throw CodeGeneratorException::invalidRequest('--add-fields requires an entity name: make:fullapi Post --add-fields="excerpt:string"');
+        }
+
+        $fields = collect(FieldParser::parseFieldsString($addFields))
+            ->map(fn (string $type, string $fieldName) => $this->makeFieldDefinition($fieldName, $type))
+            ->values();
+
+        $this->auth = (bool) $this->option('auth');
+
+        return $this->planner->planFieldAddition(ucfirst($name), $fields, $this->auth);
+    }
+
+    /**
      * @param  Collection<int, EntityDefinition>  $entities
      */
-    private function generateEntities(Collection $entities, string $sourceLabel): int
+    private function announce(Collection $entities, string $source): void
     {
-        $entities = $this->withSupportedJsonApi($entities);
+        $this->info("Generating {$entities->count()} API(s) from {$source}:");
 
-        $this->info("Generating {$entities->count()} API(s) from {$sourceLabel}:");
         foreach ($entities as $entity) {
             $flags = [];
             if ($entity->hasSoftDeletes()) {
@@ -209,38 +358,8 @@ class MakeApiCommand extends Command
             }
             $this->line("  - {$entity->name}".($flags !== [] ? ' ('.implode(', ', $flags).')' : ''));
         }
+
         $this->newLine();
-
-        $onlyTypes = $this->onlyTypesOption();
-
-        foreach ($entities as $entity) {
-            $this->apiGenerationService->generateCompleteApi($entity, $onlyTypes);
-            $this->info("  ✔ {$entity->name}");
-        }
-
-        if ($onlyTypes === null || in_array('Migration', $onlyTypes, true)) {
-            $pivots = $this->apiGenerationService->generatePivotMigrations($entities);
-            foreach ($pivots as $pivot) {
-                $this->line('  - Pivot migration: '.basename($pivot));
-            }
-        }
-
-        if ($this->option('auth')) {
-            $this->authGenerator->wrapRoutesInAuthMiddleware();
-        }
-
-        if ($this->option('postman')) {
-            $outputPath = base_path('postman_collection.json');
-            $this->postmanExporter->export($entities, $outputPath);
-            $this->info("Postman collection exported to: {$outputPath}");
-        }
-
-        $this->warnIfQueryBuilderMissing($entities);
-
-        $this->info('API generation completed successfully!');
-        $this->checkApiRoutesRegistered();
-
-        return self::SUCCESS;
     }
 
     /**
@@ -257,7 +376,7 @@ class MakeApiCommand extends Command
         if ($this->option('pest')) {
             $options['pest'] = true;
         }
-        if ($this->wantsJsonApi()) {
+        if ($this->option('json-api')) {
             $options['json_api'] = true;
         }
 
@@ -265,63 +384,6 @@ class MakeApiCommand extends Command
     }
 
     /**
-     * Whether --json-api was requested and the runtime supports it. Laravel
-     * only ships JsonApiResource from 12.45; on older versions we warn once
-     * and fall back to standard resources rather than generate a fatal class.
-     */
-    private function wantsJsonApi(): bool
-    {
-        if ($this->jsonApiResolved !== null) {
-            return $this->jsonApiResolved;
-        }
-
-        if (! $this->option('json-api')) {
-            return $this->jsonApiResolved = false;
-        }
-
-        return $this->jsonApiResolved = $this->supportsJsonApi();
-    }
-
-    private function supportsJsonApi(): bool
-    {
-        if (class_exists(JsonApiResource::class)) {
-            return true;
-        }
-
-        if (! $this->jsonApiWarned) {
-            $this->warn('  JSON:API resources need Laravel 12.45+ (Illuminate\\Http\\Resources\\JsonApi\\JsonApiResource); generating standard resources instead.');
-            $this->jsonApiWarned = true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Schema files can ask for JSON:API per entity, so the Laravel version
-     * check has to run on the parsed entities too, not only on --json-api.
-     *
-     * @param  Collection<int, EntityDefinition>  $entities
-     * @return Collection<int, EntityDefinition>
-     */
-    private function withSupportedJsonApi(Collection $entities): Collection
-    {
-        if (! $entities->contains(fn (EntityDefinition $entity) => $entity->usesJsonApi()) || $this->supportsJsonApi()) {
-            return $entities;
-        }
-
-        return $entities->map(fn (EntityDefinition $entity) => new EntityDefinition(
-            name: $entity->name,
-            fields: $entity->fields,
-            relationships: $entity->relationships,
-            parent: $entity->parent,
-            options: array_merge($entity->options, ['json_api' => false])
-        ));
-    }
-
-    /**
-     * Parsed --only option, shared by the single-entity and multi-entity
-     * (database/schema/Mermaid) generation paths.
-     *
      * @return array<int, string>|null
      */
     private function onlyTypesOption(): ?array
@@ -333,69 +395,96 @@ class MakeApiCommand extends Command
             : null;
     }
 
-    /**
-     * @param  Collection<int, EntityDefinition>  $entities
-     */
-    private function warnIfQueryBuilderMissing(Collection $entities): void
-    {
-        $usesQueryBuilder = $entities->contains(
-            fn (EntityDefinition $entity) => $entity->usesQueryBuilder()
-        );
+    // ─── Output ─────────────────────────────────────────────────────────
 
-        if ($usesQueryBuilder && ! class_exists(QueryBuilder::class)) {
-            $this->newLine();
-            $this->warn('The generated services use Spatie QueryBuilder. Install it with:');
-            $this->line('  composer require spatie/laravel-query-builder');
-            $this->newLine();
+    /**
+     * @param  array<int, FileChange>  $changes
+     * @param  array<int, array{code: string, message: string}>  $warnings
+     */
+    private function report(array $changes, array $warnings, bool $dryRun): void
+    {
+        $this->newLine();
+        $this->info($dryRun ? 'Dry run, nothing was written. Files this command would touch:' : 'Files:');
+
+        foreach ($changes as $change) {
+            if ($change->writesToDisk() || $dryRun) {
+                $this->line(sprintf('  %-9s %s', $this->actionLabel($change->action, $dryRun), $change->path));
+            }
         }
+
+        foreach ($warnings as $warning) {
+            $this->warn('  ! '.$warning['message']);
+        }
+
+        if ($dryRun) {
+            return;
+        }
+
+        if (collect($changes)->contains(fn (FileChange $change) => $change->kind === 'Bootstrap' && $change->writesToDisk())) {
+            $this->info('✔ API routes registered in bootstrap/app.php');
+        }
+
+        if ($this->auth) {
+            $this->info('Auth scaffolding complete. Make sure laravel/sanctum is installed:');
+            $this->line('  composer require laravel/sanctum');
+            $this->line('  php artisan vendor:publish --provider="Laravel\\Sanctum\\SanctumServiceProvider"');
+            $this->line('  php artisan migrate');
+        }
+
+        $addFields = $this->option('add-fields');
+        if (is_string($addFields) && $addFields !== '') {
+            $name = $this->argument('name');
+            if (is_string($name) && collect($changes)->contains(fn (FileChange $change) => $change->writesToDisk())) {
+                $this->info('Fields added to '.ucfirst($name).'. Run: php artisan migrate');
+            }
+
+            return;
+        }
+
+        $this->info('API generation completed successfully!');
+    }
+
+    private function actionLabel(string $action, bool $dryRun): string
+    {
+        return match ($action) {
+            FileChange::CREATE => $dryRun ? 'create' : 'created',
+            FileChange::UPDATE => $dryRun ? 'update' : 'updated',
+            default => 'unchanged',
+        };
+    }
+
+    /**
+     * @param  array<string, mixed>  $document
+     */
+    private function writeJson(array $document): void
+    {
+        $this->output->writeln(Protocol::encode($document), OutputInterface::OUTPUT_RAW);
     }
 
     // ─── Interactive wizard ─────────────────────────────────────────────
 
-    private function handleInteractiveGeneration(): int
+    private function interactivePlan(): ?GenerationPlan
     {
         $this->info('Laravel API Generator - Interactive Mode');
         $this->line('─────────────────────────────────────────');
         $this->newLine();
 
-        // 1. Entity name
         $name = $this->ask('Entity name (PascalCase)');
-        if (empty($name)) {
-            $this->error('Entity name is required.');
-
-            return self::FAILURE;
+        if (! is_string($name) || $name === '') {
+            throw CodeGeneratorException::invalidRequest('Entity name is required.');
         }
         $name = ucfirst($name);
 
-        // 2. Fields
         $fields = $this->collectFields();
         if ($fields->isEmpty()) {
-            $this->error('At least one field is required.');
-
-            return self::FAILURE;
+            throw CodeGeneratorException::invalidRequest('At least one field is required.');
         }
 
-        // 3. Relationships
         $relationships = $this->collectRelationships();
 
-        // 4. Options
         $softDeletes = $this->confirm('Enable soft deletes?', false);
-        $withAuth = ! $this->option('auth') && $this->confirm('Add Sanctum authentication?', false);
-        $withPostman = ! $this->option('postman') && $this->confirm('Export Postman collection?', false);
-
-        // 5. Preview
-        $this->displayPreview($name, $fields, $relationships, $softDeletes, $withAuth || (bool) $this->option('auth'));
-
-        if (! $this->confirm('Confirm generation?', true)) {
-            $this->warn('Generation cancelled.');
-
-            return self::SUCCESS;
-        }
-
-        // 6. Generate
-        if ($withAuth || $this->option('auth')) {
-            $this->scaffoldAuth();
-        }
+        $withAuth = (bool) $this->option('auth') || $this->confirm('Add Sanctum authentication?', false);
+        $withPostman = (bool) $this->option('postman') || $this->confirm('Export Postman collection?', false);
 
         $definition = new EntityDefinition(
             name: $name,
@@ -404,26 +493,20 @@ class MakeApiCommand extends Command
             options: array_merge($this->cliEntityOptions(), ['soft_deletes' => $softDeletes])
         );
 
+        $this->auth = $withAuth;
+        $plan = $this->planner->plan(new GenerationRequest(collect([$definition]), $withAuth, $withPostman));
+
+        $this->displayPreview($definition, $softDeletes, $withAuth, $plan);
+
+        if (! $this->confirm('Confirm generation?', true)) {
+            $this->warn('Generation cancelled.');
+
+            return null;
+        }
+
         $this->info("Generating complete API for: {$name}");
-        $this->apiGenerationService->generateCompleteApi($definition);
-        $this->apiGenerationService->generatePivotMigrations(collect([$definition]));
 
-        if ($withAuth || $this->option('auth')) {
-            $this->authGenerator->wrapRoutesInAuthMiddleware();
-        }
-
-        $this->displayGeneratedFiles($definition);
-
-        if ($withPostman || $this->option('postman')) {
-            $outputPath = base_path('postman_collection.json');
-            $this->postmanExporter->export(collect([$definition]), $outputPath);
-            $this->info("Postman collection exported to: {$outputPath}");
-        }
-
-        $this->info('API generation completed successfully!');
-        $this->checkApiRoutesRegistered();
-
-        return self::SUCCESS;
+        return $plan;
     }
 
     /**
@@ -519,23 +602,14 @@ class MakeApiCommand extends Command
         return $relationships;
     }
 
-    /**
-     * @param  Collection<int, FieldDefinition>  $fields
-     * @param  Collection<int, RelationshipDefinition>  $relationships
-     */
-    private function displayPreview(
-        string $name,
-        Collection $fields,
-        Collection $relationships,
-        bool $softDeletes,
-        bool $withAuth
-    ): void {
+    private function displayPreview(EntityDefinition $definition, bool $softDeletes, bool $withAuth, GenerationPlan $plan): void
+    {
         $this->newLine();
         $this->line('── Preview ──────────────────────────────────────');
-        $this->line("  Entity:     {$name}");
+        $this->line("  Entity:     {$definition->name}");
 
         $this->line('  Fields:');
-        $fields->each(function (FieldDefinition $field) {
+        $definition->fields->each(function (FieldDefinition $field) {
             $constraints = [];
             if (! $field->nullable) {
                 $constraints[] = 'required';
@@ -550,9 +624,9 @@ class MakeApiCommand extends Command
             $this->line("              {$field->name}: {$field->type}{$extra}");
         });
 
-        if ($relationships->isNotEmpty()) {
+        if ($definition->relationships->isNotEmpty()) {
             $this->line('  Relations:');
-            $relationships->each(function (RelationshipDefinition $rel) {
+            $definition->relationships->each(function (RelationshipDefinition $rel) {
                 $this->line("              {$rel->getEloquentMethod()} -> {$rel->relatedModel} (as {$rel->role})");
             });
         }
@@ -568,142 +642,15 @@ class MakeApiCommand extends Command
             $this->line('  Options:    '.implode(', ', $options));
         }
 
-        $this->newLine();
-        $this->line('  Files to generate: 12 files + route');
+        $this->line('  Files:');
+        foreach ($plan->changes() as $change) {
+            $this->line(sprintf('              %-9s %s', $change->action, $change->path));
+        }
         $this->line('─────────────────────────────────────────────────');
         $this->newLine();
     }
 
-    // ─── Standard generation modes ──────────────────────────────────────
-
-    private function handleJsonGeneration(): int
-    {
-        $this->warn('No entity name provided. Using JSON file for generation...');
-
-        $jsonFilePath = base_path('class_data.json');
-
-        if (! File::exists($jsonFilePath)) {
-            $this->error("JSON file not found: {$jsonFilePath}");
-
-            return self::FAILURE;
-        }
-
-        $jsonData = File::get($jsonFilePath);
-
-        $parser = app(JsonParser::class);
-        $entities = $parser->parseJsonToEntities($jsonData);
-
-        // Apply CLI flags (e.g. --query-builder) to every parsed entity
-        $cliOptions = $this->cliEntityOptions();
-        if ($cliOptions !== []) {
-            $entities = $entities->map(fn (EntityDefinition $entity) => new EntityDefinition(
-                name: $entity->name,
-                fields: $entity->fields,
-                relationships: $entity->relationships,
-                parent: $entity->parent,
-                options: array_merge($cliOptions, $entity->options)
-            ));
-        }
-
-        return $this->generateEntities(
-            EntitySorter::sortByDependencies(RelationshipSynthesizer::resolveRelatedKeys($entities)),
-            'class_data.json'
-        );
-    }
-
-    private function handleSingleEntityGeneration(string $name): int
-    {
-        $fieldsOption = $this->option('fields');
-
-        if (! $fieldsOption || ! is_string($fieldsOption)) {
-            $this->error('You must specify fields with the --fields option. Example: --fields="name:string,age:integer"');
-            $this->line('Or use --interactive for guided setup.');
-
-            return self::FAILURE;
-        }
-
-        $fieldsArray = FieldParser::parseFieldsString($fieldsOption);
-        $definition = $this->createEntityDefinition($name, $fieldsArray);
-
-        $onlyTypes = $this->onlyTypesOption();
-
-        if ($onlyTypes !== null) {
-            $this->info('Regenerating only: '.implode(', ', $onlyTypes)." for: {$name}");
-        } else {
-            $this->info("Generating complete API for: {$name}");
-        }
-
-        if ($definition->hasSoftDeletes()) {
-            $this->info('  -> Soft Deletes enabled');
-        }
-
-        $this->apiGenerationService->generateCompleteApi($definition, $onlyTypes);
-
-        if ($this->option('auth')) {
-            $this->authGenerator->wrapRoutesInAuthMiddleware();
-        }
-
-        $this->displayGeneratedFiles($definition);
-
-        if ($this->option('postman')) {
-            $outputPath = base_path('postman_collection.json');
-            $this->postmanExporter->export(collect([$definition]), $outputPath);
-            $this->info("Postman collection exported to: {$outputPath}");
-        }
-
-        $this->warnIfQueryBuilderMissing(collect([$definition]));
-
-        $this->info('API generation completed successfully!');
-        $this->checkApiRoutesRegistered();
-
-        return self::SUCCESS;
-    }
-
-    private function handleAddFields(string $addFields): int
-    {
-        $name = $this->argument('name');
-        if (! is_string($name) || $name === '') {
-            $this->error('--add-fields requires an entity name: make:fullapi Post --add-fields="excerpt:string"');
-
-            return self::FAILURE;
-        }
-        $name = ucfirst($name);
-
-        $fields = collect(FieldParser::parseFieldsString($addFields))
-            ->map(fn (string $type, string $fieldName) => $this->makeFieldDefinition($fieldName, $type))
-            ->values();
-
-        $result = $this->entityEvolutionService->addFields($name, $fields);
-
-        foreach ($result['changed'] as $file) {
-            $this->info('  ✔ '.str_replace(base_path().DIRECTORY_SEPARATOR, '', $file));
-        }
-        foreach ($result['warnings'] as $warning) {
-            $this->warn('  ! '.$warning);
-        }
-
-        if ($result['changed'] !== []) {
-            $this->info("Fields added to {$name}. Run: php artisan migrate");
-        }
-
-        return self::SUCCESS;
-    }
-
     // ─── Helpers ────────────────────────────────────────────────────────
-
-    private function scaffoldAuth(): void
-    {
-        $this->info('Scaffolding Sanctum authentication...');
-        $files = $this->authGenerator->generate();
-        foreach ($files as $file) {
-            $this->line('  - '.str_replace(base_path().DIRECTORY_SEPARATOR, '', $file));
-        }
-        $this->info('Auth scaffolding complete. Make sure laravel/sanctum is installed:');
-        $this->line('  composer require laravel/sanctum');
-        $this->line('  php artisan vendor:publish --provider="Laravel\\Sanctum\\SanctumServiceProvider"');
-        $this->line('  php artisan migrate');
-        $this->newLine();
-    }
 
     /**
      * @param  array<string, mixed>  $fieldsArray
@@ -745,88 +692,5 @@ class MakeApiCommand extends Command
         }
 
         return new FieldDefinition(name: $fieldName, type: $baseType, attributes: $attributes);
-    }
-
-    private function displayGeneratedFiles(EntityDefinition $definition): void
-    {
-        $this->newLine();
-        $this->info('Generated files:');
-        $this->line("  - Model:      app/Models/{$definition->name}.php");
-        $this->line("  - Controller: app/Http/Controllers/{$definition->name}Controller.php");
-        $this->line("  - Service:    app/Services/{$definition->name}Service.php");
-        $this->line("  - DTO:        app/DTO/{$definition->name}DTO.php");
-        $this->line("  - Request:    app/Http/Requests/{$definition->name}Request.php");
-        $this->line("  - Resource:   app/Http/Resources/{$definition->name}Resource.php");
-        $this->line("  - Policy:     app/Policies/{$definition->name}Policy.php");
-        $this->line("  - Factory:    database/factories/{$definition->name}Factory.php");
-        $this->line("  - Seeder:     database/seeders/{$definition->name}Seeder.php");
-        $this->line("  - Migration:  database/migrations/*_create_{$definition->getTableName()}_table.php");
-        $this->line("  - Test:       tests/Feature/{$definition->name}ControllerTest.php");
-        $this->line("  - Test:       tests/Unit/{$definition->name}ServiceTest.php");
-        $this->line('  - Route:      routes/api.php');
-        $this->newLine();
-    }
-
-    private function checkApiRoutesRegistered(): void
-    {
-        $bootstrapApp = base_path('bootstrap/app.php');
-
-        if (! File::exists($bootstrapApp)) {
-            return;
-        }
-
-        $content = File::get($bootstrapApp);
-
-        // Check if API routes are already registered in bootstrap/app.php (Laravel 11+)
-        if (str_contains($content, 'api:') || str_contains($content, "'api.php'") || str_contains($content, '"api.php"')) {
-            return;
-        }
-
-        // Only proceed if routes/api.php exists but isn't loaded
-        if (! File::exists(base_path('routes/api.php'))) {
-            return;
-        }
-
-        // Try to auto-register API routes in bootstrap/app.php
-        if ($this->registerApiRoutes($content, $bootstrapApp)) {
-            $this->info('✔ API routes registered in bootstrap/app.php');
-        } else {
-            $this->newLine();
-            $this->warn('⚠ API routes file exists but may not be loaded by your application.');
-            $this->line('  Run the following command to register API routes:');
-            $this->line('    php artisan install:api');
-            $this->newLine();
-        }
-    }
-
-    /**
-     * Try to auto-register API routes in bootstrap/app.php.
-     */
-    private function registerApiRoutes(string $content, string $bootstrapApp): bool
-    {
-        // Pattern: withRouting( ... web: ... )
-        // Add api: line after the web: line
-        $pattern = '/(->withRouting\([^)]*)(web:\s*__DIR__\s*\.\s*\'[^\']*\/routes\/web\.php\',?)/s';
-
-        if (preg_match($pattern, $content, $matches)) {
-            $webLine = $matches[2];
-            // Ensure the web line ends with a comma
-            $webLineWithComma = rtrim($webLine, ', ').',';
-            $apiLine = "\n        api: __DIR__.'/../routes/api.php',";
-
-            $newContent = str_replace(
-                $webLine,
-                $webLineWithComma.$apiLine,
-                $content
-            );
-
-            if ($newContent !== $content) {
-                File::put($bootstrapApp, $newContent);
-
-                return true;
-            }
-        }
-
-        return false;
     }
 }

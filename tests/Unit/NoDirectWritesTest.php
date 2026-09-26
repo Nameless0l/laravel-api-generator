@@ -18,6 +18,7 @@ class NoDirectWritesTest extends TestCase
         'Services/PostmanExporter.php',
         'Services/EntityEvolutionService.php',
         'Support/ApiRoutesRegistrar.php',
+        'Console/Commands/MakeApiCommand.php',
     ];
 
     /**
