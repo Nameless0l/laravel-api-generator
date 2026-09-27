@@ -97,6 +97,10 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Extension VS Code
 
+### 0.16.0
+
+- Génération depuis une spec OpenAPI 3.0, 3.1 ou Swagger 2.0, en JSON ou en YAML, depuis la palette de commandes, la barre latérale ou le bouton **Import OpenAPI** du formulaire. Un essai à blanc montre les entités, les fichiers et les schémas écartés avant toute écriture. Va avec le package 3.13.
+
 ### 0.15.0
 
 - Avec `laravel/mcp` dans le projet, le mode agent de Copilot affiche le serveur MCP du package, lancé avec votre commande PHP, Sail et Docker compris. Voir [Copilot et fichiers de schéma](/fr/guide/extension/reference#copilot-et-fichiers-de-schema). Va avec le package 3.12.

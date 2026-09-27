@@ -10,6 +10,7 @@ All commands live under the **Laravel API Generator** category in the command pa
 | Generate APIs from Database | Whole-schema generation with table multi-select |
 | Generate APIs from Schema File | Generate from `api-schema.yaml` / `.yml` / `.json` |
 | Generate APIs from Mermaid Diagram | Generate from a `.mmd` file |
+| Generate APIs from OpenAPI Spec | Generate from an OpenAPI or Swagger file, JSON or YAML, after a dry run |
 | Add Fields to Entity… | Evolve an entity via `--add-fields` |
 | Regenerate File(s)… | Rebuild selected artifacts via `--only=` |
 | Delete Full API | Remove an entity's files, routes and seeder registration |

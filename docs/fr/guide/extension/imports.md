@@ -24,6 +24,12 @@ Décrivez toute l'API dans un fichier YAML/JSON déclaratif et versionnable. L'e
 
 Transformez un `erDiagram` ou `classDiagram` Mermaid (écrit à la main ou produit par un assistant IA) en API fonctionnelle. La commande utilise le fichier `.mmd` actif ou vous laisse en choisir un. Les cardinalités (`||--o{`, `"1" --> "*"`) deviennent les bonnes relations Eloquent des deux côtés. Voir [Diagrammes Mermaid](/fr/guide/mermaid).
 
+### Generate APIs from OpenAPI Spec
+
+Confiez au package une spec OpenAPI 3.0, 3.1 ou Swagger 2.0, en JSON ou en YAML. La commande prend la spec active ou vous laisse en choisir une, puis lance un essai à blanc avant d'écrire quoi que ce soit. Une fenêtre nomme les entités trouvées, compte les fichiers à créer et à modifier, et liste les schémas écartés avec la raison, comme `NewPet` à côté de `Pet` ou `ErrorResponse`. **Générer** les écrit.
+
+Une spec rangée hors du projet passe par l'entrée standard, les projets Sail et Docker fonctionnent donc aussi. Voir [Specs OpenAPI](/fr/guide/openapi) pour ce que devient chaque élément.
+
 ## Imports du panneau
 
 Des boutons dans le panneau générateur qui pré-remplissent le formulaire, pour relire et ajuster avant de générer.
@@ -34,13 +40,13 @@ Vous préférez relire une table avant de générer ? L'extension liste toutes l
 
 ### Import OpenAPI / Swagger
 
-Importez une spec **JSON** OpenAPI 3.0 ou Swagger 2.0 pour générer les entités en masse.
+Le bouton **Import OpenAPI** ouvre le même parcours que la commande ci-dessus, YAML compris : le package lit la spec, la fenêtre de l'essai à blanc montre ce qu'il a compris, et **Générer** écrit l'API.
 
-<!-- CAPTURE : les entités extraites d'une spec OpenAPI. Enregistrer sous docs/public/ext-import-openapi.png puis :
+<!-- CAPTURE : la fenêtre de l'essai à blanc OpenAPI. Enregistrer sous docs/public/ext-import-openapi.png puis :
 ![Import OpenAPI](/ext-import-openapi.png)
 -->
 
-L'importeur parcourt `components.schemas` (ou `definitions` pour Swagger 2.0) et convertit chaque schéma en entité, en mappant les types et formats OpenAPI vers les types de champs (`integer`/`int64`, `number`/`float`, `string` avec `uuid`/`date`/`date-time`, `boolean`, `array`, `object`). Une propriété `$ref` devient une relation `belongsTo`, un `array` de `$ref` devient `hasMany`, et les schémas utilitaires comme `ErrorResponse`, `PaginatedResponse`, `Meta` ou `Links` sont ignorés automatiquement.
+Avec un package antérieur à 3.13, le bouton revient à l'importeur de l'extension, qui ne lit que les specs JSON et remplit la liste en masse comme l'import JSON ci-dessous.
 
 ### Import JSON en masse
 

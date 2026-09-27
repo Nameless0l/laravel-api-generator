@@ -97,6 +97,10 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## VS Code extension
 
+### 0.16.0
+
+- Generate from an OpenAPI 3.0, 3.1 or Swagger 2.0 spec, JSON or YAML, from the command palette, the sidebar or the builder's **Import OpenAPI** button. A dry run shows the entities, the files and the schemas left aside before anything is written. Pairs with package 3.13.
+
 ### 0.15.0
 
 - With `laravel/mcp` in the project, Copilot's agent mode lists the package's MCP server, started with your PHP command, Sail and Docker included. See [Copilot and schema files](/guide/extension/reference#copilot-and-schema-files). Pairs with package 3.12.
