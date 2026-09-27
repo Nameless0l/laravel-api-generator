@@ -12,6 +12,7 @@ php artisan api-generator:introspect {--table=}
 php artisan api-generator:validate-stubs {--json}
 php artisan api-generator:install
 php artisan api-generator:serve {--stdio}
+php artisan api-generator:mcp
 ```
 
 ## `make:fullapi`
@@ -86,3 +87,7 @@ Keeps one process running and answers generation previews over JSON-RPC 2.0, one
 | Option | Description |
 |--------|-------------|
 | `--stdio` | Required. Read requests on stdin and write responses on stdout. |
+
+## `api-generator:mcp`
+
+Starts the [MCP server](/guide/mcp) on stdin and stdout, so coding agents can list, preview and generate APIs. Your agent runs it for you once registered. It needs `laravel/mcp` (Laravel 11.45 or later), and without it the command exits with an error that says how to install it.

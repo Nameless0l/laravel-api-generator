@@ -6,6 +6,12 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.12.0
+
+- Un serveur MCP permet à Claude Code, Copilot, Cursor et aux autres agents de lister, prévisualiser et générer des API, et d'ajouter des champs, sans jamais écraser vos retouches. Voir [Serveur MCP](/fr/guide/mcp).
+- Un champ de schéma au type inconnu déclenche maintenant un avertissement `unknown_field_type`.
+- `--add-fields` refuse un nom d'entité qui sort de `app/Models`.
+
 ### 3.11.0
 
 - Régénérer garde les fichiers que vous avez modifiés à la main, et les nomme. `--force` les écrase quand même. Voir [Faire évoluer les entités](/fr/guide/evolving#vos-modifications-survivent-a-la-regeneration).

@@ -6,6 +6,12 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.12.0
+
+- An MCP server lets Claude Code, Copilot, Cursor and other agents list, preview and generate APIs, and add fields, without ever overwriting your edits. See [MCP Server](/guide/mcp).
+- A schema field with an unknown type now comes with an `unknown_field_type` warning.
+- `--add-fields` refuses an entity name that points outside `app/Models`.
+
 ### 3.11.0
 
 - Regenerating keeps the files you edited by hand, and names them. `--force` overwrites them anyway. See [Evolving Entities](/guide/evolving#your-edits-survive-regeneration).

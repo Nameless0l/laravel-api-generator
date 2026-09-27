@@ -76,6 +76,8 @@ Le package fournit un JSON Schema de ce format. Faites-y pointer la première li
 
 L'[extension VS Code](/fr/guide/extension/) applique d'elle-même le schéma à `api-schema.yaml`, `api-schema.yml` et `api-schema.json`. Hors ligne, le même fichier se trouve dans `vendor/nameless/laravel-api-generator/resources/schema/api-schema.json`.
 
+Hors de l'éditeur, `make:fullapi` génère quand même un champ de type inconnu comme une colonne `string`, et le signale par un avertissement `unknown_field_type` qui nomme le champ.
+
 ## Ce que vous obtenez gratuitement
 
 - **Relations inverses synthétisées** : déclarez `posts: hasMany Post` sur `Category`, et `Post` reçoit le `belongsTo` et sa colonne de migration `category_id`. [Détails](/fr/guide/relationships).

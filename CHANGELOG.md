@@ -5,6 +5,15 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.12.0] - Unreleased
+
+### Added
+- **MCP server for coding agents.** `php artisan api-generator:mcp` starts a local server built on `laravel/mcp` (optional, Laravel 11.45+) with four tools: `list-entities`, `plan-api`, `generate-api` and `add-fields`. It also serves the JSON Schema of the api-schema format as a resource. Agents never overwrite a file edited by hand, never delete and never migrate.
+- **`unknown_field_type` warning.** A schema field whose type is unknown, such as the typo `strng`, is still generated as a string column, and `make:fullapi --schema`, its `--json` document, the preview worker and the MCP tools now name it.
+
+### Fixed
+- `make:fullapi --add-fields` refuses an entity name that points outside `app/Models`, such as `../../config/app`.
+
 ## [3.11.0] - Unreleased
 
 ### Added
