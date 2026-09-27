@@ -112,9 +112,16 @@ final class Workspace
         return $changes;
     }
 
-    public function commit(): void
+    /**
+     * @param  array<int, string>  $skip  paths relative to the project root that must stay as they are on disk
+     */
+    public function commit(array $skip = []): void
     {
         foreach ($this->pending as $path => $file) {
+            if (in_array($this->relative($path), $skip, true)) {
+                continue;
+            }
+
             if (File::exists($path) && File::get($path) === $file['content']) {
                 continue;
             }

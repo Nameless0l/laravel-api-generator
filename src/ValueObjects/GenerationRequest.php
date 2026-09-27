@@ -11,11 +11,13 @@ final readonly class GenerationRequest
     /**
      * @param  Collection<int, EntityDefinition>  $entities
      * @param  array<int, string>|null  $only
+     * @param  bool  $force  overwrite files edited since they were generated
      */
     public function __construct(
         public Collection $entities,
         public bool $auth = false,
         public bool $postman = false,
         public ?array $only = null,
+        public bool $force = false,
     ) {}
 }

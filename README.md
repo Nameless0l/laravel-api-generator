@@ -388,8 +388,8 @@ After editing, run `api-generator:validate-stubs` (or let the VS Code extension 
 ```
 php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
                          {--schema=} {--mermaid=} {--from-database} {--tables=} {--with-migrations} {--query-builder}
-                         {--pest} {--json-api} {--add-fields=} {--dry-run} {--json}
-php artisan delete:fullapi {name?} {--force}
+                         {--pest} {--json-api} {--add-fields=} {--dry-run} {--json} {--force}
+php artisan delete:fullapi {name?} {--force} {--dry-run}
 php artisan api-generator:clean-routes {--dry-run}
 php artisan api-generator:introspect {--table=}
 php artisan api-generator:validate-stubs {--json}
@@ -417,6 +417,7 @@ php artisan api-generator:serve {--stdio}
 | `--add-fields=a:type,b:type` | Add fields to an existing entity: incremental migration + in-place patches. |
 | `--dry-run` | Run the whole generation and list the files it would create or update, without writing anything. |
 | `--json` | Print one JSON document instead of the text report, for scripts, editors and agents. Not available with `--interactive`. See [Tools & Agents](https://nameless0l.github.io/laravel-api-generator/guide/integrations). |
+| `--force` | Overwrite the files you edited by hand since they were generated. Without it they are kept and reported. |
 
 ---
 

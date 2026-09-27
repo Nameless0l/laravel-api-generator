@@ -94,7 +94,7 @@ To rebuild a `Resource` or a `Test` without touching everything else:
 php artisan make:fullapi Post --fields="title:string,content:text" --only=FeatureTest,UnitTest
 ```
 
-When `--only=` is set, the migration, the `apiResource` route and the `DatabaseSeeder` registration are **left untouched**: only the listed artifacts are rewritten.
+When `--only=` is set, the migration, the `apiResource` route and the `DatabaseSeeder` registration are **left untouched**: only the listed artifacts are rewritten. A listed file you edited by hand is kept unless you add `--force` (see [Evolving Entities](/guide/evolving#your-edits-survive-regeneration)).
 
 Available types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.
 
@@ -104,7 +104,7 @@ Available types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`,
 php artisan delete:fullapi Post
 ```
 
-After a confirmation, removes all generated files, unregisters the seeder from `DatabaseSeeder.php`, and cleans the entity's routes from `routes/api.php` and `routes/web.php`. Called without an entity name, it deletes every entity defined in `class_data.json`. Add `--force` to skip the question in scripts.
+After a confirmation, removes all generated files, unregisters the seeder from `DatabaseSeeder.php`, and cleans the entity's routes from `routes/api.php` and `routes/web.php`. Called without an entity name, it deletes every entity defined in `class_data.json`. Add `--force` to skip the question in scripts, or `--dry-run` to list what would be removed without deleting anything.
 
 If older deletions left routes pointing at controllers that no longer exist (the classic `route:list` ReflectionException), purge them:
 

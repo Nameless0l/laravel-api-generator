@@ -1,6 +1,6 @@
 # Evolving Entities
 
-Generators are great on day 1 and useless on day 30, because regenerating wipes your manual changes. `--add-fields` patches instead of regenerating.
+Generators are great on day 1 and useless on day 30 when regenerating wipes your manual changes. Here, regenerating leaves the files you edited alone, and `--add-fields` patches the entities you want to extend.
 
 ## Add fields to an existing entity
 
@@ -19,6 +19,17 @@ What happens:
 
 The DTO (constructor promotion) and the generated tests are left alone and reported as manual follow-ups.
 
+## Your edits survive regeneration
+
+The generator records what it writes in `.api-generator/manifest.json`. Commit that file. On the next run, any generated file you edited by hand is left as it is, and the report names it:
+
+```
+  kept      app/Models/Post.php
+  ! app/Models/Post.php was edited since it was generated, so it was kept. Use --force to overwrite it.
+```
+
+Files you never touched are refreshed as usual. Add `--force` to overwrite the edited ones too, or preview the whole run first with `--dry-run`. Entities generated before 3.11 are regenerated as before on their next run, then tracked.
+
 ## Regenerate specific files
 
 Changed your mind about a single artifact? `--only=` rewrites just the listed generators and leaves the migration, route and seeder registration untouched:
@@ -36,7 +47,7 @@ Available types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`,
 php artisan delete:fullapi Post
 ```
 
-Removes every generated file, unregisters the seeder from `DatabaseSeeder.php`, and strips the entity's routes from `routes/api.php` and `routes/web.php`.
+Removes every generated file, unregisters the seeder from `DatabaseSeeder.php`, and strips the entity's routes from `routes/api.php` and `routes/web.php`. Migrations added with `--add-fields` go too, since the manifest knows them. Add `--dry-run` to see the list first; the confirmation also names any file you edited by hand. Enums and pivot migrations stay, because other entities may use them.
 
 ## Repair orphan routes
 

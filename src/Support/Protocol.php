@@ -53,7 +53,7 @@ final class Protocol
 
     /**
      * @param  array<int, FileChange>  $changes
-     * @return array<int, array<string, string>>
+     * @return array<int, array<string, string|bool>>
      */
     public static function files(array $changes, bool $withContent): array
     {
@@ -91,6 +91,7 @@ final class Protocol
             'capabilities' => [
                 'fieldTypes' => FieldDefinition::CANONICAL_TYPES,
                 'relationTypes' => SchemaParser::RELATION_KEYWORDS,
+                'keepsEditedFiles' => true,
                 'options' => [
                     'json_api' => class_exists(JsonApiResource::class)
                         ? ['supported' => true]

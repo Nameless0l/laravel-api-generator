@@ -10,7 +10,7 @@ Add `--dry-run` to any `make:fullapi` command. The generation runs completely, t
 php artisan make:fullapi Post --fields="title:string,body:text" --dry-run
 ```
 
-Existing files show up as `update` when their content would change and `unchanged` when the generator would write the same bytes. Before regenerating an entity you edited by hand, a dry run tells you which files would be replaced.
+Existing files show up as `update` when their content would change and `unchanged` when the generator would write the same bytes. A file you edited by hand since it was generated shows up as `kept`: the generator leaves it alone unless you pass `--force`.
 
 ## Machine-readable output
 
@@ -32,7 +32,7 @@ php artisan make:fullapi Post --fields="title:string" --dry-run --json
 }
 ```
 
-Paths are relative to the project root and always use `/`. When something goes wrong, the command exits with code 1 and `errors` holds a stable `code`, a `message` and sometimes a `hint`.
+Paths are relative to the project root and always use `/`. A file edited by hand since it was generated carries `"kept": true` and is not written, and a `modified_file_kept` warning names it. When something goes wrong, the command exits with code 1 and `errors` holds a stable `code`, a `message` and sometimes a `hint`.
 
 ## Send a schema on stdin
 
@@ -54,7 +54,7 @@ It speaks JSON-RPC 2.0, one message per line on stdin and stdout, and never writ
 
 | Method | Params | Result |
 |---|---|---|
-| `handshake` | `client`, `clientVersion` | protocol number, package, Laravel and PHP versions, supported field types, relation types and options |
+| `handshake` | `client`, `clientVersion` | protocol number, package, Laravel and PHP versions, supported field types, relation types and options, and `keepsEditedFiles` from 3.11 |
 | `plan` | `schema` (an api-schema object), `flags` (`auth`, `postman`, `only`) | `files` and `warnings`, as in a `--dry-run --json` document |
 | `shutdown` | none | `null`, then the process exits |
 

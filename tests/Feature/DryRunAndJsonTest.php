@@ -41,7 +41,7 @@ class DryRunAndJsonTest extends GeneratorTestCase
 
     /**
      * @param  array<string, mixed>  $parameters
-     * @return array{int, array{protocol: int, dryRun: bool, files: array<int, array<string, string>>, warnings: array<int, array<string, string>>, errors: array<int, array<string, string>>}}
+     * @return array{int, array{protocol: int, dryRun: bool, files: array<int, array<string, string|bool>>, warnings: array<int, array<string, string>>, errors: array<int, array<string, string>>}}
      */
     private function runJson(array $parameters): array
     {
@@ -72,6 +72,7 @@ class DryRunAndJsonTest extends GeneratorTestCase
         $this->assertTrue($document['dryRun']);
         $model = collect($document['files'])->firstWhere('path', 'app/Models/Invoice.php');
         $this->assertIsArray($model);
+        $this->assertIsString($model['content']);
         $this->assertStringContainsString('class Invoice', $model['content']);
         $this->assertFileDoesNotExist(app_path('Models/Invoice.php'));
     }
@@ -105,6 +106,42 @@ class DryRunAndJsonTest extends GeneratorTestCase
 
         $this->assertSame(1, $exitCode);
         $this->assertSame('invalid_request', $document['errors'][0]['code']);
+    }
+
+    private function editModelByHand(): void
+    {
+        file_put_contents(app_path('Models/Invoice.php'), file_get_contents(app_path('Models/Invoice.php'))."\n// mine\n");
+    }
+
+    #[Test]
+    public function a_run_keeps_edited_files_unless_forced(): void
+    {
+        Artisan::call('make:fullapi', ['name' => 'Invoice', '--fields' => 'number:string']);
+        $this->editModelByHand();
+
+        [$exitCode, $document] = $this->runJson(['name' => 'Invoice', '--fields' => 'number:string,total:decimal']);
+
+        $model = collect($document['files'])->firstWhere('path', 'app/Models/Invoice.php');
+        $this->assertSame(0, $exitCode);
+        $this->assertMatchesProtocol($document, 'planDocument');
+        $this->assertIsArray($model);
+        $this->assertTrue($model['kept'] ?? false);
+        $this->assertStringContainsString('// mine', (string) file_get_contents(app_path('Models/Invoice.php')));
+
+        Artisan::call('make:fullapi', ['name' => 'Invoice', '--fields' => 'number:string,total:decimal', '--force' => true]);
+
+        $this->assertStringNotContainsString('// mine', (string) file_get_contents(app_path('Models/Invoice.php')));
+    }
+
+    #[Test]
+    public function the_text_report_names_kept_files(): void
+    {
+        Artisan::call('make:fullapi', ['name' => 'Invoice', '--fields' => 'number:string']);
+        $this->editModelByHand();
+
+        Artisan::call('make:fullapi', ['name' => 'Invoice', '--fields' => 'number:string,total:decimal']);
+
+        $this->assertMatchesRegularExpression('/kept\s+app\/Models\/Invoice\.php/', Artisan::output());
     }
 
     #[Test]

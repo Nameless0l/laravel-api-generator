@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\Tests\Feature;
 
+use Illuminate\Support\Facades\Artisan;
+use nameless\CodeGenerator\Support\Manifest;
 use PHPUnit\Framework\Attributes\Test;
 
 class DeleteCommandTest extends GeneratorTestCase
@@ -12,11 +14,41 @@ class DeleteCommandTest extends GeneratorTestCase
 
     protected array $generatedTables = ['widgets'];
 
+    private string $routes = '';
+
+    private string $seeder = '';
+
     protected function setUp(): void
     {
         parent::setUp();
 
+        $this->routes = (string) file_get_contents(base_path('routes/api.php'));
+        $this->seeder = (string) file_get_contents(database_path('seeders/DatabaseSeeder.php'));
         file_put_contents(app_path('Models/Widget.php'), "<?php\n");
+    }
+
+    protected function tearDown(): void
+    {
+        file_put_contents(base_path('routes/api.php'), $this->routes);
+        file_put_contents(database_path('seeders/DatabaseSeeder.php'), $this->seeder);
+        foreach ($this->addFieldMigrations() as $migration) {
+            unlink($migration);
+        }
+
+        parent::tearDown();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function addFieldMigrations(): array
+    {
+        return glob(database_path('migrations/*_to_widgets_table.php')) ?: [];
+    }
+
+    private function generateWidget(): void
+    {
+        Artisan::call('make:fullapi', ['name' => 'Widget', '--fields' => 'name:string']);
     }
 
     #[Test]
@@ -45,5 +77,44 @@ class DeleteCommandTest extends GeneratorTestCase
         $this->pendingArtisan('delete:fullapi', ['name' => 'Widget', '--force' => true])->assertSuccessful();
 
         $this->assertFileDoesNotExist(app_path('Models/Widget.php'));
+    }
+
+    #[Test]
+    public function a_dry_run_lists_the_files_and_deletes_nothing(): void
+    {
+        $this->generateWidget();
+
+        $this->pendingArtisan('delete:fullapi', ['name' => 'Widget', '--dry-run' => true])
+            ->expectsOutputToContain('app/Models/Widget.php')
+            ->assertSuccessful();
+
+        $this->assertFileExists(app_path('Models/Widget.php'));
+        $this->assertStringContainsString('WidgetController', (string) file_get_contents(base_path('routes/api.php')));
+    }
+
+    #[Test]
+    public function migrations_added_with_add_fields_are_deleted_too(): void
+    {
+        $this->generateWidget();
+        Artisan::call('make:fullapi', ['name' => 'Widget', '--add-fields' => 'color:string']);
+        $this->assertNotSame([], $this->addFieldMigrations());
+
+        $this->pendingArtisan('delete:fullapi', ['name' => 'Widget', '--force' => true])->assertSuccessful();
+
+        $this->assertSame([], $this->addFieldMigrations());
+        $this->assertSame([], Manifest::load(base_path())->filesOf('Widget'));
+    }
+
+    #[Test]
+    public function the_confirmation_names_the_files_edited_by_hand(): void
+    {
+        $this->generateWidget();
+        file_put_contents(app_path('Models/Widget.php'), file_get_contents(app_path('Models/Widget.php'))."\n// mine\n");
+
+        $this->pendingArtisan('delete:fullapi', ['name' => 'Widget'])
+            ->expectsConfirmation('Delete every generated file for Widget, including files edited by hand (app/Models/Widget.php)?', 'no')
+            ->assertSuccessful();
+
+        $this->assertFileExists(app_path('Models/Widget.php'));
     }
 }

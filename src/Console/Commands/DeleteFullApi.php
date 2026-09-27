@@ -6,10 +6,11 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use nameless\CodeGenerator\Support\Manifest;
 
 class DeleteFullApi extends Command
 {
-    protected $signature = 'delete:fullapi {name?} {--force : Skip confirmation}';
+    protected $signature = 'delete:fullapi {name?} {--force : Skip confirmation} {--dry-run : List what would be deleted, without deleting anything}';
 
     protected $description = 'Delete the model, migration, controller, resource, request, factory, seeder, DTO, policy and tests generated for an entity';
 
@@ -54,28 +55,50 @@ class DeleteFullApi extends Command
         $name = is_string($name) ? $name : '';
         $pluralName = Str::plural(Str::snake($name));
         $className = Str::studly($name);
+        $manifest = Manifest::load(base_path());
+        $targets = $this->targets($className, $pluralName, $manifest);
+        $edited = array_values(array_filter(
+            array_keys($targets),
+            fn (string $path) => File::exists(base_path($path)) && $manifest->isPristine($path, File::get(base_path($path))) === false
+        ));
 
-        if (! $this->option('force') && ! $this->confirm("Delete every generated file for {$className}?")) {
+        if ($this->option('dry-run')) {
+            $this->info("Dry run, nothing was deleted. Deleting {$className} would remove:");
+            foreach (array_keys($targets) as $path) {
+                if (File::exists(base_path($path))) {
+                    $this->line("  delete    {$path}");
+                }
+            }
+            $this->line("  update    routes/api.php and DatabaseSeeder.php (the {$className} entries)");
+            foreach ($edited as $path) {
+                $this->warn("  ! {$path} was edited by hand since it was generated.");
+            }
+
+            return self::SUCCESS;
+        }
+
+        $question = $edited === []
+            ? "Delete every generated file for {$className}?"
+            : "Delete every generated file for {$className}, including files edited by hand (".implode(', ', $edited).')?';
+
+        if (! $this->option('force') && ! $this->confirm($question)) {
             return self::SUCCESS;
         }
 
         $this->info("Deleting the generated files for {$name}");
 
-        $this->deleteFile(app_path("Models/{$className}.php"), 'Model');
-        $this->deleteFilesByPattern(database_path('migrations'), "*_create_{$pluralName}_table.php", 'Migration');
-        $this->deleteFile(app_path("Services/{$className}Service.php"), 'Service');
-        $this->deleteFile(app_path("Policies/{$className}Policy.php"), 'Policy');
+        foreach ($targets as $path => $type) {
+            $this->deleteFile(base_path($path), $type);
+            $manifest->forget($path);
+        }
+
         $this->removeFromAuthServiceProvider($className);
-        $this->deleteFile(app_path("Http/Controllers/{$className}Controller.php"), 'Controller');
-        $this->deleteFile(app_path("Http/Resources/{$className}Resource.php"), 'Resource');
-        $this->deleteFile(app_path("Http/Requests/{$className}Request.php"), 'Request');
-        $this->deleteFile(database_path("seeders/{$className}Seeder.php"), 'Seeder');
         $this->unregisterSeederFromDatabaseSeeder($className);
-        $this->deleteFile(database_path("factories/{$className}Factory.php"), 'Factory');
-        $this->deleteFile(app_path("DTO/{$className}DTO.php"), 'DTO');
-        $this->deleteFile(base_path("tests/Feature/{$className}ControllerTest.php"), 'Feature test');
-        $this->deleteFile(base_path("tests/Unit/{$className}ServiceTest.php"), 'Unit test');
         $this->removeApiRoute($className, $pluralName);
+
+        if ($manifest->exists()) {
+            $manifest->save();
+        }
 
         $this->info("Every generated file for {$name} has been deleted.");
 
@@ -124,6 +147,40 @@ class DeleteFullApi extends Command
         }
     }
 
+    /**
+     * The conventional file names, plus whatever the manifest recorded for
+     * the entity (migrations added with --add-fields, for instance). Enums
+     * and pivot migrations stay: other entities may use them.
+     *
+     * @return array<string, string> relative path => file type
+     */
+    private function targets(string $className, string $pluralName, Manifest $manifest): array
+    {
+        $targets = [
+            "app/Models/{$className}.php" => 'Model',
+            "app/Services/{$className}Service.php" => 'Service',
+            "app/Policies/{$className}Policy.php" => 'Policy',
+            "app/Http/Controllers/{$className}Controller.php" => 'Controller',
+            "app/Http/Resources/{$className}Resource.php" => 'Resource',
+            "app/Http/Requests/{$className}Request.php" => 'Request',
+            "database/seeders/{$className}Seeder.php" => 'Seeder',
+            "database/factories/{$className}Factory.php" => 'Factory',
+            "app/DTO/{$className}DTO.php" => 'DTO',
+            "tests/Feature/{$className}ControllerTest.php" => 'Feature test',
+            "tests/Unit/{$className}ServiceTest.php" => 'Unit test',
+        ];
+
+        foreach (File::glob(database_path("migrations/*_create_{$pluralName}_table.php")) as $migration) {
+            $targets['database/migrations/'.basename($migration)] = 'Migration';
+        }
+
+        foreach ($manifest->filesOf($className, ['Enum', 'PivotMigration']) as $path) {
+            $targets[$path] ??= 'Generated file';
+        }
+
+        return $targets;
+    }
+
     private function deleteFile(string $filePath, string $type): void
     {
         if (File::exists($filePath)) {
@@ -131,19 +188,6 @@ class DeleteFullApi extends Command
             $this->info("{$type} deleted: {$filePath}");
         } else {
             $this->warn("{$type} not found: {$filePath}");
-        }
-    }
-
-    private function deleteFilesByPattern(string $directory, string $pattern, string $type): void
-    {
-        $files = File::glob("{$directory}/{$pattern}");
-        if ($files) {
-            foreach ($files as $file) {
-                File::delete($file);
-                $this->info("{$type} deleted: {$file}");
-            }
-        } else {
-            $this->warn("No {$type} file matches {$pattern}");
         }
     }
 

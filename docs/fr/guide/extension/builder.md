@@ -28,7 +28,7 @@ Quand l'aperçu ne peut pas tourner, il dit pourquoi et propose la correction : 
 
 ## Sécurité pendant la génération
 
-Régénérer une entité qui existe déjà affiche d'abord la liste de tous les fichiers que le package modifierait, pour pouvoir renoncer avant que quoi que ce soit ne soit écrit. Une opération en cours n'est jamais une boîte noire non plus : recliquez sur le bouton qui tourne et le process artisan sous-jacent est tué, l'interface restaurée. Quand une génération réussit, le Model et le Controller s'ouvrent dans l'éditeur.
+Régénérer une entité garde les fichiers que vous avez modifiés à la main. Avant la génération, une fenêtre les nomme : **Écraser** les remplace quand même, **Garder mes modifications** génère tout le reste. Avec un package antérieur à la 3.11, la fenêtre liste chaque fichier existant qui serait écrasé, pour pouvoir renoncer avant que quoi que ce soit ne soit écrit. Une opération en cours n'est jamais une boîte noire non plus : recliquez sur le bouton qui tourne et le process artisan sous-jacent est tué, l'interface restaurée. Quand une génération réussit, le Model et le Controller s'ouvrent dans l'éditeur.
 
 ## La même commande que le terminal
 

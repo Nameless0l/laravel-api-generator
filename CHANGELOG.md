@@ -5,6 +5,18 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.11.0] - Unreleased
+
+### Added
+- **Generation manifest.** The generator records a hash of every file it writes in `.api-generator/manifest.json`. Commit it with your code.
+- **`--force`** on `make:fullapi` overwrites files edited by hand.
+- **`delete:fullapi --dry-run`** lists the files and entries that would be removed.
+
+### Changed
+- **Regenerating keeps your edits.** A generated file edited by hand since the last run is left as it is and reported: `kept` in the text report, `"kept": true` and a `modified_file_kept` warning in `--json`. Files you never touched are refreshed as before. Entities generated before 3.11 are regenerated as before on their next run, then tracked.
+- `delete:fullapi` also removes the migrations added with `--add-fields`, and its confirmation names the files edited by hand.
+- The handshake of `api-generator:serve` announces `keepsEditedFiles`.
+
 ## [3.10.0] - Unreleased
 
 ### Added

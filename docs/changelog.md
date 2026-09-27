@@ -6,6 +6,12 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.11.0
+
+- Regenerating keeps the files you edited by hand, and names them. `--force` overwrites them anyway. See [Evolving Entities](/guide/evolving#your-edits-survive-regeneration).
+- The generator records what it writes in `.api-generator/manifest.json`: commit it.
+- `delete:fullapi` also removes the migrations added with `--add-fields`, names the files you edited, and gains `--dry-run`.
+
 ### 3.10.0
 
 - Laravel Boost support: guidelines and a `laravel-api-generator` skill teach your coding agent to generate APIs instead of writing the files by hand. See [Tools & Agents](/guide/integrations#ai-coding-agents).
@@ -79,6 +85,10 @@ Recent releases of the package and the VS Code extension. Full histories live on
 3.3.1 (strict-types fixes), 3.3.0 (auto-registered routes and seeders, required-by-default validation), 3.2.0 (interactive wizard, Sanctum auth, generated tests, Postman export, soft deletes), 3.0.0 (clean-architecture rewrite): details in the [full changelog](https://github.com/Nameless0l/laravel-api-generator/blob/main/CHANGELOG.md).
 
 ## VS Code extension
+
+### 0.14.0
+
+- Regenerating from the builder keeps the files you edited by hand. A modal names them: overwrite them, or keep your changes and generate the rest. The live preview marks them **kept**. Pairs with package 3.11.
 
 ### 0.13.0
 
