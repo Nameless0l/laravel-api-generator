@@ -12,7 +12,10 @@
         "dto",
         "service-layer",
         "artisan",
-        "code-generator"
+        "code-generator",
+        "ai-agents",
+        "laravel-boost",
+        "json-schema"
     ],
     "authors": [
         {

@@ -66,6 +66,16 @@ Options can be global (under `options:`) or per entity:
 | `pest: true` | Pest tests instead of PHPUnit |
 | `json_api: true` | JSON:API resources (Laravel 12.45+, standard resources on older versions) |
 
+## Editor autocompletion
+
+The package ships a JSON Schema of this format. Point the first line of the file at it, and any editor running the YAML language server completes keys and types, and flags typos such as `strng` or `nulable` before you generate:
+
+```yaml
+# yaml-language-server: $schema=https://nameless0l.github.io/laravel-api-generator/schema/api-schema.json
+```
+
+The [VS Code extension](/guide/extension/) applies the schema to `api-schema.yaml`, `api-schema.yml` and `api-schema.json` on its own. Offline, the same file sits in `vendor/nameless/laravel-api-generator/resources/schema/api-schema.json`.
+
 ## What you get for free
 
 - **Inverse relations synthesized**: declare `posts: hasMany Post` on `Category`, and `Post` receives the `belongsTo` and its `category_id` migration column. [Details](/guide/relationships).
@@ -77,5 +87,5 @@ Options can be global (under `options:`) or per entity:
 The original bulk format, still fully supported: create `class_data.json` at the project root and run `php artisan make:fullapi` with no arguments. See [Relationships → JSON mode](/guide/relationships#json-mode-class-data-json) for the format, or [download the sample Blog schema](https://github.com/Nameless0l/laravel-api-generator/blob/main/examples/class_data.json).
 
 ::: tip AI-friendly
-A single YAML file describing a whole API is an ideal target for AI assistants: ask your favorite model for a schema, review it, generate. The assistant cannot hallucinate file paths, since the generator decides the layout.
+A single YAML file describing a whole API is an ideal target for AI assistants: ask your favorite model for a schema, review it, generate. The assistant cannot hallucinate file paths, since the generator decides the layout. With Laravel Boost, the agent learns the format from the package's skill: see [Tools & Agents](/guide/integrations#ai-coding-agents).
 :::

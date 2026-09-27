@@ -66,6 +66,16 @@ Les options peuvent être globales (sous `options:`) ou par entité :
 | `pest: true` | Tests Pest au lieu de PHPUnit |
 | `json_api: true` | Resources JSON:API (Laravel 12.45+, resources classiques sur les versions antérieures) |
 
+## Autocomplétion dans l'éditeur
+
+Le package fournit un JSON Schema de ce format. Faites-y pointer la première ligne du fichier, et tout éditeur qui fait tourner le serveur de langage YAML complète les clés et les types, et signale les fautes de frappe comme `strng` ou `nulable` avant la génération :
+
+```yaml
+# yaml-language-server: $schema=https://nameless0l.github.io/laravel-api-generator/schema/api-schema.json
+```
+
+L'[extension VS Code](/fr/guide/extension/) applique d'elle-même le schéma à `api-schema.yaml`, `api-schema.yml` et `api-schema.json`. Hors ligne, le même fichier se trouve dans `vendor/nameless/laravel-api-generator/resources/schema/api-schema.json`.
+
 ## Ce que vous obtenez gratuitement
 
 - **Relations inverses synthétisées** : déclarez `posts: hasMany Post` sur `Category`, et `Post` reçoit le `belongsTo` et sa colonne de migration `category_id`. [Détails](/fr/guide/relationships).
@@ -77,5 +87,5 @@ Les options peuvent être globales (sous `options:`) ou par entité :
 Le format historique de génération en masse, toujours pleinement supporté : créez `class_data.json` à la racine du projet et lancez `php artisan make:fullapi` sans argument. Voir [Relations → Mode JSON](/fr/guide/relationships#mode-json-class-data-json) pour le format, ou [téléchargez le schéma Blog d'exemple](https://github.com/Nameless0l/laravel-api-generator/blob/main/examples/class_data.json).
 
 ::: tip Compatible IA
-Un fichier YAML unique décrivant toute une API est une cible idéale pour un assistant IA : demandez un schéma à votre modèle préféré, relisez-le, générez. L'assistant ne peut pas halluciner de chemins de fichiers, puisque c'est le générateur qui décide de l'arborescence.
+Un fichier YAML unique décrivant toute une API est une cible idéale pour un assistant IA : demandez un schéma à votre modèle préféré, relisez-le, générez. L'assistant ne peut pas halluciner de chemins de fichiers, puisque c'est le générateur qui décide de l'arborescence. Avec Laravel Boost, l'agent apprend ce format grâce au skill du package : voir [Outils et agents](/fr/guide/integrations#agents-ia).
 :::

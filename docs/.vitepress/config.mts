@@ -1,4 +1,5 @@
 import { withMermaid } from "vitepress-plugin-mermaid";
+import llmstxt from "vitepress-plugin-llms";
 
 const enCliSidebar = [
   {
@@ -172,6 +173,10 @@ export default withMermaid({
   lastUpdated: true,
   sitemap: {
     hostname: "https://nameless0l.github.io/laravel-api-generator/",
+  },
+  vite: {
+    // The French pages duplicate the English ones; one language is enough for LLMs.
+    plugins: [llmstxt({ ignoreFiles: ["fr/**"] })],
   },
   head: [
     [

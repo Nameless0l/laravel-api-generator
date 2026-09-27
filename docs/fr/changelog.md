@@ -6,6 +6,13 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.10.0
+
+- Prise en charge de Laravel Boost : des consignes et un skill `laravel-api-generator` apprennent à votre agent de code à générer les API au lieu d'écrire les fichiers à la main. Voir [Outils et agents](/fr/guide/integrations#agents-ia).
+- Un JSON Schema des fichiers de schéma apporte l'autocomplétion et la détection des fautes de frappe dans l'éditeur. Voir [Autocomplétion dans l'éditeur](/fr/guide/schema-files#autocompletion-dans-l-editeur).
+- `php artisan about` affiche la version installée, le protocole et le fichier de schéma détecté.
+- La documentation publie `llms.txt` et `llms-full.txt` pour les agents IA.
+
 ### 3.9.0
 
 - `--dry-run` montre chaque fichier qu'une commande créerait ou modifierait, sans rien écrire, pour toutes les sources y compris `--add-fields`.

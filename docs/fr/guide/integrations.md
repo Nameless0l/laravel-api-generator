@@ -60,6 +60,19 @@ Il parle JSON-RPC 2.0, un message par ligne sur l'entrée et la sortie standard,
 
 Le processus s'arrête aussi dès que l'entrée standard se ferme. Les erreurs reviennent sous forme d'erreurs JSON-RPC dont le champ `data` porte les mêmes `code`, `message` et `hint` qu'en ligne de commande.
 
+## Agents IA
+
+Avec [Laravel Boost](https://laravel.com/docs/boost), le package apprend à votre agent à générer une API au lieu d'écrire une douzaine de fichiers à la main. Lancez `php artisan boost:install`, ou `php artisan boost:update --discover` si Boost est déjà en place, et cochez `nameless/laravel-api-generator` dans la liste des packages tiers. Boost ajoute alors deux choses :
+
+- des consignes courtes dans les fichiers que vos agents lisent au démarrage, comme `CLAUDE.md` ou `AGENTS.md` ;
+- un skill `laravel-api-generator` que l'agent charge quand une tâche le demande, avec le format des schémas, le déroulé aperçu puis génération, toutes les options et le sens de la sortie JSON.
+
+L'extension VS Code donne le même skill à GitHub Copilot, sans Boost.
+
+Les agents qui lisent le web peuvent partir de [`llms.txt`](https://nameless0l.github.io/laravel-api-generator/llms.txt), ou charger toute la documentation en un seul fichier avec [`llms-full.txt`](https://nameless0l.github.io/laravel-api-generator/llms-full.txt). Ces deux fichiers reprennent la documentation anglaise.
+
+`php artisan about` affiche aussi une section Laravel Api Generator avec la version installée, le protocole, le fichier de schéma détecté et l'état des stubs (publiés ou non). `php artisan about --only=laravel_api_generator --json` la renvoie en JSON.
+
 ## Stabilité
 
 Chaque document et chaque réponse porte `"protocol": 1`. De nouveaux champs peuvent apparaître sans changer ce numéro, tandis que retirer un champ ou en changer le sens ferait passer au protocole 2. Le schéma JSON est livré avec le package, dans `resources/protocol/v1.schema.json`.

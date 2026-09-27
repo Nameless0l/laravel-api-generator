@@ -6,6 +6,13 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.10.0
+
+- Laravel Boost support: guidelines and a `laravel-api-generator` skill teach your coding agent to generate APIs instead of writing the files by hand. See [Tools & Agents](/guide/integrations#ai-coding-agents).
+- A JSON Schema for schema files brings autocompletion and typo checks to your editor. See [Editor autocompletion](/guide/schema-files#editor-autocompletion).
+- `php artisan about` shows the installed version, the protocol and the detected schema file.
+- The documentation publishes `llms.txt` and `llms-full.txt` for AI agents.
+
 ### 3.9.0
 
 - `--dry-run` shows every file a command would create or update, with nothing written, for every source including `--add-fields`.
