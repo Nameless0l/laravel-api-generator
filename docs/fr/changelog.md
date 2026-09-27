@@ -6,7 +6,7 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
-### 4.0.0
+### 4.0.0 - 27 septembre 2026
 
 - Laravel 12 ou 13 est requis. Les projets Laravel 10 et 11 gardent la 3.15, et [Passer à la 4.0](/fr/guide/upgrading) liste tous les changements.
 - Les contrôleurs reçoivent le modèle par la liaison de route et interrogent la policy de l'entité avant chaque action. Les policies générées laissent passer tout le monde, invités compris, tant que vous ne les restreignez pas.
@@ -125,7 +125,7 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Extension VS Code
 
-### 1.0.0
+### 1.0.0 - 27 septembre 2026
 
 - Va avec le package 4.0 : l'arbre des entités, **Go to Related File** et **Regenerate File(s)** lisent le manifest de génération, donc les requests Store et Update, les enums et les migrations de `--add-fields` apparaissent.
 - Sur Laravel 10 et 11, l'extension installe la ligne 3.x du package, car la 4.x demande Laravel 12.

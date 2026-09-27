@@ -6,7 +6,7 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
-### 4.0.0
+### 4.0.0 - September 27, 2026
 
 - Laravel 12 or 13 is required. Laravel 10 and 11 projects keep 3.15, and [Upgrading to 4.0](/guide/upgrading) lists every change.
 - Controllers receive the model through route model binding and ask the entity's policy before every action. The generated policies let everyone through, guests included, until you restrict them.
@@ -125,7 +125,7 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## VS Code extension
 
-### 1.0.0
+### 1.0.0 - September 27, 2026
 
 - Pairs with the package 4.0: the entity tree, **Go to Related File** and **Regenerate File(s)** read the generation manifest, so the Store and Update requests, the enums and the `--add-fields` migrations show up.
 - On Laravel 10 and 11, the extension installs the package's 3.x line, since 4.x needs Laravel 12.
