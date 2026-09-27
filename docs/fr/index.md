@@ -58,7 +58,7 @@ const tabs = [
         title: 'Une commande',
         img: demoGif,
         imgAlt: 'Démo terminal de make:fullapi',
-        text: "make:fullapi transforme une ligne en douze fichiers et une route enregistrée : modèle, contrôleur, service, DTO, requests, resources, policy, migration, factory, seeder et deux suites de tests.",
+        text: "make:fullapi transforme une ligne en treize fichiers et une route enregistrée : modèle, contrôleur, service, DTO, requests, resources, policy, migration, factory, seeder et deux suites de tests.",
         link: '/fr/guide/generating',
         linkText: 'La commande make:fullapi',
     },

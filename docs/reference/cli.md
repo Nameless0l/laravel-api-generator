@@ -71,7 +71,9 @@ Emits the project's database schema as JSON for tooling.
 
 ## `api-generator:validate-stubs`
 
-Verifies that published stubs still contain every required `{{placeholder}}`.
+::: v-pre
+Verifies that published stubs still contain every required `{{placeholder}}`, and flags the ones written for 3.x.
+:::
 
 | Option | Description |
 |--------|-------------|

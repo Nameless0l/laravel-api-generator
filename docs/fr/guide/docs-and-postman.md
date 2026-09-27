@@ -20,7 +20,7 @@ Depuis VS Code, le bouton **Open API Docs** de l'[extension](/fr/guide/extension
 Ce que vous obtenez automatiquement :
 
 - **Swagger UI interactif** : testez les endpoints depuis le navigateur avec *Send API Request*
-- **Schémas auto-détectés** : `PostRequest`, `PostResource`… déduits des règles de FormRequest et de la structure des Resources
+- **Schémas auto-détectés** : `StorePostRequest`, `UpdatePostRequest`, `PostResource`… déduits des règles de FormRequest et de la structure des Resources
 - **Les règles de validation deviennent des contraintes** : `required|string|max:255` devient un champ requis avec `<= 255 characters` dans la doc
 - **Exemples de requête/réponse** : les corps JSON d'exemple sont générés pour vous
 - **Endpoints groupés** : chaque entité a sa section avec toutes les opérations CRUD

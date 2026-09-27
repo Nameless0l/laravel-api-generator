@@ -38,7 +38,7 @@ La suite passe dès la génération, avec de vraies assertions sur de vrais endp
 
 ## Ce qui est généré
 
-Une commande crée **12 fichiers** par entité et enregistre la route API :
+Une commande crée **13 fichiers** par entité et enregistre la route API :
 
 | Couche | Fichier | Emplacement |
 |--------|---------|-------------|
@@ -46,7 +46,7 @@ Une commande crée **12 fichiers** par entité et enregistre la route API :
 | Contrôleur | `PostController.php` | `app/Http/Controllers/` |
 | Service | `PostService.php` | `app/Services/` |
 | DTO | `PostDTO.php` | `app/DTO/` |
-| Request | `PostRequest.php` | `app/Http/Requests/` |
+| Requests | `StorePostRequest.php`, `UpdatePostRequest.php` | `app/Http/Requests/` |
 | Resource | `PostResource.php` | `app/Http/Resources/` |
 | Policy | `PostPolicy.php` | `app/Policies/` |
 | Factory | `PostFactory.php` | `database/factories/` |
@@ -64,6 +64,7 @@ Chaque requête traverse une structure en couches propre :
 flowchart LR
     REQ(["Requête HTTP"]) --> FR["FormRequest<br/>validation"]
     FR --> CTRL["Contrôleur<br/>fin"]
+    CTRL -. "Gate::authorize" .-> POL["Policy<br/>autorisation"]
     CTRL <-- "DTO" --> SVC["Service<br/>logique métier"]
     SVC <--> MOD["Modèle"]
     MOD <--> DB[("BDD")]
@@ -71,19 +72,19 @@ flowchart LR
     RES --> OUT(["Réponse JSON"])
 ```
 
-Le contrôleur reste fin et délègue au service :
+Le contrôleur reste fin. Il interroge la policy, puis délègue au service :
 
 ```php
-public function store(PostRequest $request)
+public function update(UpdatePostRequest $request, Post $post)
 {
-    $dto = PostDTO::fromRequest($request);
-    $post = $this->service->create($dto);
+    Gate::authorize('update', $post);
 
-    return new PostResource($post);
+    $dto = PostDTO::fromRequest($request);
+    return new PostResource($this->service->update($post, $dto));
 }
 ```
 
-La logique métier vit dans `PostService`, les données traversent les couches sous forme d'un `PostDTO` typé et `readonly`. Quand votre API grandit, les bons emplacements existent déjà.
+La logique métier vit dans `PostService`, les données traversent les couches sous forme d'un `PostDTO` typé et `readonly`, et `PostPolicy` décide qui peut faire quoi. La policy générée laisse passer tout le monde, invités compris, donc l'API fonctionne tout de suite et la restreindre revient à modifier une méthode. Les mises à jour acceptent un contenu partiel : un PATCH modifie les champs qu'il envoie et laisse les autres tels quels. Quand votre API grandit, les bons emplacements existent déjà.
 
 ## Des modèles que votre IDE comprend
 

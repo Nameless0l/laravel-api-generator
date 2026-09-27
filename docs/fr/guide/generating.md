@@ -14,11 +14,11 @@ php artisan make:fullapi Post --fields="title:string,content:text,published:bool
 php artisan make:fullapi Post --fields="title:string,content:text" --soft-deletes
 ```
 
-Ajoute le trait `SoftDeletes`, une colonne `softDeletes()` dans la migration, les méthodes `restore()` / `forceDelete()`, et deux routes supplémentaires :
+Ajoute le trait `SoftDeletes`, une colonne `softDeletes()` dans la migration, les méthodes `restore()` / `forceDelete()`, et deux routes supplémentaires qui trouvent aussi un post supprimé en soft delete :
 
 ```
-POST   /api/posts/{id}/restore
-DELETE /api/posts/{id}/force-delete
+POST   /api/posts/{post}/restore
+DELETE /api/posts/{post}/force-delete
 ```
 
 ## Authentification Sanctum

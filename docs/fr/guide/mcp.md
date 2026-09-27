@@ -72,7 +72,7 @@ Demandez avec vos mots, par exemple un blog avec des articles, des catégories e
 
 Quand le dépôt contient déjà une spec, demandez l'API décrite dans `docs/openapi.yaml`. L'agent passe ce chemin à `plan-api` au lieu d'écrire un schéma, et les avertissements lui disent quels schémas ont été écartés.
 
-Plus tard, « ajoute un résumé aux articles » passe par `add-fields`. L'outil écrit une migration incrémentale et modifie sur place le modèle, la form request, la factory et la resource, en gardant ce que vous y avez changé.
+Plus tard, « ajoute un résumé aux articles » passe par `add-fields`. L'outil écrit une migration incrémentale et modifie sur place le modèle, les form requests, la factory et la resource, en gardant ce que vous y avez changé.
 
 | Outil | Rôle |
 |---|---|

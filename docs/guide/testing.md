@@ -9,6 +9,8 @@ Every entity ships with a feature test (`tests/Feature/PostControllerTest.php`) 
 - Index: listing returns the seeded records
 - Store: creation persists and returns 201
 - Show / Update / Delete round-trips
+- A partial update: the PATCH sends one field, and every other column keeps its value
+- Restore and force delete, when the entity uses soft deletes
 - Validation errors on bad input
 - The service layer in isolation
 

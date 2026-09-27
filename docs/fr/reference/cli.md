@@ -71,7 +71,9 @@ Supprime les routes pointant vers des contrôleurs qui n'existent plus (répare 
 
 ## `api-generator:validate-stubs`
 
-Vérifie que les stubs publiés contiennent toujours chaque `{{placeholder}}` requis.
+::: v-pre
+Vérifie que les stubs publiés contiennent toujours chaque `{{placeholder}}` requis, et signale ceux écrits pour la 3.x.
+:::
 
 | Option | Description |
 |--------|-------------|

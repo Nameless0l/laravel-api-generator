@@ -38,7 +38,7 @@ The suite passes right after generation, with real assertions against real endpo
 
 ## What gets generated
 
-One command creates **12 files** per entity and registers the API route:
+One command creates **13 files** per entity and registers the API route:
 
 | Layer | File | Location |
 |-------|------|----------|
@@ -46,7 +46,7 @@ One command creates **12 files** per entity and registers the API route:
 | Controller | `PostController.php` | `app/Http/Controllers/` |
 | Service | `PostService.php` | `app/Services/` |
 | DTO | `PostDTO.php` | `app/DTO/` |
-| Request | `PostRequest.php` | `app/Http/Requests/` |
+| Requests | `StorePostRequest.php`, `UpdatePostRequest.php` | `app/Http/Requests/` |
 | Resource | `PostResource.php` | `app/Http/Resources/` |
 | Policy | `PostPolicy.php` | `app/Policies/` |
 | Factory | `PostFactory.php` | `database/factories/` |
@@ -64,6 +64,7 @@ Every request flows through a clean, layered structure:
 flowchart LR
     REQ(["HTTP request"]) --> FR["FormRequest<br/>validation"]
     FR --> CTRL["Controller<br/>thin"]
+    CTRL -. "Gate::authorize" .-> POL["Policy<br/>authorization"]
     CTRL <-- "DTO" --> SVC["Service<br/>business logic"]
     SVC <--> MOD["Model"]
     MOD <--> DB[("Database")]
@@ -71,19 +72,19 @@ flowchart LR
     RES --> OUT(["JSON response"])
 ```
 
-The controller stays thin and delegates to the service:
+The controller stays thin. It asks the policy, then delegates to the service:
 
 ```php
-public function store(PostRequest $request)
+public function update(UpdatePostRequest $request, Post $post)
 {
-    $dto = PostDTO::fromRequest($request);
-    $post = $this->service->create($dto);
+    Gate::authorize('update', $post);
 
-    return new PostResource($post);
+    $dto = PostDTO::fromRequest($request);
+    return new PostResource($this->service->update($post, $dto));
 }
 ```
 
-Business logic lives in `PostService`, data crosses layers as a typed, `readonly` `PostDTO`. When your API grows, the right places to put things already exist.
+Business logic lives in `PostService`, data crosses layers as a typed, `readonly` `PostDTO`, and `PostPolicy` decides who may do what. The generated policy lets everyone through, guests included, so the API works right away and restricting it means editing one method. Updates accept a partial payload: a PATCH changes the fields it sends and leaves the others alone. When your API grows, the right places to put things already exist.
 
 ## Models your IDE understands
 
