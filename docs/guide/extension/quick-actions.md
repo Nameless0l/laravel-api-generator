@@ -26,7 +26,7 @@ Every button shows its progress, and clicking again while it runs cancels the op
 ### Stub validation
 
 ::: v-pre
-If you [customized stubs](/guide/customizing-stubs), the extension runs `api-generator:validate-stubs` before every generation. A missing required `{{placeholder}}` triggers a modal listing the offending files, with **Open Stubs Folder** to fix them or **Generate Anyway** to proceed knowingly.
+If you [customized stubs](/guide/customizing-stubs), the extension runs `api-generator:validate-stubs` before every generation. A missing required `{{placeholder}}`, or a stub written for 3.x, triggers a modal listing the offending files and the reason, with **Open Stubs Folder** to fix them or **Generate Anyway** to proceed knowingly. A stub the package no longer reads, such as `request.stub`, only gets a warning.
 :::
 
 ### Dependency detection

@@ -45,7 +45,7 @@ A native **Getting Started walkthrough** (Help → Get Started) covers the packa
 
 - VS Code 1.80+
 - PHP 8.2+ on your PATH (or set `laravelApiGenerator.phpPath`)
-- A Laravel 10 / 11 / 12 / 13 project
+- A Laravel 10 / 11 / 12 / 13 project. The package's 4.x line needs Laravel 12: on Laravel 10 and 11, the extension installs its 3.x line.
 
 ## Your first API, without a terminal
 

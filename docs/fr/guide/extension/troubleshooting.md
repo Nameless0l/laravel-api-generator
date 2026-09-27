@@ -1,6 +1,6 @@
 # Dépannage
 
-Quand une commande artisan échoue, l'extension lit la sortie avant de vous l'afficher. Si elle reconnaît l'échec, la notification nomme la vraie cause et embarque des correctifs en un clic : ouvrir `.env`, lancer la commande manquante dans un terminal ou sauter vers vos stubs. Cette page reprend les mêmes cas pour quand vous voulez comprendre ou corriger vous-même.
+Quand une commande artisan échoue, l'extension lit la sortie avant de vous l'afficher. Avec le package 3.9 ou plus récent, une génération répond par un code d'erreur, que l'extension lit à la place. Si elle reconnaît l'échec, la notification nomme la vraie cause et embarque des correctifs en un clic : ouvrir `.env`, lancer la commande manquante dans un terminal ou sauter vers vos stubs. Cette page reprend les mêmes cas pour quand vous voulez comprendre ou corriger vous-même.
 
 ## PHP est introuvable
 
@@ -76,7 +76,7 @@ php artisan migrate:fresh
 
 ## Un stub personnalisé casse la génération
 
-La génération valide les stubs publiés avant d'écrire le moindre fichier, et nomme tout stub qui a perdu un placeholder requis. Corrigez le placeholder, ou réinitialisez depuis le builder avec **Customize Stubs** puis **Reset to Defaults**.
+La génération valide les stubs publiés avant d'écrire le moindre fichier, et nomme tout stub qui a perdu un placeholder requis ou qui date de la 3.x, avec la raison. Corrigez le placeholder, ou réinitialisez depuis le builder avec **Customize Stubs** puis **Reset to Defaults**.
 
 ## Permission denied
 

@@ -32,8 +32,8 @@ Juste en dessous, la vue **Generated Entities** suit tout ce que le générateur
 
 Chaque entité se déplie en trois groupes :
 
-- **Files** : une coche verte / barre rouge par artefact (Model, Controller, Service…) ; cliquez pour ouvrir.
-- **Fields** : lus depuis le `$fillable` du modèle.
+- **Files** : les fichiers que le package a notés dans `.api-generator/manifest.json`, requests Store et Update, enums et migrations de `--add-fields` compris, chacun avec une coche verte ou une barre rouge ; cliquez pour ouvrir. Les entités générées avant le manifest montrent leurs fichiers habituels.
+- **Fields** : lus depuis le `$fillable` du modèle, ou son attribut `#[Fillable]` sur Laravel 13.
 - **Relations** : extraites des méthodes de relation du modèle, affichées `belongsTo → Author`.
 
 Un observateur de fichiers garde l'arbre et la barre de statut synchronisés quand des API sont générées ou supprimées hors de l'extension, depuis le terminal ou après un `git pull`.
@@ -48,4 +48,4 @@ Clic droit (ou icônes en ligne) sur n'importe quelle entité :
 
 ## Go to Related File
 
-`Ctrl+Alt+R` (`Cmd+Alt+R` sur macOS) depuis n'importe quel fichier généré saute vers ses voisins (du modèle au contrôleur au service au test) sans fouiller l'arborescence.
+`Ctrl+Alt+R` (`Cmd+Alt+R` sur macOS) depuis n'importe quel fichier généré saute vers ses voisins (du modèle au contrôleur au service au test) sans fouiller l'arborescence. Il connaît les requests Store et Update, les enums nommés d'après leur entité et, grâce au manifest, les migrations.

@@ -125,6 +125,12 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Extension VS Code
 
+### 1.0.0
+
+- Va avec le package 4.0 : l'arbre des entités, **Go to Related File** et **Regenerate File(s)** lisent le manifest de génération, donc les requests Store et Update, les enums et les migrations de `--add-fields` apparaissent.
+- Sur Laravel 10 et 11, l'extension installe la ligne 3.x du package, car la 4.x demande Laravel 12.
+- Les erreurs de génération sont lues depuis les codes d'erreur du package, et la vérification des stubs explique pourquoi un stub de la 3.x ne convient plus.
+
 ### 0.17.0 - 27 septembre 2026
 
 - **Describe an API with Copilot** : décrivez l'API avec vos mots, relisez l'`api-schema.yaml` rédigé par Copilot, puis prévisualisez-le et générez-le. Voir [Imports](/fr/guide/extension/imports#describe-an-api-with-copilot).
