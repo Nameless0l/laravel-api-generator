@@ -92,39 +92,66 @@ ROUTES;
         }
 
         $content = $target->get($apiFilePath);
+        $lines = preg_split('/\R/', $content) ?: [];
+        $open = null;
+        $close = null;
 
-        // Move apiResource lines that are not inside a middleware group into the auth:sanctum group
-        if (str_contains($content, "Route::middleware('auth:sanctum')->group(function ()")) {
-            $lines = explode("\n", $content);
-            $apiResourceLines = [];
-            $otherLines = [];
-
-            foreach ($lines as $line) {
-                if (str_contains($line, 'Route::apiResource(') && ! str_contains($line, '//')) {
-                    $apiResourceLines[] = '    '.trim($line);
-                } elseif (str_contains($line, 'Route::post(') && str_contains($line, 'restore')) {
-                    $apiResourceLines[] = '    '.trim($line);
-                } elseif (str_contains($line, 'Route::delete(') && str_contains($line, 'force-delete')) {
-                    $apiResourceLines[] = '    '.trim($line);
-                } else {
-                    $otherLines[] = $line;
-                }
-            }
-
-            if (! empty($apiResourceLines)) {
-                $content = implode("\n", $otherLines);
-                $apiResourceBlock = implode("\n", $apiResourceLines);
-                $content = str_replace(
-                    "Route::middleware('auth:sanctum')->group(function () {\n    Route::post('logout', [AuthController::class, 'logout']);\n    Route::get('user', [AuthController::class, 'user']);\n});",
-                    "Route::middleware('auth:sanctum')->group(function () {\n    Route::post('logout', [AuthController::class, 'logout']);\n    Route::get('user', [AuthController::class, 'user']);\n\n{$apiResourceBlock}\n});",
-                    $content
-                );
-                $target->put($apiFilePath, $content, 'Routes');
+        foreach ($lines as $index => $line) {
+            if ($open === null && str_contains($line, "Route::middleware('auth:sanctum')->group(function ()")) {
+                $open = $index;
+            } elseif ($open !== null && trim($line) === '});') {
+                $close = $index;
+                break;
             }
         }
+
+        if ($open === null || $close === null) {
+            return;
+        }
+
+        // Routes already inside the group stay there, so running --auth again never drops them
+        $moved = [];
+        $groupHasRoutes = false;
+        foreach ($lines as $index => $line) {
+            if (! $this->isResourceRoute($line)) {
+                continue;
+            }
+            if ($index > $open && $index < $close) {
+                $groupHasRoutes = true;
+            } else {
+                $moved[$index] = '    '.trim($line);
+            }
+        }
+
+        if ($moved === []) {
+            return;
+        }
+
+        $output = [];
+        foreach ($lines as $index => $line) {
+            if (isset($moved[$index])) {
+                continue;
+            }
+            if ($index === $close) {
+                if (! $groupHasRoutes) {
+                    $output[] = '';
+                }
+                array_push($output, ...array_values($moved));
+            }
+            $output[] = $line;
+        }
+
+        $target->put($apiFilePath, implode(str_contains($content, "\r\n") ? "\r\n" : "\n", $output), 'Routes');
 
         if ($workspace === null) {
             $target->commit();
         }
+    }
+
+    private function isResourceRoute(string $line): bool
+    {
+        return (str_contains($line, 'Route::apiResource(') && ! str_contains($line, '//'))
+            || (str_contains($line, 'Route::post(') && str_contains($line, 'restore'))
+            || (str_contains($line, 'Route::delete(') && str_contains($line, 'force-delete'));
     }
 }
