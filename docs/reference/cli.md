@@ -79,7 +79,7 @@ Verifies that published stubs still contain every required `{{placeholder}}`.
 
 ## `api-generator:install`
 
-Prepares the application for generated APIs. On Laravel 11 and later, when `routes/api.php` does not exist yet, it offers to run `php artisan install:api`, which creates the file and installs Sanctum. When Scramble is missing, it offers to install it as a dev dependency so the interactive docs are served at `/docs/api`. Both steps are optional, and the command ends by printing the one that generates your first API.
+Prepares the application for generated APIs. When `routes/api.php` does not exist yet, it offers to run `php artisan install:api`, which creates the file and installs Sanctum. When Scramble is missing, it offers to install it as a dev dependency so the interactive docs are served at `/docs/api`. Both steps are optional, and the command ends by printing the one that generates your first API.
 
 ## `api-generator:serve`
 
@@ -91,4 +91,4 @@ Keeps one process running and answers generation previews over JSON-RPC 2.0, one
 
 ## `api-generator:mcp`
 
-Starts the [MCP server](/guide/mcp) on stdin and stdout, so coding agents can list, preview and generate APIs. Your agent runs it for you once registered. It needs `laravel/mcp` (Laravel 11.45 or later), and without it the command exits with an error that says how to install it.
+Starts the [MCP server](/guide/mcp) on stdin and stdout, so coding agents can list, preview and generate APIs. Your agent runs it for you once registered. It needs `laravel/mcp` (Laravel 12.41 or later), and without it the command exits with an error that says how to install it.

@@ -43,6 +43,7 @@ const enCliSidebar = [
     text: "Reference",
     items: [
       { text: "CLI Reference", link: "/reference/cli" },
+      { text: "Upgrading to 4.0", link: "/guide/upgrading" },
       { text: "Changelog", link: "/changelog" },
     ],
   },
@@ -127,6 +128,7 @@ const frCliSidebar = [
     text: "Référence",
     items: [
       { text: "Référence CLI", link: "/fr/reference/cli" },
+      { text: "Passer à la 4.0", link: "/fr/guide/upgrading" },
       { text: "Changelog", link: "/fr/changelog" },
     ],
   },

@@ -19,24 +19,10 @@ interface ApiGenerationServiceInterface
     public function generateCompleteApi(EntityDefinition $definition, ?array $onlyTypes = null): bool;
 
     /**
-     * Generate APIs from JSON data.
-     *
-     * @deprecated Unused by the package commands; will be removed in 4.0.
-     */
-    public function generateFromJson(string $jsonData): bool;
-
-    /**
      * Create the pivot table migrations required by manyToMany relationships.
      *
      * @param  Collection<int, EntityDefinition>  $definitions
      * @return array<int, string> created migration file paths
      */
     public function generatePivotMigrations(Collection $definitions): array;
-
-    /**
-     * Delete a complete API for the given entity.
-     *
-     * @deprecated Use the delete:fullapi command; will be removed in 4.0.
-     */
-    public function deleteCompleteApi(string $entityName): bool;
 }

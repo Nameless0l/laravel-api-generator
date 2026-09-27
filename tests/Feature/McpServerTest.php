@@ -46,7 +46,7 @@ class McpServerTest extends GeneratorTestCase
         parent::setUp();
 
         if (! class_exists(McpServer::class)) {
-            $this->markTestSkipped('laravel/mcp is not installed (it needs Laravel 11.45+).');
+            $this->markTestSkipped('laravel/mcp is not installed (it needs Laravel 12.41+).');
         }
 
         $this->instance(WorkspaceFactory::class, new WorkspaceFactory(fn (): int => 1767225600));

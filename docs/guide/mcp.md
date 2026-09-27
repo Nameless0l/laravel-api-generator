@@ -4,7 +4,7 @@ Coding agents such as Claude Code, GitHub Copilot or Cursor can call the generat
 
 ## Install
 
-The server runs on [Laravel MCP](https://laravel.com/docs/mcp), which needs Laravel 11.45 or later. Add it next to the package:
+The server runs on [Laravel MCP](https://laravel.com/docs/mcp), which needs Laravel 12.41 or later. Add it next to the package:
 
 ```bash
 composer require --dev laravel/mcp

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace nameless\CodeGenerator\Support;
 
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
@@ -300,9 +299,9 @@ class DatabaseIntrospector
     /**
      * Map of foreign key column => referenced table.
      *
-     * Uses real constraint metadata when available (Laravel 11+), and always
-     * complements it with the `<singular>_id` naming convention so databases
-     * without declared constraints (common on legacy MySQL/MyISAM) still work.
+     * Uses real constraint metadata, and always complements it with the
+     * `<singular>_id` naming convention so databases without declared
+     * constraints (common on legacy MySQL/MyISAM) still work.
      *
      * @param  array<int, string>  $allTables
      * @return array<string, string>
@@ -311,18 +310,16 @@ class DatabaseIntrospector
     {
         $map = [];
 
-        if (version_compare(app()->version(), '11', '>=')) {
-            try {
-                /** @var array<int, array{columns: array<int, string>, foreign_table: string}> $constraints */
-                $constraints = Schema::getForeignKeys($table);
-                foreach ($constraints as $constraint) {
-                    if (count($constraint['columns']) === 1) {
-                        $map[$constraint['columns'][0]] = $constraint['foreign_table'];
-                    }
+        try {
+            /** @var array<int, array{columns: array<int, string>, foreign_table: string}> $constraints */
+            $constraints = Schema::getForeignKeys($table);
+            foreach ($constraints as $constraint) {
+                if (count($constraint['columns']) === 1) {
+                    $map[$constraint['columns'][0]] = $constraint['foreign_table'];
                 }
-            } catch (\Throwable) {
-                // best effort, fall through to the naming convention
             }
+        } catch (\Throwable) {
+            // best effort, fall through to the naming convention
         }
 
         foreach (Schema::getColumnListing($table) as $column) {
@@ -346,28 +343,14 @@ class DatabaseIntrospector
      */
     public function getColumns(string $table): array
     {
-        if (version_compare(app()->version(), '11', '>=')) {
-            /** @var array<int, array{name: string, type_name?: string, type: string, nullable: bool}> $columns */
-            $columns = Schema::getColumns($table);
+        /** @var array<int, array{name: string, type_name?: string, type: string, nullable: bool}> $columns */
+        $columns = Schema::getColumns($table);
 
-            return array_map(fn (array $col) => [
-                'name' => $col['name'],
-                'type' => TypeNormalizer::fromDatabaseType($col['type_name'] ?? $col['type']),
-                'nullable' => (bool) $col['nullable'],
-            ], $columns);
-        }
-
-        // Laravel 10 fallback
-        $result = [];
-        foreach (Schema::getColumnListing($table) as $name) {
-            $result[] = [
-                'name' => $name,
-                'type' => TypeNormalizer::fromDatabaseType(Schema::getColumnType($table, $name)),
-                'nullable' => $this->isNullableLegacy($table, $name),
-            ];
-        }
-
-        return $result;
+        return array_map(fn (array $col) => [
+            'name' => $col['name'],
+            'type' => TypeNormalizer::fromDatabaseType($col['type_name'] ?? $col['type']),
+            'nullable' => (bool) $col['nullable'],
+        ], $columns);
     }
 
     /**
@@ -375,27 +358,10 @@ class DatabaseIntrospector
      */
     public function getAllTableNames(): array
     {
-        // Laravel 11+ has a portable Schema::getTables(). Use the runtime
-        // application version instead of method_exists() so PHPStan can't
-        // narrow the branch away on the latest Laravel installed for analysis.
-        if (version_compare(app()->version(), '11', '>=')) {
-            /** @var array<int, array{name: string}> $tables */
-            $tables = Schema::getTables();
+        /** @var array<int, array{name: string}> $tables */
+        $tables = Schema::getTables();
 
-            return collect($tables)->pluck('name')->all();
-        }
-
-        // Fallback for Laravel 10: query per driver
-        $driver = DB::connection()->getDriverName();
-
-        $rows = match ($driver) {
-            'mysql' => DB::select('SHOW TABLES'),
-            'pgsql' => DB::select("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public'"),
-            'sqlite' => DB::select("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"),
-            default => [],
-        };
-
-        return array_values(array_map(fn ($row): string => (string) array_values((array) $row)[0], $rows));
+        return collect($tables)->pluck('name')->all();
     }
 
     public function tableToModelName(string $table): string
@@ -415,24 +381,5 @@ class DatabaseIntrospector
         }
 
         return false;
-    }
-
-    private function isNullableLegacy(string $table, string $column): bool
-    {
-        try {
-            $driver = DB::connection()->getDriverName();
-            if ($driver === 'sqlite') {
-                $rows = DB::select("PRAGMA table_info({$table})");
-                foreach ($rows as $row) {
-                    if (($row->name ?? null) === $column) {
-                        return ((int) ($row->notnull ?? 0)) === 0;
-                    }
-                }
-            }
-        } catch (\Throwable) {
-            // best effort
-        }
-
-        return true;
     }
 }

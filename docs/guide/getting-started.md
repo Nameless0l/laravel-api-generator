@@ -7,7 +7,7 @@ Laravel API Generator scaffolds a complete, production-style REST API from a sin
 ## Requirements
 
 - PHP >= 8.2 (>= 8.3 for Laravel 13)
-- Laravel 10.x, 11.x, 12.x or 13.x
+- Laravel 12.x or 13.x (Laravel 10 and 11 projects stay on `^3.15`, see [Upgrading to 4.0](/guide/upgrading))
 
 ## Installation
 

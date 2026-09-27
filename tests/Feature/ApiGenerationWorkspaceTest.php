@@ -8,7 +8,6 @@ use nameless\CodeGenerator\Contracts\GeneratorInterface;
 use nameless\CodeGenerator\EntitiesGenerator\ModelGeneratorRefactored;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\Services\ApiGenerationService;
-use nameless\CodeGenerator\Support\JsonParser;
 use nameless\CodeGenerator\Support\SchemaParser;
 use nameless\CodeGenerator\Support\StubLoader;
 use nameless\CodeGenerator\Support\Workspace;
@@ -96,7 +95,6 @@ class ApiGenerationWorkspaceTest extends GeneratorTestCase
         };
         $service = new ApiGenerationService(
             collect([app(ModelGeneratorRefactored::class), $broken]),
-            app(JsonParser::class),
             app(StubLoader::class),
             app(WorkspaceFactory::class)
         );

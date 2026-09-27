@@ -112,7 +112,6 @@ class CodeGeneratorServiceProvider extends ServiceProvider
         $this->app->singleton(ApiGenerationService::class, function ($app) {
             return new ApiGenerationService(
                 $app->make('code_generator.generators'),
-                $app->make(JsonParser::class),
                 $app->make(StubLoader::class),
                 $app->make(WorkspaceFactory::class)
             );

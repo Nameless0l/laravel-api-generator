@@ -4,7 +4,7 @@ Les agents de code comme Claude Code, GitHub Copilot ou Cursor peuvent appeler l
 
 ## Installation
 
-Le serveur repose sur [Laravel MCP](https://laravel.com/docs/mcp), qui demande Laravel 11.45 ou plus récent. Ajoutez-le à côté du package :
+Le serveur repose sur [Laravel MCP](https://laravel.com/docs/mcp), qui demande Laravel 12.41 ou plus récent. Ajoutez-le à côté du package :
 
 ```bash
 composer require --dev laravel/mcp

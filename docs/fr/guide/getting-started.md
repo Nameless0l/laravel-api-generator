@@ -7,7 +7,7 @@ Laravel API Generator génère une API REST complète, structurée comme en prod
 ## Prérequis
 
 - PHP >= 8.2 (>= 8.3 pour Laravel 13)
-- Laravel 10.x, 11.x, 12.x ou 13.x
+- Laravel 12.x ou 13.x (les projets Laravel 10 et 11 restent en `^3.15`, voir [Passer à la 4.0](/fr/guide/upgrading))
 
 ## Installation
 
