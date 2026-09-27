@@ -60,6 +60,15 @@ class ProtocolHandlerTest extends GeneratorTestCase
     }
 
     #[Test]
+    public function a_plan_warns_about_unknown_field_types(): void
+    {
+        $response = $this->rpc(app(ProtocolHandler::class), 'plan', ['schema' => ['entities' => ['Book' => ['fields' => ['title' => 'strng']]]]]);
+
+        $this->assertMatchesProtocol($response['result'], 'planResult');
+        $this->assertContains('unknown_field_type', array_column($response['result']['warnings'], 'code'));
+    }
+
+    #[Test]
     public function two_identical_plans_give_the_same_answer(): void
     {
         $handler = app(ProtocolHandler::class);

@@ -65,6 +65,19 @@ class SchemaParser
         'morphmany' => 'morphMany',
     ];
 
+    /** @var array<int, array{code: string, message: string}> */
+    private array $warnings = [];
+
+    /**
+     * Warnings of the last parse.
+     *
+     * @return array<int, array{code: string, message: string}>
+     */
+    public function getWarnings(): array
+    {
+        return $this->warnings;
+    }
+
     /**
      * @param  array<string, mixed>  $extraOptions  options merged into every entity (CLI flags)
      * @return Collection<int, EntityDefinition>
@@ -139,6 +152,8 @@ class SchemaParser
      */
     public function parseArray(array $data, array $extraOptions = [], string $source = 'schema'): Collection
     {
+        $this->warnings = [];
+
         if (! isset($data['entities']) || ! is_array($data['entities']) || $data['entities'] === []) {
             throw CodeGeneratorException::invalidSchema($source, "missing or empty 'entities' section");
         }
@@ -261,6 +276,13 @@ class SchemaParser
             }
         } else {
             throw CodeGeneratorException::invalidSchema($source, "field '{$entity}.{$fieldName}' must be a string or a mapping");
+        }
+
+        if ($enumValues === null && ! TypeNormalizer::isKnownSchemaType($type)) {
+            $this->warnings[] = [
+                'code' => 'unknown_field_type',
+                'message' => "{$entity}.{$fieldName}: unknown type '{$type}', generated as a string column.",
+            ];
         }
 
         $attributes = $enumValues ? ['enum' => $enumValues] : [];

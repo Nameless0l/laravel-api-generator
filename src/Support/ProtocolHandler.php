@@ -82,7 +82,10 @@ final class ProtocolHandler implements LineHandler
             only: is_array($only) && $only !== [] ? array_values(array_map('strval', $only)) : null,
         ));
 
-        return ['files' => Protocol::files($plan->changes(), true), 'warnings' => array_values($plan->warnings)];
+        return [
+            'files' => Protocol::files($plan->changes(), true),
+            'warnings' => array_merge($this->schemaParser->getWarnings(), $plan->warnings),
+        ];
     }
 
     private function shutdown(): null

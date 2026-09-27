@@ -223,4 +223,19 @@ class SchemaParserTest extends TestCase
             $this->assertSame('invalid_schema', $e->errorCode);
         }
     }
+
+    #[Test]
+    public function an_unknown_type_becomes_a_string_with_a_warning(): void
+    {
+        $entities = $this->parser->parseArray(['entities' => ['Post' => ['fields' => [
+            'title' => 'strng',
+            'body' => ['type' => 'txet'],
+            'views' => 'integer',
+            'tags' => 'list_string',
+        ]]]]);
+
+        $this->assertSame('string', $entities[0]->fields[0]->type);
+        $this->assertSame(['unknown_field_type', 'unknown_field_type'], array_column($this->parser->getWarnings(), 'code'));
+        $this->assertStringContainsString("Post.title: unknown type 'strng'", $this->parser->getWarnings()[0]['message']);
+    }
 }
