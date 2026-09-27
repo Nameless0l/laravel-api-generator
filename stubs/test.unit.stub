@@ -20,22 +20,23 @@ class {{modelName}}ServiceTest extends TestCase
         $this->service = new {{modelName}}Service();
     }
 
-    public function test_can_get_all_{{pluralName}}(): void
+    public function test_can_paginate_{{pluralName}}(): void
     {
         {{modelName}}::factory()->count(5)->create();
 
-        $result = $this->service->getAll();
+        $result = $this->service->paginate(['per_page' => 2]);
 
-        $this->assertCount(5, $result);
+        $this->assertSame(5, $result->total());
+        $this->assertCount(2, $result->items());
     }
 
     public function test_can_filter_{{pluralName}}(): void
     {
-        {{modelName}}::factory()->count(3)->create();
+        $value = {{modelName}}::factory()->count(3)->create()->first()->getRawOriginal('{{filterField}}');
 
-        $result = $this->service->getAll([]);
+        $result = $this->service->paginate(['filter' => ['{{filterField}}' => $value]]);
 
-        $this->assertCount(3, $result);
+        $this->assertSame({{modelName}}::where('{{filterField}}', $value)->count(), $result->total());
     }
 
     public function test_can_create_{{modelNameLower}}(): void

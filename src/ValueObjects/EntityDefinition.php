@@ -120,6 +120,26 @@ final readonly class EntityDefinition
     }
 
     /**
+     * The columns an index may filter on: the key and every fillable column except JSON ones.
+     *
+     * @return array<int, string>
+     */
+    public function getFilterableColumns(): array
+    {
+        $json = $this->fields->filter(fn (FieldDefinition $field) => $field->type === 'json')->pluck('name')->all();
+
+        return array_values(array_unique([$this->getPrimaryKeyName(), ...array_diff($this->getFillableFields(), $json)]));
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getSortableColumns(): array
+    {
+        return array_values(array_unique([...$this->getFilterableColumns(), 'created_at', 'updated_at']));
+    }
+
+    /**
      * @return array<string, string>
      */
     public function getFieldsArray(): array

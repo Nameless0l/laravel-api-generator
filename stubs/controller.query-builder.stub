@@ -11,6 +11,7 @@ use App\Models\{{modelName}};
 use App\Http\Resources\{{modelName}}Resource;
 use App\Services\{{modelName}}Service;
 use App\DTO\{{modelName}}DTO;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class {{modelName}}Controller extends Controller
@@ -22,14 +23,13 @@ class {{modelName}}Controller extends Controller
     /**
      * Display a listing of the resource.
      *
-     * Filtering and sorting are handled by Spatie QueryBuilder:
-     *   GET /api/{{pluralName}}?filter[field]=value&sort=-created_at
+     * Spatie QueryBuilder reads filter[field]=value, sort=field,-field, page and per_page.
      */
-    public function index()
+    public function index(Request $request)
     {
         Gate::authorize('viewAny', {{modelName}}::class);
 
-        ${{pluralName}} = $this->service->getAll();
+        ${{pluralName}} = $this->service->paginate($request->query());
         return {{modelName}}Resource::collection(${{pluralName}});
     }
 

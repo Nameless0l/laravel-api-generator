@@ -55,20 +55,23 @@ class ServiceGenerator extends AbstractGenerator
 PHP;
         }
 
-        $key = $definition->getPrimaryKeyName();
-        $filterable = $definition->getFillableFields();
-        $sortable = array_values(array_unique(array_merge([$key], $filterable, ['created_at'])));
         $firstFieldDefinition = $definition->fields->first();
         $firstField = $firstFieldDefinition instanceof FieldDefinition ? $firstFieldDefinition->name : 'id';
+        $filters = $definition->usesQueryBuilder()
+            ? implode(', ', array_map(fn (string $column) => "AllowedFilter::exact('{$column}')", $definition->getFilterableColumns()))
+            : $this->quoteList($definition->getFilterableColumns());
+        $maxPerPage = max(1, (int) config('api-generator.pagination.max_per_page', 100));
 
         return [
             'modelName' => $definition->name,
             'modelNameLower' => $definition->getNameLower(),
             'pluralName' => $definition->getPluralName(),
             'softDeleteMethods' => $softDeleteMethods,
-            'allowedFilters' => $this->quoteList($filterable),
-            'allowedSorts' => $this->quoteList($sortable),
-            'primaryKey' => $key,
+            'allowedFilters' => $filters,
+            'allowedSorts' => $this->quoteList($definition->getSortableColumns()),
+            'primaryKey' => $definition->getPrimaryKeyName(),
+            'perPage' => (string) min(max(1, (int) config('api-generator.pagination.per_page', 15)), $maxPerPage),
+            'maxPerPage' => (string) $maxPerPage,
             'firstField' => $firstField,
         ];
     }

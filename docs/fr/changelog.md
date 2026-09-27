@@ -12,6 +12,7 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 - Les contrôleurs reçoivent le modèle par la liaison de route et interrogent la policy de l'entité avant chaque action. Les policies générées laissent passer tout le monde, invités compris, tant que vous ne les restreignez pas.
 - `StorePostRequest` et `UpdatePostRequest` remplacent `PostRequest`, et un PATCH ne modifie que les champs qu'il envoie.
 - Les tests générés couvrent les mises à jour partielles, ainsi que la restauration et la suppression définitive des entités avec soft deletes.
+- Chaque index est paginé, filtrable et triable (`filter[status]=draft&sort=-created_at&per_page=20`), avec ou sans Spatie QueryBuilder. Voir [Pagination, filtres et tri](/fr/guide/generating#pagination-filtres-et-tri).
 - Retirés : le fichier de config jamais chargé et les deux méthodes du service dépréciées en 3.8.
 
 ### 3.15.1 - 27 septembre 2026

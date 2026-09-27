@@ -36,8 +36,8 @@ class ValidateStubsCommand extends Command
         'model' => ['modelName', 'fillable'],
         'controller' => ['modelName', 'pluralName', 'routeParameter'],
         'controller.query-builder' => ['modelName', 'pluralName', 'routeParameter'],
-        'service' => ['modelName', 'modelNameLower'],
-        'service.query-builder' => ['modelName', 'modelNameLower', 'allowedFilters', 'allowedSorts'],
+        'service' => ['modelName', 'modelNameLower', 'allowedFilters', 'allowedSorts', 'perPage', 'maxPerPage'],
+        'service.query-builder' => ['modelName', 'modelNameLower', 'allowedFilters', 'allowedSorts', 'perPage', 'maxPerPage'],
         'dto' => ['modelName', 'attributes', 'attributesFromValidated'],
         'request.store' => ['modelName', 'rules'],
         'request.update' => ['modelName', 'rules'],
@@ -62,6 +62,8 @@ class ValidateStubsCommand extends Command
         'request' => 'not used since 4.0: move your changes to request.store.stub and request.update.stub, then delete it',
     ];
 
+    private const CALLS_GET_ALL = 'calls getAll(), which paginate() replaces since 4.0';
+
     private const SAVES_EVERY_PROPERTY = 'saves every DTO property, so a PATCH would reset the fields it leaves out: call $dto->toArray() instead of get_object_vars($dto)';
 
     /**
@@ -72,6 +74,8 @@ class ValidateStubsCommand extends Command
     private const OUTDATED = [
         'service' => ['get_object_vars($dto)', self::SAVES_EVERY_PROPERTY],
         'service.query-builder' => ['get_object_vars($dto)', self::SAVES_EVERY_PROPERTY],
+        'test.unit' => ['->getAll(', self::CALLS_GET_ALL],
+        'test.unit.pest' => ['->getAll(', self::CALLS_GET_ALL],
     ];
 
     public function handle(): int

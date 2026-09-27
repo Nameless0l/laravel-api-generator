@@ -55,6 +55,12 @@ Le DTO est construit depuis `$request->validated()` et retient les champs envoy�
 
 Un champ nommé `provided` est refusé, car le DTO garde sous ce nom la liste des champs envoyés.
 
+## Index paginé
+
+L'index est paginé, filtrable et triable sans package supplémentaire. `GET /api/posts?filter[status]=draft&sort=-created_at&page=2&per_page=20` répond `data`, `links` et `meta`, et la méthode du service derrière, `getAll()`, devient `paginate(array $query)`. Les clients qui lisaient toute la liste d'un coup reçoivent maintenant 15 éléments par page, et les filtres simples de la 3.x (`?status=draft`) deviennent `filter[status]=draft`. Avec `--query-builder`, les filtres cherchent une valeur exacte au lieu de la recherche partielle par défaut de Spatie.
+
+La taille de page vient d'un nouveau fichier de config, lu au moment de générer. Publiez-le avec `php artisan vendor:publish --tag=api-generator-config` pour changer la valeur par défaut de 15 ou le plafond de 100.
+
 ## Stubs publiés
 
 Les stubs publiés dans `stubs/vendor/laravel-api-generator` restent prioritaires, alors comparez-les avec les nouveaux. `php artisan api-generator:validate-stubs` signale ce qui manque à un stub de la 3.x :
@@ -65,8 +71,10 @@ Les stubs publiés dans `stubs/vendor/laravel-api-generator` restent prioritaire
 - `dto.stub` demande `{{attributesFromValidated}}` à la place de `{{attributesFromRequest}}`.
 - `service.stub` et `service.query-builder.stub` doivent enregistrer `$dto->toArray()` au lieu de `get_object_vars($dto)`, sinon un PATCH effacerait les champs qu'il n'envoie pas.
 - `policy.stub` demande `{{modelVariable}}`.
+- `service.stub` et `service.query-builder.stub` demandent `{{allowedFilters}}`, `{{allowedSorts}}`, `{{perPage}}` et `{{maxPerPage}}`.
+- `test.unit.stub` et `test.unit.pest.stub` doivent appeler `paginate()`, car `getAll()` n'existe plus.
 
-Les stubs des tests feature gagnent des placeholders facultatifs pour les nouveaux cas : `{{patchFields}}`, `{{patchAssertion}}`, `{{patchedColumns}}` et `{{softDeleteTests}}`.
+Les stubs des tests feature gagnent des placeholders facultatifs pour les nouveaux cas : `{{patchFields}}`, `{{patchAssertion}}`, `{{patchedColumns}}`, `{{softDeleteTests}}`, `{{filterField}}`, `{{primaryKey}}` et `{{sortAssertion}}`.
 :::
 
 ## Retiré

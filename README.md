@@ -276,11 +276,13 @@ composer require spatie/laravel-query-builder
 php artisan make:fullapi Post --fields="title:string,content:text" --query-builder
 ```
 
-The generated service exposes every fillable field as a filter and sort:
+The generated service keeps the parameters of the built-in index (see [Pagination, filters and sorting](#pagination-filters-and-sorting)) and hands them to Spatie, with exact filters:
 
 ```
-GET /api/posts?filter[title]=laravel&sort=-created_at
+GET /api/posts?filter[title]=laravel&sort=-created_at&per_page=20
 ```
+
+Spatie answers 400 for an unknown filter or sort. For partial matches, swap `AllowedFilter::exact` for `AllowedFilter::partial` in the service.
 
 The flag works with every generation mode (`--from-database`, `--schema`, `--mermaid`, interactive), and `query_builder: true` can also be set globally or per entity in the schema file.
 
@@ -508,7 +510,7 @@ entities:
 
 ### Controller
 
-The generated controller receives the model through route model binding, asks the policy before every action, and delegates to the service layer through a DTO. The `index` endpoint supports query parameter filtering out of the box.
+The generated controller receives the model through route model binding, asks the policy before every action, and delegates to the service layer through a DTO. The `index` endpoint is paginated, filterable and sortable out of the box.
 
 ```php
 class PostController extends Controller
@@ -561,22 +563,19 @@ class PostController extends Controller
 
 ### Service
 
-The service layer handles business logic and supports filtering on fillable fields. It saves what the DTO carries, so an update only touches the fields the request sent. With `--soft-deletes`, it also includes `restore()` and `forceDelete()` methods.
+The service layer handles business logic and pages, filters and sorts the index. It saves what the DTO carries, so an update only touches the fields the request sent. With `--soft-deletes`, it also includes `restore()` and `forceDelete()` methods.
 
 ```php
 class PostService
 {
-    public function getAll(array $filters = []): Collection
+    private const FILTERS = ['id', 'title', 'content', 'published'];
+
+    private const SORTS = ['id', 'title', 'content', 'published', 'created_at', 'updated_at'];
+
+    public function paginate(array $query = []): LengthAwarePaginator
     {
-        $query = Post::query();
-
-        foreach ($filters as $field => $value) {
-            if (in_array($field, (new Post())->getFillable(), true)) {
-                $query->where($field, $value);
-            }
-        }
-
-        return $query->get();
+        // filter[field]=value on FILTERS, sort=field,-field on SORTS (default -id),
+        // per_page capped at 100, then ->paginate(...)->withQueryString()
     }
 
     public function create(PostDTO $dto): Post
@@ -700,17 +699,19 @@ class PostControllerTest extends TestCase
 
 ---
 
-## Query parameter filtering
+## Pagination, filters and sorting
 
-All generated `index` endpoints support filtering by any fillable field via query parameters:
+Every generated `index` endpoint is paginated, filterable and sortable, without any extra package:
 
 ```
-GET /api/posts?published=true
-GET /api/users?name=John
-GET /api/products?category=electronics&in_stock=true
+GET /api/posts?filter[published]=1&sort=-created_at,title&page=2&per_page=20
 ```
 
-Only fields declared in the model's `$fillable` array are accepted as filters. Other parameters are silently ignored.
+The response carries `data`, `links` and `meta`. Filters match exact values on the primary key and the fillable columns (JSON columns excluded). `sort` takes a comma-separated list where a leading `-` means descending, and the default order is the primary key, newest first. Unknown filters and sorts are ignored. `per_page` defaults to 15 and stops at 100. To change these values, publish the config before generating, since they are written into each generated service:
+
+```bash
+php artisan vendor:publish --tag=api-generator-config
+```
 
 ---
 

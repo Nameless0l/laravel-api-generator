@@ -12,6 +12,7 @@ Recent releases of the package and the VS Code extension. Full histories live on
 - Controllers receive the model through route model binding and ask the entity's policy before every action. The generated policies let everyone through, guests included, until you restrict them.
 - `StorePostRequest` and `UpdatePostRequest` replace `PostRequest`, and a PATCH changes only the fields it sends.
 - The generated tests cover partial updates, and restore and force delete on entities with soft deletes.
+- Every index is paginated, filterable and sortable (`filter[status]=draft&sort=-created_at&per_page=20`), with or without Spatie QueryBuilder. See [Pagination, filters and sorting](/guide/generating#pagination-filters-and-sorting).
 - Removed: the config file that was never loaded, and the two service methods deprecated in 3.8.
 
 ### 3.15.1 - September 27, 2026

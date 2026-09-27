@@ -62,6 +62,10 @@ class CodeGeneratorServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../../stubs' => base_path('stubs/vendor/laravel-api-generator'),
             ], 'api-generator-stubs');
+
+            $this->publishes([
+                __DIR__.'/../../config/api-generator.php' => config_path('api-generator.php'),
+            ], 'api-generator-config');
         }
 
         if (class_exists(Registrar::class)) {
@@ -81,6 +85,7 @@ class CodeGeneratorServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        $this->mergeConfigFrom(__DIR__.'/../../config/api-generator.php', 'api-generator');
         $this->registerServices();
         $this->registerGenerators();
 

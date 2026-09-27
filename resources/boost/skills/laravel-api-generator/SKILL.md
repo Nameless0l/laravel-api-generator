@@ -106,7 +106,7 @@ They return the same JSON document as `--json`. Run `php artisan migrate` and `p
 | `--soft-deletes` | SoftDeletes trait, `deleted_at` column, restore and force-delete endpoints |
 | `--auth` | Sanctum register, login, logout and user endpoints; resource routes move behind `auth:sanctum` (requires `laravel/sanctum`) |
 | `--postman` | `postman_collection.json` at the project root |
-| `--query-builder` | `?filter[field]=value&sort=-created_at` on index endpoints (requires `spatie/laravel-query-builder`) |
+| `--query-builder` | Index filters, sorts and pagination through `spatie/laravel-query-builder` (must be installed) instead of the built-in code, same parameters |
 | `--pest` | Pest tests instead of PHPUnit classes |
 | `--json-api` | JSON:API resources (Laravel 12.45+, standard resources otherwise) |
 | `--only=Resource,FeatureTest` | Regenerate only these files; routes and the seeder registration stay untouched |
