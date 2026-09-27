@@ -79,7 +79,7 @@ Vérifie que les stubs publiés contiennent toujours chaque `{{placeholder}}` re
 
 ## `api-generator:install`
 
-Prépare l'application pour les API générées. Sur Laravel 11 et plus, quand `routes/api.php` n'existe pas encore, la commande propose de lancer `php artisan install:api`, qui crée le fichier et installe Sanctum. Si Scramble est absent, elle propose de l'installer en dépendance de développement pour servir la documentation interactive sur `/docs/api`. Les deux étapes sont facultatives, et la commande se termine en affichant celle qui génère votre première API.
+Prépare l'application pour les API générées. Quand `routes/api.php` n'existe pas encore, la commande propose de lancer `php artisan install:api`, qui crée le fichier et installe Sanctum. Si Scramble est absent, elle propose de l'installer en dépendance de développement pour servir la documentation interactive sur `/docs/api`. Les deux étapes sont facultatives, et la commande se termine en affichant celle qui génère votre première API.
 
 ## `api-generator:serve`
 
@@ -91,4 +91,4 @@ Garde un processus ouvert qui répond aux aperçus de génération en JSON-RPC 2
 
 ## `api-generator:mcp`
 
-Lance le [serveur MCP](/fr/guide/mcp) sur l'entrée et la sortie standard, pour que les agents de code listent, prévisualisent et génèrent des API. Une fois enregistré, votre agent le lance pour vous. La commande demande `laravel/mcp` (Laravel 11.45 ou plus récent), et sans lui elle s'arrête sur une erreur qui indique comment l'installer.
+Lance le [serveur MCP](/fr/guide/mcp) sur l'entrée et la sortie standard, pour que les agents de code listent, prévisualisent et génèrent des API. Une fois enregistré, votre agent le lance pour vous. La commande demande `laravel/mcp` (Laravel 12.41 ou plus récent), et sans lui elle s'arrête sur une erreur qui indique comment l'installer.

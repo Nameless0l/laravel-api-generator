@@ -189,7 +189,7 @@ php artisan make:fullapi --from-database --with-migrations
 What the introspection detects:
 
 - **Columns** with their types and nullability, mapped to validation rules, casts, factories, and DTO types.
-- **Foreign keys** (real constraints on Laravel 11+, plus the `<table>_id` naming convention) become `belongsTo` relations, with the inverse `hasMany` on the parent model.
+- **Foreign keys** (real constraints, plus the `<table>_id` naming convention) become `belongsTo` relations, with the inverse `hasMany` on the parent model.
 - **Pivot tables** (two foreign keys, nothing else) become `belongsToMany` on both models instead of a useless `PostTag` entity.
 - **`deleted_at`** columns enable soft deletes (trait, restore/force-delete endpoints).
 
@@ -380,7 +380,7 @@ Wire this into your CI to catch broken stubs before they reach production.
 
 ### Let coding agents generate the API (MCP)
 
-Install `laravel/mcp` (Laravel 11.45+) and register the server in your agent. With Claude Code:
+Install `laravel/mcp` (Laravel 12.41+) and register the server in your agent. With Claude Code:
 
 ```bash
 composer require --dev laravel/mcp
@@ -879,8 +879,8 @@ Then run `composer update`.
 ## Requirements
 
 - PHP >= 8.2
-- Laravel 10.x, 11.x, 12.x, or 13.x
-- Optional: `laravel/mcp` for the MCP server (Laravel 11.45+)
+- Laravel 12.x or 13.x (Laravel 10 and 11 projects stay on `^3.15`)
+- Optional: `laravel/mcp` for the MCP server (Laravel 12.41+)
 
 ---
 

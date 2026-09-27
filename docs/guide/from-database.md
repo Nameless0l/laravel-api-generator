@@ -27,7 +27,7 @@ The first form converts every user table; system tables are skipped automaticall
 The introspection reads far more than column names:
 
 - **Columns** with their types and nullability, mapped to validation rules, casts, factories, DTO types and the model PHPDoc. A `VARCHAR(255) NOT NULL UNIQUE` becomes `required|string|max:255|unique:...` plus a unique factory value.
-- **Foreign keys** (real constraints on Laravel 11+, plus the `<table>_id` naming convention) become `belongsTo` relations, with the inverse `hasMany` on the parent model: both sides typed in the PHPDoc.
+- **Foreign keys** (real constraints, plus the `<table>_id` naming convention) become `belongsTo` relations, with the inverse `hasMany` on the parent model: both sides typed in the PHPDoc.
 - **Pivot tables** (two foreign keys, nothing else) become `belongsToMany` on both models instead of a useless intermediate entity.
 - **Polymorphic pairs**: `commentable_type` + `commentable_id` columns are detected as a proper `morphTo` relation.
 - **Enum columns** become native PHP backed enums with casts and `Rule::enum()` validation.
