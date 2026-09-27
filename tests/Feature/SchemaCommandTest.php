@@ -117,8 +117,8 @@ class SchemaCommandTest extends GeneratorTestCase
         $command->run();
 
         $service = (string) file_get_contents(app_path('Services/TagService.php'));
-        $this->assertStringContainsString('QueryBuilder::for(Tag::class)', $service);
-        $this->assertStringContainsString("allowedFilters(['name'])", $service);
+        $this->assertStringContainsString('QueryBuilder::for(Tag::class, new Request($query))', $service);
+        $this->assertStringContainsString("allowedFilters([AllowedFilter::exact('id'), AllowedFilter::exact('name')])", $service);
     }
 
     #[Test]

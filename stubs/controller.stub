@@ -27,7 +27,7 @@ class {{modelName}}Controller extends Controller
     {
         Gate::authorize('viewAny', {{modelName}}::class);
 
-        ${{pluralName}} = $this->service->getAll($request->query());
+        ${{pluralName}} = $this->service->paginate($request->query());
         return {{modelName}}Resource::collection(${{pluralName}});
     }
 

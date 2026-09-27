@@ -6,21 +6,39 @@ namespace App\Services;
 
 use App\Models\{{modelName}};
 use App\DTO\{{modelName}}DTO;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class {{modelName}}Service
 {
-    public function getAll(array $filters = []): Collection
-    {
-        $query = {{modelName}}::query();
+    private const FILTERS = [{{allowedFilters}}];
 
-        foreach ($filters as $field => $value) {
-            if (in_array($field, (new {{modelName}}())->getFillable(), true)) {
-                $query->where($field, $value);
+    private const SORTS = [{{allowedSorts}}];
+
+    /**
+     * @param  array<string, mixed>  $query  filter[field]=value, sort=field,-field, page, per_page
+     */
+    public function paginate(array $query = []): LengthAwarePaginator
+    {
+        $builder = {{modelName}}::query();
+
+        foreach ((array) ($query['filter'] ?? []) as $field => $value) {
+            if (in_array($field, self::FILTERS, true)) {
+                $builder->where($field, $value);
             }
         }
 
-        return $query->get();
+        $sorts = array_filter(
+            explode(',', is_string($query['sort'] ?? null) ? $query['sort'] : ''),
+            fn (string $sort) => in_array(ltrim($sort, '-'), self::SORTS, true)
+        );
+
+        foreach ($sorts ?: ['-{{primaryKey}}'] as $sort) {
+            $builder->orderBy(ltrim($sort, '-'), str_starts_with($sort, '-') ? 'desc' : 'asc');
+        }
+
+        $perPage = is_numeric($query['per_page'] ?? null) ? min(max((int) $query['per_page'], 1), {{maxPerPage}}) : {{perPage}};
+
+        return $builder->paginate($perPage, ['*'], 'page', max((int) ($query['page'] ?? 1), 1))->withQueryString();
     }
 
     public function create({{modelName}}DTO $dto): {{modelName}}

@@ -86,6 +86,17 @@ class ValidateStubsCommandTest extends TestCase
         $this->assertStringContainsString('$dto->toArray()', (string) $this->row($report, 'service')['reason']);
     }
 
+    #[Test]
+    public function a_unit_test_stub_calling_get_all_is_outdated(): void
+    {
+        File::put("{$this->published}/test.unit.stub", "class {{modelName}}ServiceTest\n{\n    // {{modelNameLower}}\n    public function test_all(): void { \$this->service->getAll(); }\n}\n");
+
+        [$exitCode, $report] = $this->validate();
+
+        $this->assertSame(1, $exitCode);
+        $this->assertStringContainsString('paginate()', (string) $this->row($report, 'test.unit')['reason']);
+    }
+
     /**
      * @return array{int, array{status: string, results: array<int, array<string, mixed>>}}
      */

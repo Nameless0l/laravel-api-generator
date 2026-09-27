@@ -26,13 +26,12 @@ class QueryBuilderOptionTest extends GeneratorTestCase
 
         $service = (string) file_get_contents(app_path('Services/ProductService.php'));
         $this->assertStringContainsString('use Spatie\QueryBuilder\QueryBuilder;', $service);
-        $this->assertStringContainsString('QueryBuilder::for(Product::class)', $service);
-        $this->assertStringContainsString("allowedFilters(['name', 'price'])", $service);
-        $this->assertStringContainsString("allowedSorts(['id', 'name', 'price', 'created_at'])", $service);
+        $this->assertStringContainsString('QueryBuilder::for(Product::class, new Request($query))', $service);
+        $this->assertStringContainsString("allowedFilters([AllowedFilter::exact('id'), AllowedFilter::exact('name'), AllowedFilter::exact('price')])", $service);
+        $this->assertStringContainsString("allowedSorts(['id', 'name', 'price', 'created_at', 'updated_at'])", $service);
 
         $controller = (string) file_get_contents(app_path('Http/Controllers/ProductController.php'));
-        $this->assertStringContainsString('$this->service->getAll()', $controller);
-        $this->assertStringNotContainsString('use Illuminate\Http\Request;', $controller);
+        $this->assertStringContainsString('$this->service->paginate($request->query())', $controller);
     }
 
     #[Test]
@@ -47,7 +46,7 @@ class QueryBuilderOptionTest extends GeneratorTestCase
 
         $service = (string) file_get_contents(app_path('Services/ProductService.php'));
         $this->assertStringNotContainsString('QueryBuilder', $service);
-        $this->assertStringContainsString('getAll(array $filters = [])', $service);
+        $this->assertStringContainsString('public function paginate(array $query = []): LengthAwarePaginator', $service);
     }
 
     #[Test]
@@ -62,7 +61,7 @@ class QueryBuilderOptionTest extends GeneratorTestCase
         $command->run();
 
         $service = (string) file_get_contents(app_path('Services/ProductService.php'));
-        $this->assertStringContainsString("allowedSorts(['sku', 'name', 'created_at'])", $service);
+        $this->assertStringContainsString("allowedSorts(['sku', 'name', 'created_at', 'updated_at'])", $service);
         $this->assertStringContainsString("->defaultSort('-sku')", $service);
         $this->assertStringNotContainsString("'-id'", $service);
     }

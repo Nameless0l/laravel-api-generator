@@ -56,6 +56,7 @@ class FeatureTestGenerator extends AbstractGenerator
 
         $patched = $definition->fields->first(fn (FieldDefinition $field) => ! $field->isPrimary());
         $indent = $definition->usesPest() ? '    ' : '        ';
+        $firstByKey = "{$definition->name}::query()->orderBy('{$pk}')->value('{$pk}')";
 
         return [
             'modelName' => $definition->name,
@@ -82,6 +83,11 @@ class FeatureTestGenerator extends AbstractGenerator
                 : "\n{$indent}\$this->assertDatabaseHas('{$definition->getTableName()}', ['{$pk}' => \${$lower}->getKey(), '{$patched->name}' => {$this->sampleValue($patched)}]);",
             'patchedColumns' => implode(', ', array_map(fn (string $column) => "'{$column}'", array_filter([$patched?->name, 'updated_at']))),
             'softDeleteTests' => $definition->hasSoftDeletes() ? $this->generateSoftDeleteTests($definition) : '',
+            'filterField' => collect($definition->getFilterableColumns())->first(fn (string $column) => $column !== $pk) ?? $pk,
+            'primaryKey' => $pk,
+            'sortAssertion' => $definition->usesJsonApi()
+                ? "->assertJsonPath('data.0.id', (string) {$firstByKey})"
+                : "->assertJsonPath('data.0.{$pk}', {$firstByKey})",
         ];
     }
 

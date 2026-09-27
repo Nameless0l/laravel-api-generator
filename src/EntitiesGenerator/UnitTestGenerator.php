@@ -45,8 +45,10 @@ class UnitTestGenerator extends AbstractGenerator
 
         $belongsToRels = $definition->relationships
             ->filter(fn (RelationshipDefinition $rel) => $rel->requiresForeignKey());
+        $pk = $definition->getPrimaryKeyName();
 
         return [
+            'filterField' => collect($definition->getFilterableColumns())->first(fn (string $column) => $column !== $pk) ?? $pk,
             'modelName' => $definition->name,
             'modelNameLower' => $definition->getNameLower(),
             'pluralName' => $definition->getPluralName(),

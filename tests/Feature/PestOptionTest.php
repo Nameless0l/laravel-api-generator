@@ -36,7 +36,7 @@ class PestOptionTest extends GeneratorTestCase
 
         $unitTest = (string) file_get_contents(base_path('tests/Unit/GadgetServiceTest.php'));
         $this->assertStringContainsString('beforeEach(function () {', $unitTest);
-        $this->assertStringContainsString('expect($result)->toHaveCount(5);', $unitTest);
+        $this->assertStringContainsString('expect($result->total())->toBe(5)', $unitTest);
         $this->assertStringNotContainsString('class GadgetServiceTest', $unitTest);
     }
 

@@ -11,20 +11,21 @@ beforeEach(function () {
     $this->service = new {{modelName}}Service();
 });
 
-it('gets all {{pluralName}}', function () {
+it('paginates {{pluralName}}', function () {
     {{modelName}}::factory()->count(5)->create();
 
-    $result = $this->service->getAll();
+    $result = $this->service->paginate(['per_page' => 2]);
 
-    expect($result)->toHaveCount(5);
+    expect($result->total())->toBe(5)
+        ->and($result->items())->toHaveCount(2);
 });
 
 it('filters {{pluralName}}', function () {
-    {{modelName}}::factory()->count(3)->create();
+    $value = {{modelName}}::factory()->count(3)->create()->first()->getRawOriginal('{{filterField}}');
 
-    $result = $this->service->getAll([]);
+    $result = $this->service->paginate(['filter' => ['{{filterField}}' => $value]]);
 
-    expect($result)->toHaveCount(3);
+    expect($result->total())->toBe({{modelName}}::where('{{filterField}}', $value)->count());
 });
 
 it('creates a {{modelNameLower}}', function () {
