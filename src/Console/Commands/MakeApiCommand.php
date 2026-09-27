@@ -39,7 +39,8 @@ class MakeApiCommand extends Command
         {--json-api : Generate JSON:API-compliant resources (requires Laravel 12.45+)}
         {--add-fields= : Add fields to an existing entity (incremental migration + in-place patches)}
         {--dry-run : List the files that would be written, without writing anything}
-        {--json : Print one JSON document (protocol 1) instead of text}';
+        {--json : Print one JSON document (protocol 1) instead of text}
+        {--force : Overwrite files edited by hand since they were generated}';
 
     protected $description = 'Generate a complete API including model, migration, controller, resource, request, factory, seeder, DTO, service, policy, and tests';
 
@@ -142,6 +143,7 @@ class MakeApiCommand extends Command
             auth: $this->auth,
             postman: (bool) $this->option('postman'),
             only: $this->onlyTypesOption(),
+            force: (bool) $this->option('force'),
         ));
     }
 
@@ -407,8 +409,9 @@ class MakeApiCommand extends Command
         $this->info($dryRun ? 'Dry run, nothing was written. Files this command would touch:' : 'Files:');
 
         foreach ($changes as $change) {
-            if ($change->writesToDisk() || $dryRun) {
-                $this->line(sprintf('  %-9s %s', $this->actionLabel($change->action, $dryRun), $change->path));
+            if ($change->writesToDisk() || $change->kept || $dryRun) {
+                $label = $change->kept ? 'kept' : $this->actionLabel($change->action, $dryRun);
+                $this->line(sprintf('  %-9s %s', $label, $change->path));
             }
         }
 
@@ -494,7 +497,7 @@ class MakeApiCommand extends Command
         );
 
         $this->auth = $withAuth;
-        $plan = $this->planner->plan(new GenerationRequest(collect([$definition]), $withAuth, $withPostman));
+        $plan = $this->planner->plan(new GenerationRequest(collect([$definition]), $withAuth, $withPostman, force: (bool) $this->option('force')));
 
         $this->displayPreview($definition, $softDeletes, $withAuth, $plan);
 
