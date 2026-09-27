@@ -2,6 +2,7 @@
 
 use App\Models\{{modelName}};{{relatedImports}}{{userImport}}
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Arr;
 
 uses(RefreshDatabase::class);
 {{userSetup}}
@@ -46,6 +47,16 @@ it('updates a {{modelNameLower}}', function () {
     {{updateAssertFields}}
 });
 
+it('patches a {{modelNameLower}}', function () {
+    ${{modelNameLower}} = {{modelName}}::factory()->create()->fresh();
+
+    $response = {{actingAs}}$this->patchJson("/api/{{pluralName}}/{${{modelNameLower}}->getKey()}", [{{patchFields}}]);
+
+    $response->assertStatus(200);{{patchAssertion}}
+    expect(Arr::except(${{modelNameLower}}->fresh()->getAttributes(), [{{patchedColumns}}]))
+        ->toBe(Arr::except(${{modelNameLower}}->getAttributes(), [{{patchedColumns}}]));
+});
+
 it('deletes a {{modelNameLower}}', function () {
     ${{modelNameLower}} = {{modelName}}::factory()->create();
 
@@ -53,7 +64,7 @@ it('deletes a {{modelNameLower}}', function () {
 
     $response->assertStatus(204);
     {{deleteAssertion}}
-});
+});{{softDeleteTests}}
 
 it('validates required fields on create', function () {
     $response = {{actingAs}}$this->postJson('/api/{{pluralName}}', []);
