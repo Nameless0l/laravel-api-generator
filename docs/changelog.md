@@ -6,6 +6,14 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.15.0
+
+- Fixed: a custom primary key is validated as unique, so posting a key that already exists returns a 422 instead of a 500.
+- Fixed: a `hasOne` puts its foreign key on the related table, where Eloquent looks for it. A `has_one_foreign_key` warning names the column to add when the related model is generated separately.
+- Fixed: `date`, `time` and `datetime` fields get `DATE`, `TIME` and `DATETIME` columns instead of `TIMESTAMP`, and `time` fields are validated as a time of day. See [Field Types](/guide/field-types).
+- Fixed: `--query-builder` sorts on the real primary key, so entities with a custom key no longer fail on their index.
+- `class_data.json` gets the missing side of its relations, like schema files and Mermaid diagrams.
+
 ### 3.14.0 - September 27, 2026
 
 - The MCP server offers a `design-api` prompt: describe the API in plain words, and the agent drafts the schema, shows you the plan, then generates it once you agree. See [MCP Server](/guide/mcp#ask-for-an-api).

@@ -6,6 +6,14 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.15.0
+
+- Corrigé : une clé primaire personnalisée est validée comme unique, donc poster une clé qui existe déjà renvoie 422 au lieu de 500.
+- Corrigé : un `hasOne` pose sa clé étrangère sur la table liée, là où Eloquent la cherche. Un avertissement `has_one_foreign_key` nomme la colonne à ajouter quand le modèle lié est généré à part.
+- Corrigé : les champs `date`, `time` et `datetime` reçoivent des colonnes `DATE`, `TIME` et `DATETIME` au lieu de `TIMESTAMP`, et les champs `time` sont validés comme une heure. Voir [Types de champs](/fr/guide/field-types).
+- Corrigé : `--query-builder` trie sur la vraie clé primaire, donc les entités à clé personnalisée ne plantent plus sur leur index.
+- `class_data.json` reçoit le côté manquant de ses relations, comme les fichiers de schéma et les diagrammes Mermaid.
+
 ### 3.14.0 - 27 septembre 2026
 
 - Le serveur MCP propose un prompt `design-api` : décrivez l'API avec vos mots, l'agent rédige le schéma, vous montre le plan, puis génère une fois votre accord donné. Voir [Serveur MCP](/fr/guide/mcp#demander-une-api).
