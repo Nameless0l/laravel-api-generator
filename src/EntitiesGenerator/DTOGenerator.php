@@ -53,7 +53,7 @@ class DTOGenerator extends AbstractGenerator
         // Add foreign key fields from belongsTo relationships as optional parameters
         $fkAttributes = $definition->relationships
             ->filter(fn (RelationshipDefinition $rel) => $rel->requiresForeignKey())
-            ->map(fn (RelationshipDefinition $rel) => "public ?int \${$rel->getForeignKeyName()} = null,")
+            ->map(fn (RelationshipDefinition $rel) => "public ?{$rel->getForeignKeyPhpType()} \${$rel->getForeignKeyName()} = null,")
             ->toArray();
 
         $all = array_merge($attributes, $fkAttributes);
@@ -86,7 +86,7 @@ class DTOGenerator extends AbstractGenerator
         // Add foreign key fields from belongsTo relationships
         $fkFromRequest = $definition->relationships
             ->filter(fn (RelationshipDefinition $rel) => $rel->requiresForeignKey())
-            ->map(fn (RelationshipDefinition $rel) => "\$request->input('{$rel->getForeignKeyName()}') ? (int) \$request->input('{$rel->getForeignKeyName()}') : null,")
+            ->map(fn (RelationshipDefinition $rel) => "\$request->input('{$rel->getForeignKeyName()}') ? ({$rel->getForeignKeyPhpType()}) \$request->input('{$rel->getForeignKeyName()}') : null,")
             ->toArray();
 
         $all = array_merge($fromRequest, $fkFromRequest);

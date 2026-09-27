@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `config/laravel-api-generator.php`, which was never loaded, so its paths, namespaces and field types had no effect.
 - `ApiGenerationServiceInterface::generateFromJson()` and `deleteCompleteApi()`, deprecated since 3.8.
 
+## [3.15.1] - 2026-09-27
+
+### Fixed
+- **A `belongsTo` toward a custom string primary key works through the DTO.** The DTO typed every foreign key as `?int` and cast it with `(int)`, so `country_code` became `0` and creating or updating a `City` failed on the foreign key constraint, generated tests included. The DTO now follows the key type of the related model, like the request and the model PHPDoc already did.
+
 ## [3.15.0] - 2026-09-27
 
 ### Fixed

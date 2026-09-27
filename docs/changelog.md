@@ -11,6 +11,10 @@ Recent releases of the package and the VS Code extension. Full histories live on
 - Laravel 12 or 13 is required. Laravel 10 and 11 projects keep 3.15, and [Upgrading to 4.0](/guide/upgrading) lists every change.
 - Removed: the config file that was never loaded, and the two service methods deprecated in 3.8.
 
+### 3.15.1 - September 27, 2026
+
+- Fixed: a `belongsTo` toward a model with a custom string primary key, such as `country_code`, no longer turns the key into `0` in the DTO, which made creating and updating fail.
+
 ### 3.15.0 - September 27, 2026
 
 - Fixed: a custom primary key is validated as unique, so posting a key that already exists returns a 422 instead of a 500.
