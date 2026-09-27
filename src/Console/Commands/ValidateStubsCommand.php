@@ -34,22 +34,44 @@ class ValidateStubsCommand extends Command
      */
     private const REQUIRED = [
         'model' => ['modelName', 'fillable'],
-        'controller' => ['modelName', 'modelNameLower', 'pluralName'],
-        'controller.query-builder' => ['modelName', 'modelNameLower', 'pluralName'],
+        'controller' => ['modelName', 'pluralName', 'routeParameter'],
+        'controller.query-builder' => ['modelName', 'pluralName', 'routeParameter'],
         'service' => ['modelName', 'modelNameLower'],
         'service.query-builder' => ['modelName', 'modelNameLower', 'allowedFilters', 'allowedSorts'],
-        'dto' => ['modelName', 'attributes', 'attributesFromRequest'],
-        'request' => ['modelName', 'rules'],
+        'dto' => ['modelName', 'attributes', 'attributesFromValidated'],
+        'request.store' => ['modelName', 'rules'],
+        'request.update' => ['modelName', 'rules'],
         'resource' => ['modelName', 'fields'],
         'migrations' => ['tableName', 'fields'],
         'factory' => ['modelName', 'factoryFields'],
         'seed' => ['modelName'],
-        'policy' => ['modelName', 'modelNameLower'],
+        'policy' => ['modelName', 'modelVariable'],
         'test.feature' => ['modelName', 'modelNameLower', 'pluralName'],
         'test.unit' => ['modelName', 'modelNameLower'],
         'test.feature.pest' => ['modelName', 'modelNameLower', 'pluralName'],
         'test.unit.pest' => ['modelName', 'modelNameLower'],
         'migration.add-fields' => ['tableName', 'columns', 'dropColumns'],
+    ];
+
+    /**
+     * Published stubs the generator no longer reads, so their changes are lost.
+     *
+     * @var array<string, string>
+     */
+    private const OBSOLETE = [
+        'request' => 'not used since 4.0: move your changes to request.store.stub and request.update.stub, then delete it',
+    ];
+
+    private const SAVES_EVERY_PROPERTY = 'saves every DTO property, so a PATCH would reset the fields it leaves out: call $dto->toArray() instead of get_object_vars($dto)';
+
+    /**
+     * Code that only 3.x stubs contain and that breaks the generated API since 4.0.
+     *
+     * @var array<string, array{string, string}> stub => [code, reason]
+     */
+    private const OUTDATED = [
+        'service' => ['get_object_vars($dto)', self::SAVES_EVERY_PROPERTY],
+        'service.query-builder' => ['get_object_vars($dto)', self::SAVES_EVERY_PROPERTY],
     ];
 
     public function handle(): int
@@ -92,21 +114,31 @@ class ValidateStubsCommand extends Command
                 }
             }
 
+            [$code, $reason] = self::OUTDATED[$stubName] ?? [null, null];
+            $outdated = $code !== null && str_contains($content, $code);
+
             $results[] = [
                 'stub' => $stubName,
-                'status' => empty($missing) ? 'ok' : 'invalid',
+                'status' => empty($missing) && ! $outdated ? 'ok' : 'invalid',
                 'missing' => $missing,
+                ...($outdated ? ['reason' => $reason] : []),
             ];
 
-            if (! empty($missing)) {
+            if (! empty($missing) || $outdated) {
                 $hasError = true;
+            }
+        }
+
+        foreach (self::OBSOLETE as $stubName => $reason) {
+            if (File::exists($userStubsDir.DIRECTORY_SEPARATOR.$stubName.'.stub')) {
+                $results[] = ['stub' => $stubName, 'status' => 'obsolete', 'missing' => [], 'reason' => $reason];
             }
         }
 
         $payload = [
             'status' => $hasError ? 'invalid' : 'ok',
             'message' => $hasError
-                ? 'One or more stubs are missing required placeholders.'
+                ? 'One or more stubs are missing required placeholders or were written for 3.x.'
                 : 'All customized stubs are valid.',
             'results' => $results,
         ];
@@ -143,8 +175,11 @@ class ValidateStubsCommand extends Command
                 $this->line("  ✓ {$stub}");
             } elseif ($status === 'not-customized') {
                 $this->line("  · {$stub} (using package default)");
+            } elseif ($status === 'obsolete') {
+                $this->line("  ! {$stub} - {$row['reason']}");
             } else {
-                $this->line("  ✗ {$stub} - missing: ".implode(', ', $missing));
+                $details = array_filter([$missing === [] ? null : 'missing: '.implode(', ', $missing), $row['reason'] ?? null]);
+                $this->line("  ✗ {$stub} - ".implode('; ', $details));
             }
         }
     }

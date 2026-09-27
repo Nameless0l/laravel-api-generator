@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\Tests\Feature;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Testing\PendingCommand;
+use nameless\CodeGenerator\EntitiesGenerator\RequestGenerator;
+use nameless\CodeGenerator\Support\StubLoader;
+use nameless\CodeGenerator\ValueObjects\EntityDefinition;
+use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 use PHPUnit\Framework\Attributes\Test;
 
 class EnumFieldTest extends GeneratorTestCase
@@ -56,14 +61,41 @@ class EnumFieldTest extends GeneratorTestCase
         $this->assertStringContainsString("'status' => \App\Enums\Status::class", $model);
         $this->assertStringContainsString('@property \App\Enums\Status $status', $model);
 
-        $request = (string) file_get_contents(app_path('Http/Requests/ArticleRequest.php'));
-        $this->assertStringContainsString('Rule::enum(\App\Enums\Status::class)', $request);
+        $this->assertStringContainsString(
+            "'status' => ['required', \Illuminate\Validation\Rule::enum(\App\Enums\Status::class)],",
+            (string) file_get_contents(app_path('Http/Requests/StoreArticleRequest.php'))
+        );
+        $this->assertStringContainsString(
+            "'status' => ['sometimes', 'required', \Illuminate\Validation\Rule::enum(\App\Enums\Status::class)],",
+            (string) file_get_contents(app_path('Http/Requests/UpdateArticleRequest.php'))
+        );
 
         $factory = (string) file_get_contents(database_path('factories/ArticleFactory.php'));
         $this->assertStringContainsString('fake()->randomElement(\App\Enums\Status::cases())', $factory);
 
         $migration = (string) file_get_contents($this->firstMigrationFor('articles'));
         $this->assertStringContainsString("\$table->enum('status', ['draft', 'published']);", $migration);
+    }
+
+    #[Test]
+    public function a_nullable_enum_accepts_null_instead_of_being_skipped(): void
+    {
+        (new RequestGenerator(app(StubLoader::class)))->generate(new EntityDefinition(
+            name: 'Article',
+            fields: new Collection([
+                new FieldDefinition(name: 'status', type: 'string', nullable: true, attributes: ['enum' => ['draft', 'published']]),
+            ]),
+            relationships: new Collection,
+        ));
+
+        $this->assertStringContainsString(
+            "'status' => ['nullable', \Illuminate\Validation\Rule::enum(\App\Enums\Status::class)],",
+            (string) file_get_contents(app_path('Http/Requests/StoreArticleRequest.php'))
+        );
+        $this->assertStringContainsString(
+            "'status' => ['sometimes', 'nullable', \Illuminate\Validation\Rule::enum(\App\Enums\Status::class)],",
+            (string) file_get_contents(app_path('Http/Requests/UpdateArticleRequest.php'))
+        );
     }
 
     #[Test]

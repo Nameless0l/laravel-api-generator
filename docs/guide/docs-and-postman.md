@@ -20,7 +20,7 @@ From VS Code, the [extension](/guide/extension/quick-actions)'s **Open API Docs*
 What you get automatically:
 
 - **Interactive Swagger UI**: test endpoints from the browser with *Send API Request*
-- **Auto-detected schemas**: `PostRequest`, `PostResource`… inferred from FormRequest rules and Resource structure
+- **Auto-detected schemas**: `StorePostRequest`, `UpdatePostRequest`, `PostResource`… inferred from FormRequest rules and Resource structure
 - **Validation rules as constraints**: `required|string|max:255` becomes a required string with `<= 255 characters` in the docs
 - **Request/response examples**: sample JSON bodies generated for you
 - **Grouped endpoints**: each entity gets its own section with all CRUD operations

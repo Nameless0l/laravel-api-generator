@@ -33,9 +33,14 @@ class PolicyGenerator extends AbstractGenerator
      */
     protected function getReplacements(EntityDefinition $definition): array
     {
+        // The policy of User already receives a $user, as with php artisan make:policy.
+        $isUser = $definition->name === 'User';
+
         return [
             'modelName' => $definition->name,
             'modelNameLower' => $definition->getNameLower(),
+            'modelVariable' => $isUser ? 'model' : $definition->getNameCamel(),
+            'userImport' => $isUser ? '' : "\nuse App\\Models\\User;",
         ];
     }
 }

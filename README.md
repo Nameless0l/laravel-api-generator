@@ -56,7 +56,7 @@ Every request flows through a clean, layered structure:
 
 ## What it generates
 
-From a single command, the package creates **12 files** per entity and registers the API route:
+From a single command, the package creates **13 files** per entity and registers the API route:
 
 | Layer | File | Location |
 |-------|------|----------|
@@ -64,7 +64,7 @@ From a single command, the package creates **12 files** per entity and registers
 | Controller | `PostController.php` | `app/Http/Controllers/` |
 | Service | `PostService.php` | `app/Services/` |
 | DTO | `PostDTO.php` | `app/DTO/` |
-| Request | `PostRequest.php` | `app/Http/Requests/` |
+| Requests | `StorePostRequest.php`, `UpdatePostRequest.php` | `app/Http/Requests/` |
 | Resource | `PostResource.php` | `app/Http/Resources/` |
 | Policy | `PostPolicy.php` | `app/Policies/` |
 | Factory | `PostFactory.php` | `database/factories/` |
@@ -508,7 +508,7 @@ entities:
 
 ### Controller
 
-The generated controller uses constructor injection, DTOs, and delegates to the service layer. The `index` endpoint supports query parameter filtering out of the box.
+The generated controller receives the model through route model binding, asks the policy before every action, and delegates to the service layer through a DTO. The `index` endpoint supports query parameter filtering out of the box.
 
 ```php
 class PostController extends Controller
@@ -519,12 +519,16 @@ class PostController extends Controller
 
     public function index(Request $request)
     {
+        Gate::authorize('viewAny', Post::class);
+
         $posts = $this->service->getAll($request->query());
         return PostResource::collection($posts);
     }
 
-    public function store(PostRequest $request)
+    public function store(StorePostRequest $request)
     {
+        Gate::authorize('create', Post::class);
+
         $dto = PostDTO::fromRequest($request);
         $post = $this->service->create($dto);
         return new PostResource($post);
@@ -532,27 +536,32 @@ class PostController extends Controller
 
     public function show(Post $post)
     {
+        Gate::authorize('view', $post);
+
         return new PostResource($post);
     }
 
-    public function update(PostRequest $request, Post $post)
+    public function update(UpdatePostRequest $request, Post $post)
     {
+        Gate::authorize('update', $post);
+
         $dto = PostDTO::fromRequest($request);
-        $updatedPost = $this->service->update($post, $dto);
-        return new PostResource($updatedPost);
+        return new PostResource($this->service->update($post, $dto));
     }
 
     public function destroy(Post $post)
     {
+        Gate::authorize('delete', $post);
+
         $this->service->delete($post);
-        return response(null, 204);
+        return response()->noContent();
     }
 }
 ```
 
 ### Service
 
-The service layer handles business logic and supports filtering on fillable fields. Route parameters are accepted as `int|string` to work seamlessly with `declare(strict_types=1)`. With `--soft-deletes`, it also includes `restore()` and `forceDelete()` methods.
+The service layer handles business logic and supports filtering on fillable fields. It saves what the DTO carries, so an update only touches the fields the request sent. With `--soft-deletes`, it also includes `restore()` and `forceDelete()` methods.
 
 ```php
 class PostService
@@ -570,19 +579,14 @@ class PostService
         return $query->get();
     }
 
-    public function find(int|string $id): Post
-    {
-        return Post::findOrFail($id);
-    }
-
     public function create(PostDTO $dto): Post
     {
-        return Post::create(get_object_vars($dto));
+        return Post::create($dto->toArray());
     }
 
     public function update(Post $post, PostDTO $dto): Post
     {
-        $post->update(get_object_vars($dto));
+        $post->update($dto->toArray());
         return $post->fresh();
     }
 
@@ -593,27 +597,65 @@ class PostService
 }
 ```
 
+### Requests
+
+`StorePostRequest` holds the creation rules. `UpdatePostRequest` prefixes each of them with `sometimes`, so a PATCH may send a single field, and its unique rules ignore the post being updated:
+
+```php
+public function rules(): array
+{
+    return [
+        'title' => 'sometimes|required|string|max:255',
+        'slug' => ['sometimes', 'required', 'string', 'max:255', Rule::unique('posts')->ignore($this->route('post'))],
+        'published_at' => 'sometimes|nullable|date',
+    ];
+}
+```
+
 ### DTO
 
-Readonly data transfer objects with typed properties and a factory method:
+Readonly data transfer objects built from the validated data. `toArray()` returns the fields the request sent, which keeps a partial update partial:
 
 ```php
 readonly class PostDTO
 {
     public function __construct(
-        public ?string $title,
-        public ?string $content,
-        public ?bool $published
+        public ?string $title = null,
+        public ?string $content = null,
+        public ?bool $published = null,
+        private ?array $provided = null
     ) {}
 
-    public static function fromRequest(PostRequest $request): self
+    public static function fromRequest(StorePostRequest|UpdatePostRequest $request): self
     {
+        $data = $request->validated();
+
         return new self(
-            $request->input('title'),
-            $request->input('content'),
-            (bool) $request->input('published')
+            title: $data['title'] ?? null,
+            content: $data['content'] ?? null,
+            published: isset($data['published']) ? (bool) $data['published'] : null,
+            provided: array_keys($data)
         );
     }
+
+    public function toArray(): array
+    {
+        $values = get_object_vars($this);
+        unset($values['provided']);
+
+        return $this->provided === null ? $values : array_intersect_key($values, array_flip($this->provided));
+    }
+}
+```
+
+### Policy
+
+Every controller action goes through the entity's policy. The generated policy accepts guests and returns `true`, so the API is public until you restrict it:
+
+```php
+public function update(?User $user, Post $post): bool
+{
+    return $user?->id === $post->user_id;
 }
 ```
 
@@ -639,6 +681,17 @@ class PostControllerTest extends TestCase
         $response = $this->postJson('/api/posts', $data);
         $response->assertStatus(201);
         $this->assertDatabaseHas('posts', $data);
+    }
+
+    public function test_can_patch_post(): void
+    {
+        $post = Post::factory()->create()->fresh();
+        $response = $this->patchJson("/api/posts/{$post->getKey()}", ['title' => 'test_title']);
+        $response->assertStatus(200);
+        $this->assertSame(
+            Arr::except($post->getAttributes(), ['title', 'updated_at']),
+            Arr::except($post->fresh()->getAttributes(), ['title', 'updated_at'])
+        );
     }
 
     // ... show, update, delete, validation tests
@@ -668,11 +721,11 @@ When using `--soft-deletes`, the generator adds:
 - `SoftDeletes` trait and import to the model
 - `$table->softDeletes()` to the migration
 - `restore()` and `forceDelete()` methods to the controller and service
-- Two additional routes:
+- Two additional routes, which also find a soft deleted post:
 
 ```
-POST   /api/posts/{id}/restore
-DELETE /api/posts/{id}/force-delete
+POST   /api/posts/{post}/restore
+DELETE /api/posts/{post}/force-delete
 ```
 
 ---

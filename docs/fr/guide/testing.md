@@ -9,6 +9,8 @@ Chaque entité arrive avec un test feature (`tests/Feature/PostControllerTest.ph
 - Index : la liste renvoie les enregistrements créés
 - Store : la création persiste et renvoie 201
 - Les allers-retours Show / Update / Delete
+- Une mise à jour partielle : le PATCH envoie un champ, et toutes les autres colonnes gardent leur valeur
+- La restauration et la suppression définitive, quand l'entité utilise les soft deletes
 - Les erreurs de validation sur entrée invalide
 - La couche service isolément
 

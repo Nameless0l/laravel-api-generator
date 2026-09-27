@@ -9,6 +9,9 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 ### 4.0.0
 
 - Laravel 12 ou 13 est requis. Les projets Laravel 10 et 11 gardent la 3.15, et [Passer à la 4.0](/fr/guide/upgrading) liste tous les changements.
+- Les contrôleurs reçoivent le modèle par la liaison de route et interrogent la policy de l'entité avant chaque action. Les policies générées laissent passer tout le monde, invités compris, tant que vous ne les restreignez pas.
+- `StorePostRequest` et `UpdatePostRequest` remplacent `PostRequest`, et un PATCH ne modifie que les champs qu'il envoie.
+- Les tests générés couvrent les mises à jour partielles, ainsi que la restauration et la suppression définitive des entités avec soft deletes.
 - Retirés : le fichier de config jamais chargé et les deux méthodes du service dépréciées en 3.8.
 
 ### 3.15.1 - 27 septembre 2026

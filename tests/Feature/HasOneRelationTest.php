@@ -51,7 +51,7 @@ class HasOneRelationTest extends GeneratorTestCase
         );
         $this->assertStringContainsString('return $this->hasOne(Profile::class);', (string) file_get_contents(app_path('Models/Author.php')));
         $this->assertStringContainsString('return $this->belongsTo(Author::class);', (string) file_get_contents(app_path('Models/Profile.php')));
-        $this->assertStringNotContainsString('profile_id', (string) file_get_contents(app_path('Http/Requests/AuthorRequest.php')));
+        $this->assertStringNotContainsString('profile_id', (string) file_get_contents(app_path('Http/Requests/StoreAuthorRequest.php')));
     }
 
     #[Test]

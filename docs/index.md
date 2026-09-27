@@ -58,7 +58,7 @@ const tabs = [
         title: 'One command',
         img: demoGif,
         imgAlt: 'make:fullapi terminal demo',
-        text: 'make:fullapi turns one line into twelve files and a registered route: model, controller, service, DTO, requests, resources, policy, migration, factory, seeder and two test suites.',
+        text: 'make:fullapi turns one line into thirteen files and a registered route: model, controller, service, DTO, requests, resources, policy, migration, factory, seeder and two test suites.',
         link: '/guide/generating',
         linkText: 'The make:fullapi command',
     },

@@ -7,6 +7,7 @@ namespace nameless\CodeGenerator\Services;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use nameless\CodeGenerator\EntitiesGenerator\MigrationGenerator;
+use nameless\CodeGenerator\EntitiesGenerator\RequestGenerator;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\Support\StubLoader;
 use nameless\CodeGenerator\Support\Workspace;
@@ -67,14 +68,7 @@ class EntityEvolutionService
         $this->createMigration($target, $name, $table, $fields);
         $this->generateEnums($target, $name, $fields);
         $this->patchModel($target, $name, $modelPath, $fields);
-        $this->patchAfterReturnArray(
-            $target,
-            $name,
-            'Request',
-            app_path("Http/Requests/{$name}Request.php"),
-            'rules',
-            $fields->map(fn (FieldDefinition $f) => $this->ruleLine($f))
-        );
+        $this->patchRequests($target, $name, $fields);
         $this->patchAfterReturnArray(
             $target,
             $name,
@@ -261,14 +255,32 @@ class EntityEvolutionService
         $this->changed[] = $path;
     }
 
-    private function ruleLine(FieldDefinition $field): string
+    /**
+     * Entities generated before 4.0 have a single request, patched like a store request.
+     *
+     * @param  Collection<int, FieldDefinition>  $fields
+     */
+    private function patchRequests(Workspace $workspace, string $entity, Collection $fields): void
     {
-        if ($field->isEnum()) {
-            $prefix = $field->nullable ? 'sometimes' : 'required';
+        $store = app_path("Http/Requests/Store{$entity}Request.php");
+        $legacy = app_path("Http/Requests/{$entity}Request.php");
 
-            return "            '{$field->name}' => ['{$prefix}', \\Illuminate\\Validation\\Rule::enum(\\App\\Enums\\{$field->getEnumClass()}::class)],";
+        if (! $workspace->exists($store) && $workspace->exists($legacy)) {
+            $this->patchAfterReturnArray($workspace, $entity, 'Request', $legacy, 'rules', $this->ruleLines($fields, update: false));
+
+            return;
         }
 
-        return "            '{$field->name}' => '{$field->getValidationRule()}',";
+        $this->patchAfterReturnArray($workspace, $entity, 'Request', $store, 'rules', $this->ruleLines($fields, update: false));
+        $this->patchAfterReturnArray($workspace, $entity, 'Request', app_path("Http/Requests/Update{$entity}Request.php"), 'rules', $this->ruleLines($fields, update: true));
+    }
+
+    /**
+     * @param  Collection<int, FieldDefinition>  $fields
+     * @return Collection<int, string>
+     */
+    private function ruleLines(Collection $fields, bool $update): Collection
+    {
+        return $fields->map(fn (FieldDefinition $f) => "            '{$f->name}' => ".RequestGenerator::fieldRule($f, $update).',');
     }
 }

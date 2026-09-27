@@ -72,7 +72,7 @@ Ask in plain words, for example a blog with posts, categories and tags where a p
 
 When the repository already holds a spec, ask for the API described in `docs/openapi.yaml`. The agent passes that path to `plan-api` instead of writing a schema, and the warnings tell it which schemas were left aside.
 
-Later, "add an excerpt to posts" goes through `add-fields`. It writes an incremental migration and patches the model, form request, factory and resource in place, keeping what you changed in them.
+Later, "add an excerpt to posts" goes through `add-fields`. It writes an incremental migration and patches the model, form requests, factory and resource in place, keeping what you changed in them.
 
 | Tool | What it does |
 |---|---|

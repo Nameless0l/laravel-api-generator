@@ -89,6 +89,15 @@ final readonly class EntityDefinition
         return Str::lower($this->name);
     }
 
+    /**
+     * The parameter Route::apiResource() names, which implicit model binding
+     * matches by name: "medium" for Media, not "media".
+     */
+    public function getRouteParameter(): string
+    {
+        return Str::singular($this->getPluralName());
+    }
+
     public function getNameCamel(): string
     {
         return Str::camel($this->name);

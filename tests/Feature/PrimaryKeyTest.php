@@ -67,10 +67,13 @@ class PrimaryKeyTest extends GeneratorTestCase
         $result->assertSuccessful();
         $result->run();
 
-        $request = (string) file_get_contents(app_path('Http/Requests/CountryRequest.php'));
         $this->assertStringContainsString(
-            "'code' => ['required', 'string', 'max:255', \\Illuminate\\Validation\\Rule::unique('countries')->ignore(\$this->route('country'), 'code')],",
-            $request
+            "'code' => ['required', 'string', 'max:255', \\Illuminate\\Validation\\Rule::unique('countries')],",
+            (string) file_get_contents(app_path('Http/Requests/StoreCountryRequest.php'))
+        );
+        $this->assertStringContainsString(
+            "'code' => ['sometimes', 'required', 'string', 'max:255', \\Illuminate\\Validation\\Rule::unique('countries')->ignore(\$this->route('country'), 'code')],",
+            (string) file_get_contents(app_path('Http/Requests/UpdateCountryRequest.php'))
         );
     }
 
@@ -100,15 +103,21 @@ class PrimaryKeyTest extends GeneratorTestCase
         $this->assertStringContainsString("\$table->foreign('country_code')->references('code')->on('countries')->cascadeOnDelete();", $migration);
         $this->assertStringNotContainsString("foreignId('country_code')", $migration);
 
-        $request = (string) file_get_contents(app_path('Http/Requests/CityRequest.php'));
-        $this->assertStringContainsString("'country_code' => 'required|string|exists:countries,code',", $request);
+        $this->assertStringContainsString(
+            "'country_code' => 'required|string|exists:countries,code',",
+            (string) file_get_contents(app_path('Http/Requests/StoreCityRequest.php'))
+        );
+        $this->assertStringContainsString(
+            "'country_code' => 'sometimes|required|string|exists:countries,code',",
+            (string) file_get_contents(app_path('Http/Requests/UpdateCityRequest.php'))
+        );
 
         $city = (string) file_get_contents(app_path('Models/City.php'));
         $this->assertStringContainsString('@property string $country_code', $city);
 
         $dto = (string) file_get_contents(app_path('DTO/CityDTO.php'));
-        $this->assertStringContainsString('public ?string $country_code = null', $dto);
-        $this->assertStringContainsString("\$request->input('country_code') ? (string) \$request->input('country_code') : null", $dto);
+        $this->assertStringContainsString('public ?string $country_code = null,', $dto);
+        $this->assertStringContainsString("country_code: \$data['country_code'] ?? null,", $dto);
 
         $factory = (string) file_get_contents(database_path('factories/CountryFactory.php'));
         $this->assertStringContainsString("'code' => fake()->unique()->word()", $factory);

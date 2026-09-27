@@ -44,7 +44,7 @@ final class GenerationPlanner
             $entities = $entities->map(fn (EntityDefinition $entity) => $entity->withOptions(['json_api' => false]));
         }
 
-        $warnings = array_merge($warnings, $this->hasOneWarnings($entities));
+        $warnings = array_merge($warnings, $this->hasOneWarnings($entities), $this->legacyRequestWarnings($entities, $request->only));
 
         if ($request->auth) {
             $this->authGenerator->generate($workspace);
@@ -138,6 +138,27 @@ final class GenerationPlanner
         }
 
         return $edited;
+    }
+
+    /**
+     * @param  Collection<int, EntityDefinition>  $entities
+     * @param  array<int, string>|null  $only
+     * @return array<int, array{code: string, message: string}>
+     */
+    private function legacyRequestWarnings(Collection $entities, ?array $only): array
+    {
+        if ($only !== null && ! in_array('Request', $only, true)) {
+            return [];
+        }
+
+        return $entities
+            ->filter(fn (EntityDefinition $entity) => File::exists(app_path("Http/Requests/{$entity->name}Request.php")))
+            ->map(fn (EntityDefinition $entity) => [
+                'code' => 'legacy_request',
+                'message' => "app/Http/Requests/{$entity->name}Request.php is no longer used: Store{$entity->name}Request and Update{$entity->name}Request replace it since 4.0. Move your changes there, then delete it.",
+            ])
+            ->values()
+            ->all();
     }
 
     /**

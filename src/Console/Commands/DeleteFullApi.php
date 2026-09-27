@@ -94,7 +94,7 @@ class DeleteFullApi extends Command
 
         $this->removeFromAuthServiceProvider($className);
         $this->unregisterSeederFromDatabaseSeeder($className);
-        $this->removeApiRoute($className, $pluralName);
+        $this->removeApiRoute($className, Str::plural(Str::lower($className)));
 
         if ($manifest->exists()) {
             $manifest->save();
@@ -162,13 +162,18 @@ class DeleteFullApi extends Command
             "app/Policies/{$className}Policy.php" => 'Policy',
             "app/Http/Controllers/{$className}Controller.php" => 'Controller',
             "app/Http/Resources/{$className}Resource.php" => 'Resource',
-            "app/Http/Requests/{$className}Request.php" => 'Request',
+            "app/Http/Requests/Store{$className}Request.php" => 'Request',
+            "app/Http/Requests/Update{$className}Request.php" => 'Request',
             "database/seeders/{$className}Seeder.php" => 'Seeder',
             "database/factories/{$className}Factory.php" => 'Factory',
             "app/DTO/{$className}DTO.php" => 'DTO',
             "tests/Feature/{$className}ControllerTest.php" => 'Feature test',
             "tests/Unit/{$className}ServiceTest.php" => 'Unit test',
         ];
+
+        if (File::exists(app_path("Http/Requests/{$className}Request.php"))) {
+            $targets["app/Http/Requests/{$className}Request.php"] = 'Request';
+        }
 
         foreach (File::glob(database_path("migrations/*_create_{$pluralName}_table.php")) as $migration) {
             $targets['database/migrations/'.basename($migration)] = 'Migration';
@@ -220,8 +225,7 @@ class DeleteFullApi extends Command
                 continue;
             }
             // Soft-delete companion routes registered with URI strings only
-            if (str_contains($trimmed, "'{$pluralName}/{id}/restore'") || str_contains($trimmed, "\"{$pluralName}/{id}/restore\"")
-                || str_contains($trimmed, "'{$pluralName}/{id}/force-delete'") || str_contains($trimmed, "\"{$pluralName}/{id}/force-delete\"")) {
+            if (preg_match('#[\'"]'.preg_quote($pluralName, '#').'/\{[^}]+\}/(restore|force-delete)[\'"]#', $trimmed)) {
                 $this->info("Line removed: {$trimmed}");
 
                 continue;

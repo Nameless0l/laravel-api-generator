@@ -22,7 +22,7 @@ use Throwable;
 
 #[Name('add-fields')]
 #[Title('Add fields to an entity')]
-#[Description('Adds columns to an entity generated before: an incremental migration, and in-place patches of the model, form request, factory and resource that keep manual edits. Update the DTO and the tests yourself, then run php artisan migrate.')]
+#[Description('Adds columns to an entity generated before: an incremental migration, and in-place patches of the model, form requests, factory and resource that keep manual edits. Update the DTO and the tests yourself, then run php artisan migrate.')]
 #[IsDestructive(false)]
 #[IsOpenWorld(false)]
 final class AddFieldsTool extends Tool

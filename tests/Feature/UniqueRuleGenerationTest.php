@@ -43,18 +43,24 @@ class UniqueRuleGenerationTest extends GeneratorTestCase
     }
 
     #[Test]
-    public function unique_fields_generate_a_parameterized_rule_that_ignores_the_current_model(): void
+    public function unique_fields_generate_a_parameterized_rule_that_ignores_the_current_model_on_update(): void
     {
         (new RequestGenerator(app(StubLoader::class)))->generate($this->definition());
 
-        $request = (string) file_get_contents(app_path('Http/Requests/ProductRequest.php'));
+        $store = (string) file_get_contents(app_path('Http/Requests/StoreProductRequest.php'));
+        $update = (string) file_get_contents(app_path('Http/Requests/UpdateProductRequest.php'));
 
         $this->assertStringContainsString(
-            "'slug' => ['required', 'string', 'max:255', \Illuminate\Validation\Rule::unique('products')->ignore(\$this->route('product'))],",
-            $request
+            "'slug' => ['required', 'string', 'max:255', \Illuminate\Validation\Rule::unique('products')],",
+            $store
         );
-        $this->assertStringContainsString("'title' => 'required|string|max:255',", $request);
-        $this->assertStringNotContainsString('|unique', $request);
+        $this->assertStringContainsString(
+            "'slug' => ['sometimes', 'required', 'string', 'max:255', \Illuminate\Validation\Rule::unique('products')->ignore(\$this->route('product'))],",
+            $update
+        );
+        $this->assertStringContainsString("'title' => 'required|string|max:255',", $store);
+        $this->assertStringContainsString("'title' => 'sometimes|required|string|max:255',", $update);
+        $this->assertStringNotContainsString('|unique', $store.$update);
     }
 
     #[Test]
@@ -126,12 +132,12 @@ class UniqueRuleGenerationTest extends GeneratorTestCase
     private function validateUpdate(EntityDefinition $definition, string $uri, array $payload): array
     {
         (new RequestGenerator(app(StubLoader::class)))->generate($definition);
-        require_once app_path("Http/Requests/{$definition->name}Request.php");
+        require_once app_path("Http/Requests/Update{$definition->name}Request.php");
 
         Route::apiResource($definition->getPluralName(), "App\\Http\\Controllers\\{$definition->name}Controller");
 
         /** @var class-string<FormRequest> $class */
-        $class = "App\\Http\\Requests\\{$definition->name}Request";
+        $class = "App\\Http\\Requests\\Update{$definition->name}Request";
         $request = $class::create($uri, 'PUT', $payload);
         $route = app('router')->getRoutes()->match($request);
         $request->setRouteResolver(fn () => $route);

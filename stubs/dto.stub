@@ -4,18 +4,39 @@ declare(strict_types=1);
 
 namespace App\DTO;
 
-use App\Http\Requests\{{modelName}}Request;
+use App\Http\Requests\Store{{modelName}}Request;
+use App\Http\Requests\Update{{modelName}}Request;
 
 readonly class {{modelName}}DTO
 {
+    /**
+     * @param  array<int, string>|null  $provided
+     */
     public function __construct(
         {{attributes}}
+        private ?array $provided = null
     ) {}
 
-    public static function fromRequest({{modelName}}Request $request): self
+    public static function fromRequest(Store{{modelName}}Request|Update{{modelName}}Request $request): self
     {
+        $data = $request->validated();
+
         return new self(
-            {{attributesFromRequest}}
+            {{attributesFromValidated}}
+            provided: array_keys($data)
         );
+    }
+
+    /**
+     * The fields the request sent, or every property when built by hand.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        $values = get_object_vars($this);
+        unset($values['provided']);
+
+        return $this->provided === null ? $values : array_intersect_key($values, array_flip($this->provided));
     }
 }

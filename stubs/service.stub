@@ -25,7 +25,7 @@ class {{modelName}}Service
 
     public function create({{modelName}}DTO $dto): {{modelName}}
     {
-        return {{modelName}}::create(get_object_vars($dto));
+        return {{modelName}}::create($dto->toArray());
     }
 
     public function find(int|string $id): {{modelName}}
@@ -35,7 +35,7 @@ class {{modelName}}Service
 
     public function update({{modelName}} ${{modelNameLower}}, {{modelName}}DTO $dto): {{modelName}}
     {
-        ${{modelNameLower}}->update(get_object_vars($dto));
+        ${{modelNameLower}}->update($dto->toArray());
         return ${{modelNameLower}}->fresh();
     }
 

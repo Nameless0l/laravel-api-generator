@@ -54,6 +54,9 @@ class FeatureTestGenerator extends AbstractGenerator
             ? "->assertJsonPath('data.id', (string) \${$lower}->getKey())"
             : "->assertJsonFragment(['{$pk}' => \${$lower}->getKey()])";
 
+        $patched = $definition->fields->first(fn (FieldDefinition $field) => ! $field->isPrimary());
+        $indent = $definition->usesPest() ? '    ' : '        ';
+
         return [
             'modelName' => $definition->name,
             'modelNameLower' => $definition->getNameLower(),
@@ -72,7 +75,94 @@ class FeatureTestGenerator extends AbstractGenerator
             'userImport' => $hasAuth ? "\nuse App\\Models\\User;" : '',
             'userSetup' => $hasAuth ? $this->generateUserSetup($definition->usesPest()) : '',
             'actingAs' => $hasAuth ? '$this->actingAs($this->user)->' : '',
+            'patchFields' => $patched === null ? '' : "'{$patched->name}' => {$this->sampleValue($patched)}",
+            // JSON columns may store the payload reformatted, so the value is not looked up.
+            'patchAssertion' => $patched === null || $patched->type === 'json'
+                ? ''
+                : "\n{$indent}\$this->assertDatabaseHas('{$definition->getTableName()}', ['{$pk}' => \${$lower}->getKey(), '{$patched->name}' => {$this->sampleValue($patched)}]);",
+            'patchedColumns' => implode(', ', array_map(fn (string $column) => "'{$column}'", array_filter([$patched?->name, 'updated_at']))),
+            'softDeleteTests' => $definition->hasSoftDeletes() ? $this->generateSoftDeleteTests($definition) : '',
         ];
+    }
+
+    private function sampleValue(FieldDefinition $field): string
+    {
+        if ($field->isEnum()) {
+            return "'".($field->getEnumValues()[0] ?? 'test')."'";
+        }
+
+        return match ($field->type) {
+            'string' => "'test_{$field->name}'",
+            'text' => "'Test text content'",
+            'integer', 'int', 'bigint' => '1',
+            'boolean', 'bool' => 'true',
+            'float', 'decimal' => '10.50',
+            'json' => "'{\"key\":\"value\"}'",
+            'date', 'datetime', 'timestamp' => "'2025-01-01 00:00:00'",
+            'time' => "'10:30:00'",
+            'uuid', 'UUID' => "'550e8400-e29b-41d4-a716-446655440000'",
+            default => "'test'",
+        };
+    }
+
+    private function generateSoftDeleteTests(EntityDefinition $definition): string
+    {
+        $template = $definition->usesPest() ? <<<'PEST'
+
+
+it('restores a {lower}', function () {
+    ${lower} = {model}::factory()->create();
+    ${lower}->delete();
+
+    $response = {actingAs}$this->postJson("/api/{plural}/{${lower}->getKey()}/restore");
+
+    $response->assertStatus(200);
+    $this->assertNotSoftDeleted('{table}', ['{pk}' => ${lower}->getKey()]);
+});
+
+it('force deletes a {lower}', function () {
+    ${lower} = {model}::factory()->create();
+    ${lower}->delete();
+
+    $response = {actingAs}$this->deleteJson("/api/{plural}/{${lower}->getKey()}/force-delete");
+
+    $response->assertStatus(204);
+    $this->assertDatabaseMissing('{table}', ['{pk}' => ${lower}->getKey()]);
+});
+PEST : <<<'PHPUNIT'
+
+
+    public function test_can_restore_{lower}(): void
+    {
+        ${lower} = {model}::factory()->create();
+        ${lower}->delete();
+
+        $response = {actingAs}$this->postJson("/api/{plural}/{${lower}->getKey()}/restore");
+
+        $response->assertStatus(200);
+        $this->assertNotSoftDeleted('{table}', ['{pk}' => ${lower}->getKey()]);
+    }
+
+    public function test_can_force_delete_{lower}(): void
+    {
+        ${lower} = {model}::factory()->create();
+        ${lower}->delete();
+
+        $response = {actingAs}$this->deleteJson("/api/{plural}/{${lower}->getKey()}/force-delete");
+
+        $response->assertStatus(204);
+        $this->assertDatabaseMissing('{table}', ['{pk}' => ${lower}->getKey()]);
+    }
+PHPUNIT;
+
+        return strtr($template, [
+            '{lower}' => $definition->getNameLower(),
+            '{model}' => $definition->name,
+            '{plural}' => $definition->getPluralName(),
+            '{table}' => $definition->getTableName(),
+            '{pk}' => $definition->getPrimaryKeyName(),
+            '{actingAs}' => $definition->hasAuth() ? '$this->actingAs($this->user)->' : '',
+        ]);
     }
 
     private function generateUserSetup(bool $pest): string
@@ -93,26 +183,9 @@ class FeatureTestGenerator extends AbstractGenerator
 
     private function generateRequestFields(EntityDefinition $definition): string
     {
-        $fields = $definition->fields->map(function (FieldDefinition $field) {
-            $value = $field->isEnum()
-                ? "'".($field->getEnumValues()[0] ?? 'test')."'"
-                : match ($field->type) {
-                    'string' => "'test_{$field->name}'",
-                    'text' => "'Test text content'",
-                    'integer', 'int', 'bigint' => '1',
-                    'boolean', 'bool' => 'true',
-                    'float', 'decimal' => '10.50',
-                    'json' => "'{\"key\":\"value\"}'",
-                    'date', 'datetime', 'timestamp' => "'2025-01-01 00:00:00'",
-                    'time' => "'10:30:00'",
-                    'uuid', 'UUID' => "'550e8400-e29b-41d4-a716-446655440000'",
-                    default => "'test'",
-                };
-
-            return "            '{$field->name}' => {$value},";
-        })->toArray();
-
-        return implode("\n", $fields);
+        return $definition->fields
+            ->map(fn (FieldDefinition $field) => "            '{$field->name}' => {$this->sampleValue($field)},")
+            ->implode("\n");
     }
 
     /**

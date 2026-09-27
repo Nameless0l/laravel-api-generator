@@ -18,7 +18,7 @@ final class ApiGeneratorServer extends Server
     protected string $name = 'Laravel API Generator';
 
     protected string $instructions = <<<'MARKDOWN'
-        Writes complete Laravel REST APIs: model, migration, controller, service, DTO, form request, resource, policy, factory, seeder, feature and unit tests, the route and the seeder registration.
+        Writes complete Laravel REST APIs: model, migration, controller, service, DTO, store and update requests, resource, policy, factory, seeder, feature and unit tests, the route and the seeder registration.
 
         1. Call list-entities to see what was generated before and which files were edited by hand.
         2. Describe the entities as an api-schema document, or point at an OpenAPI spec of the project, and call plan-api to preview the files. Show the list to the user.

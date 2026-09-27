@@ -142,8 +142,9 @@ class SchemaCommandTest extends GeneratorTestCase
         $result->assertSuccessful();
         $result->run();
 
-        $this->assertFileExists(app_path('Http/Requests/PostRequest.php'));
-        $this->assertFileExists(app_path('Http/Requests/TagRequest.php'));
+        foreach (['StorePostRequest', 'UpdatePostRequest', 'StoreTagRequest', 'UpdateTagRequest'] as $request) {
+            $this->assertFileExists(app_path("Http/Requests/{$request}.php"));
+        }
         // Regression: --only used to be ignored on the schema/database/
         // Mermaid paths and regenerated every file type.
         $this->assertFileDoesNotExist(app_path('Models/Post.php'));

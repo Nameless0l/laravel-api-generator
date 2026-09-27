@@ -12,7 +12,9 @@ This copies every `.stub` into `stubs/vendor/laravel-api-generator/`. The `StubL
 
 ## Validate your customizations
 
-`api-generator:validate-stubs` checks that every required `{{placeholder}}` is still present in your modified templates:
+::: v-pre
+`api-generator:validate-stubs` checks that every required `{{placeholder}}` is still present in your modified templates, and flags the ones written for 3.x (see [Upgrading to 4.0](/guide/upgrading#published-stubs)):
+:::
 
 ```bash
 php artisan api-generator:validate-stubs
