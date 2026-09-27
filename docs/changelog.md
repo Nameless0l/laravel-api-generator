@@ -6,7 +6,7 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
-### 3.15.1
+### 3.15.1 - September 27, 2026
 
 - Fixed: a `belongsTo` toward a model with a custom string primary key, such as `country_code`, no longer turns the key into `0` in the DTO, which made creating and updating fail.
 
