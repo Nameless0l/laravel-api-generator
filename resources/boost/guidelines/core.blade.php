@@ -4,7 +4,8 @@ This project uses `nameless/laravel-api-generator`. One command writes a complet
 
 - Generate CRUD APIs with `php artisan make:fullapi` instead of writing these files by hand.
 - Keep the entities in `api-schema.yaml` at the project root and generate from it.
-- Preview before writing with `--dry-run --json`, and check the files marked `update`: they would be overwritten.
+- Preview before writing with `--dry-run --json`. Files edited by hand since they were generated are kept unless you pass `--force`.
+- When the `laravel-api-generator` MCP server is available, use its `plan-api` and `generate-api` tools instead of the shell commands.
 - Add columns to a generated entity with `--add-fields` rather than regenerating it.
 - Put business logic in the generated service class and keep the controller thin.
 
