@@ -61,16 +61,18 @@ class WorkspaceServicesTest extends GeneratorTestCase
     {
         $this->generatedEntities = ['Report'];
         $this->generatedTables = ['reports'];
+        $this->instance(WorkspaceFactory::class, new WorkspaceFactory(fn (): int => 1767225600));
         app(ApiGenerationService::class)->generateCompleteApi(
             new EntityDefinition('Report', collect([new FieldDefinition('title', 'string')]), collect())
         );
         $modelBefore = (string) file_get_contents(app_path('Models/Report.php'));
-        $workspace = (new WorkspaceFactory(fn (): int => 1767225600))->make();
+        $workspace = app(WorkspaceFactory::class)->make();
 
         app(EntityEvolutionService::class)->addFields('Report', collect([new FieldDefinition('excerpt', 'text')]), $workspace);
 
         $changes = collect($workspace->changes())->keyBy('path');
-        $this->assertTrue($changes->has('database/migrations/2026_01_01_000000_add_excerpt_to_reports_table.php'));
+        $this->assertFileExists(database_path('migrations/2026_01_01_000000_create_reports_table.php'));
+        $this->assertTrue($changes->has('database/migrations/2026_01_01_000001_add_excerpt_to_reports_table.php'));
         $this->assertSame(FileChange::UPDATE, $changes['app/Models/Report.php']->action);
         $this->assertSame($modelBefore, file_get_contents(app_path('Models/Report.php')));
         $this->assertEmpty((array) glob(database_path('migrations/*_add_excerpt_to_reports_table.php')));

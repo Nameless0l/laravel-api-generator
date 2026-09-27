@@ -1,6 +1,6 @@
 [
     {
-        "path": "database/migrations/2026_01_01_000000_add_excerpt_to_reports_table.php",
+        "path": "database/migrations/2026_01_01_000001_add_excerpt_to_reports_table.php",
         "kind": "Migration",
         "entity": "Report",
         "action": "create",

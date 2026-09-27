@@ -112,6 +112,23 @@ class WorkspaceTest extends TestCase
     }
 
     #[Test]
+    public function a_migration_is_stamped_after_the_newest_existing_one(): void
+    {
+        File::ensureDirectoryExists(database_path('migrations'));
+        $existing = database_path('migrations/2026_01_01_000005_create_legacy_table.php');
+        file_put_contents($existing, "<?php\n");
+
+        try {
+            $workspace = $this->workspace();
+
+            $this->assertSame('2026_01_01_000006', $workspace->migrationTimestamp());
+            $this->assertSame('2026_01_01_000007', $workspace->migrationTimestamp());
+        } finally {
+            unlink($existing);
+        }
+    }
+
+    #[Test]
     public function the_first_writer_names_the_file(): void
     {
         $workspace = $this->workspace();
