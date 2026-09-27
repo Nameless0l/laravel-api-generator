@@ -106,11 +106,15 @@ final class Manifest
     }
 
     /**
+     * @param  array<int, string>  $exceptKinds
      * @return array<int, string>
      */
-    public function filesOf(string $entity): array
+    public function filesOf(string $entity, array $exceptKinds = []): array
     {
-        return array_keys(array_filter($this->files, fn (array $entry) => $entry['entity'] === $entity));
+        return array_keys(array_filter(
+            $this->files,
+            fn (array $entry) => $entry['entity'] === $entity && ! in_array($entry['kind'], $exceptKinds, true)
+        ));
     }
 
     public function save(): void
