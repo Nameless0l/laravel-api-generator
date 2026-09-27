@@ -64,7 +64,10 @@ final readonly class FieldDefinition
             'float' => 'decimal',
             'decimal' => 'decimal',
             'json' => 'json',
-            'date', 'datetime', 'timestamp', 'time' => 'timestamp',
+            'date' => 'date',
+            'time' => 'time',
+            'datetime' => 'dateTime',
+            'timestamp' => 'timestamp',
             'uuid', 'UUID' => 'uuid',
             'bigint' => 'bigInteger',
             default => 'string'
@@ -99,6 +102,7 @@ final readonly class FieldDefinition
             'float', 'decimal' => 'numeric',
             'json' => 'json',
             'date', 'datetime', 'timestamp' => 'date',
+            'time' => 'date_format:H:i,H:i:s',
             default => 'string'
         };
 
@@ -173,7 +177,9 @@ final readonly class FieldDefinition
             'uuid', 'UUID' => 'fake()->uuid()',
             'float', 'decimal' => 'fake()->randomFloat(2, 1, 1000)',
             'json' => "json_encode(['key' => 'value'])",
-            'date', 'datetime', 'timestamp', 'time' => "fake()->dateTime()->format('Y-m-d H:i:s')",
+            'date' => 'fake()->date()',
+            'time' => 'fake()->time()',
+            'datetime', 'timestamp' => "fake()->dateTime()->format('Y-m-d H:i:s')",
             default => 'fake()->word()'
         };
 
