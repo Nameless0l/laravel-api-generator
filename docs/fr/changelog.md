@@ -101,6 +101,10 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Extension VS Code
 
+### 0.17.0
+
+- **Describe an API with Copilot** : décrivez l'API avec vos mots, relisez l'`api-schema.yaml` rédigé par Copilot, puis prévisualisez-le et générez-le. Voir [Imports](/fr/guide/extension/imports#describe-an-api-with-copilot).
+
 ### 0.16.0
 
 - Génération depuis une spec OpenAPI 3.0, 3.1 ou Swagger 2.0, en JSON ou en YAML, depuis la palette de commandes, la barre latérale ou le bouton **Import OpenAPI** du formulaire. Un essai à blanc montre les entités, les fichiers et les schémas écartés avant toute écriture. Va avec le package 3.13.

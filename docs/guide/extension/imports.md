@@ -6,6 +6,12 @@ You rarely start from a blank form. The extension can generate the whole API sur
 
 Available from the command palette and the sidebar `…` menu.
 
+### Describe an API with Copilot
+
+Start from a sentence. Describe the API in plain words, for example a library that lends books to members where a loan has a due date, and the model VS Code offers (GitHub Copilot first) drafts an `api-schema.yaml`. The model also gets the names of the entities your project already has, so the draft relates to them instead of redefining them. The draft opens in an editor, where you can fix a type or rename a field before anything happens.
+
+**Preview and Generate** sends the edited draft to the package. The same dry run dialog as the OpenAPI import names the entities and counts the files, and **Generate** writes them. **Save as api-schema.yaml** keeps the draft at the project root instead, as the versioned source of the API. It needs VS Code 1.90 or later and a signed-in chat model.
+
 ### Generate APIs from Database
 
 This is the legacy-project command. It generates complete REST APIs for **every table at once**, straight from the existing schema.

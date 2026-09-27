@@ -11,6 +11,7 @@ Toutes les commandes vivent sous la catégorie **Laravel API Generator** de la p
 | Generate APIs from Schema File | Génère depuis `api-schema.yaml` / `.yml` / `.json` |
 | Generate APIs from Mermaid Diagram | Génère depuis un fichier `.mmd` |
 | Generate APIs from OpenAPI Spec | Génère depuis un fichier OpenAPI ou Swagger, en JSON ou en YAML, après un essai à blanc |
+| Describe an API with Copilot | Rédige `api-schema.yaml` depuis une description, puis le prévisualise et le génère |
 | Add Fields to Entity… | Fait évoluer une entité via `--add-fields` |
 | Regenerate File(s)… | Reconstruit les artefacts choisis via `--only=` |
 | Delete Full API | Supprime fichiers, routes et enregistrement du seeder d'une entité |
