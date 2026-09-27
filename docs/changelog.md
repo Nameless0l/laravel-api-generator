@@ -6,7 +6,7 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
-### 3.15.0
+### 3.15.0 - September 27, 2026
 
 - Fixed: a custom primary key is validated as unique, so posting a key that already exists returns a 422 instead of a 500.
 - Fixed: a `hasOne` puts its foreign key on the related table, where Eloquent looks for it. A `has_one_foreign_key` warning names the column to add when the related model is generated separately.

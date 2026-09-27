@@ -6,7 +6,7 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
-### 3.15.0
+### 3.15.0 - 27 septembre 2026
 
 - Corrigé : une clé primaire personnalisée est validée comme unique, donc poster une clé qui existe déjà renvoie 422 au lieu de 500.
 - Corrigé : un `hasOne` pose sa clé étrangère sur la table liée, là où Eloquent la cherche. Un avertissement `has_one_foreign_key` nomme la colonne à ajouter quand le modèle lié est généré à part.
