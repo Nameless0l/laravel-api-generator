@@ -1,6 +1,6 @@
 ---
 name: laravel-api-generator
-description: Generate complete Laravel REST APIs with nameless/laravel-api-generator (model, migration, controller, service, DTO, form request, resource, policy, factory, seeder, tests and routes) instead of writing those files by hand. Use when the user asks for new API resources, CRUD endpoints, entities with relations, or new columns on an entity generated before.
+description: Generate complete Laravel REST APIs with nameless/laravel-api-generator (model, migration, controller, service, DTO, store and update requests, resource, policy, factory, seeder, tests and routes) instead of writing those files by hand. Use when the user asks for new API resources, CRUD endpoints, entities with relations, or new columns on an entity generated before.
 ---
 
 # Laravel API Generator
@@ -33,7 +33,7 @@ php artisan migrate
 php artisan test
 ```
 
-5. Put business logic in the generated service (`app/Services/PostService.php`) and keep the controller thin.
+5. Put business logic in the generated service (`app/Services/PostService.php`) and keep the controller thin. Restrict access in the generated policy (`app/Policies/PostPolicy.php`): every controller action calls `Gate::authorize()`, and the policy allows everyone, guests included, until you change it.
 
 A single entity also works from the command line:
 
@@ -115,7 +115,7 @@ They return the same JSON document as `--json`. Run `php artisan migrate` and `p
 
 ## Evolving the API
 
-- New columns on a generated entity: `php artisan make:fullapi Post --add-fields="excerpt:text,published_at:datetime"`. It writes an incremental migration and patches the model, request, factory and resource in place. Update the DTO and the tests yourself.
+- New columns on a generated entity: `php artisan make:fullapi Post --add-fields="excerpt:text,published_at:datetime"`. It writes an incremental migration and patches the model, both requests, factory and resource in place. Update the DTO and the tests yourself.
 - Remove an entity and all its files: `php artisan delete:fullapi Post --force` (without `--force` it asks for confirmation).
 - After deleting controllers by hand: `php artisan api-generator:clean-routes`.
 - Read the database structure as JSON: `php artisan api-generator:introspect --table=posts`.
@@ -128,9 +128,9 @@ They return the same JSON document as `--json`. Run `php artisan migrate` and `p
 
 - `action` is `create`, `update` (the file exists and would change) or `unchanged`.
 - `"kept": true` marks a file edited by hand since it was generated. It is not written.
-- Warnings worth acting on: `unknown_field_type` (a typo in a field type, generated as a string column), `modified_file_kept` and `api_routes_not_loaded`.
+- Warnings worth acting on: `unknown_field_type` (a typo in a field type, generated as a string column), `modified_file_kept`, `legacy_request` (a request left by 3.x, to merge into the new ones then delete) and `api_routes_not_loaded`.
 - `content` is only present with `--dry-run`.
-- On failure the exit code is 1 and each error has a stable `code`: `invalid_request`, `invalid_schema`, `invalid_diagram`, `invalid_json`, `file_not_found`, `write_failed`, `generation_failed` or `unexpected_error`. A `hint` often gives the fix.
+- On failure the exit code is 1 and each error has a stable `code`: `invalid_request`, `invalid_schema`, `invalid_diagram`, `invalid_json`, `file_not_found`, `write_failed`, `reserved_field_name`, `generation_failed` or `unexpected_error`. A `hint` often gives the fix.
 
 ## Good to know
 

@@ -1,6 +1,6 @@
 ## Laravel API Generator
 
-This project uses `nameless/laravel-api-generator`. One command writes a complete REST API for an entity: model, migration, controller, service, DTO, form request, resource, policy, factory, seeder, feature and unit tests, the `apiResource` route and the seeder registration.
+This project uses `nameless/laravel-api-generator`. One command writes a complete REST API for an entity: model, migration, controller, service, DTO, store and update requests, resource, policy, factory, seeder, feature and unit tests, the `apiResource` route and the seeder registration.
 
 - Generate CRUD APIs with `php artisan make:fullapi` instead of writing these files by hand.
 - Keep the entities in `api-schema.yaml` at the project root and generate from it.
@@ -8,6 +8,7 @@ This project uses `nameless/laravel-api-generator`. One command writes a complet
 - When the `laravel-api-generator` MCP server is available, use its `plan-api` and `generate-api` tools instead of the shell commands.
 - Add columns to a generated entity with `--add-fields` rather than regenerating it.
 - Put business logic in the generated service class and keep the controller thin.
+- Restrict access in the generated policy. Every controller action calls `Gate::authorize()`, and the policy allows everyone, guests included, until you change it.
 
 @verbatim
 <code-snippet name="Preview, then generate the API described in api-schema.yaml" lang="bash">
