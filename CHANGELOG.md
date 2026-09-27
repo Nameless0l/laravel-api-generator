@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Laravel 12 or 13 is required.** Laravel 10 and 11 projects keep the 3.x line: 3.15 carries every generator fix released before 4.0. `laravel/mcp` needs Laravel 12.41 or later.
+- **Controllers bind the model from the route and enforce the policies.** `show`, `update`, `destroy`, `restore` and `forceDelete` receive the model through implicit binding, under the name of the `apiResource` parameter (`$medium` for `Media`), and every action starts with `Gate::authorize()`. The generated policies take `?User $user` and return `true`, so an API stays public until a policy says otherwise. The restore and force-delete routes take the same parameter and call `withTrashed()`, and regenerating an entity replaces the `{id}` routes written by 3.x. `restore` returns the resource, and the deletions answer `204 No Content`.
+- **`StorePostRequest` and `UpdatePostRequest` replace `PostRequest`.** The update rules start with `sometimes`, so a PATCH may send a single field, and their unique rules keep ignoring the current row. Nullable fields validate with `nullable`, which accepts an explicit `null`. A request left by 3.x is reported with a `legacy_request` warning, and `delete:fullapi` removes it.
+- **A PATCH keeps the fields it leaves out.** The DTO is built from the validated data, remembers which keys the request sent and returns them through `toArray()`, which the services save. An explicit `null` on an integer or boolean field stays `null` instead of becoming `0` or `false`. A field named `provided` is refused with a `reserved_field_name` error, since the DTO uses that name.
+- The generated feature tests cover a partial update and, with soft deletes, restore and force delete.
+- Stubs: `request.store.stub` and `request.update.stub` replace `request.stub`, the controller stubs need `{{routeParameter}}`, the DTO stub needs `{{attributesFromValidated}}` instead of `{{attributesFromRequest}}`, and the policy stub needs `{{modelVariable}}`. `api-generator:validate-stubs` reports these, and flags a service stub that still saves `get_object_vars($dto)`.
+
+### Fixed
+- The policy of a `User` entity no longer imports `App\Models\User` twice nor declares two `$user` parameters, which would have broken every request once policies are enforced.
 
 ### Removed
 - `config/laravel-api-generator.php`, which was never loaded, so its paths, namespaces and field types had no effect.

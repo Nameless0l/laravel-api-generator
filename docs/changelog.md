@@ -9,6 +9,9 @@ Recent releases of the package and the VS Code extension. Full histories live on
 ### 4.0.0
 
 - Laravel 12 or 13 is required. Laravel 10 and 11 projects keep 3.15, and [Upgrading to 4.0](/guide/upgrading) lists every change.
+- Controllers receive the model through route model binding and ask the entity's policy before every action. The generated policies let everyone through, guests included, until you restrict them.
+- `StorePostRequest` and `UpdatePostRequest` replace `PostRequest`, and a PATCH changes only the fields it sends.
+- The generated tests cover partial updates, and restore and force delete on entities with soft deletes.
 - Removed: the config file that was never loaded, and the two service methods deprecated in 3.8.
 
 ### 3.15.1 - September 27, 2026
