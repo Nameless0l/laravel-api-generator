@@ -54,3 +54,14 @@ php artisan serve
 ```
 
 You can also use this file with the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=Nameless0l.laravel-api-generator) via the **Import JSON** button.
+
+## openapi.yaml
+
+An OpenAPI 3.1 shop with **Customer**, **Product**, **Order** and **OrderLine**. It shows what the OpenAPI import understands: a reference becomes a `belongsTo`, a list of references a `hasMany`, `productId` next to a `Product` schema a relation, `deletedAt` soft deletes, and a string enum a PHP enum. `NewOrder`, `OrderList` and `Error` are skipped with a warning.
+
+Preview it, then generate it:
+
+```bash
+php artisan make:fullapi --openapi=examples/openapi.yaml --dry-run
+php artisan make:fullapi --openapi=examples/openapi.yaml
+```

@@ -127,6 +127,10 @@ jobs:
       working-directory: app
       run: php artisan make:fullapi --schema=../package/examples/api-schema.yaml --no-interaction
 
+    - name: Generate the OpenAPI example
+      working-directory: app
+      run: php artisan make:fullapi --openapi=../package/examples/openapi.yaml --no-interaction
+
     - name: Run the migrations
       working-directory: app
       run: php artisan migrate --force --no-interaction
