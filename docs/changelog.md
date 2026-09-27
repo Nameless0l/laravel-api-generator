@@ -6,6 +6,11 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.13.0
+
+- Generate from an OpenAPI 3.0, 3.1 or Swagger 2.0 spec with `--openapi`, from the command line or through the MCP server. See [OpenAPI Specs](/guide/openapi).
+- Fixed: a `hasMany` follows the `belongsTo` of the other side when it is named after its role, such as `author_id` for `author: belongsTo User`.
+
 ### 3.12.0
 
 - An MCP server lets Claude Code, Copilot, Cursor and other agents list, preview and generate APIs, and add fields, without ever overwriting your edits. See [MCP Server](/guide/mcp).
@@ -91,6 +96,10 @@ Recent releases of the package and the VS Code extension. Full histories live on
 3.3.1 (strict-types fixes), 3.3.0 (auto-registered routes and seeders, required-by-default validation), 3.2.0 (interactive wizard, Sanctum auth, generated tests, Postman export, soft deletes), 3.0.0 (clean-architecture rewrite): details in the [full changelog](https://github.com/Nameless0l/laravel-api-generator/blob/main/CHANGELOG.md).
 
 ## VS Code extension
+
+### 0.16.0
+
+- Generate from an OpenAPI 3.0, 3.1 or Swagger 2.0 spec, JSON or YAML, from the command palette, the sidebar or the builder's **Import OpenAPI** button. A dry run shows the entities, the files and the schemas left aside before anything is written. Pairs with package 3.13.
 
 ### 0.15.0
 

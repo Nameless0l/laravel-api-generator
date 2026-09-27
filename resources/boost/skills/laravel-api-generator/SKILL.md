@@ -87,7 +87,7 @@ cat api-schema.yaml | php artisan make:fullapi --schema=- --dry-run --json
 When the `laravel-api-generator` MCP server is connected (the project requires `laravel/mcp`), call its tools instead of the shell commands:
 
 - `list-entities`: the generated entities and their files, each marked intact, edited or missing.
-- `plan-api`: the files an api-schema document would create or update, nothing written. Pass the schema as a JSON object.
+- `plan-api`: the files an api-schema document would create or update, nothing written. Pass the schema as a JSON object, or `openapi` with the path of a spec in the project.
 - `generate-api`: writes them. Files edited by hand are kept, never overwritten.
 - `add-fields`: new columns on a generated entity, with `dry_run` to preview.
 
@@ -97,6 +97,7 @@ They return the same JSON document as `--json`. Run `php artisan migrate` and `p
 
 - Existing database: `php artisan make:fullapi --from-database --tables=posts,tags --with-migrations`. Without `--tables`, every table except `users` is used.
 - Mermaid `erDiagram` or `classDiagram`: `php artisan make:fullapi --mermaid=diagram.mmd`.
+- OpenAPI 3 or Swagger 2 spec, JSON or YAML: `php artisan make:fullapi --openapi=openapi.yaml`. Each object schema becomes an entity; error, pagination and payload schemas (`NewPet`, `CreatePetRequest`) are skipped with an `openapi_schema_skipped` warning. Read them in the dry run first.
 
 ## Options
 

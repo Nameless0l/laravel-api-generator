@@ -70,13 +70,15 @@ docker exec -i my-app php artisan api-generator:mcp
 
 Demandez avec vos mots, par exemple un blog avec des articles, des catégories et des tags, où un article est brouillon ou publié. L'agent regarde ce qui existe déjà avec `list-entities`, écrit un document [api-schema](/fr/guide/schema-files) et appelle `plan-api`, qui liste chaque fichier que la génération créerait ou modifierait sans rien écrire. Une fois votre accord donné, `generate-api` les écrit, et l'agent peut lancer `php artisan migrate` puis les tests générés.
 
+Quand le dépôt contient déjà une spec, demandez l'API décrite dans `docs/openapi.yaml`. L'agent passe ce chemin à `plan-api` au lieu d'écrire un schéma, et les avertissements lui disent quels schémas ont été écartés.
+
 Plus tard, « ajoute un résumé aux articles » passe par `add-fields`. L'outil écrit une migration incrémentale et modifie sur place le modèle, la form request, la factory et la resource, en gardant ce que vous y avez changé.
 
 | Outil | Rôle |
 |---|---|
 | `list-entities` | Lit `.api-generator/manifest.json` et renvoie chaque entité générée avec ses fichiers, marqués intacts, modifiés ou absents. Donne aussi le fichier de schéma trouvé à la racine. |
-| `plan-api` | Prévisualise les fichiers d'un document api-schema, avec les avertissements, comme un type de champ inconnu. Renvoie le contenu des fichiers sur demande. |
-| `generate-api` | Écrit les fichiers d'un document api-schema, avec `auth`, `postman` et `only` comme en ligne de commande. |
+| `plan-api` | Prévisualise les fichiers d'un document api-schema, ou d'une [spec OpenAPI](/fr/guide/openapi) du projet désignée par son chemin, avec les avertissements, comme un type de champ inconnu. Renvoie le contenu des fichiers sur demande. |
+| `generate-api` | Écrit les fichiers d'un document api-schema ou d'une spec OpenAPI du projet, avec `auth`, `postman` et `only` comme en ligne de commande. |
 | `add-fields` | Ajoute des colonnes à une entité générée, avec un essai à blanc possible. |
 
 Les résultats reprennent le document JSON de [`make:fullapi --json`](/fr/guide/integrations#une-sortie-lisible-par-les-machines), les erreurs gardent donc les mêmes codes stables et les mêmes indices. Le serveur expose aussi le JSON Schema du format api-schema, sous la ressource `api-generator://schema/api-schema.json`.

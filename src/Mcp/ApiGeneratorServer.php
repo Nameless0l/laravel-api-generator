@@ -20,7 +20,7 @@ final class ApiGeneratorServer extends Server
         Writes complete Laravel REST APIs: model, migration, controller, service, DTO, form request, resource, policy, factory, seeder, feature and unit tests, the route and the seeder registration.
 
         1. Call list-entities to see what was generated before and which files were edited by hand.
-        2. Describe the entities as an api-schema document and call plan-api to preview the files. Show the list to the user.
+        2. Describe the entities as an api-schema document, or point at an OpenAPI spec of the project, and call plan-api to preview the files. Show the list to the user.
         3. Call generate-api to write them, then run php artisan migrate and php artisan test.
 
         Use add-fields to add columns to an entity generated before instead of regenerating it. Files edited by hand since they were generated are never overwritten: they come back with "kept": true. Business logic belongs in the generated service class.

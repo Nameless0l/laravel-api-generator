@@ -92,7 +92,8 @@ class McpServerTest extends GeneratorTestCase
     {
         $input = (new PlanApiTool)->toArray()['inputSchema'] ?? [];
 
-        $this->assertSame(['schema'], $input['required'] ?? null);
+        $this->assertArrayNotHasKey('required', $input);
+        $this->assertArrayHasKey('openapi', $input['properties']);
         $this->assertStringContainsString('belongsToMany', $input['properties']['schema']['description']);
         $this->assertStringContainsString('uuid', $input['properties']['schema']['description']);
         $this->assertContains('FeatureTest', $input['properties']['only']['items']['enum']);
@@ -194,6 +195,25 @@ class McpServerTest extends GeneratorTestCase
         ])->assertOk());
 
         $this->assertContains('unknown_field_type', array_column($plan['warnings'], 'code'));
+    }
+
+    #[Test]
+    public function an_openapi_spec_of_the_project_can_replace_the_schema(): void
+    {
+        copy(__DIR__.'/../Fixtures/openapi/petstore.yaml', base_path('mcp-petstore.yaml'));
+
+        try {
+            $plan = $this->structured(ApiGeneratorServer::tool(PlanApiTool::class, ['openapi' => 'mcp-petstore.yaml'])->assertOk());
+
+            $this->assertSame('create', $this->file($plan, 'app/Models/Pet.php')['action']);
+            $this->assertContains('openapi_schema_skipped', array_column($plan['warnings'], 'code'));
+        } finally {
+            unlink(base_path('mcp-petstore.yaml'));
+        }
+
+        ApiGeneratorServer::tool(PlanApiTool::class, ['openapi' => 'missing.yaml'])->assertHasErrors(['"code":"file_not_found"']);
+        ApiGeneratorServer::tool(PlanApiTool::class, ['openapi' => '../../../../composer.json'])->assertHasErrors(['"code":"invalid_request"']);
+        ApiGeneratorServer::tool(PlanApiTool::class, ['openapi' => 'composer.json', 'schema' => self::SCHEMA])->assertHasErrors(['"code":"invalid_request"']);
     }
 
     #[Test]

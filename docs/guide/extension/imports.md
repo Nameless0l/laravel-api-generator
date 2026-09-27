@@ -24,6 +24,12 @@ Describe the whole API in a declarative, versionable YAML/JSON file. The extensi
 
 Turn a Mermaid `erDiagram` or `classDiagram` (hand-written or produced by an AI assistant) into a working API. The command uses the active `.mmd` file or lets you browse for one. Cardinalities (`||--o{`, `"1" --> "*"`) become the right Eloquent relations on both sides. See [Mermaid Diagrams](/guide/mermaid).
 
+### Generate APIs from OpenAPI Spec
+
+Hand an OpenAPI 3.0, 3.1 or Swagger 2.0 spec, JSON or YAML, to the package. The command uses the active spec or lets you browse for one, then runs a dry run before anything is written. A dialog names the entities it found, counts the files to create and update, and lists the schemas left aside with the reason, such as `NewPet` next to `Pet` or `ErrorResponse`. **Generate** writes them.
+
+A spec that lives outside the project is sent on stdin, so Sail and Docker projects work too. See [OpenAPI Specs](/guide/openapi) for what becomes what.
+
 ## Panel imports
 
 Buttons inside the generator panel that pre-fill the form, so you can review and adjust before generating.
@@ -34,13 +40,13 @@ Prefer to review one table before generating? The extension lists every user tab
 
 ### OpenAPI / Swagger import
 
-Import an OpenAPI 3.0 or Swagger 2.0 **JSON** spec to bulk-generate entities.
+The **Import OpenAPI** button opens the same flow as the command above, YAML included: the package reads the spec, the dry run dialog shows what it understood, and **Generate** writes the API.
 
-<!-- SCREENSHOT: entities parsed from an OpenAPI spec. Save as docs/public/ext-import-openapi.png then:
+<!-- SCREENSHOT: the OpenAPI dry run dialog. Save as docs/public/ext-import-openapi.png then:
 ![OpenAPI import](/ext-import-openapi.png)
 -->
 
-The importer walks `components.schemas` (or `definitions` for Swagger 2.0) and converts each schema into an entity, mapping OpenAPI types and formats to field types (`integer`/`int64`, `number`/`float`, `string` with `uuid`/`date`/`date-time`, `boolean`, `array`, `object`). A `$ref` property becomes a `belongsTo` relationship, an array of `$ref` becomes `hasMany`, and boilerplate schemas like `ErrorResponse`, `PaginatedResponse`, `Meta` or `Links` are skipped automatically.
+With a package older than 3.13, the button falls back to the extension's own importer, which reads JSON specs only and fills the bulk list like the JSON import below.
 
 ### JSON bulk import
 

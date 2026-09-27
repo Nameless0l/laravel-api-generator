@@ -14,6 +14,7 @@ use nameless\CodeGenerator\Support\EntitySorter;
 use nameless\CodeGenerator\Support\FieldParser;
 use nameless\CodeGenerator\Support\JsonParser;
 use nameless\CodeGenerator\Support\MermaidParser;
+use nameless\CodeGenerator\Support\OpenApiConverter;
 use nameless\CodeGenerator\Support\Protocol;
 use nameless\CodeGenerator\Support\RelationshipSynthesizer;
 use nameless\CodeGenerator\Support\SchemaParser;
@@ -31,6 +32,7 @@ class MakeApiCommand extends Command
     protected $signature = 'make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
         {--schema= : Generate from a declarative YAML/JSON schema file, or - to read it from stdin}
         {--mermaid= : Generate from a Mermaid classDiagram or erDiagram file}
+        {--openapi= : Generate from the schemas of an OpenAPI 3 or Swagger 2 document, JSON or YAML, or - to read it from stdin}
         {--from-database : Generate from the existing database schema}
         {--tables= : Comma-separated list of tables to use with --from-database}
         {--with-migrations : Also generate migrations when using --from-database}
@@ -54,6 +56,7 @@ class MakeApiCommand extends Command
         private readonly DatabaseIntrospector $databaseIntrospector,
         private readonly SchemaParser $schemaParser,
         private readonly MermaidParser $mermaidParser,
+        private readonly OpenApiConverter $openApiConverter,
         private readonly StdinReader $stdin
     ) {
         parent::__construct();
@@ -168,6 +171,11 @@ class MakeApiCommand extends Command
             return $this->entitiesFromMermaid($mermaid);
         }
 
+        $openApi = $this->option('openapi');
+        if (is_string($openApi) && $openApi !== '') {
+            return $this->entitiesFromOpenApi($openApi);
+        }
+
         $name = $this->argument('name');
         if (! is_string($name) || $name === '') {
             return $this->entitiesFromDefaultFiles();
@@ -240,6 +248,32 @@ class MakeApiCommand extends Command
         }
 
         $this->announce($entities, basename($resolved));
+
+        return $entities;
+    }
+
+    /**
+     * @return Collection<int, EntityDefinition>
+     */
+    private function entitiesFromOpenApi(string $path): Collection
+    {
+        if ($path === '-') {
+            $content = $this->stdin->read();
+            $source = 'stdin';
+        } else {
+            $resolved = File::exists($path) ? $path : base_path($path);
+            if (! File::exists($resolved)) {
+                throw CodeGeneratorException::fileNotFound($path);
+            }
+            $content = File::get($resolved);
+            $source = basename($resolved);
+        }
+
+        $schema = $this->openApiConverter->convertString($content, $source);
+        $entities = $this->schemaParser->parseArray($schema, $this->cliEntityOptions(), $source);
+
+        $this->inputWarnings = array_merge($this->inputWarnings, $this->openApiConverter->getWarnings(), $this->schemaParser->getWarnings());
+        $this->announce($entities, $source);
 
         return $entities;
     }

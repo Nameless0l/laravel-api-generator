@@ -70,11 +70,62 @@ class RelationshipSynthesizer
     /**
      * When a relation targets an entity with a custom primary key, the FK
      * column name, its type and the referenced column must all follow it.
+     * A hasMany then takes the FK of the belongsTo that points back at it.
      *
      * @param  Collection<int, EntityDefinition>  $entities
      * @return Collection<int, EntityDefinition>
      */
     public static function resolveRelatedKeys(Collection $entities): Collection
+    {
+        return self::pairHasManyKeys(self::followCustomPrimaryKeys($entities));
+    }
+
+    /**
+     * @param  Collection<int, EntityDefinition>  $entities
+     * @return Collection<int, EntityDefinition>
+     */
+    private static function pairHasManyKeys(Collection $entities): Collection
+    {
+        $byName = $entities->keyBy(fn (EntityDefinition $e) => $e->name);
+
+        return $entities->map(function (EntityDefinition $entity) use ($byName) {
+            $changed = false;
+            $relationships = $entity->relationships->map(function (RelationshipDefinition $rel) use ($entity, $byName, &$changed) {
+                if ($rel->type !== 'oneToMany' || $rel->foreignKey !== null) {
+                    return $rel;
+                }
+
+                $backReferences = $byName->get($rel->relatedModel)?->relationships
+                    ->filter(fn (RelationshipDefinition $back) => $back->type === 'manyToOne' && $back->relatedModel === $entity->name);
+
+                if ($backReferences === null || $backReferences->count() !== 1) {
+                    return $rel;
+                }
+
+                $changed = true;
+
+                return new RelationshipDefinition(
+                    type: $rel->type,
+                    relatedModel: $rel->relatedModel,
+                    role: $rel->role,
+                    foreignKey: $backReferences->first()?->getForeignKeyName(),
+                    localKey: $rel->localKey,
+                    pivotTable: $rel->pivotTable,
+                    morphName: $rel->morphName,
+                    relatedKey: $rel->relatedKey,
+                    relatedKeyType: $rel->relatedKeyType
+                );
+            });
+
+            return $changed ? self::withRelationships($entity, $relationships) : $entity;
+        });
+    }
+
+    /**
+     * @param  Collection<int, EntityDefinition>  $entities
+     * @return Collection<int, EntityDefinition>
+     */
+    private static function followCustomPrimaryKeys(Collection $entities): Collection
     {
         $byName = $entities->keyBy(fn (EntityDefinition $e) => $e->name);
 
@@ -106,18 +157,22 @@ class RelationshipSynthesizer
                 );
             });
 
-            if (! $changed) {
-                return $entity;
-            }
-
-            return new EntityDefinition(
-                name: $entity->name,
-                fields: $entity->fields,
-                relationships: $relationships,
-                parent: $entity->parent,
-                options: $entity->options
-            );
+            return $changed ? self::withRelationships($entity, $relationships) : $entity;
         });
+    }
+
+    /**
+     * @param  Collection<int, RelationshipDefinition>  $relationships
+     */
+    private static function withRelationships(EntityDefinition $entity, Collection $relationships): EntityDefinition
+    {
+        return new EntityDefinition(
+            name: $entity->name,
+            fields: $entity->fields,
+            relationships: $relationships,
+            parent: $entity->parent,
+            options: $entity->options
+        );
     }
 
     private static function inverseFor(string $owner, RelationshipDefinition $relation): ?RelationshipDefinition

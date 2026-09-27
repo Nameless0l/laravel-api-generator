@@ -256,6 +256,17 @@ php artisan make:fullapi --mermaid=blog.mmd
 
 Both `erDiagram` and `classDiagram` are supported: cardinalities (`||--o{`, `"1" --> "*"`) become the right Eloquent relations on both sides, compositions/aggregations (`*--`, `o--`) become `hasMany`, `UK` markers become unique fields, `deleted_at` enables soft deletes, and markdown fences/comments are stripped so you can paste diagrams as-is.
 
+### Generate from an OpenAPI spec (`--openapi=`)
+
+Got an OpenAPI 3.0, 3.1 or Swagger 2.0 document, in JSON or YAML? Each object schema becomes an entity ([full example](examples/openapi.yaml)):
+
+```bash
+php artisan make:fullapi --openapi=openapi.yaml --dry-run
+php artisan make:fullapi --openapi=openapi.yaml
+```
+
+References become `belongsTo`, lists of references `hasMany` (or `belongsToMany` when both sides list each other), `postId` next to a `Post` schema a relation, string enums PHP enums, `deletedAt` soft deletes, and optional properties nullable columns. Error, pagination and payload schemas such as `NewPet` or `CreatePetRequest` are skipped, each with a warning. See [OpenAPI Specs](https://nameless0l.github.io/laravel-api-generator/guide/openapi).
+
 ### Spatie QueryBuilder integration (`--query-builder`)
 
 Generate index endpoints backed by the community-standard [spatie/laravel-query-builder](https://github.com/spatie/laravel-query-builder):
@@ -398,7 +409,7 @@ After editing, run `api-generator:validate-stubs` (or let the VS Code extension 
 
 ```
 php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
-                         {--schema=} {--mermaid=} {--from-database} {--tables=} {--with-migrations} {--query-builder}
+                         {--schema=} {--mermaid=} {--openapi=} {--from-database} {--tables=} {--with-migrations} {--query-builder}
                          {--pest} {--json-api} {--add-fields=} {--dry-run} {--json} {--force}
 php artisan delete:fullapi {name?} {--force} {--dry-run}
 php artisan api-generator:clean-routes {--dry-run}
@@ -420,6 +431,7 @@ php artisan api-generator:mcp
 | `--only=Type,Type` | Regenerate only the listed artifacts; skip route + seeder registration. |
 | `--schema=file` | Generate every entity from a declarative YAML/JSON schema file. `--schema=-` reads the schema from stdin. |
 | `--mermaid=file` | Generate every entity from a Mermaid `erDiagram` / `classDiagram`. |
+| `--openapi=file` | Generate an entity from each object schema of an OpenAPI 3 or Swagger 2 document, JSON or YAML. `--openapi=-` reads it from stdin. |
 | `--from-database` | Introspect the existing database and generate APIs for its tables. |
 | `--tables=a,b` | Restrict `--from-database` to specific tables. |
 | `--with-migrations` | With `--from-database`: also generate the migration files. |

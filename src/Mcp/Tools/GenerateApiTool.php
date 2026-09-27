@@ -14,27 +14,29 @@ use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
 use Laravel\Mcp\Server\Tools\Annotations\IsIdempotent;
 use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 use nameless\CodeGenerator\Services\GenerationPlanner;
+use nameless\CodeGenerator\Support\OpenApiConverter;
 use nameless\CodeGenerator\Support\Protocol;
 use nameless\CodeGenerator\Support\SchemaParser;
 use Throwable;
 
 #[Name('generate-api')]
 #[Title('Generate an API')]
-#[Description('Writes every file of the entities of an api-schema document. Files edited by hand since they were generated are kept as they are. Run php artisan migrate afterwards.')]
+#[Description('Writes every file of the entities of an api-schema document or of an OpenAPI spec of the project. Files edited by hand since they were generated are kept as they are. Run php artisan migrate afterwards.')]
 #[IsDestructive(false)]
 #[IsIdempotent]
 #[IsOpenWorld(false)]
 final class GenerateApiTool extends GenerationTool
 {
-    public function handle(Request $request, GenerationPlanner $planner, SchemaParser $parser): Response|ResponseFactory
+    public function handle(Request $request, GenerationPlanner $planner, SchemaParser $parser, OpenApiConverter $converter): Response|ResponseFactory
     {
         try {
-            $plan = $planner->plan($this->generationRequest($request, $parser));
+            [$generation, $warnings] = $this->generationRequest($request, $parser, $converter);
+            $plan = $planner->plan($generation);
             $plan->apply();
         } catch (Throwable $e) {
             return Response::error(Protocol::encode(Protocol::errorDocument($e, false)));
         }
 
-        return Response::structured(Protocol::planDocument($plan->changes(), array_merge($parser->getWarnings(), $plan->warnings), false));
+        return Response::structured(Protocol::planDocument($plan->changes(), array_merge($warnings, $plan->warnings), false));
     }
 }

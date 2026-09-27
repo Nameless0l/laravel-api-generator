@@ -94,7 +94,7 @@ class SchemaParser
             throw CodeGeneratorException::invalidSchema($path, "unsupported extension .{$extension} (expected .yaml, .yml or .json)");
         }
 
-        return $this->parseArray($this->decode(File::get($path), $extension === 'json', $path), $extraOptions, $path);
+        return $this->parseArray(self::decode(File::get($path), $extension === 'json', $path), $extraOptions, $path);
     }
 
     /**
@@ -105,19 +105,29 @@ class SchemaParser
      */
     public function parseString(string $content, array $extraOptions = [], string $source = 'stdin'): Collection
     {
+        return $this->parseArray(self::decodeString($content, $source), $extraOptions, $source);
+    }
+
+    /**
+     * JSON when the text starts with "{", YAML otherwise.
+     *
+     * @return array<mixed>
+     */
+    public static function decodeString(string $content, string $source): array
+    {
         $trimmed = ltrim($content);
 
         if ($trimmed === '') {
-            throw CodeGeneratorException::invalidSchema($source, 'the schema is empty');
+            throw CodeGeneratorException::invalidSchema($source, 'the document is empty');
         }
 
-        return $this->parseArray($this->decode($content, str_starts_with($trimmed, '{'), $source), $extraOptions, $source);
+        return self::decode($content, str_starts_with($trimmed, '{'), $source);
     }
 
     /**
      * @return array<mixed>
      */
-    private function decode(string $content, bool $json, string $source): array
+    private static function decode(string $content, bool $json, string $source): array
     {
         if ($json) {
             $data = json_decode($content, true);

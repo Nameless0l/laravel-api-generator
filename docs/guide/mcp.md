@@ -70,13 +70,15 @@ docker exec -i my-app php artisan api-generator:mcp
 
 Ask in plain words, for example a blog with posts, categories and tags where a post can be a draft or published. The agent checks what already exists with `list-entities`, writes an [api-schema](/guide/schema-files) document and calls `plan-api`, which lists every file the generation would create or update without writing anything. Once you agree, `generate-api` writes them, and the agent can run `php artisan migrate` and the generated tests.
 
+When the repository already holds a spec, ask for the API described in `docs/openapi.yaml`. The agent passes that path to `plan-api` instead of writing a schema, and the warnings tell it which schemas were left aside.
+
 Later, "add an excerpt to posts" goes through `add-fields`. It writes an incremental migration and patches the model, form request, factory and resource in place, keeping what you changed in them.
 
 | Tool | What it does |
 |---|---|
 | `list-entities` | Reads `.api-generator/manifest.json` and returns each generated entity with its files, marked intact, edited or missing. Also names the schema file at the project root. |
-| `plan-api` | Previews the files of an api-schema document, with warnings such as an unknown field type. Returns the content of the files on request. |
-| `generate-api` | Writes the files of an api-schema document, with `auth`, `postman` and `only` like the command line. |
+| `plan-api` | Previews the files of an api-schema document, or of an [OpenAPI spec](/guide/openapi) of the project given by its path, with warnings such as an unknown field type. Returns the content of the files on request. |
+| `generate-api` | Writes the files of an api-schema document or of an OpenAPI spec of the project, with `auth`, `postman` and `only` like the command line. |
 | `add-fields` | Adds columns to a generated entity, with an optional dry run. |
 
 The results use the same JSON document as [`make:fullapi --json`](/guide/integrations#machine-readable-output), so errors carry the same stable codes and hints. The server also exposes the JSON Schema of the api-schema format as the resource `api-generator://schema/api-schema.json`.
