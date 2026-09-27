@@ -1,0 +1,56 @@
+openapi: 3.0.3
+info:
+  title: Petstore
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    Owner:
+      type: object
+      required: [name, email]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        pets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pet'
+    Pet:
+      type: object
+      required: [name, status]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        status:
+          type: string
+          enum: [available, pending, sold]
+        birthday:
+          type: string
+          format: date
+        owner:
+          $ref: '#/components/schemas/Owner'
+        created_at:
+          type: string
+          format: date-time
+    NewPet:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
