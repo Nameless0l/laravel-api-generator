@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace nameless\CodeGenerator\Mcp;
 
 use Laravel\Mcp\Server;
+use nameless\CodeGenerator\Mcp\Prompts\DesignApiPrompt;
 use nameless\CodeGenerator\Mcp\Resources\ApiSchemaResource;
 use nameless\CodeGenerator\Mcp\Tools\AddFieldsTool;
 use nameless\CodeGenerator\Mcp\Tools\GenerateApiTool;
@@ -35,6 +36,10 @@ final class ApiGeneratorServer extends Server
 
     protected array $resources = [
         ApiSchemaResource::class,
+    ];
+
+    protected array $prompts = [
+        DesignApiPrompt::class,
     ];
 
     protected function boot(): void

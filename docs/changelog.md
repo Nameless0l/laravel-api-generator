@@ -6,6 +6,10 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.14.0
+
+- The MCP server offers a `design-api` prompt: describe the API in plain words, and the agent drafts the schema, shows you the plan, then generates it once you agree. See [MCP Server](/guide/mcp#ask-for-an-api).
+
 ### 3.13.0
 
 - Generate from an OpenAPI 3.0, 3.1 or Swagger 2.0 spec with `--openapi`, from the command line or through the MCP server. See [OpenAPI Specs](/guide/openapi).
@@ -96,6 +100,10 @@ Recent releases of the package and the VS Code extension. Full histories live on
 3.3.1 (strict-types fixes), 3.3.0 (auto-registered routes and seeders, required-by-default validation), 3.2.0 (interactive wizard, Sanctum auth, generated tests, Postman export, soft deletes), 3.0.0 (clean-architecture rewrite): details in the [full changelog](https://github.com/Nameless0l/laravel-api-generator/blob/main/CHANGELOG.md).
 
 ## VS Code extension
+
+### 0.17.0
+
+- **Describe an API with Copilot**: write the API in plain words, review the `api-schema.yaml` Copilot drafts, then preview and generate it. See [Imports](/guide/extension/imports#describe-an-api-with-copilot).
 
 ### 0.16.0
 

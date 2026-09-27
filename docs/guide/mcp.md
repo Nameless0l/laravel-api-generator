@@ -81,6 +81,8 @@ Later, "add an excerpt to posts" goes through `add-fields`. It writes an increme
 | `generate-api` | Writes the files of an api-schema document or of an OpenAPI spec of the project, with `auth`, `postman` and `only` like the command line. |
 | `add-fields` | Adds columns to a generated entity, with an optional dry run. |
 
+The server also ships a `design-api` prompt, which most clients offer as a slash command. Give it the description, and it walks the agent through the steps above, waiting for your agreement before `generate-api`.
+
 The results use the same JSON document as [`make:fullapi --json`](/guide/integrations#machine-readable-output), so errors carry the same stable codes and hints. The server also exposes the JSON Schema of the api-schema format as the resource `api-generator://schema/api-schema.json`.
 
 ## What stays in your hands

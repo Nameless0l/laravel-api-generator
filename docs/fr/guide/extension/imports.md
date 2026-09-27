@@ -6,6 +6,12 @@ On part rarement d'un formulaire vide. L'extension sait générer toute la surfa
 
 Disponibles dans la palette de commandes et le menu `…` de la sidebar.
 
+### Describe an API with Copilot
+
+Partez d'une phrase. Décrivez l'API avec vos mots, par exemple une bibliothèque qui prête des livres à ses membres, où un prêt a une date de retour, et le modèle que propose VS Code (GitHub Copilot en priorité) rédige un `api-schema.yaml`. Le modèle reçoit aussi le nom des entités déjà présentes dans le projet, et le brouillon s'y rattache au lieu de les redéfinir. Il s'ouvre dans un éditeur, où vous corrigez un type ou renommez un champ avant toute action.
+
+**Prévisualiser et générer** envoie le brouillon modifié au package. La même fenêtre d'essai à blanc que pour l'import OpenAPI nomme les entités et compte les fichiers, et **Générer** les écrit. **Enregistrer en api-schema.yaml** garde plutôt le brouillon à la racine du projet, comme source versionnée de l'API. Il faut VS Code 1.90 ou plus récent et un modèle de chat connecté.
+
 ### Generate APIs from Database
 
 C'est la commande des projets legacy. Elle génère des API REST complètes pour **toutes les tables d'un coup**, directement depuis le schéma existant.

@@ -6,6 +6,10 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.14.0
+
+- Le serveur MCP propose un prompt `design-api` : décrivez l'API avec vos mots, l'agent rédige le schéma, vous montre le plan, puis génère une fois votre accord donné. Voir [Serveur MCP](/fr/guide/mcp#demander-une-api).
+
 ### 3.13.0
 
 - Génération depuis une spec OpenAPI 3.0, 3.1 ou Swagger 2.0 avec `--openapi`, en ligne de commande ou par le serveur MCP. Voir [Specs OpenAPI](/fr/guide/openapi).
@@ -96,6 +100,10 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 3.3.1 (correctifs strict types), 3.3.0 (routes et seeders auto-enregistrés, validation required par défaut), 3.2.0 (assistant interactif, auth Sanctum, tests générés, export Postman, soft deletes), 3.0.0 (réécriture clean architecture) : détails dans le [changelog complet](https://github.com/Nameless0l/laravel-api-generator/blob/main/CHANGELOG.md).
 
 ## Extension VS Code
+
+### 0.17.0
+
+- **Describe an API with Copilot** : décrivez l'API avec vos mots, relisez l'`api-schema.yaml` rédigé par Copilot, puis prévisualisez-le et générez-le. Voir [Imports](/fr/guide/extension/imports#describe-an-api-with-copilot).
 
 ### 0.16.0
 

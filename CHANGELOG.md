@@ -5,6 +5,11 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.0] - Unreleased
+
+### Added
+- **`design-api` prompt on the MCP server.** Given a description in plain words, it walks the agent through `list-entities`, an api-schema document, `plan-api`, your agreement and `generate-api`. Clients show it as a slash command.
+
 ## [3.13.0] - Unreleased
 
 ### Added

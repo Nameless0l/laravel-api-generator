@@ -11,6 +11,7 @@ use Laravel\Mcp\Server\Registrar;
 use Laravel\Mcp\Server\Testing\TestResponse;
 use nameless\CodeGenerator\Console\Commands\McpCommand;
 use nameless\CodeGenerator\Mcp\ApiGeneratorServer;
+use nameless\CodeGenerator\Mcp\Prompts\DesignApiPrompt;
 use nameless\CodeGenerator\Mcp\Resources\ApiSchemaResource;
 use nameless\CodeGenerator\Mcp\Tools\AddFieldsTool;
 use nameless\CodeGenerator\Mcp\Tools\GenerateApiTool;
@@ -247,6 +248,18 @@ class McpServerTest extends GeneratorTestCase
         $this->assertSame('edited', $status[self::MODEL] ?? null);
         $this->assertSame('missing', $status['app/Policies/GizmoPolicy.php'] ?? null);
         $this->assertSame('intact', $status['app/Http/Controllers/GizmoController.php'] ?? null);
+    }
+
+    #[Test]
+    public function the_design_prompt_walks_the_agent_from_a_description_to_the_generation(): void
+    {
+        ApiGeneratorServer::prompts()->assertRegistered(DesignApiPrompt::class);
+
+        ApiGeneratorServer::prompt(DesignApiPrompt::class, ['description' => 'a library that lends books to members'])
+            ->assertOk()
+            ->assertSee(['a library that lends books to members', 'list-entities', 'plan-api', 'generate-api', 'belongsToMany', 'php artisan migrate']);
+
+        ApiGeneratorServer::prompt(DesignApiPrompt::class, [])->assertHasErrors();
     }
 
     #[Test]
