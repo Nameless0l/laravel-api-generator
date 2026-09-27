@@ -5,6 +5,15 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - Unreleased
+
+### Changed
+- **Laravel 12 or 13 is required.** Laravel 10 and 11 projects keep the 3.x line: 3.15 carries every generator fix released before 4.0. `laravel/mcp` needs Laravel 12.41 or later.
+
+### Removed
+- `config/laravel-api-generator.php`, which was never loaded, so its paths, namespaces and field types had no effect.
+- `ApiGenerationServiceInterface::generateFromJson()` and `deleteCompleteApi()`, deprecated since 3.8.
+
 ## [3.15.0] - 2026-09-27
 
 ### Fixed

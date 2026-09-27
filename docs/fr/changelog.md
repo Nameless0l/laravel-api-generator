@@ -6,6 +6,11 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
+### 4.0.0
+
+- Laravel 12 ou 13 est requis. Les projets Laravel 10 et 11 gardent la 3.15, et [Passer à la 4.0](/fr/guide/upgrading) liste tous les changements.
+- Retirés : le fichier de config jamais chargé et les deux méthodes du service dépréciées en 3.8.
+
 ### 3.15.0 - 27 septembre 2026
 
 - Corrigé : une clé primaire personnalisée est validée comme unique, donc poster une clé qui existe déjà renvoie 422 au lieu de 500.
