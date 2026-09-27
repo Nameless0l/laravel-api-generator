@@ -94,6 +94,8 @@ abstract class GeneratorTestCase extends TestCase
             }
         }
 
+        File::deleteDirectory(base_path('.api-generator'));
+
         parent::tearDown();
     }
 

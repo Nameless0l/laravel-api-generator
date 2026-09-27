@@ -6,10 +6,14 @@ namespace nameless\CodeGenerator\Services;
 
 use Illuminate\Http\Resources\JsonApi\JsonApiResource;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 use nameless\CodeGenerator\Support\ApiRoutesRegistrar;
+use nameless\CodeGenerator\Support\Manifest;
+use nameless\CodeGenerator\Support\Workspace;
 use nameless\CodeGenerator\Support\WorkspaceFactory;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
+use nameless\CodeGenerator\ValueObjects\FileChange;
 use nameless\CodeGenerator\ValueObjects\GenerationPlan;
 use nameless\CodeGenerator\ValueObjects\GenerationRequest;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -65,7 +69,18 @@ final class GenerationPlanner
             ];
         }
 
-        return new GenerationPlan($workspace, array_merge($warnings, $this->apiRoutesRegistrar->register($workspace)));
+        $warnings = array_merge($warnings, $this->apiRoutesRegistrar->register($workspace));
+        $manifest = Manifest::load(base_path());
+        $kept = $request->force ? [] : $this->editedFiles($workspace, $manifest);
+
+        foreach ($kept as $path) {
+            $warnings[] = [
+                'code' => 'modified_file_kept',
+                'message' => "{$path} was edited since it was generated, so it was kept. Use --force to overwrite it.",
+            ];
+        }
+
+        return new GenerationPlan($workspace, $warnings, $manifest, $kept);
     }
 
     /**
@@ -80,10 +95,44 @@ final class GenerationPlanner
         }
 
         $result = $this->entityEvolutionService->addFields($entity, $fields, $workspace);
+        $manifest = Manifest::load(base_path());
 
-        return new GenerationPlan($workspace, array_map(
-            fn (string $message) => ['code' => 'field_addition', 'message' => $message],
-            $result['warnings']
-        ));
+        return new GenerationPlan(
+            $workspace,
+            array_map(fn (string $message) => ['code' => 'field_addition', 'message' => $message], $result['warnings']),
+            $manifest->exists() ? $manifest : null,
+            patchesInPlace: true
+        );
+    }
+
+    /**
+     * Files the plan would overwrite although they changed since the last
+     * generation. Entities the manifest has never seen were generated before
+     * it existed: they are regenerated as before, then tracked.
+     *
+     * @return array<int, string>
+     */
+    private function editedFiles(Workspace $workspace, Manifest $manifest): array
+    {
+        if (! $manifest->exists()) {
+            return [];
+        }
+
+        $edited = [];
+
+        foreach ($workspace->changes() as $change) {
+            if ($change->action !== FileChange::UPDATE || ! Manifest::tracks($change->kind)) {
+                continue;
+            }
+
+            $pristine = $manifest->isPristine($change->path, File::get(base_path($change->path)));
+            $tracked = $change->entity !== null && $manifest->filesOf($change->entity) !== [];
+
+            if ($pristine === false || ($pristine === null && $tracked)) {
+                $edited[] = $change->path;
+            }
+        }
+
+        return $edited;
     }
 }
