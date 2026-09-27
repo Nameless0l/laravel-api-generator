@@ -122,4 +122,16 @@ class AddFieldsTest extends GeneratorTestCase
         ]);
         $result->assertFailed();
     }
+
+    #[Test]
+    public function it_refuses_an_entity_name_that_leaves_the_models_directory(): void
+    {
+        /** @var PendingCommand $result */
+        $result = $this->artisan('make:fullapi', [
+            'name' => '../../config/app',
+            '--add-fields' => 'excerpt:text',
+        ]);
+        $result->expectsOutputToContain('Invalid entity name');
+        $result->assertFailed();
+    }
 }

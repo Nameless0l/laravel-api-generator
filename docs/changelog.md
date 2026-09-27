@@ -6,6 +6,12 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.12.0
+
+- An MCP server lets Claude Code, Copilot, Cursor and other agents list, preview and generate APIs, and add fields, without ever overwriting your edits. See [MCP Server](/guide/mcp).
+- A schema field with an unknown type now comes with an `unknown_field_type` warning.
+- `--add-fields` refuses an entity name that points outside `app/Models`.
+
 ### 3.11.0
 
 - Regenerating keeps the files you edited by hand, and names them. `--force` overwrites them anyway. See [Evolving Entities](/guide/evolving#your-edits-survive-regeneration).
@@ -85,6 +91,10 @@ Recent releases of the package and the VS Code extension. Full histories live on
 3.3.1 (strict-types fixes), 3.3.0 (auto-registered routes and seeders, required-by-default validation), 3.2.0 (interactive wizard, Sanctum auth, generated tests, Postman export, soft deletes), 3.0.0 (clean-architecture rewrite): details in the [full changelog](https://github.com/Nameless0l/laravel-api-generator/blob/main/CHANGELOG.md).
 
 ## VS Code extension
+
+### 0.15.0
+
+- With `laravel/mcp` in the project, Copilot's agent mode lists the package's MCP server, started with your PHP command, Sail and Docker included. See [Copilot and schema files](/guide/extension/reference#copilot-and-schema-files). Pairs with package 3.12.
 
 ### 0.14.0
 

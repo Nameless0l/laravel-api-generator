@@ -214,14 +214,15 @@ class MakeApiCommand extends Command
     {
         if ($path === '-') {
             $entities = $this->schemaParser->parseString($this->stdin->read(), $this->cliEntityOptions(), 'stdin');
-            $this->announce($entities, 'stdin');
-
-            return $entities;
+            $source = 'stdin';
+        } else {
+            $resolved = File::exists($path) ? $path : base_path($path);
+            $entities = $this->schemaParser->parseFile($resolved, $this->cliEntityOptions());
+            $source = basename($resolved);
         }
 
-        $resolved = File::exists($path) ? $path : base_path($path);
-        $entities = $this->schemaParser->parseFile($resolved, $this->cliEntityOptions());
-        $this->announce($entities, basename($resolved));
+        $this->inputWarnings = array_merge($this->inputWarnings, $this->schemaParser->getWarnings());
+        $this->announce($entities, $source);
 
         return $entities;
     }

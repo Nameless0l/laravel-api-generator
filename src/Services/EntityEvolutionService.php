@@ -11,6 +11,7 @@ use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\Support\StubLoader;
 use nameless\CodeGenerator\Support\Workspace;
 use nameless\CodeGenerator\Support\WorkspaceFactory;
+use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 
 /**
@@ -40,6 +41,10 @@ class EntityEvolutionService
      */
     public function addFields(string $name, Collection $fields, ?Workspace $workspace = null): array
     {
+        if (! preg_match(EntityDefinition::NAME_PATTERN, $name)) {
+            throw CodeGeneratorException::invalidEntityName($name);
+        }
+
         $this->changed = [];
         $this->warnings = [];
         $target = $workspace ?? $this->workspaces->make();

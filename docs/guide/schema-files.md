@@ -76,6 +76,8 @@ The package ships a JSON Schema of this format. Point the first line of the file
 
 The [VS Code extension](/guide/extension/) applies the schema to `api-schema.yaml`, `api-schema.yml` and `api-schema.json` on its own. Offline, the same file sits in `vendor/nameless/laravel-api-generator/resources/schema/api-schema.json`.
 
+Outside the editor, `make:fullapi` still generates a field of unknown type as a string column, and reports it with an `unknown_field_type` warning that names the field.
+
 ## What you get for free
 
 - **Inverse relations synthesized**: declare `posts: hasMany Post` on `Category`, and `Post` receives the `belongsTo` and its `category_id` migration column. [Details](/guide/relationships).

@@ -10,6 +10,8 @@ use InvalidArgumentException;
 
 final readonly class EntityDefinition
 {
+    public const NAME_PATTERN = '/^[A-Z][a-zA-Z0-9]*$/';
+
     /**
      * @param  Collection<int, FieldDefinition>  $fields
      * @param  Collection<int, RelationshipDefinition>  $relationships
@@ -41,7 +43,7 @@ final readonly class EntityDefinition
             throw new InvalidArgumentException('Entity name cannot be empty');
         }
 
-        if (! preg_match('/^[A-Z][a-zA-Z0-9]*$/', $name)) {
+        if (! preg_match(self::NAME_PATTERN, $name)) {
             throw new InvalidArgumentException("Invalid entity name: {$name}. Must start with uppercase letter.");
         }
     }

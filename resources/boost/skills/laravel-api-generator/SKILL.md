@@ -24,7 +24,7 @@ One command writes the whole stack for an entity, and the generated tests pass o
 php artisan make:fullapi --schema=api-schema.yaml --dry-run --json
 ```
 
-3. Read the JSON document on the last line of the output. Fix every entry of `errors`, read the `warnings`, and look at each file whose `action` is `update`: the generator would overwrite it, so manual changes in it would be lost.
+3. Read the JSON document on the last line of the output. Fix every entry of `errors` and read the `warnings`. A file whose `action` is `update` would be regenerated, except when it was edited by hand since it was generated: then it carries `"kept": true` and stays as it is unless you add `--force`.
 4. Generate, migrate, and run the generated tests:
 
 ```bash
@@ -82,6 +82,17 @@ The schema can also come from stdin, so nothing has to be saved first:
 cat api-schema.yaml | php artisan make:fullapi --schema=- --dry-run --json
 ```
 
+## MCP tools
+
+When the `laravel-api-generator` MCP server is connected (the project requires `laravel/mcp`), call its tools instead of the shell commands:
+
+- `list-entities`: the generated entities and their files, each marked intact, edited or missing.
+- `plan-api`: the files an api-schema document would create or update, nothing written. Pass the schema as a JSON object.
+- `generate-api`: writes them. Files edited by hand are kept, never overwritten.
+- `add-fields`: new columns on a generated entity, with `dry_run` to preview.
+
+They return the same JSON document as `--json`. Run `php artisan migrate` and `php artisan test` yourself after generating.
+
 ## Other sources
 
 - Existing database: `php artisan make:fullapi --from-database --tables=posts,tags --with-migrations`. Without `--tables`, every table except `users` is used.
@@ -115,6 +126,8 @@ cat api-schema.yaml | php artisan make:fullapi --schema=- --dry-run --json
 ```
 
 - `action` is `create`, `update` (the file exists and would change) or `unchanged`.
+- `"kept": true` marks a file edited by hand since it was generated. It is not written.
+- Warnings worth acting on: `unknown_field_type` (a typo in a field type, generated as a string column), `modified_file_kept` and `api_routes_not_loaded`.
 - `content` is only present with `--dry-run`.
 - On failure the exit code is 1 and each error has a stable `code`: `invalid_request`, `invalid_schema`, `invalid_diagram`, `invalid_json`, `file_not_found`, `write_failed`, `generation_failed` or `unexpected_error`. A `hint` often gives the fix.
 

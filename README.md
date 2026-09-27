@@ -367,6 +367,17 @@ php artisan api-generator:validate-stubs --json   # machine-readable, exit code 
 
 Wire this into your CI to catch broken stubs before they reach production.
 
+### Let coding agents generate the API (MCP)
+
+Install `laravel/mcp` (Laravel 11.45+) and register the server in your agent. With Claude Code:
+
+```bash
+composer require --dev laravel/mcp
+claude mcp add -s project laravel-api-generator -- php artisan api-generator:mcp
+```
+
+The agent gets four tools, `list-entities`, `plan-api`, `generate-api` and `add-fields`. It previews before writing and never overwrites a file you edited by hand. The VS Code extension registers the server for Copilot on its own. See [MCP Server](https://nameless0l.github.io/laravel-api-generator/guide/mcp) for Cursor, Docker and Sail.
+
 ---
 
 ## Customize the generated code (stubs)
@@ -395,6 +406,7 @@ php artisan api-generator:introspect {--table=}
 php artisan api-generator:validate-stubs {--json}
 php artisan api-generator:install
 php artisan api-generator:serve {--stdio}
+php artisan api-generator:mcp
 ```
 
 | Argument / Option | Description |
@@ -853,6 +865,7 @@ Then run `composer update`.
 
 - PHP >= 8.2
 - Laravel 10.x, 11.x, 12.x, or 13.x
+- Optional: `laravel/mcp` for the MCP server (Laravel 11.45+)
 
 ---
 

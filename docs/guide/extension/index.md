@@ -22,6 +22,7 @@ A free visual interface for the generator: build entities in a form, preview the
 | [Imports](/guide/extension/imports) | Generate from your database, a schema file, a Mermaid diagram, a JSON definition or an **OpenAPI / Swagger spec** |
 | [Diagram & Sidebar](/guide/extension/diagram-and-sidebar) | An interactive entity canvas and a tree of everything you generated |
 | [Quick Actions & Guardrails](/guide/extension/quick-actions) | Migrate, seed, tests, routes and API docs in one click, server and dependencies handled for you |
+| [Copilot](/guide/extension/reference#copilot-and-schema-files) | The package's agent skill and its [MCP server](/guide/mcp), so Copilot's agent mode plans and generates APIs through the package |
 | [Commands & Settings](/guide/extension/reference) | Command palette reference, keybindings, settings, PHP snippets |
 
 The whole UI (panel labels, popups, prompts, error messages) is available in **English and French**, following VS Code's display language (forceable via the `laravelApiGenerator.locale` setting).

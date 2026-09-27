@@ -10,46 +10,44 @@ namespace nameless\CodeGenerator\Support;
  */
 class TypeNormalizer
 {
+    private const SCHEMA_TYPES = [
+        'int' => ['integer', 'int', 'long', 'tinyint', 'smallint', 'mediumint', 'short', 'byte'],
+        'bigint' => ['bigint', 'biginteger'],
+        'string' => ['str', 'string', 'varchar', 'char', 'enum', 'set', 'java.time.offsetdatetime', 'java.time.localdate'],
+        'text' => ['text', 'longtext', 'mediumtext', 'tinytext', 'clob'],
+        'bool' => ['boolean', 'bool'],
+        'float' => ['float', 'double', 'real', 'number'],
+        'decimal' => ['decimal', 'java.math.bigdecimal', 'money'],
+        'date' => ['date', 'localdate'],
+        'datetime' => ['datetime', 'timestamp', 'localdatetime'],
+        'time' => ['time', 'localtime'],
+        'json' => ['json', 'jsonb', 'array', 'list', 'map', 'object', 'java.util.map', 'java.util.list'],
+        'uuid' => ['uuid'],
+    ];
+
     /**
      * Normalize type names from schema-like sources (UML, Java, YAML, Mermaid)
-     * to the field type vocabulary accepted by FieldDefinition.
+     * to the field type vocabulary accepted by FieldDefinition. Unknown types
+     * become strings, and list_* types (list_uuid, list_string) become json.
      */
     public static function fromSchemaType(string $type): string
     {
-        return match (strtolower($type)) {
-            // Integer variants
-            'integer', 'int', 'long', 'tinyint', 'smallint', 'mediumint', 'short', 'byte' => 'int',
-            'bigint', 'biginteger' => 'bigint',
+        $lower = strtolower($type);
 
-            // String variants
-            'str', 'string', 'varchar', 'char', 'enum', 'set',
-            'java.time.offsetdatetime', 'java.time.localdate' => 'string',
+        foreach (self::SCHEMA_TYPES as $normalized => $names) {
+            if (in_array($lower, $names, true)) {
+                return $normalized;
+            }
+        }
 
-            // Text
-            'text', 'longtext', 'mediumtext', 'tinytext', 'clob' => 'text',
+        return str_starts_with($lower, 'list_') ? 'json' : 'string';
+    }
 
-            // Boolean
-            'boolean', 'bool' => 'bool',
+    public static function isKnownSchemaType(string $type): bool
+    {
+        $lower = strtolower($type);
 
-            // Float/Decimal variants
-            'float', 'double', 'real', 'number' => 'float',
-            'decimal', 'java.math.bigdecimal', 'money' => 'decimal',
-
-            // Date/Time
-            'date', 'localdate' => 'date',
-            'datetime', 'timestamp', 'localdatetime' => 'datetime',
-            'time', 'localtime' => 'time',
-
-            // JSON / Array
-            'json', 'jsonb', 'array', 'list', 'map', 'object',
-            'java.util.map', 'java.util.list' => 'json',
-
-            // UUID
-            'uuid' => 'uuid',
-
-            // Catch-all: types like list_uuid, list_string, etc.
-            default => str_starts_with(strtolower($type), 'list_') ? 'json' : 'string',
-        };
+        return str_starts_with($lower, 'list_') || in_array($lower, array_merge(...array_values(self::SCHEMA_TYPES)), true);
     }
 
     /**

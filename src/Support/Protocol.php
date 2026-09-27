@@ -24,14 +24,15 @@ final class Protocol
     /**
      * @param  array<int, FileChange>  $changes
      * @param  array<int, array{code: string, message: string}>  $warnings
+     * @param  bool|null  $withContent  file contents, included in a dry run by default
      * @return array<string, mixed>
      */
-    public static function planDocument(array $changes, array $warnings, bool $dryRun): array
+    public static function planDocument(array $changes, array $warnings, bool $dryRun, ?bool $withContent = null): array
     {
         return [
             'protocol' => self::VERSION,
             'dryRun' => $dryRun,
-            'files' => self::files($changes, $dryRun),
+            'files' => self::files($changes, $withContent ?? $dryRun),
             'warnings' => array_values($warnings),
             'errors' => [],
         ];

@@ -151,7 +151,7 @@ class DryRunAndJsonTest extends GeneratorTestCase
         {
             public function read(): string
             {
-                return '{"entities":{"Book":{"fields":{"title":"string"}}}}';
+                return '{"entities":{"Book":{"fields":{"title":"string","isbn":"strng"}}}}';
             }
         });
 
@@ -159,6 +159,7 @@ class DryRunAndJsonTest extends GeneratorTestCase
 
         $this->assertSame(0, $exitCode);
         $this->assertContains('app/Models/Book.php', array_column($document['files'], 'path'));
+        $this->assertContains('unknown_field_type', array_column($document['warnings'], 'code'));
         $this->assertFileDoesNotExist(app_path('Models/Book.php'));
     }
 }

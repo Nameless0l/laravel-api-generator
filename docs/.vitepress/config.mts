@@ -35,6 +35,7 @@ const enCliSidebar = [
     items: [
       { text: "Customizing Stubs", link: "/guide/customizing-stubs" },
       { text: "Tools & Agents", link: "/guide/integrations" },
+      { text: "MCP Server", link: "/guide/mcp" },
     ],
   },
   {
@@ -117,6 +118,7 @@ const frCliSidebar = [
     items: [
       { text: "Personnaliser les stubs", link: "/fr/guide/customizing-stubs" },
       { text: "Outils et agents", link: "/fr/guide/integrations" },
+      { text: "Serveur MCP", link: "/fr/guide/mcp" },
     ],
   },
   {

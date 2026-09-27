@@ -69,6 +69,8 @@ Avec [Laravel Boost](https://laravel.com/docs/boost), le package apprend à votr
 
 L'extension VS Code donne le même skill à GitHub Copilot, sans Boost.
 
+Les agents peuvent aussi appeler le générateur eux-mêmes grâce à son [serveur MCP](/fr/guide/mcp), qui liste, prévisualise et génère des API en gardant vos retouches.
+
 Les agents qui lisent le web peuvent partir de [`llms.txt`](https://nameless0l.github.io/laravel-api-generator/llms.txt), ou charger toute la documentation en un seul fichier avec [`llms-full.txt`](https://nameless0l.github.io/laravel-api-generator/llms-full.txt). Ces deux fichiers reprennent la documentation anglaise.
 
 `php artisan about` affiche aussi une section Laravel Api Generator avec la version installée, le protocole, le fichier de schéma détecté et l'état des stubs (publiés ou non). `php artisan about --only=laravel_api_generator --json` la renvoie en JSON.
