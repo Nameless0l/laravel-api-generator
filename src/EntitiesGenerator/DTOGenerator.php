@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\EntitiesGenerator;
 
+use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
@@ -22,6 +23,13 @@ class DTOGenerator extends AbstractGenerator
 
     protected function generateContent(EntityDefinition $definition): string
     {
+        if (in_array('provided', $definition->getFillableFields(), true)) {
+            throw new CodeGeneratorException(
+                "{$definition->name}.provided: the generated DTO keeps the list of sent fields in \$provided, rename the field.",
+                'reserved_field_name'
+            );
+        }
+
         return $this->processStub($definition);
     }
 
@@ -38,64 +46,51 @@ class DTOGenerator extends AbstractGenerator
         return [
             'modelName' => $definition->name,
             'attributes' => $this->generateAttributes($definition),
-            'attributesFromRequest' => $this->generateFromRequest($definition),
+            'attributesFromValidated' => $this->generateFromValidated($definition),
         ];
     }
 
     private function generateAttributes(EntityDefinition $definition): string
     {
-        $attributes = $definition->fields->map(function (FieldDefinition $field) {
-            $phpType = $field->nullable ? "?{$field->getPhpType()}" : $field->getPhpType();
-
-            return "public {$phpType} \${$field->name},";
-        })->toArray();
-
-        // Add foreign key fields from belongsTo relationships as optional parameters
-        $fkAttributes = $definition->relationships
-            ->filter(fn (RelationshipDefinition $rel) => $rel->requiresForeignKey())
-            ->map(fn (RelationshipDefinition $rel) => "public ?{$rel->getForeignKeyPhpType()} \${$rel->getForeignKeyName()} = null,")
-            ->toArray();
-
-        $all = array_merge($attributes, $fkAttributes);
-
-        // Remove trailing comma from last attribute
-        if (! empty($all)) {
-            $lastIndex = count($all) - 1;
-            $all[$lastIndex] = rtrim($all[$lastIndex], ',');
+        $lines = [];
+        foreach ($this->properties($definition) as $name => $phpType) {
+            $lines[] = "public ?{$phpType} \${$name} = null,";
         }
 
-        return implode("\n        ", $all);
+        return implode("\n        ", $lines);
     }
 
-    private function generateFromRequest(EntityDefinition $definition): string
+    private function generateFromValidated(EntityDefinition $definition): string
     {
-        $fromRequest = $definition->fields->map(function (FieldDefinition $field) {
-            if ($field->getPhpType() === 'array') {
-                return "is_array(\$request->input('{$field->name}')) ? \$request->input('{$field->name}') : (array) json_decode(\$request->input('{$field->name}'), true),";
-            }
-            $cast = match ($field->getPhpType()) {
-                'int' => '(int) ',
-                'float' => '(float) ',
-                'bool' => '(bool) ',
-                default => '',
-            };
-
-            return "{$cast}\$request->input('{$field->name}'),";
-        })->toArray();
-
-        // Add foreign key fields from belongsTo relationships
-        $fkFromRequest = $definition->relationships
-            ->filter(fn (RelationshipDefinition $rel) => $rel->requiresForeignKey())
-            ->map(fn (RelationshipDefinition $rel) => "\$request->input('{$rel->getForeignKeyName()}') ? ({$rel->getForeignKeyPhpType()}) \$request->input('{$rel->getForeignKeyName()}') : null,")
-            ->toArray();
-
-        $all = array_merge($fromRequest, $fkFromRequest);
-
-        if (! empty($all)) {
-            $lastIndex = count($all) - 1;
-            $all[$lastIndex] = rtrim($all[$lastIndex], ',');
+        $lines = [];
+        foreach ($this->properties($definition) as $name => $phpType) {
+            $lines[] = "{$name}: {$this->validatedValue($name, $phpType)},";
         }
 
-        return implode("\n            ", $all);
+        return implode("\n            ", $lines);
+    }
+
+    /**
+     * @return array<string, string> property name => PHP type
+     */
+    private function properties(EntityDefinition $definition): array
+    {
+        $fields = $definition->fields->mapWithKeys(fn (FieldDefinition $field) => [$field->name => $field->getPhpType()]);
+        $foreignKeys = $definition->relationships
+            ->filter(fn (RelationshipDefinition $rel) => $rel->requiresForeignKey())
+            ->mapWithKeys(fn (RelationshipDefinition $rel) => [$rel->getForeignKeyName() => $rel->getForeignKeyPhpType()]);
+
+        return $fields->merge($foreignKeys)->all();
+    }
+
+    private function validatedValue(string $key, string $phpType): string
+    {
+        $value = "\$data['{$key}']";
+
+        return match ($phpType) {
+            'int', 'float', 'bool' => "isset({$value}) ? ({$phpType}) {$value} : null",
+            'array' => "isset({$value}) ? (is_array({$value}) ? {$value} : (array) json_decode({$value}, true)) : null",
+            default => "{$value} ?? null",
+        };
     }
 }

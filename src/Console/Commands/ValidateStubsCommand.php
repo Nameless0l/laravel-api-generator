@@ -38,7 +38,7 @@ class ValidateStubsCommand extends Command
         'controller.query-builder' => ['modelName', 'modelNameLower', 'pluralName'],
         'service' => ['modelName', 'modelNameLower'],
         'service.query-builder' => ['modelName', 'modelNameLower', 'allowedFilters', 'allowedSorts'],
-        'dto' => ['modelName', 'attributes', 'attributesFromRequest'],
+        'dto' => ['modelName', 'attributes', 'attributesFromValidated'],
         'request.store' => ['modelName', 'rules'],
         'request.update' => ['modelName', 'rules'],
         'resource' => ['modelName', 'fields'],
@@ -60,6 +60,18 @@ class ValidateStubsCommand extends Command
      */
     private const OBSOLETE = [
         'request' => 'not used since 4.0: move your changes to request.store.stub and request.update.stub, then delete it',
+    ];
+
+    private const SAVES_EVERY_PROPERTY = 'saves every DTO property, so a PATCH would reset the fields it leaves out: call $dto->toArray() instead of get_object_vars($dto)';
+
+    /**
+     * Code that only 3.x stubs contain and that breaks the generated API since 4.0.
+     *
+     * @var array<string, array{string, string}> stub => [code, reason]
+     */
+    private const OUTDATED = [
+        'service' => ['get_object_vars($dto)', self::SAVES_EVERY_PROPERTY],
+        'service.query-builder' => ['get_object_vars($dto)', self::SAVES_EVERY_PROPERTY],
     ];
 
     public function handle(): int
@@ -102,13 +114,17 @@ class ValidateStubsCommand extends Command
                 }
             }
 
+            [$code, $reason] = self::OUTDATED[$stubName] ?? [null, null];
+            $outdated = $code !== null && str_contains($content, $code);
+
             $results[] = [
                 'stub' => $stubName,
-                'status' => empty($missing) ? 'ok' : 'invalid',
+                'status' => empty($missing) && ! $outdated ? 'ok' : 'invalid',
                 'missing' => $missing,
+                ...($outdated ? ['reason' => $reason] : []),
             ];
 
-            if (! empty($missing)) {
+            if (! empty($missing) || $outdated) {
                 $hasError = true;
             }
         }
@@ -122,7 +138,7 @@ class ValidateStubsCommand extends Command
         $payload = [
             'status' => $hasError ? 'invalid' : 'ok',
             'message' => $hasError
-                ? 'One or more stubs are missing required placeholders.'
+                ? 'One or more stubs are missing required placeholders or were written for 3.x.'
                 : 'All customized stubs are valid.',
             'results' => $results,
         ];
@@ -162,7 +178,8 @@ class ValidateStubsCommand extends Command
             } elseif ($status === 'obsolete') {
                 $this->line("  ! {$stub} - {$row['reason']}");
             } else {
-                $this->line("  ✗ {$stub} - missing: ".implode(', ', $missing));
+                $details = array_filter([$missing === [] ? null : 'missing: '.implode(', ', $missing), $row['reason'] ?? null]);
+                $this->line("  ✗ {$stub} - ".implode('; ', $details));
             }
         }
     }

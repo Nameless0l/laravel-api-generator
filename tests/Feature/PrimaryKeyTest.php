@@ -116,8 +116,8 @@ class PrimaryKeyTest extends GeneratorTestCase
         $this->assertStringContainsString('@property string $country_code', $city);
 
         $dto = (string) file_get_contents(app_path('DTO/CityDTO.php'));
-        $this->assertStringContainsString('public ?string $country_code = null', $dto);
-        $this->assertStringContainsString("\$request->input('country_code') ? (string) \$request->input('country_code') : null", $dto);
+        $this->assertStringContainsString('public ?string $country_code = null,', $dto);
+        $this->assertStringContainsString("country_code: \$data['country_code'] ?? null,", $dto);
 
         $factory = (string) file_get_contents(database_path('factories/CountryFactory.php'));
         $this->assertStringContainsString("'code' => fake()->unique()->word()", $factory);

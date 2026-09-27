@@ -52,6 +52,29 @@ class ValidateStubsCommandTest extends TestCase
         $this->assertSame('obsolete', $this->row($report, 'request')['status']);
     }
 
+    #[Test]
+    public function a_dto_stub_from_3x_misses_the_validated_attributes(): void
+    {
+        File::put("{$this->published}/dto.stub", "class {{modelName}}DTO\n{\n    public function __construct({{attributes}}) {}\n    public static function fromRequest(\$request) { return new self({{attributesFromRequest}}); }\n}\n");
+
+        [$exitCode, $report] = $this->validate();
+
+        $this->assertSame(1, $exitCode);
+        $this->assertSame(['attributesFromValidated'], $this->row($report, 'dto')['missing']);
+    }
+
+    #[Test]
+    public function a_service_stub_that_saves_every_dto_property_is_outdated(): void
+    {
+        File::put("{$this->published}/service.stub", "class {{modelName}}Service\n{\n    public function update({{modelName}} \${{modelNameLower}}, \$dto) { \${{modelNameLower}}->update(get_object_vars(\$dto)); }\n}\n");
+
+        [$exitCode, $report] = $this->validate();
+
+        $this->assertSame(1, $exitCode);
+        $this->assertSame('invalid', $this->row($report, 'service')['status']);
+        $this->assertStringContainsString('$dto->toArray()', (string) $this->row($report, 'service')['reason']);
+    }
+
     /**
      * @return array{int, array{status: string, results: array<int, array<string, mixed>>}}
      */
