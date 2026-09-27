@@ -12,7 +12,7 @@ php artisan migrate
 Ce qui se passe :
 
 - Une migration **incrémentale** `Schema::table()` est créée (avec un vrai `down()`)
-- `$fillable`, `$casts` et le bloc PHPDoc du modèle existant sont **patchés en place**
+- Les colonnes fillable (`$fillable` ou `#[Fillable]`), les casts (`casts()`, ou `$casts` dans un modèle écrit par la 3.x) et le bloc PHPDoc du modèle existant sont **patchés en place**
 - Les règles de validation vont dans les deux requests (avec `sometimes` dans celle de mise à jour), les valeurs de factory et les champs de resource à leur place
 - La classe enum est générée si nécessaire
 - Les champs déjà existants sont ignorés ; **vos méthodes personnalisées ne sont jamais touchées**
