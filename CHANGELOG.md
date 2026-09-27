@@ -5,7 +5,15 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.10.0] - Unreleased
+
+### Added
+- **Laravel Boost support.** The package ships guidelines (`resources/boost/guidelines/core.blade.php`) and a `laravel-api-generator` skill (`resources/boost/skills/`). Tick the package in `php artisan boost:install` and your coding agent learns to generate APIs with `make:fullapi` instead of writing the files by hand.
+- **JSON Schema for schema files** in `resources/schema/api-schema.json`, also served at `https://nameless0l.github.io/laravel-api-generator/schema/api-schema.json`. Editors running the YAML language server complete keys and flag typos; the example schema points at it.
+- **`php artisan about`** gains a Laravel Api Generator section: installed version, protocol, detected schema file and published stubs.
+- The documentation site publishes `llms.txt` and `llms-full.txt` for AI agents.
+
+## [3.9.0] - Unreleased
 
 ### Added
 - **`--dry-run`** on `make:fullapi` runs the whole generation and lists every file it would create or update, with nothing written. It works with every source: `--fields`, schema files, Mermaid, the database, `class_data.json` and `--add-fields`.

@@ -49,6 +49,12 @@ Tapez un préfixe `lag:` dans n'importe quel fichier PHP :
 | `lag:route` | `Route::apiResource(…)` |
 | `lag:filter` | Un query scope `scopeFilter()` |
 
+## Copilot et fichiers de schéma
+
+Dans un projet Laravel, l'extension donne à GitHub Copilot (VS Code 1.109 et plus) le skill `laravel-api-generator` du package. Copilot le charge quand une tâche demande de nouvelles ressources d'API ou des endpoints CRUD, et les génère avec `make:fullapi` au lieu d'écrire les fichiers à la main.
+
+`api-schema.yaml`, `api-schema.yml` et `api-schema.json` sont vérifiés avec le [JSON Schema](/fr/guide/schema-files#autocompletion-dans-l-editeur) du package : les clés et les types se complètent pendant la saisie, et les fautes de frappe apparaissent comme des problèmes. Les fichiers YAML demandent l'extension YAML de Red Hat ; le JSON fonctionne tel quel.
+
 ## Activation
 
 L'extension s'active quand le workspace contient un fichier `artisan` : y compris dans les monorepos où l'app Laravel vit jusqu'à deux niveaux de profondeur (`backend/`, `apps/api/`…).

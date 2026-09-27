@@ -6,6 +6,13 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.10.0
+
+- Prise en charge de Laravel Boost : des consignes et un skill `laravel-api-generator` apprennent à votre agent de code à générer les API au lieu d'écrire les fichiers à la main. Voir [Outils et agents](/fr/guide/integrations#agents-ia).
+- Un JSON Schema des fichiers de schéma apporte l'autocomplétion et la détection des fautes de frappe dans l'éditeur. Voir [Autocomplétion dans l'éditeur](/fr/guide/schema-files#autocompletion-dans-l-editeur).
+- `php artisan about` affiche la version installée, le protocole et le fichier de schéma détecté.
+- La documentation publie `llms.txt` et `llms-full.txt` pour les agents IA.
+
 ### 3.9.0
 
 - `--dry-run` montre chaque fichier qu'une commande créerait ou modifierait, sans rien écrire, pour toutes les sources y compris `--add-fields`.
@@ -72,6 +79,11 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 3.3.1 (correctifs strict types), 3.3.0 (routes et seeders auto-enregistrés, validation required par défaut), 3.2.0 (assistant interactif, auth Sanctum, tests générés, export Postman, soft deletes), 3.0.0 (réécriture clean architecture) : détails dans le [changelog complet](https://github.com/Nameless0l/laravel-api-generator/blob/main/CHANGELOG.md).
 
 ## Extension VS Code
+
+### 0.13.0
+
+- Dans les projets Laravel, GitHub Copilot reçoit le skill `laravel-api-generator` du package et génère les API avec `make:fullapi`.
+- Les fichiers `api-schema.yaml`, `.yml` et `.json` gagnent l'autocomplétion et la détection des fautes de frappe grâce au JSON Schema du package.
 
 ### 0.12.0
 

@@ -1,0 +1,139 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nameless0l.github.io/laravel-api-generator/schema/api-schema.json",
+  "title": "laravel-api-generator schema file",
+  "description": "Every entity of the API in one file. Generate it with: php artisan make:fullapi --schema=api-schema.yaml",
+  "type": "object",
+  "required": ["entities"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "options": {
+      "description": "Options applied to every entity. An entity can override them.",
+      "type": ["object", "null"],
+      "properties": {
+        "soft_deletes": { "$ref": "#/definitions/softDeletes" },
+        "softDeletes": { "$ref": "#/definitions/softDeletes" },
+        "query_builder": { "$ref": "#/definitions/queryBuilder" },
+        "queryBuilder": { "$ref": "#/definitions/queryBuilder" },
+        "pest": { "$ref": "#/definitions/pest" },
+        "json_api": { "$ref": "#/definitions/jsonApi" },
+        "jsonApi": { "$ref": "#/definitions/jsonApi" }
+      },
+      "additionalProperties": false
+    },
+    "entities": {
+      "description": "One key per entity, in PascalCase (Post, BlogPost).",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[A-Za-z][A-Za-z0-9]*$" },
+      "additionalProperties": { "$ref": "#/definitions/entity" }
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "softDeletes": { "type": "boolean", "description": "SoftDeletes trait, deleted_at column, restore and force-delete endpoints." },
+    "queryBuilder": { "type": "boolean", "description": "Filtering and sorting on index endpoints with spatie/laravel-query-builder." },
+    "pest": { "type": "boolean", "description": "Generate Pest tests instead of PHPUnit classes." },
+    "jsonApi": { "type": "boolean", "description": "JSON:API resources (Laravel 12.45+). Falls back to standard resources on older versions." },
+    "entity": {
+      "type": "object",
+      "required": ["fields"],
+      "properties": {
+        "fields": {
+          "description": "Columns of the table. A shorthand string (\"string nullable unique default=x\") or a mapping.",
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+          "additionalProperties": { "$ref": "#/definitions/field" }
+        },
+        "relations": { "$ref": "#/definitions/relations" },
+        "relationships": { "$ref": "#/definitions/relations" },
+        "soft_deletes": { "$ref": "#/definitions/softDeletes" },
+        "softDeletes": { "$ref": "#/definitions/softDeletes" },
+        "query_builder": { "$ref": "#/definitions/queryBuilder" },
+        "queryBuilder": { "$ref": "#/definitions/queryBuilder" },
+        "pest": { "$ref": "#/definitions/pest" },
+        "json_api": { "$ref": "#/definitions/jsonApi" },
+        "jsonApi": { "$ref": "#/definitions/jsonApi" }
+      },
+      "additionalProperties": false
+    },
+    "fieldType": {
+      "description": "Column type. The first thirteen are the documented types; the others are accepted aliases.",
+      "enum": [
+        "string", "text", "integer", "bigint", "float", "decimal", "boolean", "json", "date", "datetime", "timestamp", "time", "uuid",
+        "int", "bool", "UUID", "long", "tinyint", "smallint", "mediumint", "short", "byte", "biginteger", "str", "varchar", "char",
+        "longtext", "mediumtext", "tinytext", "clob", "double", "real", "number", "money", "jsonb", "array", "list", "map", "object",
+        "localdate", "localdatetime", "localtime"
+      ]
+    },
+    "field": {
+      "oneOf": [
+        {
+          "description": "<type> or enum(a,b) followed by nullable, required, unique, primary (pk), default=<value>.",
+          "type": "string",
+          "pattern": "^\\s*(string|text|integer|bigint|float|decimal|boolean|json|date|datetime|timestamp|time|uuid|int|bool|UUID|long|tinyint|smallint|mediumint|short|byte|biginteger|str|varchar|char|longtext|mediumtext|tinytext|clob|double|real|number|money|jsonb|array|list|map|object|localdate|localdatetime|localtime|enum\\([^\\s()]+\\))(\\s+(nullable|required|unique|primary|pk|default=\\S*|enum\\([^\\s()]+\\)))*\\s*$",
+          "examples": ["string", "string nullable", "string unique", "text nullable", "integer default=0", "enum(draft,published)", "string primary"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "$ref": "#/definitions/fieldType" },
+            "nullable": { "type": "boolean" },
+            "unique": { "type": "boolean" },
+            "primary": { "type": "boolean", "description": "Replaces the default auto-increment id." },
+            "default": { "type": ["string", "number", "boolean", "null"] },
+            "rules": {
+              "description": "Extra validation rules, as a list or a pipe-separated string.",
+              "oneOf": [
+                { "type": "string" },
+                { "type": "array", "items": { "type": "string" } }
+              ]
+            },
+            "enum": {
+              "description": "Values of a backed PHP enum (the field becomes a string column).",
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": ["string", "number"] }
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "relations": {
+      "description": "One key per Eloquent method: \"belongsTo Category\", \"belongsToMany:Tag\" or a mapping.",
+      "type": ["object", "null"],
+      "propertyNames": { "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+      "additionalProperties": { "$ref": "#/definitions/relation" }
+    },
+    "relationType": {
+      "enum": ["belongsTo", "hasOne", "hasMany", "belongsToMany", "morphTo", "morphOne", "morphMany", "manyToOne", "oneToMany", "oneToOne", "manyToMany"]
+    },
+    "relation": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^\\s*(morphTo([\\s:]+[A-Za-z_][A-Za-z0-9_]*){0,2}|(belongsTo|hasOne|hasMany|belongsToMany|morphOne|morphMany|manyToOne|oneToMany|oneToOne|manyToMany)[\\s:]+[A-Za-z_][A-Za-z0-9_]*([\\s:]+[A-Za-z_][A-Za-z0-9_]*)?)\\s*$",
+          "examples": ["belongsTo Category", "hasMany Comment", "belongsToMany Tag", "morphTo", "morphMany Comment commentable"]
+        },
+        {
+          "type": "object",
+          "required": ["type"],
+          "properties": {
+            "type": { "$ref": "#/definitions/relationType" },
+            "model": { "type": "string" },
+            "relatedModel": { "type": "string" },
+            "foreignKey": { "type": "string" },
+            "pivotTable": { "type": "string" },
+            "name": { "type": "string", "description": "Morph name for morphOne and morphMany." }
+          },
+          "additionalProperties": false,
+          "if": { "properties": { "type": { "const": "morphTo" } } },
+          "then": {},
+          "else": { "anyOf": [{ "required": ["model"] }, { "required": ["relatedModel"] }] }
+        }
+      ]
+    }
+  }
+}

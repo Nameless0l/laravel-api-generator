@@ -60,6 +60,19 @@ It speaks JSON-RPC 2.0, one message per line on stdin and stdout, and never writ
 
 The process also exits as soon as stdin closes. Errors come back as JSON-RPC errors whose `data` holds the same `code`, `message` and `hint` as the command line.
 
+## AI coding agents
+
+With [Laravel Boost](https://laravel.com/docs/boost), the package teaches your agent to generate an API instead of writing a dozen files by hand. Run `php artisan boost:install`, or `php artisan boost:update --discover` when Boost is already set up, and tick `nameless/laravel-api-generator` in the list of third-party packages. Boost then adds two things:
+
+- short guidelines to the files your agents read at startup, such as `CLAUDE.md` or `AGENTS.md`;
+- a `laravel-api-generator` skill that the agent loads when a task calls for it, with the schema format, the preview-then-generate workflow, every option and the meaning of the JSON output.
+
+The VS Code extension gives GitHub Copilot the same skill, without Boost.
+
+Agents that read the web can start from [`llms.txt`](https://nameless0l.github.io/laravel-api-generator/llms.txt), or load the whole documentation in one file from [`llms-full.txt`](https://nameless0l.github.io/laravel-api-generator/llms-full.txt).
+
+`php artisan about` also has a Laravel Api Generator section with the installed version, the protocol, the detected schema file and whether stubs are published. `php artisan about --only=laravel_api_generator --json` returns it as JSON.
+
 ## Stability
 
 Every document and response carries `"protocol": 1`. New fields can appear without changing that number, while removing a field or changing its meaning would move to protocol 2. The JSON Schema ships with the package in `resources/protocol/v1.schema.json`.
