@@ -4,7 +4,7 @@
 
 ```bash
 php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
-                         {--schema=} {--mermaid=} {--from-database} {--tables=} {--with-migrations} {--query-builder}
+                         {--schema=} {--mermaid=} {--openapi=} {--from-database} {--tables=} {--with-migrations} {--query-builder}
                          {--pest} {--json-api} {--add-fields=} {--dry-run} {--json} {--force}
 php artisan delete:fullapi {name?} {--force} {--dry-run}
 php artisan api-generator:clean-routes {--dry-run}
@@ -28,6 +28,7 @@ php artisan api-generator:mcp
 | `--only=Type,Type` | Regenerate only the listed artifacts; skip route + seeder registration. |
 | `--schema=file` | Generate every entity from a declarative YAML/JSON schema file. `--schema=-` reads the schema from stdin. |
 | `--mermaid=file` | Generate every entity from a Mermaid `erDiagram` / `classDiagram`. |
+| `--openapi=file` | Generate an entity from each object schema of an OpenAPI 3 or Swagger 2 document, JSON or YAML. `--openapi=-` reads it from stdin. See [OpenAPI Specs](/guide/openapi). |
 | `--from-database` | Introspect the existing database and generate APIs for its tables. |
 | `--tables=a,b` | Restrict `--from-database` to specific tables. |
 | `--with-migrations` | With `--from-database`: also generate the migration files. |

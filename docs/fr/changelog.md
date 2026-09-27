@@ -6,6 +6,11 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.13.0
+
+- Génération depuis une spec OpenAPI 3.0, 3.1 ou Swagger 2.0 avec `--openapi`, en ligne de commande ou par le serveur MCP. Voir [Specs OpenAPI](/fr/guide/openapi).
+- Corrigé : un `hasMany` suit le `belongsTo` d'en face quand celui-ci porte le nom de son rôle, comme `author_id` pour `author: belongsTo User`.
+
 ### 3.12.0
 
 - Un serveur MCP permet à Claude Code, Copilot, Cursor et aux autres agents de lister, prévisualiser et générer des API, et d'ajouter des champs, sans jamais écraser vos retouches. Voir [Serveur MCP](/fr/guide/mcp).

@@ -5,6 +5,15 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.13.0] - Unreleased
+
+### Added
+- **OpenAPI source.** `make:fullapi --openapi=<file|->` generates an entity from each object schema of an OpenAPI 3.0, 3.1 or Swagger 2.0 document, in JSON or YAML. References become relations, `post_id` or `postId` next to a `Post` schema a `belongsTo`, string enums PHP enums, `deleted_at` soft deletes and a string `id` a custom primary key. Error, pagination and payload schemas (`NewPet`, `CreatePetRequest`) are skipped with an `openapi_schema_skipped` warning.
+- The MCP tools `plan-api` and `generate-api` accept `openapi`, the path of a spec in the project, instead of `schema`.
+
+### Fixed
+- A `hasMany` uses the foreign key of the `belongsTo` that points back at it. With `author: belongsTo Writer` on `Story`, `Writer::stories()` looked for `writer_id` while the migration created `author_id`.
+
 ## [3.12.0] - Unreleased
 
 ### Added

@@ -19,6 +19,7 @@ const enCliSidebar = [
     items: [
       { text: "YAML & JSON Schemas", link: "/guide/schema-files" },
       { text: "Mermaid Diagrams", link: "/guide/mermaid" },
+      { text: "OpenAPI Specs", link: "/guide/openapi" },
       { text: "From an Existing Database", link: "/guide/from-database" },
     ],
   },
@@ -102,6 +103,7 @@ const frCliSidebar = [
     items: [
       { text: "Schémas YAML & JSON", link: "/fr/guide/schema-files" },
       { text: "Diagrammes Mermaid", link: "/fr/guide/mermaid" },
+      { text: "Specs OpenAPI", link: "/fr/guide/openapi" },
       { text: "Depuis une base existante", link: "/fr/guide/from-database" },
     ],
   },
