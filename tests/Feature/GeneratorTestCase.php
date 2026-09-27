@@ -72,6 +72,8 @@ abstract class GeneratorTestCase extends TestCase
                 app_path("Models/{$entity}.php"),
                 app_path("Http/Controllers/{$entity}Controller.php"),
                 app_path("Http/Requests/{$entity}Request.php"),
+                app_path("Http/Requests/Store{$entity}Request.php"),
+                app_path("Http/Requests/Update{$entity}Request.php"),
                 app_path("Http/Resources/{$entity}Resource.php"),
                 app_path("Services/{$entity}Service.php"),
                 app_path("DTO/{$entity}DTO.php"),

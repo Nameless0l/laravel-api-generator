@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\{{modelName}}Request;
+use App\Http\Requests\Store{{modelName}}Request;
+use App\Http\Requests\Update{{modelName}}Request;
 use App\Models\{{modelName}};
 use App\Http\Resources\{{modelName}}Resource;
 use App\Services\{{modelName}}Service;
@@ -32,7 +33,7 @@ class {{modelName}}Controller extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store({{modelName}}Request $request)
+    public function store(Store{{modelName}}Request $request)
     {
         $dto = {{modelName}}DTO::fromRequest($request);
         ${{modelNameLower}} = $this->service->create($dto);
@@ -51,7 +52,7 @@ class {{modelName}}Controller extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update({{modelName}}Request $request, int|string $id)
+    public function update(Update{{modelName}}Request $request, int|string $id)
     {
         ${{modelNameLower}} = $this->service->find($id);
         $dto = {{modelName}}DTO::fromRequest($request);

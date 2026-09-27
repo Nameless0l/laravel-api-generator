@@ -110,7 +110,7 @@ class ManifestGenerationTest extends GeneratorTestCase
 
         $this->assertStringContainsString('// edited by hand', (string) file_get_contents(base_path(self::MODEL)));
         $this->assertTrue($this->byPath($plan)[self::MODEL]->kept);
-        $this->assertStringContainsString('priority', (string) file_get_contents(app_path('Http/Requests/TicketRequest.php')));
+        $this->assertStringContainsString('priority', (string) file_get_contents(app_path('Http/Requests/StoreTicketRequest.php')));
         $this->assertContains('modified_file_kept', array_column($plan->warnings, 'code'));
         $this->assertFalse($this->pristine(self::MODEL));
     }
@@ -158,12 +158,13 @@ class ManifestGenerationTest extends GeneratorTestCase
     public function adding_fields_keeps_pristine_files_pristine_and_edited_files_edited(): void
     {
         $this->generate();
-        $this->editByHand('app/Http/Requests/TicketRequest.php');
+        $this->editByHand('app/Http/Requests/StoreTicketRequest.php');
 
         $this->addField('excerpt');
 
         $this->assertTrue($this->pristine(self::MODEL));
-        $this->assertStringContainsString('excerpt', (string) file_get_contents(app_path('Http/Requests/TicketRequest.php')));
-        $this->assertFalse($this->pristine('app/Http/Requests/TicketRequest.php'));
+        $this->assertTrue($this->pristine('app/Http/Requests/UpdateTicketRequest.php'));
+        $this->assertStringContainsString('excerpt', (string) file_get_contents(app_path('Http/Requests/StoreTicketRequest.php')));
+        $this->assertFalse($this->pristine('app/Http/Requests/StoreTicketRequest.php'));
     }
 }

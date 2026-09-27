@@ -153,7 +153,7 @@ class McpServerTest extends GeneratorTestCase
         $this->assertTrue($this->file($result, self::MODEL)['kept'] ?? false);
         $this->assertContains('modified_file_kept', array_column($result['warnings'], 'code'));
         $this->assertStringContainsString('// edited by hand', (string) file_get_contents(base_path(self::MODEL)));
-        $this->assertStringContainsString('stock', (string) file_get_contents(app_path('Http/Requests/GizmoRequest.php')));
+        $this->assertStringContainsString('stock', (string) file_get_contents(app_path('Http/Requests/StoreGizmoRequest.php')));
     }
 
     #[Test]

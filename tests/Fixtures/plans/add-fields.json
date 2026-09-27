@@ -14,11 +14,18 @@
         "content": "<?php\n\nnamespace App\\Models;\n\nuse Illuminate\\Database\\Eloquent\\Factories\\HasFactory;\nuse Illuminate\\Database\\Eloquent\\Model;\n\n\n/**\n * @property int $id\n * @property string $title\n * @property \\Illuminate\\Support\\Carbon|null $created_at\n * @property \\Illuminate\\Support\\Carbon|null $updated_at\n * @property string $excerpt\n */\nclass Report extends Model\n{\n    use HasFactory;\n\n\n    protected $fillable = ['title', 'excerpt'];\n\n}\n"
     },
     {
-        "path": "app/Http/Requests/ReportRequest.php",
+        "path": "app/Http/Requests/StoreReportRequest.php",
         "kind": "Request",
         "entity": "Report",
         "action": "update",
-        "content": "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\\Http\\Requests;\n\nuse Illuminate\\Foundation\\Http\\FormRequest;\n\nclass ReportRequest extends FormRequest\n{\n    public function authorize(): bool\n    {\n        return true;\n    }\n\n    /**\n     * @return array<string, mixed>\n     */\n    public function rules(): array\n    {\n        return [\n            'excerpt' => 'required|string',\n            'title' => 'required|string|max:255',\n        ];\n    }\n}\n"
+        "content": "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\\Http\\Requests;\n\nuse Illuminate\\Foundation\\Http\\FormRequest;\n\nclass StoreReportRequest extends FormRequest\n{\n    public function authorize(): bool\n    {\n        return true;\n    }\n\n    /**\n     * @return array<string, mixed>\n     */\n    public function rules(): array\n    {\n        return [\n            'excerpt' => 'required|string',\n            'title' => 'required|string|max:255',\n        ];\n    }\n}\n"
+    },
+    {
+        "path": "app/Http/Requests/UpdateReportRequest.php",
+        "kind": "Request",
+        "entity": "Report",
+        "action": "update",
+        "content": "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\\Http\\Requests;\n\nuse Illuminate\\Foundation\\Http\\FormRequest;\n\nclass UpdateReportRequest extends FormRequest\n{\n    public function authorize(): bool\n    {\n        return true;\n    }\n\n    /**\n     * @return array<string, mixed>\n     */\n    public function rules(): array\n    {\n        return [\n            'excerpt' => 'sometimes|required|string',\n            'title' => 'sometimes|required|string|max:255',\n        ];\n    }\n}\n"
     },
     {
         "path": "database/factories/ReportFactory.php",

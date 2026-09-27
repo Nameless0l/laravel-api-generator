@@ -106,7 +106,7 @@ final readonly class FieldDefinition
             default => 'string'
         };
 
-        $prefix = $this->nullable ? 'sometimes' : 'required';
+        $prefix = $this->nullable ? 'nullable' : 'required';
 
         // Note: uniqueness is NOT appended here; a bare "unique" rule is
         // invalid in Laravel (it needs the table). RequestGenerator emits a

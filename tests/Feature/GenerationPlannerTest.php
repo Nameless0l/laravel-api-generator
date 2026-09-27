@@ -121,6 +121,21 @@ class GenerationPlannerTest extends GeneratorTestCase
     }
 
     #[Test]
+    public function a_request_left_by_3x_is_reported_as_unused(): void
+    {
+        $legacy = app_path('Http/Requests/NoteRequest.php');
+        $this->originals[$legacy] = null;
+        file_put_contents($legacy, "<?php\n");
+
+        $plan = app(GenerationPlanner::class)->plan($this->request(self::requests()['auth and postman'][0], false, false));
+
+        $this->assertContains([
+            'code' => 'legacy_request',
+            'message' => 'app/Http/Requests/NoteRequest.php is no longer used: StoreNoteRequest and UpdateNoteRequest replace it since 4.0. Move your changes there, then delete it.',
+        ], $plan->warnings);
+    }
+
+    #[Test]
     public function a_plan_lists_every_kind_of_file_it_touches(): void
     {
         $plan = app(GenerationPlanner::class)->plan($this->request(self::requests()['auth and postman'][0], true, true));

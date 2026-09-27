@@ -39,7 +39,8 @@ class ValidateStubsCommand extends Command
         'service' => ['modelName', 'modelNameLower'],
         'service.query-builder' => ['modelName', 'modelNameLower', 'allowedFilters', 'allowedSorts'],
         'dto' => ['modelName', 'attributes', 'attributesFromRequest'],
-        'request' => ['modelName', 'rules'],
+        'request.store' => ['modelName', 'rules'],
+        'request.update' => ['modelName', 'rules'],
         'resource' => ['modelName', 'fields'],
         'migrations' => ['tableName', 'fields'],
         'factory' => ['modelName', 'factoryFields'],
@@ -50,6 +51,15 @@ class ValidateStubsCommand extends Command
         'test.feature.pest' => ['modelName', 'modelNameLower', 'pluralName'],
         'test.unit.pest' => ['modelName', 'modelNameLower'],
         'migration.add-fields' => ['tableName', 'columns', 'dropColumns'],
+    ];
+
+    /**
+     * Published stubs the generator no longer reads, so their changes are lost.
+     *
+     * @var array<string, string>
+     */
+    private const OBSOLETE = [
+        'request' => 'not used since 4.0: move your changes to request.store.stub and request.update.stub, then delete it',
     ];
 
     public function handle(): int
@@ -103,6 +113,12 @@ class ValidateStubsCommand extends Command
             }
         }
 
+        foreach (self::OBSOLETE as $stubName => $reason) {
+            if (File::exists($userStubsDir.DIRECTORY_SEPARATOR.$stubName.'.stub')) {
+                $results[] = ['stub' => $stubName, 'status' => 'obsolete', 'missing' => [], 'reason' => $reason];
+            }
+        }
+
         $payload = [
             'status' => $hasError ? 'invalid' : 'ok',
             'message' => $hasError
@@ -143,6 +159,8 @@ class ValidateStubsCommand extends Command
                 $this->line("  ✓ {$stub}");
             } elseif ($status === 'not-customized') {
                 $this->line("  · {$stub} (using package default)");
+            } elseif ($status === 'obsolete') {
+                $this->line("  ! {$stub} - {$row['reason']}");
             } else {
                 $this->line("  ✗ {$stub} - missing: ".implode(', ', $missing));
             }

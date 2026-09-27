@@ -29,7 +29,7 @@ class DateTimeFieldTest extends GeneratorTestCase
         $this->assertStringContainsString("\$table->time('starts_at');", $migration);
         $this->assertStringContainsString("\$table->dateTime('held_at');", $migration);
 
-        $request = (string) file_get_contents(app_path('Http/Requests/MeetingRequest.php'));
+        $request = (string) file_get_contents(app_path('Http/Requests/StoreMeetingRequest.php'));
         $this->assertStringContainsString("'starts_at' => 'required|date_format:H:i,H:i:s',", $request);
 
         $factory = (string) file_get_contents(database_path('factories/MeetingFactory.php'));

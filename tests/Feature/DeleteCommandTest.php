@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace nameless\CodeGenerator\Tests\Feature;
 
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\File;
 use nameless\CodeGenerator\Support\Manifest;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -103,6 +104,32 @@ class DeleteCommandTest extends GeneratorTestCase
 
         $this->assertSame([], $this->addFieldMigrations());
         $this->assertSame([], Manifest::load(base_path())->filesOf('Widget'));
+    }
+
+    #[Test]
+    public function both_requests_are_deleted_along_with_a_request_left_by_3x(): void
+    {
+        $this->generateWidget();
+        File::deleteDirectory(base_path('.api-generator'));
+        file_put_contents(app_path('Http/Requests/WidgetRequest.php'), "<?php\n");
+
+        $this->pendingArtisan('delete:fullapi', ['name' => 'Widget', '--force' => true])->assertSuccessful();
+
+        foreach (['StoreWidgetRequest', 'UpdateWidgetRequest', 'WidgetRequest'] as $request) {
+            $this->assertFileDoesNotExist(app_path("Http/Requests/{$request}.php"));
+        }
+    }
+
+    #[Test]
+    public function restore_routes_are_removed_whatever_their_parameter(): void
+    {
+        file_put_contents(base_path('routes/api.php'), $this->routes."\nRoute::post('widgets/{id}/restore', fn () => null);\nRoute::delete('widgets/{widget}/force-delete', fn () => null)->withTrashed();\nRoute::post('gadgets/{gadget}/restore', fn () => null);\n");
+
+        $this->pendingArtisan('delete:fullapi', ['name' => 'Widget', '--force' => true])->assertSuccessful();
+
+        $routes = (string) file_get_contents(base_path('routes/api.php'));
+        $this->assertStringNotContainsString('widgets/', $routes);
+        $this->assertStringContainsString("Route::post('gadgets/{gadget}/restore'", $routes);
     }
 
     #[Test]

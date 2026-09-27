@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\DTO;
 
-use App\Http\Requests\{{modelName}}Request;
+use App\Http\Requests\Store{{modelName}}Request;
+use App\Http\Requests\Update{{modelName}}Request;
 
 readonly class {{modelName}}DTO
 {
@@ -12,7 +13,7 @@ readonly class {{modelName}}DTO
         {{attributes}}
     ) {}
 
-    public static function fromRequest({{modelName}}Request $request): self
+    public static function fromRequest(Store{{modelName}}Request|Update{{modelName}}Request $request): self
     {
         return new self(
             {{attributesFromRequest}}

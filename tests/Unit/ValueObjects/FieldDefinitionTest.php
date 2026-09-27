@@ -76,7 +76,7 @@ class FieldDefinitionTest extends TestCase
         $this->assertEquals('required|string|max:255', $stringField->getValidationRule());
 
         $nullableField = new FieldDefinition('email', 'string', nullable: true);
-        $this->assertEquals('sometimes|string|max:255', $nullableField->getValidationRule());
+        $this->assertEquals('nullable|string|max:255', $nullableField->getValidationRule());
 
         $requiredField = new FieldDefinition('email', 'string', nullable: false);
         $this->assertEquals('required|string|max:255', $requiredField->getValidationRule());

@@ -61,8 +61,8 @@ class AddFieldsTest extends GeneratorTestCase
         $this->assertStringContainsString("'title', 'excerpt'", $model);
         $this->assertStringContainsString('@property string $excerpt', $model);
 
-        $request = (string) file_get_contents(app_path('Http/Requests/ReportRequest.php'));
-        $this->assertStringContainsString("'excerpt' => 'required|string',", $request);
+        $this->assertStringContainsString("'excerpt' => 'required|string',", (string) file_get_contents(app_path('Http/Requests/StoreReportRequest.php')));
+        $this->assertStringContainsString("'excerpt' => 'sometimes|required|string',", (string) file_get_contents(app_path('Http/Requests/UpdateReportRequest.php')));
 
         $factory = (string) file_get_contents(database_path('factories/ReportFactory.php'));
         $this->assertStringContainsString("'excerpt' => fake()->sentence(),", $factory);
@@ -89,8 +89,33 @@ class AddFieldsTest extends GeneratorTestCase
         $model = (string) file_get_contents(app_path('Models/Report.php'));
         $this->assertStringContainsString("'severity' => \App\Enums\Severity::class", $model);
 
-        $request = (string) file_get_contents(app_path('Http/Requests/ReportRequest.php'));
-        $this->assertStringContainsString('Rule::enum(\App\Enums\Severity::class)', $request);
+        $this->assertStringContainsString(
+            "'severity' => ['required', \Illuminate\Validation\Rule::enum(\App\Enums\Severity::class)],",
+            (string) file_get_contents(app_path('Http/Requests/StoreReportRequest.php'))
+        );
+        $this->assertStringContainsString(
+            "'severity' => ['sometimes', 'required', \Illuminate\Validation\Rule::enum(\App\Enums\Severity::class)],",
+            (string) file_get_contents(app_path('Http/Requests/UpdateReportRequest.php'))
+        );
+    }
+
+    #[Test]
+    public function an_entity_generated_by_3x_gets_its_single_request_patched(): void
+    {
+        $this->generateReport();
+        File::delete([app_path('Http/Requests/StoreReportRequest.php'), app_path('Http/Requests/UpdateReportRequest.php')]);
+        File::put(app_path('Http/Requests/ReportRequest.php'), "<?php\n\nclass ReportRequest\n{\n    public function rules(): array\n    {\n        return [\n            'title' => 'required|string|max:255',\n        ];\n    }\n}\n");
+
+        /** @var PendingCommand $result */
+        $result = $this->artisan('make:fullapi', [
+            'name' => 'Report',
+            '--add-fields' => 'excerpt:text',
+        ]);
+        $result->assertSuccessful();
+        $result->run();
+
+        $this->assertStringContainsString("'excerpt' => 'required|string',", (string) file_get_contents(app_path('Http/Requests/ReportRequest.php')));
+        $this->assertFileDoesNotExist(app_path('Http/Requests/StoreReportRequest.php'));
     }
 
     #[Test]
