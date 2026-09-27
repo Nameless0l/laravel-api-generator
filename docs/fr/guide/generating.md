@@ -31,8 +31,8 @@ Génère un système d'authentification par token complet : `AuthController` (re
 
 | Méthode | Route | Accès |
 |---------|-------|-------|
-| `POST` | `/api/register` | Public |
-| `POST` | `/api/login` | Public |
+| `POST` | `/api/register` | Public, limité à 6 requêtes par minute |
+| `POST` | `/api/login` | Public, limité à 6 requêtes par minute |
 | `POST` | `/api/logout` | `auth:sanctum` |
 | `GET` | `/api/user` | `auth:sanctum` |
 | `GET` | `/api/posts` | `auth:sanctum` (vos ressources exigent aussi un token) |
@@ -104,7 +104,7 @@ Types disponibles : `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resourc
 php artisan delete:fullapi Post
 ```
 
-Supprime tous les fichiers générés, désenregistre le seeder de `DatabaseSeeder.php`, et nettoie les routes de l'entité dans `routes/api.php` et `routes/web.php`. Appelée sans nom d'entité, la commande supprime toutes les entités définies dans `class_data.json`.
+Après confirmation, supprime tous les fichiers générés, désenregistre le seeder de `DatabaseSeeder.php`, et nettoie les routes de l'entité dans `routes/api.php` et `routes/web.php`. Appelée sans nom d'entité, la commande supprime toutes les entités définies dans `class_data.json`. Ajoutez `--force` pour sauter la question dans un script.
 
 Si d'anciennes suppressions ont laissé des routes pointant vers des contrôleurs disparus (la fameuse ReflectionException de `route:list`), purgez-les :
 

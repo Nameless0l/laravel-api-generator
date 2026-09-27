@@ -31,8 +31,8 @@ Scaffolds a complete token-based auth system: `AuthController` (register, login,
 
 | Method | Route | Access |
 |--------|-------|--------|
-| `POST` | `/api/register` | Public |
-| `POST` | `/api/login` | Public |
+| `POST` | `/api/register` | Public, limited to 6 requests per minute |
+| `POST` | `/api/login` | Public, limited to 6 requests per minute |
 | `POST` | `/api/logout` | `auth:sanctum` |
 | `GET` | `/api/user` | `auth:sanctum` |
 | `GET` | `/api/posts` | `auth:sanctum` (your resources require a token too) |
@@ -104,7 +104,7 @@ Available types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`,
 php artisan delete:fullapi Post
 ```
 
-Removes all generated files, unregisters the seeder from `DatabaseSeeder.php`, and cleans the entity's routes from `routes/api.php` and `routes/web.php`. Called without an entity name, it deletes every entity defined in `class_data.json`.
+After a confirmation, removes all generated files, unregisters the seeder from `DatabaseSeeder.php`, and cleans the entity's routes from `routes/api.php` and `routes/web.php`. Called without an entity name, it deletes every entity defined in `class_data.json`. Add `--force` to skip the question in scripts.
 
 If older deletions left routes pointing at controllers that no longer exist (the classic `route:list` ReflectionException), purge them:
 

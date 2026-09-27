@@ -20,6 +20,8 @@ interface ApiGenerationServiceInterface
 
     /**
      * Generate APIs from JSON data.
+     *
+     * @deprecated Unused by the package commands; will be removed in 4.0.
      */
     public function generateFromJson(string $jsonData): bool;
 
@@ -33,6 +35,8 @@ interface ApiGenerationServiceInterface
 
     /**
      * Delete a complete API for the given entity.
+     *
+     * @deprecated Use the delete:fullapi command; will be removed in 4.0.
      */
     public function deleteCompleteApi(string $entityName): bool;
 }

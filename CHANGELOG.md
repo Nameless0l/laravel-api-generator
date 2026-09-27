@@ -5,6 +5,30 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.0] - 2026-09-26
+
+### Fixed
+- **Updates rejected by the `unique` rule.** For multi-word entities (`BlogPost`), the generated request read `$this->route('blog_post')` while `Route::apiResource()` names the parameter `blogpost`, so the current record was never ignored and a PUT keeping the same unique value returned 422. Entities with a custom primary key ignored the record on a nonexistent `id` column. The rule now reads the real route parameter and passes the key column when it is not `id`.
+- **Seeder missing from `DatabaseSeeder` on CRLF files.** When `DatabaseSeeder.php` used Windows line endings, the generated seeder was silently left out. The insertion now works on both line endings and keeps the file's own.
+- **`api-generator:install`** pointed to a nonexistent `api:generate` command and `config/api-generator.php` file, overwrote `config/scramble.php` and offered Breeze or Laravel UI. It now offers `php artisan install:api` when `routes/api.php` is missing, offers Scramble as a dev dependency when it is absent, never republishes configuration, and ends with the real `make:fullapi` command.
+- **`delete:fullapi` deleted without asking**, although `--force` was documented as skipping a confirmation. It now asks first, and `--force` skips the question (the VS Code extension already passes it).
+- **`json_api: true` was ignored in schema files.** It is now read (`json_api` or `jsonApi`), with the same Laravel 12.45 fallback as `--json-api`.
+
+### Security
+- The `--auth` scaffolding limits `POST /api/register` and `POST /api/login` to 6 requests per minute (`throttle:6,1`).
+
+### Removed
+- The undocumented `make:loic` debug command, the unregistered legacy `MakeApi` command class, empty placeholder files, and the sample data left at the repository root.
+
+### Deprecated
+- `ApiGenerationServiceInterface::generateFromJson()` and `deleteCompleteApi()`, unused by the package commands. They will be removed in 4.0.
+
+### Changed
+- `LICENSE.md` now contains the MIT license text (the file was empty).
+- Composer no longer downloads the documentation, tests and examples: the package archive drops from about 7 MB to under 0.5 MB.
+- `delete:fullapi` messages are in English, like the rest of the CLI.
+- CI adds PHP 8.5, and a job that creates fresh Laravel 12 and 13 applications, installs the package from the checkout, generates `examples/api-schema.yaml`, runs the migrations and then the generated tests.
+
 ## [3.7.1] - 2026-07-17
 
 ### Fixed

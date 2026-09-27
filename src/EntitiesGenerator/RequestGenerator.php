@@ -74,9 +74,11 @@ class RequestGenerator extends AbstractGenerator
                 // Array syntax with Rule::unique() so the rule carries the
                 // table AND ignores the current model on updates.
                 $table = $definition->getTableName();
-                $routeParam = Str::singular($table);
+                $routeParam = Str::singular($definition->getPluralName());
+                $keyName = $definition->getPrimaryKeyName();
+                $ignoreArgs = "\$this->route('{$routeParam}')".($keyName === 'id' ? '' : ", '{$keyName}'");
                 $parts = array_map(fn (string $p) => "'{$p}'", explode('|', $rule));
-                $parts[] = "\\Illuminate\\Validation\\Rule::unique('{$table}')->ignore(\$this->route('{$routeParam}'))";
+                $parts[] = "\\Illuminate\\Validation\\Rule::unique('{$table}')->ignore({$ignoreArgs})";
 
                 return "'{$field->name}' => [".implode(', ', $parts).'],';
             }

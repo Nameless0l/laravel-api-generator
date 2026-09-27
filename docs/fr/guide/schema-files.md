@@ -64,6 +64,7 @@ Les options peuvent être globales (sous `options:`) ou par entité :
 | `soft_deletes: true` | Trait SoftDeletes + endpoints restore/force-delete |
 | `query_builder: true` | Filtrage & tri Spatie QueryBuilder sur l'index |
 | `pest: true` | Tests Pest au lieu de PHPUnit |
+| `json_api: true` | Resources JSON:API (Laravel 12.45+, resources classiques sur les versions antérieures) |
 
 ## Ce que vous obtenez gratuitement
 

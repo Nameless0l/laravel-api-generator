@@ -24,9 +24,13 @@ jobs:
             laravel-version: '12.*'
           - php-version: '8.4'
             laravel-version: '12.*'
+          - php-version: '8.5'
+            laravel-version: '12.*'
           - php-version: '8.3'
             laravel-version: '13.*'
           - php-version: '8.4'
+            laravel-version: '13.*'
+          - php-version: '8.5'
             laravel-version: '13.*'
 
     name: PHP ${{ matrix.php-version }} - Laravel ${{ matrix.laravel-version }}
@@ -39,7 +43,7 @@ jobs:
       with:
         php-version: ${{ matrix.php-version }}
         extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv
-        coverage: xdebug
+        coverage: none
 
     - name: Cache Composer dependencies
       uses: actions/cache@v6
@@ -54,6 +58,51 @@ jobs:
 
     - name: Run tests
       run: vendor/bin/phpunit
+
+  generated-app:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        laravel-version: ['12.*', '13.*']
+
+    name: Generated app - Laravel ${{ matrix.laravel-version }}
+
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        path: package
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.4'
+        extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, intl
+        coverage: none
+
+    - name: Create a fresh Laravel application
+      run: composer create-project laravel/laravel app "${{ matrix.laravel-version }}" --prefer-dist --no-interaction
+
+    - name: Install the package from this checkout
+      working-directory: app
+      run: |
+        composer config repositories.package '{"type": "path", "url": "../package", "options": {"symlink": true, "versions": {"nameless/laravel-api-generator": "dev-ci"}}}'
+        composer require --dev "nameless/laravel-api-generator:dev-ci" --no-interaction
+
+    - name: Generate the example API
+      working-directory: app
+      run: php artisan make:fullapi --schema=../package/examples/api-schema.yaml --no-interaction
+
+    - name: Run the migrations
+      working-directory: app
+      run: php artisan migrate --force --no-interaction
+
+    - name: Run the generated tests
+      working-directory: app
+      run: |
+        rm -f tests/Feature/ExampleTest.php tests/Unit/ExampleTest.php
+        php artisan test
 
   static-analysis:
     runs-on: ubuntu-latest

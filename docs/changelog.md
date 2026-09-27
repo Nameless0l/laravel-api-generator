@@ -6,6 +6,16 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.8.0 - September 26, 2026
+
+- Fixed: a PUT that keeps a unique value no longer returns 422 on multi-word entities (`BlogPost`) or with a custom primary key.
+- Fixed: the seeder is registered in `DatabaseSeeder.php` even when the file uses Windows (CRLF) line endings.
+- `--auth` limits register and login to 6 requests per minute.
+- `json_api: true` is now honored in schema files.
+- `api-generator:install` offers `install:api` and Scramble, and no longer overwrites your configuration.
+- `delete:fullapi` asks for confirmation before deleting (`--force` skips it).
+- Removed the undocumented `make:loic` command. Composer downloads drop from about 7 MB to under 0.5 MB.
+
 ### 3.7.1 - July 17, 2026
 
 - Corrected the maintainer contact email (`composer.json` + README security section).
@@ -53,6 +63,15 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## VS Code extension
 
+### 0.11.1 - September 26, 2026
+
+- The builder form now offers the one-click package update when the installed `nameless/laravel-api-generator` is too old for an option, as the import commands already did.
+
+### 0.11.0 - July 21, 2026
+
+- **Sidebar home**: the activity bar view opens on a panel with a New API button, the three import sources and shortcuts to the diagram, the snippets and the documentation.
+- **Infinite canvas**: the entity diagram pans in every direction over a dotted grid, and Ctrl+wheel zooms toward the cursor.
+
 ### 0.10.1 - July 17, 2026
 
 - Sponsor button on the Marketplace listing; corrected the maintainer contact email.
@@ -75,7 +94,7 @@ Recent releases of the package and the VS Code extension. Full histories live on
 - **Pest tests toggle** in the form and the three source commands.
 - **Enum field type** with values input, rendered in the live preview.
 
-### 0.7.x - July 15–16, 2026
+### 0.7.x - July 15 and 16, 2026
 
 - **Generate APIs from Database / Schema File / Mermaid Diagram** commands (pair with package ≥ 3.5).
 - **Spatie QueryBuilder toggle** + dependency check with one-click `composer require`.
