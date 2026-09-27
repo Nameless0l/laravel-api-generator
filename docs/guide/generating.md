@@ -53,22 +53,32 @@ php artisan make:fullapi Post --fields="title:string" --postman
 
 Exports a `postman_collection.json` (v2.1 schema) at the project root: a folder per entity with List, Create, Show, Update and Delete requests pre-filled with sample data. See [API Docs & Postman](/guide/docs-and-postman).
 
-## Spatie QueryBuilder
+## Pagination, filters and sorting
+
+Every generated `index` endpoint is paginated, filterable and sortable:
+
+```
+GET /api/posts?filter[status]=draft&sort=-created_at,title&page=2&per_page=20
+```
+
+The response carries `data`, `links` and `meta`. Filters match exact values on the primary key and the fillable columns (JSON columns excluded). `sort` takes a comma-separated list where a leading `-` means descending, and the default order is the primary key, newest first. Unknown filters and sorts are ignored.
+
+`per_page` defaults to 15 and stops at 100. To change these values, publish the config before generating. They are written into each generated service, so the generated code never reads the package at runtime.
+
+```bash
+php artisan vendor:publish --tag=api-generator-config
+```
+
+### With Spatie QueryBuilder
 
 ```bash
 composer require spatie/laravel-query-builder
 php artisan make:fullapi Post --fields="title:string,content:text" --query-builder
 ```
 
-Index endpoints become filterable and sortable through the community-standard [spatie/laravel-query-builder](https://github.com/spatie/laravel-query-builder):
-
-```
-GET /api/posts?filter[title]=laravel&sort=-created_at
-```
+The same parameters then go through [spatie/laravel-query-builder](https://github.com/spatie/laravel-query-builder), with exact filters, the same sortable columns and the same pagination. Spatie answers 400 for an unknown filter or sort instead of ignoring it. For partial matches, swap `AllowedFilter::exact` for `AllowedFilter::partial` in the service.
 
 The flag works with every generation mode, and `query_builder: true` can be set globally or per entity in a schema file.
-
-Without the flag, generated `index` endpoints still support simple filtering on any fillable field (`GET /api/posts?published=true`); other parameters are silently ignored.
 
 ## Pest tests
 

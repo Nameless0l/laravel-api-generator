@@ -6,7 +6,7 @@ La plupart des générateurs livrent des squelettes de tests vides. Celui-ci éc
 
 Chaque entité arrive avec un test feature (`tests/Feature/PostControllerTest.php`) et un test unitaire (`tests/Unit/PostServiceTest.php`) couvrant :
 
-- Index : la liste renvoie les enregistrements créés
+- Index : la liste paginée et son `meta.total`, un filtre et un tri
 - Store : la création persiste et renvoie 201
 - Les allers-retours Show / Update / Delete
 - Une mise à jour partielle : le PATCH envoie un champ, et toutes les autres colonnes gardent leur valeur

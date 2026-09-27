@@ -53,22 +53,32 @@ php artisan make:fullapi Post --fields="title:string" --postman
 
 Exporte un `postman_collection.json` (schéma v2.1) à la racine du projet : un dossier par entité avec les requêtes List, Create, Show, Update et Delete pré-remplies avec des données d'exemple. Voir [Doc API & Postman](/fr/guide/docs-and-postman).
 
-## Spatie QueryBuilder
+## Pagination, filtres et tri
+
+Chaque endpoint `index` généré est paginé, filtrable et triable :
+
+```
+GET /api/posts?filter[status]=draft&sort=-created_at,title&page=2&per_page=20
+```
+
+La réponse contient `data`, `links` et `meta`. Les filtres cherchent une valeur exacte sur la clé primaire et les colonnes fillable (sauf les colonnes JSON). `sort` prend une liste séparée par des virgules où un `-` initial signifie décroissant, et l'ordre par défaut est la clé primaire, du plus récent au plus ancien. Les filtres et tris inconnus sont ignorés.
+
+`per_page` vaut 15 par défaut et s'arrête à 100. Pour changer ces valeurs, publiez la config avant de générer. Elles sont écrites dans chaque service généré, donc le code généré ne lit jamais le package à l'exécution.
+
+```bash
+php artisan vendor:publish --tag=api-generator-config
+```
+
+### Avec Spatie QueryBuilder
 
 ```bash
 composer require spatie/laravel-query-builder
 php artisan make:fullapi Post --fields="title:string,content:text" --query-builder
 ```
 
-Les endpoints d'index deviennent filtrables et triables via le standard communautaire [spatie/laravel-query-builder](https://github.com/spatie/laravel-query-builder) :
-
-```
-GET /api/posts?filter[title]=laravel&sort=-created_at
-```
+Les mêmes paramètres passent alors par [spatie/laravel-query-builder](https://github.com/spatie/laravel-query-builder), avec des filtres exacts, les mêmes colonnes triables et la même pagination. Spatie répond 400 pour un filtre ou un tri inconnu au lieu de l'ignorer. Pour une recherche partielle, remplacez `AllowedFilter::exact` par `AllowedFilter::partial` dans le service.
 
 Le flag fonctionne avec tous les modes de génération, et `query_builder: true` peut être défini globalement ou par entité dans un fichier de schéma.
-
-Sans le flag, les endpoints `index` générés supportent quand même un filtrage simple sur tout champ fillable (`GET /api/posts?published=true`) ; les autres paramètres sont ignorés silencieusement.
 
 ## Tests Pest
 

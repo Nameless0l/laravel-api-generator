@@ -55,6 +55,12 @@ The DTO is built from `$request->validated()` and remembers which fields the req
 
 A field named `provided` is refused, since the DTO keeps its list of sent fields under that name.
 
+## Paginated index
+
+The index is paginated, filterable and sortable without any extra package. `GET /api/posts?filter[status]=draft&sort=-created_at&page=2&per_page=20` answers `data`, `links` and `meta`, and the service method behind it, `getAll()`, becomes `paginate(array $query)`. Clients that read the whole list in one call now get 15 items per page, and the plain filters of 3.x (`?status=draft`) become `filter[status]=draft`. With `--query-builder`, filters match exact values instead of Spatie's default partial match.
+
+The page size comes from a new config file, read when you generate. Publish it with `php artisan vendor:publish --tag=api-generator-config` to change the default of 15 or the cap of 100.
+
 ## Published stubs
 
 Stubs published under `stubs/vendor/laravel-api-generator` keep taking precedence, so compare them with the new ones. `php artisan api-generator:validate-stubs` points at what a 3.x stub misses:
@@ -65,8 +71,10 @@ Stubs published under `stubs/vendor/laravel-api-generator` keep taking precedenc
 - `dto.stub` needs `{{attributesFromValidated}}` in place of `{{attributesFromRequest}}`.
 - `service.stub` and `service.query-builder.stub` must save `$dto->toArray()` instead of `get_object_vars($dto)`, or a PATCH would clear the fields it leaves out.
 - `policy.stub` needs `{{modelVariable}}`.
+- `service.stub` and `service.query-builder.stub` need `{{allowedFilters}}`, `{{allowedSorts}}`, `{{perPage}}` and `{{maxPerPage}}`.
+- `test.unit.stub` and `test.unit.pest.stub` must call `paginate()`, since `getAll()` no longer exists.
 
-The feature test stubs gain optional placeholders for the new cases: `{{patchFields}}`, `{{patchAssertion}}`, `{{patchedColumns}}` and `{{softDeleteTests}}`.
+The feature test stubs gain optional placeholders for the new cases: `{{patchFields}}`, `{{patchAssertion}}`, `{{patchedColumns}}`, `{{softDeleteTests}}`, `{{filterField}}`, `{{primaryKey}}` and `{{sortAssertion}}`.
 :::
 
 ## Removed

@@ -6,7 +6,7 @@ Most generators give you empty test skeletons. This one writes **real assertions
 
 Every entity ships with a feature test (`tests/Feature/PostControllerTest.php`) and a unit test (`tests/Unit/PostServiceTest.php`) covering:
 
-- Index: listing returns the seeded records
+- Index: the paginated list and its `meta.total`, a filter and a sort
 - Store: creation persists and returns 201
 - Show / Update / Delete round-trips
 - A partial update: the PATCH sends one field, and every other column keeps its value
