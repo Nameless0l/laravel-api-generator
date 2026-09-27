@@ -35,6 +35,8 @@ class ControllerGenerator extends AbstractGenerator
      */
     protected function getReplacements(EntityDefinition $definition): array
     {
+        $model = $definition->name;
+        $parameter = $definition->getRouteParameter();
         $softDeleteMethods = '';
         if ($definition->hasSoftDeletes()) {
             $softDeleteMethods = <<<PHP
@@ -42,27 +44,27 @@ class ControllerGenerator extends AbstractGenerator
     /**
      * Restore the specified soft-deleted resource.
      */
-    public function restore(int|string \$id)
+    public function restore({$model} \${$parameter})
     {
-        \$this->service->restore(\$id);
-        return response()->json(['message' => '{$definition->name} restored successfully.']);
+        return new {$model}Resource(\$this->service->restore(\${$parameter}));
     }
 
     /**
      * Permanently delete the specified resource.
      */
-    public function forceDelete(int|string \$id)
+    public function forceDelete({$model} \${$parameter})
     {
-        \$this->service->forceDelete(\$id);
-        return response(null, 204);
+        \$this->service->forceDelete(\${$parameter});
+        return response()->noContent();
     }
 PHP;
         }
 
         return [
-            'modelName' => $definition->name,
+            'modelName' => $model,
             'modelNameLower' => $definition->getNameLower(),
             'pluralName' => $definition->getPluralName(),
+            'routeParameter' => $parameter,
             'softDeleteMethods' => $softDeleteMethods,
         ];
     }

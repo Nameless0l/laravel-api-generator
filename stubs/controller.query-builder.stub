@@ -36,38 +36,34 @@ class {{modelName}}Controller extends Controller
     public function store(Store{{modelName}}Request $request)
     {
         $dto = {{modelName}}DTO::fromRequest($request);
-        ${{modelNameLower}} = $this->service->create($dto);
-        return new {{modelName}}Resource(${{modelNameLower}});
+        ${{routeParameter}} = $this->service->create($dto);
+        return new {{modelName}}Resource(${{routeParameter}});
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(int|string $id)
+    public function show({{modelName}} ${{routeParameter}})
     {
-        ${{modelNameLower}} = $this->service->find($id);
-        return new {{modelName}}Resource(${{modelNameLower}});
+        return new {{modelName}}Resource(${{routeParameter}});
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Update{{modelName}}Request $request, int|string $id)
+    public function update(Update{{modelName}}Request $request, {{modelName}} ${{routeParameter}})
     {
-        ${{modelNameLower}} = $this->service->find($id);
         $dto = {{modelName}}DTO::fromRequest($request);
-        $updated{{modelName}} = $this->service->update(${{modelNameLower}}, $dto);
-        return new {{modelName}}Resource($updated{{modelName}});
+        return new {{modelName}}Resource($this->service->update(${{routeParameter}}, $dto));
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(int|string $id)
+    public function destroy({{modelName}} ${{routeParameter}})
     {
-        ${{modelNameLower}} = $this->service->find($id);
-        $this->service->delete(${{modelNameLower}});
-        return response(null, 204);
+        $this->service->delete(${{routeParameter}});
+        return response()->noContent();
     }
 {{softDeleteMethods}}
 }

@@ -53,6 +53,17 @@ class ValidateStubsCommandTest extends TestCase
     }
 
     #[Test]
+    public function a_controller_stub_from_3x_misses_the_route_parameter(): void
+    {
+        File::put("{$this->published}/controller.stub", "class {{modelName}}Controller\n{\n    public function show(int|string \$id) { \${{modelNameLower}} = \$this->service->find(\$id); }\n    // {{pluralName}}\n}\n");
+
+        [$exitCode, $report] = $this->validate();
+
+        $this->assertSame(1, $exitCode);
+        $this->assertSame(['routeParameter'], $this->row($report, 'controller')['missing']);
+    }
+
+    #[Test]
     public function a_dto_stub_from_3x_misses_the_validated_attributes(): void
     {
         File::put("{$this->published}/dto.stub", "class {{modelName}}DTO\n{\n    public function __construct({{attributes}}) {}\n    public static function fromRequest(\$request) { return new self({{attributesFromRequest}}); }\n}\n");

@@ -36,21 +36,21 @@ class ServiceGenerator extends AbstractGenerator
      */
     protected function getReplacements(EntityDefinition $definition): array
     {
+        $model = $definition->name;
+        $variable = $definition->getNameLower();
         $softDeleteMethods = '';
         if ($definition->hasSoftDeletes()) {
             $softDeleteMethods = <<<PHP
 
-    public function restore(int|string \$id): {$definition->name}
+    public function restore({$model} \${$variable}): {$model}
     {
-        \${$definition->getNameLower()} = {$definition->name}::withTrashed()->findOrFail(\$id);
-        \${$definition->getNameLower()}->restore();
-        return \${$definition->getNameLower()};
+        \${$variable}->restore();
+        return \${$variable};
     }
 
-    public function forceDelete(int|string \$id): bool
+    public function forceDelete({$model} \${$variable}): bool
     {
-        \${$definition->getNameLower()} = {$definition->name}::withTrashed()->findOrFail(\$id);
-        return \${$definition->getNameLower()}->forceDelete();
+        return \${$variable}->forceDelete();
     }
 PHP;
         }

@@ -156,10 +156,22 @@ class ApiGenerationService implements ApiGenerationServiceInterface
         }
 
         if ($definition->hasSoftDeletes()) {
-            $restoreRoute = "Route::post('{$pluralName}/{id}/restore', [{$controllerClass}::class, 'restore']);";
-            $forceDeleteRoute = "Route::delete('{$pluralName}/{id}/force-delete', [{$controllerClass}::class, 'forceDelete']);";
+            $parameter = $definition->getRouteParameter();
+            $restoreRoute = "Route::post('{$pluralName}/{{$parameter}}/restore', [{$controllerClass}::class, 'restore'])->withTrashed();";
+            $forceDeleteRoute = "Route::delete('{$pluralName}/{{$parameter}}/force-delete', [{$controllerClass}::class, 'forceDelete'])->withTrashed();";
 
-            if (! str_contains($workspace->get($apiFilePath), $restoreRoute)) {
+            // Routes written by 3.x take an {id} the bound model cannot match.
+            $content = str_replace(
+                [
+                    "Route::post('{$pluralName}/{id}/restore', [{$controllerClass}::class, 'restore']);",
+                    "Route::delete('{$pluralName}/{id}/force-delete', [{$controllerClass}::class, 'forceDelete']);",
+                ],
+                [$restoreRoute, $forceDeleteRoute],
+                $workspace->get($apiFilePath)
+            );
+            $workspace->put($apiFilePath, $content, 'Routes');
+
+            if (! str_contains($content, $restoreRoute)) {
                 $workspace->append($apiFilePath, PHP_EOL.$restoreRoute.PHP_EOL.$forceDeleteRoute, 'Routes');
             }
         }
