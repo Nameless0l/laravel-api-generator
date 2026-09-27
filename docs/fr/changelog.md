@@ -92,6 +92,10 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Extension VS Code
 
+### 0.15.0
+
+- Avec `laravel/mcp` dans le projet, le mode agent de Copilot affiche le serveur MCP du package, lancé avec votre commande PHP, Sail et Docker compris. Voir [Copilot et fichiers de schéma](/fr/guide/extension/reference#copilot-et-fichiers-de-schema). Va avec le package 3.12.
+
 ### 0.14.0
 
 - Régénérer depuis le formulaire garde les fichiers modifiés à la main. Une fenêtre les nomme : les écraser, ou garder vos modifications et générer le reste. L'aperçu en direct les marque **gardé**. Va avec le package 3.11.

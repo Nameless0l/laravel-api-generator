@@ -22,6 +22,7 @@ Une interface visuelle gratuite pour le générateur : construisez vos entités 
 | [Les imports](/fr/guide/extension/imports) | Générez depuis votre base de données, un fichier de schéma, un diagramme Mermaid, une définition JSON ou une **spec OpenAPI / Swagger** |
 | [Diagramme & sidebar](/fr/guide/extension/diagram-and-sidebar) | Un canevas d'entités interactif et l'arborescence de tout ce que vous avez généré |
 | [Actions rapides & garde-fous](/fr/guide/extension/quick-actions) | Migrate, seed, tests, routes et doc API en un clic, serveur et dépendances gérés pour vous |
+| [Copilot](/fr/guide/extension/reference#copilot-et-fichiers-de-schema) | Le skill d'agent du package et son [serveur MCP](/fr/guide/mcp), pour que le mode agent de Copilot planifie et génère des API avec le package |
 | [Commandes & réglages](/fr/guide/extension/reference) | Référence de la palette de commandes, raccourcis, settings, snippets PHP |
 
 Toute l'interface (libellés, popups, invites, messages d'erreur) existe en **anglais et en français**, selon la langue d'affichage de VS Code (forçable via le réglage `laravelApiGenerator.locale`).

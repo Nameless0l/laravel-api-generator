@@ -92,6 +92,10 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## VS Code extension
 
+### 0.15.0
+
+- With `laravel/mcp` in the project, Copilot's agent mode lists the package's MCP server, started with your PHP command, Sail and Docker included. See [Copilot and schema files](/guide/extension/reference#copilot-and-schema-files). Pairs with package 3.12.
+
 ### 0.14.0
 
 - Regenerating from the builder keeps the files you edited by hand. A modal names them: overwrite them, or keep your changes and generate the rest. The live preview marks them **kept**. Pairs with package 3.11.

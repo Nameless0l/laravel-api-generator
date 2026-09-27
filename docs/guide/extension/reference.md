@@ -30,6 +30,7 @@ All commands live under the **Laravel API Generator** category in the command pa
 |---------|---------|-------------|
 | `laravelApiGenerator.phpPath` | `php` | Path to the PHP executable |
 | `laravelApiGenerator.phpCommand` | `[]` | Full command that runs PHP, one argument per item (Sail, Docker). Wins over `phpPath` when set. |
+| `laravelApiGenerator.mcp.enabled` | `true` | Offer the package's MCP server to Copilot's agent mode when the project has `laravel/mcp` |
 | `laravelApiGenerator.locale` | `auto` | UI language: `auto` (follow VS Code), `en` or `fr` |
 
 ## PHP snippets
@@ -52,6 +53,8 @@ Type a `lag:` prefix in any PHP file:
 ## Copilot and schema files
 
 In a Laravel project, the extension gives GitHub Copilot (VS Code 1.109 and later) the package's `laravel-api-generator` agent skill. Copilot loads it when a task calls for new API resources or CRUD endpoints, and generates them with `make:fullapi` instead of writing the files by hand.
+
+When the project also has `laravel/mcp`, the extension registers the package's [MCP server](/guide/mcp) (VS Code 1.101 and later). Copilot's agent mode then lists a Laravel API Generator server whose tools list your entities, preview a generation, generate APIs and add fields, and never overwrite a file you edited. The server starts with the PHP command of the settings above, so Sail and Docker work too, and it appears or disappears on its own when you install or remove `laravel/mcp`.
 
 `api-schema.yaml`, `api-schema.yml` and `api-schema.json` are checked against the package's [JSON Schema](/guide/schema-files#editor-autocompletion): keys and types complete as you type, and typos show up as problems. YAML files need the Red Hat YAML extension; JSON works out of the box.
 
