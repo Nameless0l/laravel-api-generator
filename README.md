@@ -456,7 +456,10 @@ php artisan api-generator:mcp
 | `boolean` / `bool` | `BOOLEAN` | `bool` | `boolean` |
 | `float` / `decimal` | `DECIMAL(8,2)` | `float` | `numeric` |
 | `json` | `JSON` | `array` | `json` |
-| `date` / `datetime` / `timestamp` | `TIMESTAMP` | `DateTimeInterface` | `date` |
+| `date` | `DATE` | `DateTimeInterface` | `date` |
+| `time` | `TIME` | `string` | `date_format:H:i,H:i:s` |
+| `datetime` | `DATETIME` | `DateTimeInterface` | `date` |
+| `timestamp` | `TIMESTAMP` | `DateTimeInterface` | `date` |
 | `uuid` | `UUID` | `string` | `uuid` |
 | `enum(a,b,...)` | `ENUM('a','b')` | `App\Enums\FieldName` (backed enum + cast) | `Rule::enum()` |
 
@@ -497,7 +500,7 @@ entities:
       commentable: morphTo
 ```
 
-`morphTo` emits `$table->morphs('commentable')` in the migration and `morphTo()` on the model; `morphOne` / `morphMany` point back with the right morph name. On every schema and Mermaid source, declaring one side of a `belongsTo` / `hasMany` / `belongsToMany` is enough -- the inverse (and its FK column) is synthesized automatically, exactly like `--from-database` does.
+`morphTo` emits `$table->morphs('commentable')` in the migration and `morphTo()` on the model; `morphOne` / `morphMany` point back with the right morph name. In schema files, Mermaid diagrams and `class_data.json`, declaring one side of a `belongsTo` / `hasOne` / `hasMany` / `belongsToMany` is enough: the inverse and its FK column are synthesized automatically, exactly like `--from-database` does.
 
 ---
 

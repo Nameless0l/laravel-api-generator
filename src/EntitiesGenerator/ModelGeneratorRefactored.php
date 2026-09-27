@@ -116,7 +116,7 @@ class ModelGeneratorRefactored extends AbstractGenerator
 
         // Eloquent guesses owner_id, or owner_<key> with a custom primary key
         $guessedKey = Str::snake($owner->name).'_'.$owner->getPrimaryKeyName();
-        if ($relationship->type === 'oneToMany' && $relationship->foreignKey !== null && $relationship->foreignKey !== $guessedKey) {
+        if (in_array($relationship->type, ['oneToMany', 'oneToOne'], true) && $relationship->foreignKey !== null && $relationship->foreignKey !== $guessedKey) {
             $arguments .= ", '{$relationship->foreignKey}'";
         }
 

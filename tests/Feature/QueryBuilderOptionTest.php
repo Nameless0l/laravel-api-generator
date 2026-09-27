@@ -49,4 +49,21 @@ class QueryBuilderOptionTest extends GeneratorTestCase
         $this->assertStringNotContainsString('QueryBuilder', $service);
         $this->assertStringContainsString('getAll(array $filters = [])', $service);
     }
+
+    #[Test]
+    public function it_sorts_on_a_custom_primary_key(): void
+    {
+        /** @var PendingCommand $command */
+        $command = $this->artisan('make:fullapi', [
+            'name' => 'Product',
+            '--fields' => 'sku:string:primary,name:string',
+            '--query-builder' => true,
+        ]);
+        $command->run();
+
+        $service = (string) file_get_contents(app_path('Services/ProductService.php'));
+        $this->assertStringContainsString("allowedSorts(['sku', 'name', 'created_at'])", $service);
+        $this->assertStringContainsString("->defaultSort('-sku')", $service);
+        $this->assertStringNotContainsString("'-id'", $service);
+    }
 }

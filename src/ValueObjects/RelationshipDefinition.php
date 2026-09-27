@@ -64,7 +64,7 @@ final readonly class RelationshipDefinition
 
     public function requiresForeignKey(): bool
     {
-        return in_array($this->type, ['manyToOne', 'oneToOne'], true);
+        return $this->type === 'manyToOne';
     }
 
     public function isPolymorphic(): bool

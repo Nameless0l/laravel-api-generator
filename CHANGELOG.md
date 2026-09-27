@@ -5,6 +5,15 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.15.0] - Unreleased
+
+### Fixed
+- **Custom primary keys are validated as unique.** Posting a key that already exists failed with a 500 (SQL error) and now fails validation with a 422.
+- **A `hasOne` puts its foreign key on the related table.** `profile: hasOne Profile` added a `profile_id` column to the owner, so the relation never returned anything. The related table now gets the key through a synthesized `belongsTo`, and a `has_one_foreign_key` warning names the column to add when the related model is generated separately. In a Mermaid erDiagram, `A ||--|| B` gives A the `hasOne` and B the `belongsTo`.
+- **`date`, `time` and `datetime` fields get their own column types** instead of `timestamp`. `time` fields are validated with `date_format:H:i,H:i:s` and get matching fakes and test values, and `datetime` columns no longer stop at 2038 on MySQL.
+- **`--query-builder` sorts on the real primary key.** With a custom key, `defaultSort('-id')` made every index request fail.
+- `class_data.json` gets the missing side of its relations, like schema files and Mermaid diagrams.
+
 ## [3.14.0] - 2026-09-27
 
 ### Added

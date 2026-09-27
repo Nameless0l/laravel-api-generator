@@ -199,6 +199,31 @@ class MermaidParserTest extends TestCase
     }
 
     #[Test]
+    public function a_one_to_one_link_puts_the_foreign_key_on_the_right_hand_entity(): void
+    {
+        $entities = $this->parser->parse(<<<'MERMAID'
+        erDiagram
+            AUTHOR ||--|| PROFILE : has
+            AUTHOR {
+                string name
+            }
+            PROFILE {
+                text bio
+            }
+        MERMAID);
+
+        /** @var EntityDefinition $author */
+        $author = $entities->firstWhere('name', 'Author');
+        /** @var EntityDefinition $profile */
+        $profile = $entities->firstWhere('name', 'Profile');
+
+        $this->assertSame('Profile', $author->getRelationshipsByType('oneToOne')->first()?->relatedModel);
+        $belongsTo = $profile->getRelationshipsByType('manyToOne')->first();
+        $this->assertNotNull($belongsTo);
+        $this->assertSame('author_id', $belongsTo->getForeignKeyName());
+    }
+
+    #[Test]
     public function it_rejects_non_mermaid_content(): void
     {
         $this->expectException(CodeGeneratorException::class);

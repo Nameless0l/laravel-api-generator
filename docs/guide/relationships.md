@@ -4,7 +4,7 @@ Relations can be declared in [schema files](/guide/schema-files), [Mermaid diagr
 
 ## Declare one side, get both
 
-On every schema and Mermaid source, declaring one side of a `belongsTo` / `hasMany` / `belongsToMany` is enough: the inverse relation **and its FK migration column** are synthesized automatically, exactly like `--from-database` does:
+In schema files, Mermaid diagrams and `class_data.json`, declaring one side of a `belongsTo` / `hasOne` / `hasMany` / `belongsToMany` is enough: the inverse relation **and its FK migration column** are synthesized automatically, exactly like `--from-database` does:
 
 ```yaml
 entities:

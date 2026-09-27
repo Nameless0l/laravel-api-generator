@@ -17,7 +17,10 @@ php artisan make:fullapi Product --fields="name:string,price:decimal,stock:integ
 | `boolean` / `bool` | `BOOLEAN` | `bool` | `boolean` |
 | `float` / `decimal` | `DECIMAL(8,2)` | `float` | `numeric` |
 | `json` | `JSON` | `array` | `json` |
-| `date` / `datetime` / `timestamp` | `TIMESTAMP` | `DateTimeInterface` | `date` |
+| `date` | `DATE` | `DateTimeInterface` | `date` |
+| `time` | `TIME` | `string` | `date_format:H:i,H:i:s` |
+| `datetime` | `DATETIME` | `DateTimeInterface` | `date` |
+| `timestamp` | `TIMESTAMP` | `DateTimeInterface` | `date` |
 | `uuid` | `UUID` | `string` | `uuid` |
 | `enum(a,b,...)` | `ENUM('a','b')` | backed enum + cast | `Rule::enum()` |
 

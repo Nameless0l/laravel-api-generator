@@ -322,7 +322,7 @@ class MakeApiCommand extends Command
             ));
         }
 
-        $entities = EntitySorter::sortByDependencies(RelationshipSynthesizer::resolveRelatedKeys($entities));
+        $entities = EntitySorter::sortByDependencies(RelationshipSynthesizer::resolveRelatedKeys(RelationshipSynthesizer::addInverses($entities)));
         $this->announce($entities, 'class_data.json');
 
         return $entities;

@@ -44,3 +44,16 @@ entities:
       body: text
     relations:
       post: belongsTo Post
+
+  Author:
+    fields:
+      name: string
+      email: string unique
+    relations:
+      profile: hasOne Profile
+
+  Profile:
+    fields:
+      bio: text nullable
+      birthday: date nullable
+      newsletter_time: time nullable

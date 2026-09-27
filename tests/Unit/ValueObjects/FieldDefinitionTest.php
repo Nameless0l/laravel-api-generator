@@ -117,4 +117,24 @@ class FieldDefinitionTest extends TestCase
         $plain = new FieldDefinition(name: 'slug', type: 'string');
         $this->assertEquals('fake()->slug()', $plain->getFakeValue());
     }
+
+    public function test_date_and_time_types_get_their_own_columns(): void
+    {
+        $this->assertSame('date', (new FieldDefinition('day', 'date'))->getDatabaseType());
+        $this->assertSame('time', (new FieldDefinition('starts_at', 'time'))->getDatabaseType());
+        $this->assertSame('dateTime', (new FieldDefinition('held_at', 'datetime'))->getDatabaseType());
+        $this->assertSame('timestamp', (new FieldDefinition('logged_at', 'timestamp'))->getDatabaseType());
+    }
+
+    public function test_time_fields_are_validated_as_a_time_of_day(): void
+    {
+        $this->assertSame('required|date_format:H:i,H:i:s', (new FieldDefinition('starts_at', 'time'))->getValidationRule());
+    }
+
+    public function test_date_and_time_fakes_match_their_columns(): void
+    {
+        $this->assertSame('fake()->date()', (new FieldDefinition('day', 'date'))->getFakeValue());
+        $this->assertSame('fake()->time()', (new FieldDefinition('starts_at', 'time'))->getFakeValue());
+        $this->assertSame("fake()->dateTime()->format('Y-m-d H:i:s')", (new FieldDefinition('held_at', 'datetime'))->getFakeValue());
+    }
 }

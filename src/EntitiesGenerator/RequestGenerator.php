@@ -70,7 +70,7 @@ class RequestGenerator extends AbstractGenerator
 
             $rule = $field->getValidationRule();
 
-            if ($field->unique) {
+            if ($field->unique || $field->isPrimary()) {
                 // Array syntax with Rule::unique() so the rule carries the
                 // table AND ignores the current model on updates.
                 $table = $definition->getTableName();
