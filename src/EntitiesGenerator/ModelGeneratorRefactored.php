@@ -236,10 +236,7 @@ class ModelGeneratorRefactored extends AbstractGenerator
 
         foreach ($definition->relationships as $rel) {
             if ($rel->requiresForeignKey()) {
-                $fkType = $rel->referencesCustomKey() && ! in_array($rel->relatedKeyType, ['integer', 'int', 'bigint'], true)
-                    ? 'string'
-                    : 'int';
-                $lines[] = " * @property {$fkType} \${$rel->getForeignKeyName()}";
+                $lines[] = " * @property {$rel->getForeignKeyPhpType()} \${$rel->getForeignKeyName()}";
             }
         }
 
