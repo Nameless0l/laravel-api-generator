@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/Nameless0l/laravel-api-generator/main/resources/protocol/v1.schema.json",
+  "title": "laravel-api-generator tooling protocol, version 1",
+  "definitions": {
+    "error": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" },
+        "hint": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "warning": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "file": {
+      "type": "object",
+      "required": ["path", "kind", "action"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^(?![A-Za-z]:)[^\\\\/][^\\\\]*$" },
+        "kind": {
+          "enum": ["Controller", "DTO", "Enum", "Factory", "FeatureTest", "Migration", "Model", "Policy", "Request", "Resource", "Seeder", "Service", "UnitTest", "Routes", "DatabaseSeeder", "PivotMigration", "Auth", "Bootstrap", "Postman"]
+        },
+        "entity": { "type": "string" },
+        "action": { "enum": ["create", "update", "unchanged"] },
+        "content": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "planDocument": {
+      "type": "object",
+      "required": ["protocol", "dryRun", "files", "warnings", "errors"],
+      "properties": {
+        "protocol": { "enum": [1] },
+        "dryRun": { "type": "boolean" },
+        "files": { "type": "array", "items": { "$ref": "#/definitions/file" } },
+        "warnings": { "type": "array", "items": { "$ref": "#/definitions/warning" } },
+        "errors": { "type": "array", "items": { "$ref": "#/definitions/error" } }
+      },
+      "additionalProperties": false
+    },
+    "handshakeResult": {
+      "type": "object",
+      "required": ["protocol", "package", "laravel", "php", "capabilities"],
+      "properties": {
+        "protocol": { "enum": [1] },
+        "package": {
+          "type": "object",
+          "required": ["version"],
+          "properties": { "version": { "type": "string" } }
+        },
+        "laravel": { "type": "string" },
+        "php": { "type": "string" },
+        "capabilities": {
+          "type": "object",
+          "required": ["fieldTypes", "relationTypes", "options"],
+          "properties": {
+            "fieldTypes": { "type": "array", "items": { "type": "string" } },
+            "relationTypes": { "type": "array", "items": { "type": "string" } },
+            "options": {
+              "type": "object",
+              "required": ["json_api"],
+              "properties": {
+                "json_api": {
+                  "type": "object",
+                  "required": ["supported"],
+                  "properties": {
+                    "supported": { "type": "boolean" },
+                    "reason": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "planResult": {
+      "type": "object",
+      "required": ["files", "warnings"],
+      "properties": {
+        "files": { "type": "array", "items": { "$ref": "#/definitions/file" } },
+        "warnings": { "type": "array", "items": { "$ref": "#/definitions/warning" } }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [{ "$ref": "#/definitions/planDocument" }]
+}

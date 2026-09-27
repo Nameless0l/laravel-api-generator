@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\Contracts;
 
+use nameless\CodeGenerator\Support\Workspace;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 
 interface GeneratorInterface
@@ -12,6 +13,11 @@ interface GeneratorInterface
      * Generate the file based on the entity definition.
      */
     public function generate(EntityDefinition $definition): bool;
+
+    /**
+     * Record the generated file(s) in the workspace without writing them.
+     */
+    public function render(EntityDefinition $definition, Workspace $workspace): void;
 
     /**
      * Get the type of generator.

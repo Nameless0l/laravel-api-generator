@@ -6,6 +6,16 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.9.0
+
+- `--dry-run` montre chaque fichier qu'une commande créerait ou modifierait, sans rien écrire, pour toutes les sources y compris `--add-fields`.
+- `--json` affiche un seul document lisible par les machines, pour les scripts, les éditeurs et les agents IA. Voir [Outils et agents](/fr/guide/integrations).
+- `--schema=-` lit un schéma sur l'entrée standard.
+- `api-generator:serve --stdio` garde un processus d'aperçu ouvert. L'extension VS Code s'en sert : son aperçu en direct montre exactement le code que le package écrit.
+- Une génération qui échoue ne laisse plus la moitié des fichiers derrière elle.
+- Régénérer la collection Postman conserve son identifiant.
+- Corrigé : relancer `--auth` ne retire plus les routes de ressources de `routes/api.php`.
+
 ### 3.8.0 - 26 septembre 2026
 
 - Corrigé : un PUT qui conserve une valeur unique ne renvoie plus 422 sur les entités à nom composé (`BlogPost`) ni avec une clé primaire personnalisée.
@@ -62,6 +72,12 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 3.3.1 (correctifs strict types), 3.3.0 (routes et seeders auto-enregistrés, validation required par défaut), 3.2.0 (assistant interactif, auth Sanctum, tests générés, export Postman, soft deletes), 3.0.0 (réécriture clean architecture) : détails dans le [changelog complet](https://github.com/Nameless0l/laravel-api-generator/blob/main/CHANGELOG.md).
 
 ## Extension VS Code
+
+### 0.12.0
+
+- L'aperçu en direct est rendu par le package installé (3.9 ou plus récent) : chaque fichier que le générateur écrit, vos stubs publiés, des badges nouveau, modifié ou identique, et un diff pour les fichiers modifiés.
+- La génération envoie le formulaire à `make:fullapi --schema=-`. Plus de `class_data.json` à la racine du projet, et Soft Deletes, Auth et Postman ne sont plus ignorés quand le formulaire a des relations.
+- `laravelApiGenerator.phpCommand` lance PHP via Sail ou Docker.
 
 ### 0.11.1 - 26 septembre 2026
 

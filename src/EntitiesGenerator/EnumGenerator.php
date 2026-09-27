@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\EntitiesGenerator;
 
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
+use nameless\CodeGenerator\Support\Workspace;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 
@@ -42,25 +41,17 @@ class EnumGenerator extends AbstractGenerator
         return $definition->fields->contains(fn (FieldDefinition $f) => $f->isEnum());
     }
 
-    public function generate(EntityDefinition $definition): bool
+    public function render(EntityDefinition $definition, Workspace $workspace): void
     {
-        try {
-            foreach ($definition->fields as $field) {
-                if (! $field->isEnum()) {
-                    continue;
-                }
-
-                $path = app_path("Enums/{$field->getEnumClass()}.php");
-                $this->ensureDirectoryExists($path);
-
-                if (File::put($path, $this->generateEnumClass($field)) === false) {
-                    throw CodeGeneratorException::fileCreationFailed($path);
-                }
+        foreach ($definition->fields as $field) {
+            if ($field->isEnum()) {
+                $workspace->put(
+                    app_path("Enums/{$field->getEnumClass()}.php"),
+                    $this->generateEnumClass($field),
+                    $this->getType(),
+                    $definition->name
+                );
             }
-
-            return true;
-        } catch (\Exception $e) {
-            throw CodeGeneratorException::generationFailed($this->getType(), $e->getMessage());
         }
     }
 

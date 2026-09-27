@@ -1,0 +1,86 @@
+[
+    {
+        "path": "database/migrations/2026_01_01_000000_create_products_table.php",
+        "kind": "Migration",
+        "entity": "Product",
+        "action": "create",
+        "content": "<?php\n\nuse Illuminate\\Database\\Migrations\\Migration;\nuse Illuminate\\Database\\Schema\\Blueprint;\nuse Illuminate\\Support\\Facades\\Schema;\n\nreturn new class extends Migration\n{\n    public function up(): void\n    {\n        Schema::create('products', function (Blueprint $table) {\n\n                        $table->string('code')->primary();\n            $table->string('slug')->unique();\n            $table->string('title');\n            $table->timestamps();\n\n\n        });\n    }\n\n    public function down(): void\n    {\n        Schema::dropIfExists('products');\n    }\n};\n"
+    },
+    {
+        "path": "app/Models/Product.php",
+        "kind": "Model",
+        "entity": "Product",
+        "action": "create",
+        "content": "<?php\n\nnamespace App\\Models;\n\nuse Illuminate\\Database\\Eloquent\\Factories\\HasFactory;\nuse Illuminate\\Database\\Eloquent\\Model;\n\n\n/**\n * @property string $code\n * @property string $slug\n * @property string $title\n * @property \\Illuminate\\Support\\Carbon|null $created_at\n * @property \\Illuminate\\Support\\Carbon|null $updated_at\n */\nclass Product extends Model\n{\n    use HasFactory;\n\n\n    protected $fillable = ['code', 'slug', 'title'];\n\n    protected $primaryKey = 'code';\n\n    public $incrementing = false;\n\n    protected $keyType = 'string';\n\n}\n"
+    },
+    {
+        "path": "app/Http/Controllers/ProductController.php",
+        "kind": "Controller",
+        "entity": "Product",
+        "action": "create",
+        "content": "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\\Http\\Controllers;\n\nuse App\\Http\\Controllers\\Controller;\nuse App\\Http\\Requests\\ProductRequest;\nuse App\\Models\\Product;\nuse App\\Http\\Resources\\ProductResource;\nuse App\\Services\\ProductService;\nuse App\\DTO\\ProductDTO;\nuse Illuminate\\Http\\Request;\n\nclass ProductController extends Controller\n{\n    public function __construct(\n        private readonly ProductService $service\n    ) {}\n\n    /**\n     * Display a listing of the resource.\n     */\n    public function index(Request $request)\n    {\n        $products = $this->service->getAll($request->query());\n        return ProductResource::collection($products);\n    }\n\n    /**\n     * Store a newly created resource in storage.\n     */\n    public function store(ProductRequest $request)\n    {\n        $dto = ProductDTO::fromRequest($request);\n        $product = $this->service->create($dto);\n        return new ProductResource($product);\n    }\n\n    /**\n     * Display the specified resource.\n     */\n    public function show(int|string $id)\n    {\n        $product = $this->service->find($id);\n        return new ProductResource($product);\n    }\n\n    /**\n     * Update the specified resource in storage.\n     */\n    public function update(ProductRequest $request, int|string $id)\n    {\n        $product = $this->service->find($id);\n        $dto = ProductDTO::fromRequest($request);\n        $updatedProduct = $this->service->update($product, $dto);\n        return new ProductResource($updatedProduct);\n    }\n\n    /**\n     * Remove the specified resource from storage.\n     */\n    public function destroy(int|string $id)\n    {\n        $product = $this->service->find($id);\n        $this->service->delete($product);\n        return response(null, 204);\n    }\n\n}\n"
+    },
+    {
+        "path": "app/Services/ProductService.php",
+        "kind": "Service",
+        "entity": "Product",
+        "action": "create",
+        "content": "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\\Services;\n\nuse App\\Models\\Product;\nuse App\\DTO\\ProductDTO;\nuse Illuminate\\Database\\Eloquent\\Collection;\n\nclass ProductService\n{\n    public function getAll(array $filters = []): Collection\n    {\n        $query = Product::query();\n\n        foreach ($filters as $field => $value) {\n            if (in_array($field, (new Product())->getFillable(), true)) {\n                $query->where($field, $value);\n            }\n        }\n\n        return $query->get();\n    }\n\n    public function create(ProductDTO $dto): Product\n    {\n        return Product::create(get_object_vars($dto));\n    }\n\n    public function find(int|string $id): Product\n    {\n        return Product::findOrFail($id);\n    }\n\n    public function update(Product $product, ProductDTO $dto): Product\n    {\n        $product->update(get_object_vars($dto));\n        return $product->fresh();\n    }\n\n    public function delete(Product $product): bool\n    {\n        return $product->delete();\n    }\n\n}\n"
+    },
+    {
+        "path": "app/DTO/ProductDTO.php",
+        "kind": "DTO",
+        "entity": "Product",
+        "action": "create",
+        "content": "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\\DTO;\n\nuse App\\Http\\Requests\\ProductRequest;\n\nreadonly class ProductDTO\n{\n    public function __construct(\n        public string $code,\n        public string $slug,\n        public string $title\n    ) {}\n\n    public static function fromRequest(ProductRequest $request): self\n    {\n        return new self(\n            $request->input('code'),\n            $request->input('slug'),\n            $request->input('title')\n        );\n    }\n}\n"
+    },
+    {
+        "path": "app/Http/Requests/ProductRequest.php",
+        "kind": "Request",
+        "entity": "Product",
+        "action": "create",
+        "content": "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\\Http\\Requests;\n\nuse Illuminate\\Foundation\\Http\\FormRequest;\n\nclass ProductRequest extends FormRequest\n{\n    public function authorize(): bool\n    {\n        return true;\n    }\n\n    /**\n     * @return array<string, mixed>\n     */\n    public function rules(): array\n    {\n        return [\n            'code' => 'required|string|max:255',\n            'slug' => ['required', 'string', 'max:255', \\Illuminate\\Validation\\Rule::unique('products')->ignore($this->route('product'), 'code')],\n            'title' => 'required|string|max:255',\n        ];\n    }\n}\n"
+    },
+    {
+        "path": "app/Http/Resources/ProductResource.php",
+        "kind": "Resource",
+        "entity": "Product",
+        "action": "create",
+        "content": "<?php\n\nnamespace App\\Http\\Resources;\n\nuse Illuminate\\Http\\Request;\nuse Illuminate\\Http\\Resources\\Json\\JsonResource;\n\nclass ProductResource extends JsonResource\n{\n    /**\n     * Transform the resource into an array.\n     *\n     * @param  Request  $request\n     * @return array<string, mixed>\n     */\n    public function toArray(Request $request): array\n    {\n        return [\n                        'id' => $this->id,\n            'code' => $this->code,\n            'slug' => $this->slug,\n            'title' => $this->title,\n            'created_at' => $this->created_at,\n            'updated_at' => $this->updated_at,\n        ];\n    }\n}\n"
+    },
+    {
+        "path": "app/Policies/ProductPolicy.php",
+        "kind": "Policy",
+        "entity": "Product",
+        "action": "create",
+        "content": "<?php\n\nnamespace App\\Policies;\n\nuse App\\Models\\Product;\nuse App\\Models\\User;\nuse Illuminate\\Auth\\Access\\HandlesAuthorization;\nuse Illuminate\\Auth\\Access\\Response;\n\nclass ProductPolicy\n{\n    use HandlesAuthorization;\n\n    public function viewAny(User $user): Response|bool\n    {\n        return true;\n    }\n\n    public function view(User $user, Product $product): Response|bool\n    {\n        return true;\n    }\n\n    public function create(User $user): Response|bool\n    {\n        return true;\n    }\n\n    public function update(User $user, Product $product): Response|bool\n    {\n        return true;\n    }\n\n    public function delete(User $user, Product $product): Response|bool\n    {\n        return true;\n    }\n\n    public function restore(User $user, Product $product): Response|bool\n    {\n        return true;\n    }\n\n    public function forceDelete(User $user, Product $product): Response|bool\n    {\n        return true;\n    }\n}\n"
+    },
+    {
+        "path": "database/factories/ProductFactory.php",
+        "kind": "Factory",
+        "entity": "Product",
+        "action": "create",
+        "content": "<?php\n\nnamespace Database\\Factories;\n\nuse App\\Models\\Product;\nuse Illuminate\\Database\\Eloquent\\Factories\\Factory;\n\n/**\n * @extends Factory<Product>\n */\nclass ProductFactory extends Factory\n{\n    protected $model = Product::class;\n\n    public function definition(): array\n    {\n        return [\n                        'code' => fake()->unique()->word(),\n            'slug' => fake()->unique()->slug(),\n            'title' => fake()->word(),\n        ];\n    }\n}\n"
+    },
+    {
+        "path": "database/seeders/ProductSeeder.php",
+        "kind": "Seeder",
+        "entity": "Product",
+        "action": "create",
+        "content": "<?php\n\nnamespace Database\\Seeders;\n\nuse App\\Models\\Product;\nuse Illuminate\\Database\\Seeder;\n\nclass ProductSeeder extends Seeder\n{\n    public function run(): void\n    {\n        Product::factory()->count(10)->create();\n    }\n}\n"
+    },
+    {
+        "path": "tests/Feature/ProductControllerTest.php",
+        "kind": "FeatureTest",
+        "entity": "Product",
+        "action": "create",
+        "content": "<?php\n\nnamespace Tests\\Feature;\n\nuse App\\Models\\Product;\nuse Illuminate\\Foundation\\Testing\\RefreshDatabase;\nuse Tests\\TestCase;\n\nclass ProductControllerTest extends TestCase\n{\n    use RefreshDatabase;\n\n    public function test_can_list_products(): void\n    {\n        Product::factory()->count(3)->create();\n\n        $response = $this->getJson('/api/products');\n\n        $response->assertStatus(200)\n            ->assertJsonCount(3, 'data');\n    }\n\n    public function test_can_create_product(): void\n    {\n        $data = [\n            'code' => 'test_code',\n            'slug' => 'test_slug',\n            'title' => 'test_title',\n        ];\n\n        $response = $this->postJson('/api/products', $data);\n\n        $response->assertStatus(201);\n        $this->assertDatabaseHas('products', [\n                    'code' => 'test_code',\n                ]);\n    }\n\n    public function test_can_show_product(): void\n    {\n        $product = Product::factory()->create();\n\n        $response = $this->getJson(\"/api/products/{$product->getKey()}\");\n\n        $response->assertStatus(200)\n            ->assertJsonFragment(['code' => $product->getKey()]);\n    }\n\n    public function test_can_update_product(): void\n    {\n        $product = Product::factory()->create();\n        $data = [\n            'code' => 'test_code',\n            'slug' => 'test_slug',\n            'title' => 'test_title',\n        ];\n\n        $response = $this->putJson(\"/api/products/{$product->getKey()}\", $data);\n\n        $response->assertStatus(200);\n        $this->assertDatabaseHas('products', [\n                    'code' => 'test_code',\n                ]);\n    }\n\n    public function test_can_delete_product(): void\n    {\n        $product = Product::factory()->create();\n\n        $response = $this->deleteJson(\"/api/products/{$product->getKey()}\");\n\n        $response->assertStatus(204);\n        $this->assertDatabaseMissing('products', ['code' => $product->getKey()]);\n    }\n\n    public function test_create_product_validates_required_fields(): void\n    {\n        $response = $this->postJson('/api/products', []);\n\n        $response->assertStatus(422);\n    }\n}\n"
+    },
+    {
+        "path": "tests/Unit/ProductServiceTest.php",
+        "kind": "UnitTest",
+        "entity": "Product",
+        "action": "create",
+        "content": "<?php\n\nnamespace Tests\\Unit;\n\nuse App\\Models\\Product;\nuse App\\Services\\ProductService;\nuse App\\DTO\\ProductDTO;\nuse Illuminate\\Foundation\\Testing\\RefreshDatabase;\nuse Tests\\TestCase;\n\nclass ProductServiceTest extends TestCase\n{\n    use RefreshDatabase;\n\n    private ProductService $service;\n\n    protected function setUp(): void\n    {\n        parent::setUp();\n        $this->service = new ProductService();\n    }\n\n    public function test_can_get_all_products(): void\n    {\n        Product::factory()->count(5)->create();\n\n        $result = $this->service->getAll();\n\n        $this->assertCount(5, $result);\n    }\n\n    public function test_can_filter_products(): void\n    {\n        Product::factory()->count(3)->create();\n\n        $result = $this->service->getAll([]);\n\n        $this->assertCount(3, $result);\n    }\n\n    public function test_can_create_product(): void\n    {\n        $dto = new ProductDTO(\n            code: 'test_code',\n            slug: 'test_slug',\n            title: 'test_title',\n        );\n\n        $product = $this->service->create($dto);\n\n        $this->assertInstanceOf(Product::class, $product);\n        $this->assertDatabaseCount('products', 1);\n    }\n\n    public function test_can_find_product(): void\n    {\n        $product = Product::factory()->create();\n\n        $found = $this->service->find($product->getKey());\n\n        $this->assertEquals($product->getKey(), $found->getKey());\n    }\n\n    public function test_can_update_product(): void\n    {\n        $product = Product::factory()->create();\n        $dto = new ProductDTO(\n            code: 'test_code',\n            slug: 'test_slug',\n            title: 'test_title',\n        );\n\n        $updated = $this->service->update($product, $dto);\n\n        $this->assertInstanceOf(Product::class, $updated);\n    }\n\n    public function test_can_delete_product(): void\n    {\n        $product = Product::factory()->create();\n\n        $result = $this->service->delete($product);\n\n        $this->assertTrue($result);\n        $this->assertDatabaseCount('products', 0);\n    }\n}\n"
+    }
+]

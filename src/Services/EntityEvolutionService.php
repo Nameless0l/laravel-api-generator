@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace nameless\CodeGenerator\Services;
 
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use nameless\CodeGenerator\EntitiesGenerator\MigrationGenerator;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\Support\StubLoader;
+use nameless\CodeGenerator\Support\Workspace;
+use nameless\CodeGenerator\Support\WorkspaceFactory;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 
 /**
@@ -27,25 +28,29 @@ class EntityEvolutionService
     private array $warnings = [];
 
     public function __construct(
-        private readonly StubLoader $stubLoader
+        private readonly StubLoader $stubLoader,
+        private readonly WorkspaceFactory $workspaces
     ) {}
 
     /**
+     * Writes immediately unless a workspace is given.
+     *
      * @param  Collection<int, FieldDefinition>  $fields
      * @return array{changed: array<int, string>, warnings: array<int, string>}
      */
-    public function addFields(string $name, Collection $fields): array
+    public function addFields(string $name, Collection $fields, ?Workspace $workspace = null): array
     {
         $this->changed = [];
         $this->warnings = [];
+        $target = $workspace ?? $this->workspaces->make();
 
         $modelPath = app_path("Models/{$name}.php");
-        if (! File::exists($modelPath)) {
+        if (! $target->exists($modelPath)) {
             throw CodeGeneratorException::fileNotFound($modelPath);
         }
 
         $table = Str::plural(Str::snake($name));
-        $existing = $this->existingFillable($modelPath);
+        $existing = $this->existingFillable($target->get($modelPath));
         $fields = $fields->reject(fn (FieldDefinition $f) => in_array($f->name, $existing, true))->values();
 
         if ($fields->isEmpty()) {
@@ -54,20 +59,29 @@ class EntityEvolutionService
             return ['changed' => [], 'warnings' => $this->warnings];
         }
 
-        $this->createMigration($table, $fields);
-        $this->generateEnums($fields);
-        $this->patchModel($modelPath, $fields);
+        $this->createMigration($target, $name, $table, $fields);
+        $this->generateEnums($target, $name, $fields);
+        $this->patchModel($target, $name, $modelPath, $fields);
         $this->patchAfterReturnArray(
+            $target,
+            $name,
+            'Request',
             app_path("Http/Requests/{$name}Request.php"),
             'rules',
             $fields->map(fn (FieldDefinition $f) => $this->ruleLine($f))
         );
         $this->patchAfterReturnArray(
+            $target,
+            $name,
+            'Factory',
             database_path("factories/{$name}Factory.php"),
             'definition',
             $fields->map(fn (FieldDefinition $f) => "            '{$f->name}' => {$f->getFakeValue()},")
         );
         $this->patchAfterReturnArray(
+            $target,
+            $name,
+            'Resource',
             app_path("Http/Resources/{$name}Resource.php"),
             'toArray',
             $fields->map(fn (FieldDefinition $f) => "            '{$f->name}' => \$this->{$f->name},")
@@ -76,16 +90,19 @@ class EntityEvolutionService
         $this->warnings[] = "app/DTO/{$name}DTO.php was not patched (constructor promotion): add the new properties manually.";
         $this->warnings[] = 'Generated tests were not patched: new required fields may break the create/update tests.';
 
+        if ($workspace === null) {
+            $target->commit();
+        }
+
         return ['changed' => $this->changed, 'warnings' => $this->warnings];
     }
 
     /**
      * @return array<int, string>
      */
-    private function existingFillable(string $modelPath): array
+    private function existingFillable(string $modelContent): array
     {
-        $content = File::get($modelPath);
-        if (! preg_match('/protected \$fillable = \[([^\]]*)\]/s', $content, $matches)) {
+        if (! preg_match('/protected \$fillable = \[([^\]]*)\]/s', $modelContent, $matches)) {
             return [];
         }
 
@@ -97,7 +114,7 @@ class EntityEvolutionService
     /**
      * @param  Collection<int, FieldDefinition>  $fields
      */
-    private function createMigration(string $table, Collection $fields): void
+    private function createMigration(Workspace $workspace, string $entity, string $table, Collection $fields): void
     {
         $columns = $fields
             ->map(fn (FieldDefinition $f) => '            '.MigrationGenerator::columnDefinition($f))
@@ -115,16 +132,16 @@ class EntityEvolutionService
         $slug = $fields->count() === 1
             ? $fields->first()?->name
             : 'fields';
-        $path = database_path('migrations/'.MigrationGenerator::nextTimestamp()."_add_{$slug}_to_{$table}_table.php");
+        $path = database_path('migrations/'.$workspace->migrationTimestamp()."_add_{$slug}_to_{$table}_table.php");
 
-        File::put($path, $content);
+        $workspace->put($path, $content, 'Migration', $entity);
         $this->changed[] = $path;
     }
 
     /**
      * @param  Collection<int, FieldDefinition>  $fields
      */
-    private function generateEnums(Collection $fields): void
+    private function generateEnums(Workspace $workspace, string $entity, Collection $fields): void
     {
         foreach ($fields as $field) {
             if (! $field->isEnum()) {
@@ -137,8 +154,7 @@ class EntityEvolutionService
             ));
             $path = app_path("Enums/{$field->getEnumClass()}.php");
 
-            File::ensureDirectoryExists(dirname($path));
-            File::put($path, "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\\Enums;\n\nenum {$field->getEnumClass()}: string\n{\n    {$cases}\n}\n");
+            $workspace->put($path, "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\\Enums;\n\nenum {$field->getEnumClass()}: string\n{\n    {$cases}\n}\n", 'Enum', $entity);
             $this->changed[] = $path;
         }
     }
@@ -146,9 +162,9 @@ class EntityEvolutionService
     /**
      * @param  Collection<int, FieldDefinition>  $fields
      */
-    private function patchModel(string $modelPath, Collection $fields): void
+    private function patchModel(Workspace $workspace, string $entity, string $modelPath, Collection $fields): void
     {
-        $content = File::get($modelPath);
+        $content = $workspace->get($modelPath);
 
         $fillableEntries = $fields->map(fn (FieldDefinition $f) => "'{$f->name}'")->implode(', ');
         $patched = preg_replace_callback(
@@ -210,22 +226,22 @@ class EntityEvolutionService
             );
         }
 
-        File::put($modelPath, $content);
+        $workspace->put($modelPath, $content, 'Model', $entity);
         $this->changed[] = $modelPath;
     }
 
     /**
      * @param  Collection<int, string>  $lines
      */
-    private function patchAfterReturnArray(string $path, string $method, Collection $lines): void
+    private function patchAfterReturnArray(Workspace $workspace, string $entity, string $kind, string $path, string $method, Collection $lines): void
     {
-        if (! File::exists($path)) {
+        if (! $workspace->exists($path)) {
             $this->warnings[] = basename($path).': file not found, skipped.';
 
             return;
         }
 
-        $content = File::get($path);
+        $content = $workspace->get($path);
         $pattern = '/(function '.$method.'\([^)]*\)(?::\s*array)?\s*\{\s*return \[\R)/';
 
         $patched = preg_replace($pattern, '$1'.str_replace(['\\', '$'], ['\\\\', '\\$'], $lines->implode("\n"))."\n", $content, 1, $count);
@@ -236,7 +252,7 @@ class EntityEvolutionService
             return;
         }
 
-        File::put($path, $patched);
+        $workspace->put($path, $patched, $kind, $entity);
         $this->changed[] = $path;
     }
 

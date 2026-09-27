@@ -27,6 +27,14 @@ final readonly class EntityDefinition
         $this->validateRelationships($relationships);
     }
 
+    /**
+     * @param  array<string, mixed>  $options
+     */
+    public function withOptions(array $options): self
+    {
+        return new self($this->name, $this->fields, $this->relationships, $this->parent, array_merge($this->options, $options));
+    }
+
     private function validateName(string $name): void
     {
         if (empty(trim($name))) {

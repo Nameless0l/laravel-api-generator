@@ -31,7 +31,10 @@ const enCliSidebar = [
   },
   {
     text: "Advanced",
-    items: [{ text: "Customizing Stubs", link: "/guide/customizing-stubs" }],
+    items: [
+      { text: "Customizing Stubs", link: "/guide/customizing-stubs" },
+      { text: "Tools & Agents", link: "/guide/integrations" },
+    ],
   },
   {
     text: "Reference",
@@ -112,6 +115,7 @@ const frCliSidebar = [
     text: "Avancé",
     items: [
       { text: "Personnaliser les stubs", link: "/fr/guide/customizing-stubs" },
+      { text: "Outils et agents", link: "/fr/guide/integrations" },
     ],
   },
   {

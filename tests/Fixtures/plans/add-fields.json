@@ -1,0 +1,37 @@
+[
+    {
+        "path": "database/migrations/2026_01_01_000000_add_excerpt_to_reports_table.php",
+        "kind": "Migration",
+        "entity": "Report",
+        "action": "create",
+        "content": "<?php\n\nuse Illuminate\\Database\\Migrations\\Migration;\nuse Illuminate\\Database\\Schema\\Blueprint;\nuse Illuminate\\Support\\Facades\\Schema;\n\nreturn new class extends Migration\n{\n    public function up(): void\n    {\n        Schema::table('reports', function (Blueprint $table) {\n            $table->text('excerpt');\n        });\n    }\n\n    public function down(): void\n    {\n        Schema::table('reports', function (Blueprint $table) {\n            $table->dropColumn(['excerpt']);\n        });\n    }\n};\n"
+    },
+    {
+        "path": "app/Models/Report.php",
+        "kind": "Model",
+        "entity": "Report",
+        "action": "update",
+        "content": "<?php\n\nnamespace App\\Models;\n\nuse Illuminate\\Database\\Eloquent\\Factories\\HasFactory;\nuse Illuminate\\Database\\Eloquent\\Model;\n\n\n/**\n * @property int $id\n * @property string $title\n * @property \\Illuminate\\Support\\Carbon|null $created_at\n * @property \\Illuminate\\Support\\Carbon|null $updated_at\n * @property string $excerpt\n */\nclass Report extends Model\n{\n    use HasFactory;\n\n\n    protected $fillable = ['title', 'excerpt'];\n\n}\n"
+    },
+    {
+        "path": "app/Http/Requests/ReportRequest.php",
+        "kind": "Request",
+        "entity": "Report",
+        "action": "update",
+        "content": "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\\Http\\Requests;\n\nuse Illuminate\\Foundation\\Http\\FormRequest;\n\nclass ReportRequest extends FormRequest\n{\n    public function authorize(): bool\n    {\n        return true;\n    }\n\n    /**\n     * @return array<string, mixed>\n     */\n    public function rules(): array\n    {\n        return [\n            'excerpt' => 'required|string',\n            'title' => 'required|string|max:255',\n        ];\n    }\n}\n"
+    },
+    {
+        "path": "database/factories/ReportFactory.php",
+        "kind": "Factory",
+        "entity": "Report",
+        "action": "update",
+        "content": "<?php\n\nnamespace Database\\Factories;\n\nuse App\\Models\\Report;\nuse Illuminate\\Database\\Eloquent\\Factories\\Factory;\n\n/**\n * @extends Factory<Report>\n */\nclass ReportFactory extends Factory\n{\n    protected $model = Report::class;\n\n    public function definition(): array\n    {\n        return [\n            'excerpt' => fake()->sentence(),\n                        'title' => fake()->word(),\n        ];\n    }\n}\n"
+    },
+    {
+        "path": "app/Http/Resources/ReportResource.php",
+        "kind": "Resource",
+        "entity": "Report",
+        "action": "update",
+        "content": "<?php\n\nnamespace App\\Http\\Resources;\n\nuse Illuminate\\Http\\Request;\nuse Illuminate\\Http\\Resources\\Json\\JsonResource;\n\nclass ReportResource extends JsonResource\n{\n    /**\n     * Transform the resource into an array.\n     *\n     * @param  Request  $request\n     * @return array<string, mixed>\n     */\n    public function toArray(Request $request): array\n    {\n        return [\n            'excerpt' => $this->excerpt,\n                        'id' => $this->id,\n            'title' => $this->title,\n            'created_at' => $this->created_at,\n            'updated_at' => $this->updated_at,\n        ];\n    }\n}\n"
+    }
+]

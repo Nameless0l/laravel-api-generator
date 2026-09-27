@@ -15,19 +15,21 @@ Fields are rows you add, remove and drag to reorder. Each row has a name and a t
 - Pick `enum` and type the values (`draft,published`): the generated API gets a backed PHP enum class, the model cast, `Rule::enum()` validation and a faked factory value.
 - Check `PK` on any row to replace the default `id` as primary key: the model (`$primaryKey`, `$incrementing`, `$keyType`), the migration and every incoming relation follow. See [Field Types & Primary Keys](/guide/field-types).
 
-Relationships get their own rows (`belongsTo`, `hasMany`, `hasOne`, `belongsToMany`), and the target model input autocompletes from `app/Models`. Generation goes through the package's JSON pipeline, so relations arrive with real foreign key columns, foreign-keyed factories and passing tests.
+Relationships get their own rows (`belongsTo`, `hasMany`, `hasOne`, `belongsToMany`), and the target model input autocompletes from `app/Models`. Generation hands the entity to the package in the schema file format, so relations arrive with real foreign key columns, foreign-keyed factories and passing tests.
 
 The options are checkboxes: Auth (Sanctum), Postman collection export, Soft Deletes, Spatie QueryBuilder, Pest tests and JSON:API resources (Laravel 12.45+).
 
 ## Live code preview
 
-As you edit the form, the panel renders the code that will be generated (Model, Controller, Service, DTO, Request, Resource, Migration, Factory…) with syntax highlighting and tabbed navigation. Enum casts, custom primary keys and relations all show up in the preview before you commit to anything.
+The preview comes from the package installed in your project. When the form opens, the extension starts `php artisan api-generator:serve --stdio` and keeps it running, so every change you make is rendered by the same code that will write the files, in a few milliseconds. Your published stubs, enum casts, custom primary keys and relations show up exactly as they will be generated.
 
-A **file preview** also lists which files will be created, paths included.
+Every file gets a tab: model, controller, service, DTO, request, resource, policy, migration, factory, seeder, tests, enums, plus `routes/api.php` and `DatabaseSeeder.php`. A badge tells whether the file is new, modified or unchanged, and **Show diff** opens a modified file side by side with what the generator would write.
+
+When the preview cannot run, it says why and offers the fix: `composer install` when the package is not installed yet, `composer update nameless/laravel-api-generator -W` when it is too old, or the setting to change when PHP is missing. The PHP process restarts by itself after a `composer update`, a change to `.env` or to `config/`.
 
 ## Safety while generating
 
-Regenerating an entity that already exists first shows a modal listing every file that would be overwritten, so you can back out before anything is written. A running operation is never a black box either: click the spinning button again and the underlying artisan process is killed, with the UI restored. When a generation succeeds, the new Model and Controller open in the editor.
+Regenerating an entity that already exists first shows a modal listing every file the package would modify, so you can back out before anything is written. A running operation is never a black box either: click the spinning button again and the underlying artisan process is killed, with the UI restored. When a generation succeeds, the new Model and Controller open in the editor.
 
 ## The same command as the terminal
 

@@ -12,6 +12,28 @@ L'extension appelle `php` depuis votre PATH. Si VS Code ne le trouve pas, ou cho
 
 Herd, Valet, Laragon et XAMPP embarquent chacun leur PHP ; pointez le réglage vers celui que votre projet utilise.
 
+## PHP tourne dans Sail ou Docker
+
+Quand PHP n'existe que dans un conteneur, donnez à l'extension la commande complète plutôt qu'un chemin. Chaque élément du tableau est un argument.
+
+::: code-group
+
+```json [Sail]
+{ "laravelApiGenerator.phpCommand": ["./vendor/bin/sail", "php"] }
+```
+
+```json [Docker Compose]
+{ "laravelApiGenerator.phpCommand": ["docker", "compose", "exec", "-T", "app", "php"] }
+```
+
+:::
+
+Remplacez `app` par le nom de votre service PHP. Si PHP manque sur la machine et que le projet embarque Sail, l'aperçu du formulaire propose ce réglage en un clic.
+
+## L'aperçu est indisponible
+
+L'aperçu demande le package installé dans `vendor/`, dans une version assez récente pour y répondre, et une application Laravel qui démarre. Le panneau nomme la pièce manquante et propose la commande qui la corrige. Si c'est l'application qui ne démarre pas, le message montre la fin de l'erreur PHP, et cette même erreur arrêterait une génération. Les lignes que l'application affiche d'elle-même au démarrage atterrissent dans le canal de sortie **Laravel API Generator**.
+
 ## Pas de fichier artisan
 
 « Could not open input file: artisan » signifie que le dossier ouvert n'est pas la racine Laravel. Ouvrez le dossier qui contient `artisan` ; l'extension le détecte aussi jusqu'à deux niveaux de profondeur pour les monorepos.

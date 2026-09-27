@@ -24,6 +24,7 @@ class RegisteredCommandsTest extends TestCase
             'api-generator:clean-routes',
             'api-generator:install',
             'api-generator:introspect',
+            'api-generator:serve',
             'api-generator:validate-stubs',
             'delete:fullapi',
             'make:fullapi',

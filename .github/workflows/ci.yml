@@ -4,7 +4,6 @@ on:
   push:
     branches: [ main, develop ]
   pull_request:
-    branches: [ main, develop ]
 
 jobs:
   test:
@@ -89,6 +88,26 @@ jobs:
       run: |
         composer config repositories.package '{"type": "path", "url": "../package", "options": {"symlink": true, "versions": {"nameless/laravel-api-generator": "dev-ci"}}}'
         composer require --dev "nameless/laravel-api-generator:dev-ci" --no-interaction
+
+    - name: Preview the example API without writing it
+      working-directory: app
+      run: |
+        find app database routes -type f -exec md5sum {} + | sort > before.txt
+        php artisan make:fullapi --schema=../package/examples/api-schema.yaml --dry-run --json > plan.json
+        find app database routes -type f -exec md5sum {} + | sort > after.txt
+        diff before.txt after.txt
+        php -r '$d = json_decode(file_get_contents("plan.json"), true); exit($d["protocol"] === 1 && $d["dryRun"] === true && count($d["files"]) > 0 && $d["errors"] === [] ? 0 : 1);'
+
+    - name: Talk to the preview worker
+      working-directory: app
+      run: |
+        printf '%s\n' \
+          '{"jsonrpc":"2.0","id":1,"method":"handshake","params":{"client":"ci"}}' \
+          '{"jsonrpc":"2.0","id":2,"method":"plan","params":{"schema":{"entities":{"Book":{"fields":{"title":"string"}}}}}}' \
+          '{"jsonrpc":"2.0","id":3,"method":"shutdown"}' \
+          | php artisan api-generator:serve --stdio > worker.out
+        php -r '$l = array_map(fn ($x) => json_decode($x, true), file("worker.out", FILE_IGNORE_NEW_LINES)); exit(count($l) === 3 && $l[0]["result"]["protocol"] === 1 && $l[1]["result"]["files"] !== [] && array_key_exists("result", $l[2]) ? 0 : 1);'
+        test ! -e app/Models/Book.php
 
     - name: Generate the example API
       working-directory: app

@@ -6,6 +6,16 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.9.0
+
+- `--dry-run` shows every file a command would create or update, with nothing written, for every source including `--add-fields`.
+- `--json` prints one machine-readable document for scripts, editors and AI agents. See [Tools & Agents](/guide/integrations).
+- `--schema=-` reads a schema from stdin.
+- `api-generator:serve --stdio` keeps a preview process running. The VS Code extension uses it, so its live preview shows the exact code the package writes.
+- A failed generation no longer leaves half the files behind.
+- Regenerating the Postman collection keeps its id.
+- Fixed: running `--auth` again no longer removes the resource routes from `routes/api.php`.
+
 ### 3.8.0 - September 26, 2026
 
 - Fixed: a PUT that keeps a unique value no longer returns 422 on multi-word entities (`BlogPost`) or with a custom primary key.
@@ -62,6 +72,12 @@ Recent releases of the package and the VS Code extension. Full histories live on
 3.3.1 (strict-types fixes), 3.3.0 (auto-registered routes and seeders, required-by-default validation), 3.2.0 (interactive wizard, Sanctum auth, generated tests, Postman export, soft deletes), 3.0.0 (clean-architecture rewrite): details in the [full changelog](https://github.com/Nameless0l/laravel-api-generator/blob/main/CHANGELOG.md).
 
 ## VS Code extension
+
+### 0.12.0
+
+- The live preview is rendered by the installed package (3.9 or later): every file the generator writes, your published stubs, badges for new, modified and unchanged files, and a diff for modified ones.
+- Generation sends the form to `make:fullapi --schema=-`. No `class_data.json` at the project root anymore, and Soft Deletes, Auth and Postman are no longer ignored when the form has relationships.
+- `laravelApiGenerator.phpCommand` runs PHP through Sail or Docker.
 
 ### 0.11.1 - September 26, 2026
 

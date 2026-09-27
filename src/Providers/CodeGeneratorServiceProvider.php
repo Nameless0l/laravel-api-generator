@@ -11,8 +11,10 @@ use nameless\CodeGenerator\Console\Commands\DeleteFullApi;
 use nameless\CodeGenerator\Console\Commands\InstallPackageCommand;
 use nameless\CodeGenerator\Console\Commands\IntrospectCommand;
 use nameless\CodeGenerator\Console\Commands\MakeApiCommand;
+use nameless\CodeGenerator\Console\Commands\ServeCommand;
 use nameless\CodeGenerator\Console\Commands\ValidateStubsCommand;
 use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
+use nameless\CodeGenerator\Contracts\LineHandler;
 use nameless\CodeGenerator\EntitiesGenerator\ControllerGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\DTOGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\EnumGenerator;
@@ -30,7 +32,9 @@ use nameless\CodeGenerator\Services\ApiGenerationService;
 use nameless\CodeGenerator\Services\AuthGenerator;
 use nameless\CodeGenerator\Services\PostmanExporter;
 use nameless\CodeGenerator\Support\JsonParser;
+use nameless\CodeGenerator\Support\ProtocolHandler;
 use nameless\CodeGenerator\Support\StubLoader;
+use nameless\CodeGenerator\Support\WorkspaceFactory;
 
 class CodeGeneratorServiceProvider extends ServiceProvider
 {
@@ -44,6 +48,7 @@ class CodeGeneratorServiceProvider extends ServiceProvider
                 InstallPackageCommand::class,
                 IntrospectCommand::class,
                 ValidateStubsCommand::class,
+                ServeCommand::class,
             ]);
 
             $this->publishes([
@@ -65,6 +70,9 @@ class CodeGeneratorServiceProvider extends ServiceProvider
 
     private function registerServices(): void
     {
+        $this->app->singleton(WorkspaceFactory::class, fn () => new WorkspaceFactory);
+        $this->app->bind(LineHandler::class, ProtocolHandler::class);
+
         // Register StubLoader
         $this->app->singleton(StubLoader::class, function () {
             return new StubLoader(__DIR__.'/../../stubs');
@@ -79,14 +87,16 @@ class CodeGeneratorServiceProvider extends ServiceProvider
         // Register AuthGenerator
         $this->app->singleton(AuthGenerator::class);
 
-        // Register main API generation service
-        $this->app->singleton(ApiGenerationServiceInterface::class, function ($app) {
+        $this->app->singleton(ApiGenerationService::class, function ($app) {
             return new ApiGenerationService(
                 $app->make('code_generator.generators'),
                 $app->make(JsonParser::class),
-                $app->make(StubLoader::class)
+                $app->make(StubLoader::class),
+                $app->make(WorkspaceFactory::class)
             );
         });
+
+        $this->app->singleton(ApiGenerationServiceInterface::class, fn ($app) => $app->make(ApiGenerationService::class));
     }
 
     private function registerGenerators(): void

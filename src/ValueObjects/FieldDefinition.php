@@ -10,6 +10,16 @@ use InvalidArgumentException;
 final readonly class FieldDefinition
 {
     /**
+     * Types offered to editors. The aliases below stay accepted.
+     */
+    public const CANONICAL_TYPES = [
+        'string', 'text', 'integer', 'bigint', 'float', 'decimal', 'boolean',
+        'json', 'date', 'datetime', 'timestamp', 'time', 'uuid',
+    ];
+
+    private const TYPE_ALIASES = ['int', 'bool', 'UUID'];
+
+    /**
      * @param  array<int, string>  $validationRules
      * @param  array<string, mixed>  $attributes
      */
@@ -39,13 +49,7 @@ final readonly class FieldDefinition
 
     private function validateType(string $type): void
     {
-        $allowedTypes = [
-            'string', 'integer', 'int', 'boolean', 'bool', 'text', 'float',
-            'decimal', 'json', 'date', 'datetime', 'timestamp', 'time',
-            'uuid', 'UUID', 'bigint',
-        ];
-
-        if (! in_array($type, $allowedTypes, true)) {
+        if (! in_array($type, [...self::CANONICAL_TYPES, ...self::TYPE_ALIASES], true)) {
             throw new InvalidArgumentException("Unsupported field type: {$type}");
         }
     }
