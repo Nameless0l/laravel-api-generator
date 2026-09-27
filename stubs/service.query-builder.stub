@@ -20,7 +20,7 @@ class {{modelName}}Service
         return QueryBuilder::for({{modelName}}::class)
             ->allowedFilters([{{allowedFilters}}])
             ->allowedSorts([{{allowedSorts}}])
-            ->defaultSort('-id')
+            ->defaultSort('-{{primaryKey}}')
             ->get();
     }
 

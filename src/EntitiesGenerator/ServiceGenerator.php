@@ -55,8 +55,9 @@ class ServiceGenerator extends AbstractGenerator
 PHP;
         }
 
+        $key = $definition->getPrimaryKeyName();
         $filterable = $definition->getFillableFields();
-        $sortable = array_values(array_unique(array_merge(['id'], $filterable, ['created_at'])));
+        $sortable = array_values(array_unique(array_merge([$key], $filterable, ['created_at'])));
         $firstFieldDefinition = $definition->fields->first();
         $firstField = $firstFieldDefinition instanceof FieldDefinition ? $firstFieldDefinition->name : 'id';
 
@@ -67,6 +68,7 @@ PHP;
             'softDeleteMethods' => $softDeleteMethods,
             'allowedFilters' => $this->quoteList($filterable),
             'allowedSorts' => $this->quoteList($sortable),
+            'primaryKey' => $key,
             'firstField' => $firstField,
         ];
     }
