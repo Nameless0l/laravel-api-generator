@@ -6,6 +6,10 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.15.1
+
+- Corrigé : un `belongsTo` vers un modèle à clé primaire personnalisée en texte, comme `country_code`, ne transforme plus la clé en `0` dans le DTO, ce qui faisait échouer la création et la mise à jour.
+
 ### 3.15.0 - 27 septembre 2026
 
 - Corrigé : une clé primaire personnalisée est validée comme unique, donc poster une clé qui existe déjà renvoie 422 au lieu de 500.

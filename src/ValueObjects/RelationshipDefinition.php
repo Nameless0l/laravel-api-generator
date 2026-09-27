@@ -97,6 +97,13 @@ final readonly class RelationshipDefinition
         return $this->relatedKey !== null && $this->relatedKey !== 'id';
     }
 
+    public function getForeignKeyPhpType(): string
+    {
+        return $this->referencesCustomKey() && ! in_array($this->relatedKeyType, ['integer', 'int', 'bigint'], true)
+            ? 'string'
+            : 'int';
+    }
+
     public function getMethodName(): string
     {
         return Str::camel($this->role);
