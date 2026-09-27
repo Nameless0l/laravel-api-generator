@@ -57,6 +57,24 @@ class PrimaryKeyTest extends GeneratorTestCase
     }
 
     #[Test]
+    public function a_custom_primary_key_is_validated_as_unique(): void
+    {
+        /** @var PendingCommand $result */
+        $result = $this->artisan('make:fullapi', [
+            'name' => 'Country',
+            '--fields' => 'code:string:primary,name:string',
+        ]);
+        $result->assertSuccessful();
+        $result->run();
+
+        $request = (string) file_get_contents(app_path('Http/Requests/CountryRequest.php'));
+        $this->assertStringContainsString(
+            "'code' => ['required', 'string', 'max:255', \\Illuminate\\Validation\\Rule::unique('countries')->ignore(\$this->route('country'), 'code')],",
+            $request
+        );
+    }
+
+    #[Test]
     public function relations_follow_the_parent_custom_primary_key(): void
     {
         File::put($this->schemaPath, <<<'YAML'

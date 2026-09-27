@@ -39,7 +39,7 @@
         "kind": "Request",
         "entity": "Product",
         "action": "create",
-        "content": "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\\Http\\Requests;\n\nuse Illuminate\\Foundation\\Http\\FormRequest;\n\nclass ProductRequest extends FormRequest\n{\n    public function authorize(): bool\n    {\n        return true;\n    }\n\n    /**\n     * @return array<string, mixed>\n     */\n    public function rules(): array\n    {\n        return [\n            'code' => 'required|string|max:255',\n            'slug' => ['required', 'string', 'max:255', \\Illuminate\\Validation\\Rule::unique('products')->ignore($this->route('product'), 'code')],\n            'title' => 'required|string|max:255',\n        ];\n    }\n}\n"
+        "content": "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\\Http\\Requests;\n\nuse Illuminate\\Foundation\\Http\\FormRequest;\n\nclass ProductRequest extends FormRequest\n{\n    public function authorize(): bool\n    {\n        return true;\n    }\n\n    /**\n     * @return array<string, mixed>\n     */\n    public function rules(): array\n    {\n        return [\n            'code' => ['required', 'string', 'max:255', \\Illuminate\\Validation\\Rule::unique('products')->ignore($this->route('product'), 'code')],\n            'slug' => ['required', 'string', 'max:255', \\Illuminate\\Validation\\Rule::unique('products')->ignore($this->route('product'), 'code')],\n            'title' => 'required|string|max:255',\n        ];\n    }\n}\n"
     },
     {
         "path": "app/Http/Resources/ProductResource.php",
