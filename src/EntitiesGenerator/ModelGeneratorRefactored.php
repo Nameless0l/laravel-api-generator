@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\EntitiesGenerator;
 
+use Illuminate\Support\Str;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
 
@@ -82,7 +83,7 @@ class ModelGeneratorRefactored extends AbstractGenerator
         $methods = [];
 
         foreach ($definition->relationships as $relationship) {
-            $methods[] = $this->generateRelationshipMethod($relationship);
+            $methods[] = $this->generateRelationshipMethod($relationship, $definition);
         }
 
         return implode("\n\n", $methods);
@@ -91,7 +92,7 @@ class ModelGeneratorRefactored extends AbstractGenerator
     /**
      * Generate a single relationship method.
      */
-    private function generateRelationshipMethod(RelationshipDefinition $relationship): string
+    private function generateRelationshipMethod(RelationshipDefinition $relationship, EntityDefinition $owner): string
     {
         $methodName = $relationship->getMethodName();
         $eloquentMethod = $relationship->getEloquentMethod();
@@ -111,9 +112,17 @@ class ModelGeneratorRefactored extends AbstractGenerator
     }";
         }
 
+        $arguments = "{$relatedModel}::class";
+
+        // Eloquent guesses owner_id, or owner_<key> with a custom primary key
+        $guessedKey = Str::snake($owner->name).'_'.$owner->getPrimaryKeyName();
+        if ($relationship->type === 'oneToMany' && $relationship->foreignKey !== null && $relationship->foreignKey !== $guessedKey) {
+            $arguments .= ", '{$relationship->foreignKey}'";
+        }
+
         return "    public function {$methodName}()
     {
-        return \$this->{$eloquentMethod}({$relatedModel}::class);
+        return \$this->{$eloquentMethod}({$arguments});
     }";
     }
 
