@@ -83,13 +83,9 @@ final class Protocol
      */
     public static function handshake(): array
     {
-        $version = InstalledVersions::isInstalled(self::PACKAGE)
-            ? (InstalledVersions::getPrettyVersion(self::PACKAGE) ?? 'unknown')
-            : 'unknown';
-
         return [
             'protocol' => self::VERSION,
-            'package' => ['version' => $version],
+            'package' => ['version' => self::packageVersion()],
             'laravel' => app()->version(),
             'php' => PHP_VERSION,
             'capabilities' => [
@@ -102,6 +98,13 @@ final class Protocol
                 ],
             ],
         ];
+    }
+
+    public static function packageVersion(): string
+    {
+        return InstalledVersions::isInstalled(self::PACKAGE)
+            ? (InstalledVersions::getPrettyVersion(self::PACKAGE) ?? 'unknown')
+            : 'unknown';
     }
 
     /**

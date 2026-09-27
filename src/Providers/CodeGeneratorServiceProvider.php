@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace nameless\CodeGenerator\Providers;
 
 use Dedoc\Scramble\ScrambleServiceProvider;
+use Illuminate\Foundation\Console\AboutCommand;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use nameless\CodeGenerator\Console\Commands\CleanRoutesCommand;
 use nameless\CodeGenerator\Console\Commands\DeleteFullApi;
@@ -32,7 +34,9 @@ use nameless\CodeGenerator\Services\ApiGenerationService;
 use nameless\CodeGenerator\Services\AuthGenerator;
 use nameless\CodeGenerator\Services\PostmanExporter;
 use nameless\CodeGenerator\Support\JsonParser;
+use nameless\CodeGenerator\Support\Protocol;
 use nameless\CodeGenerator\Support\ProtocolHandler;
+use nameless\CodeGenerator\Support\SchemaParser;
 use nameless\CodeGenerator\Support\StubLoader;
 use nameless\CodeGenerator\Support\WorkspaceFactory;
 
@@ -55,6 +59,14 @@ class CodeGeneratorServiceProvider extends ServiceProvider
                 __DIR__.'/../../stubs' => base_path('stubs/vendor/laravel-api-generator'),
             ], 'api-generator-stubs');
         }
+
+        // "API" would become "a_p_i" in the JSON key of php artisan about --json
+        AboutCommand::add('Laravel Api Generator', fn () => [
+            'Version' => Protocol::packageVersion(),
+            'Protocol' => Protocol::VERSION,
+            'Schema file' => collect(SchemaParser::DEFAULT_FILES)->first(fn (string $file) => File::exists(base_path($file))) ?? 'none',
+            'Stubs' => File::isDirectory(base_path('stubs/vendor/laravel-api-generator')) ? 'published' : 'package defaults',
+        ]);
     }
 
     public function register(): void
