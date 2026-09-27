@@ -6,7 +6,7 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
-### 3.10.0
+### 3.9.0
 
 - `--dry-run` montre chaque fichier qu'une commande créerait ou modifierait, sans rien écrire, pour toutes les sources y compris `--add-fields`.
 - `--json` affiche un seul document lisible par les machines, pour les scripts, les éditeurs et les agents IA. Voir [Outils et agents](/fr/guide/integrations).
@@ -73,9 +73,9 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Extension VS Code
 
-### 0.13.0
+### 0.12.0
 
-- L'aperçu en direct est rendu par le package installé (3.10 ou plus récent) : chaque fichier que le générateur écrit, vos stubs publiés, des badges nouveau, modifié ou identique, et un diff pour les fichiers modifiés.
+- L'aperçu en direct est rendu par le package installé (3.9 ou plus récent) : chaque fichier que le générateur écrit, vos stubs publiés, des badges nouveau, modifié ou identique, et un diff pour les fichiers modifiés.
 - La génération envoie le formulaire à `make:fullapi --schema=-`. Plus de `class_data.json` à la racine du projet, et Soft Deletes, Auth et Postman ne sont plus ignorés quand le formulaire a des relations.
 - `laravelApiGenerator.phpCommand` lance PHP via Sail ou Docker.
 

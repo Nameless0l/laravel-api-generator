@@ -6,7 +6,7 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
-### 3.10.0
+### 3.9.0
 
 - `--dry-run` shows every file a command would create or update, with nothing written, for every source including `--add-fields`.
 - `--json` prints one machine-readable document for scripts, editors and AI agents. See [Tools & Agents](/guide/integrations).
@@ -73,9 +73,9 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## VS Code extension
 
-### 0.13.0
+### 0.12.0
 
-- The live preview is rendered by the installed package (3.10 or later): every file the generator writes, your published stubs, badges for new, modified and unchanged files, and a diff for modified ones.
+- The live preview is rendered by the installed package (3.9 or later): every file the generator writes, your published stubs, badges for new, modified and unchanged files, and a diff for modified ones.
 - Generation sends the form to `make:fullapi --schema=-`. No `class_data.json` at the project root anymore, and Soft Deletes, Auth and Postman are no longer ignored when the form has relationships.
 - `laravelApiGenerator.phpCommand` runs PHP through Sail or Docker.
 
