@@ -13,6 +13,9 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 - `StorePostRequest` et `UpdatePostRequest` remplacent `PostRequest`, et un PATCH ne modifie que les champs qu'il envoie.
 - Les tests générés couvrent les mises à jour partielles, ainsi que la restauration et la suppression définitive des entités avec soft deletes.
 - Chaque index est paginé, filtrable et triable (`filter[status]=draft&sort=-created_at&per_page=20`), avec ou sans Spatie QueryBuilder. Voir [Pagination, filtres et tri](/fr/guide/generating#pagination-filtres-et-tri).
+- Sur Laravel 13, les modèles générés déclarent leur clé et leurs colonnes fillable avec `#[Table]` et `#[Fillable]`. Les casts passent dans une méthode `casts()`, et les enums portent le nom de l'entité et du champ (`PostStatus`).
+- Le code généré passe `pint --test`, et les champs JSON acceptent un objet ou une liste.
+- Corrigé : une migration de `--add-fields` ne passe plus avant la table qu'elle modifie quand les deux ont été générées dans la même seconde.
 - Retirés : le fichier de config jamais chargé et les deux méthodes du service dépréciées en 3.8.
 
 ### 3.15.1 - 27 septembre 2026
@@ -121,6 +124,12 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 3.3.1 (correctifs strict types), 3.3.0 (routes et seeders auto-enregistrés, validation required par défaut), 3.2.0 (assistant interactif, auth Sanctum, tests générés, export Postman, soft deletes), 3.0.0 (réécriture clean architecture) : détails dans le [changelog complet](https://github.com/Nameless0l/laravel-api-generator/blob/main/CHANGELOG.md).
 
 ## Extension VS Code
+
+### 1.0.0
+
+- Va avec le package 4.0 : l'arbre des entités, **Go to Related File** et **Regenerate File(s)** lisent le manifest de génération, donc les requests Store et Update, les enums et les migrations de `--add-fields` apparaissent.
+- Sur Laravel 10 et 11, l'extension installe la ligne 3.x du package, car la 4.x demande Laravel 12.
+- Les erreurs de génération sont lues depuis les codes d'erreur du package, et la vérification des stubs explique pourquoi un stub de la 3.x ne convient plus.
 
 ### 0.17.0 - 27 septembre 2026
 

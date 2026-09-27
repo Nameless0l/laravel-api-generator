@@ -1,6 +1,6 @@
 # Troubleshooting
 
-When an artisan command fails, the extension reads the output before showing it to you. If it recognizes the failure, the notification names the actual cause and carries one-click fixes such as opening `.env`, running the missing command in a terminal or jumping to your stubs. This page covers the same cases for when you want to understand or fix things yourself.
+When an artisan command fails, the extension reads the output before showing it to you. With the package 3.9 or later, a generation answers with an error code, which the extension reads instead. If it recognizes the failure, the notification names the actual cause and carries one-click fixes such as opening `.env`, running the missing command in a terminal or jumping to your stubs. This page covers the same cases for when you want to understand or fix things yourself.
 
 ## PHP is not found
 
@@ -76,7 +76,7 @@ php artisan migrate:fresh
 
 ## A customized stub breaks generation
 
-Generation validates published stubs before writing a single file, and names any stub that lost a required placeholder. Fix the placeholder, or reset from the builder with **Customize Stubs** then **Reset to Defaults**.
+Generation validates published stubs before writing a single file, and names any stub that lost a required placeholder or was written for 3.x, with the reason. Fix the placeholder, or reset from the builder with **Customize Stubs** then **Reset to Defaults**.
 
 ## Permission denied
 

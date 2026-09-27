@@ -16,7 +16,7 @@ php artisan make:fullapi Product --fields="name:string,price:decimal,stock:integ
 | `bigint` | `BIGINTEGER` | `int` | `integer` |
 | `boolean` / `bool` | `BOOLEAN` | `bool` | `boolean` |
 | `float` / `decimal` | `DECIMAL(8,2)` | `float` | `numeric` |
-| `json` | `JSON` | `array` | `json` |
+| `json` | `JSON` | `array` | `array` |
 | `date` | `DATE` | `DateTimeInterface` | `date` |
 | `time` | `TIME` | `string` | `date_format:H:i,H:i:s` |
 | `datetime` | `DATETIME` | `DateTimeInterface` | `date` |
@@ -36,10 +36,10 @@ Une seule définition de champ produit toute la chaîne :
 
 ![Un seul champ enum se déploie en cinq fichiers cohérents](/enum-chain.gif)
 
-- `app/Enums/Status.php` : un `enum Status: string` avec un case par valeur
-- Modèle : `'status' => \App\Enums\Status::class` dans `$casts` et `@property \App\Enums\Status $status` dans le PHPDoc
-- Request : validation `Rule::enum(Status::class)`
-- Factory : `fake()->randomElement(Status::cases())`
+- `app/Enums/ArticleStatus.php` : un `enum ArticleStatus: string` avec un case par valeur, nommé d'après l'entité et le champ
+- Modèle : `'status' => ArticleStatus::class` dans `casts()` et `@property ArticleStatus $status` dans le PHPDoc
+- Request : validation `Rule::enum(ArticleStatus::class)`
+- Factory : `fake()->randomElement(ArticleStatus::cases())`
 - Migration : `$table->enum('status', ['draft', 'published', 'archived'])`
 
 Dans un fichier de schéma :

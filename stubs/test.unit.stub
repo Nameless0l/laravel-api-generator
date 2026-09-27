@@ -17,7 +17,7 @@ class {{modelName}}ServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new {{modelName}}Service();
+        $this->service = new {{modelName}}Service;
     }
 
     public function test_can_paginate_{{pluralName}}(): void

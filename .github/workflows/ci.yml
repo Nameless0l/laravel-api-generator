@@ -126,6 +126,14 @@ jobs:
       working-directory: app
       run: php artisan make:fullapi --openapi=../package/examples/openapi.yaml --no-interaction
 
+    - name: Generate an entity with a string key, an enum and JSON
+      working-directory: app
+      run: php artisan make:fullapi Gadget --fields="code:string:primary,name:string,kind:enum(small,big),specs:json" --soft-deletes --no-interaction
+
+    - name: Check the style of the generated code
+      working-directory: app
+      run: vendor/bin/pint --test
+
     - name: Run the migrations
       working-directory: app
       run: php artisan migrate --force --no-interaction

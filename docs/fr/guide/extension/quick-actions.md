@@ -26,7 +26,7 @@ Chaque bouton affiche sa progression, et un clic pendant l'exécution annule l'o
 ### Validation des stubs
 
 ::: v-pre
-Si vous avez [personnalisé des stubs](/fr/guide/customizing-stubs), l'extension lance `api-generator:validate-stubs` avant chaque génération. Un `{{placeholder}}` requis qui manque déclenche un modal listant les fichiers fautifs, avec **Open Stubs Folder** pour corriger ou **Generate Anyway** pour passer outre en connaissance de cause.
+Si vous avez [personnalisé des stubs](/fr/guide/customizing-stubs), l'extension lance `api-generator:validate-stubs` avant chaque génération. Un `{{placeholder}}` requis qui manque, ou un stub écrit pour la 3.x, déclenche un modal listant les fichiers fautifs et la raison, avec **Open Stubs Folder** pour corriger ou **Generate Anyway** pour passer outre en connaissance de cause. Un stub que le package ne lit plus, comme `request.stub`, reçoit seulement un avertissement.
 :::
 
 ### Détection des dépendances

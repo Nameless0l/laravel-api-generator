@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace nameless\CodeGenerator\Support;
 
 use Closure;
+use DateTimeImmutable;
 use Illuminate\Support\Facades\File;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\ValueObjects\FileChange;
@@ -19,6 +20,8 @@ final class Workspace
     private array $pending = [];
 
     private int $migrationSequence = 0;
+
+    private ?int $migrationStart = null;
 
     /**
      * @param  Closure(): int  $clock
@@ -85,11 +88,28 @@ final class Workspace
 
     /**
      * Consecutive within a run so migrations keep their generation order
-     * (parents before children, pivots last), which foreign keys rely on.
+     * (parents before children, pivots last), which foreign keys rely on,
+     * and after every existing migration, even one created the same second.
      */
     public function migrationTimestamp(): string
     {
-        return date('Y_m_d_His', ($this->clock)() + $this->migrationSequence++);
+        $this->migrationStart ??= max(($this->clock)(), $this->newestMigrationTime() + 1);
+
+        return date('Y_m_d_His', $this->migrationStart + $this->migrationSequence++);
+    }
+
+    private function newestMigrationTime(): int
+    {
+        $newest = PHP_INT_MIN;
+
+        foreach ($this->glob(database_path('migrations/*.php')) as $migration) {
+            $time = DateTimeImmutable::createFromFormat('!Y_m_d_His', substr(basename($migration), 0, 17));
+            if ($time !== false) {
+                $newest = max($newest, $time->getTimestamp());
+            }
+        }
+
+        return $newest;
     }
 
     /**

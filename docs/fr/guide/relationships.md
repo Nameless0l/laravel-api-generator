@@ -51,7 +51,7 @@ entities:
       commentable: morphTo
 ```
 
-`morphTo` émet `$table->morphs('commentable')` dans la migration et `morphTo()` sur le modèle ; `morphOne` / `morphMany` pointent en retour avec le bon nom de morph. L'introspection de base détecte automatiquement les paires de colonnes `*_type` / `*_id` comme `morphTo`.
+`morphTo` émet `$table->nullableMorphs('commentable')` dans la migration et `morphTo()` sur le modèle ; `morphOne` / `morphMany` pointent en retour avec le bon nom de morph. L'introspection de base détecte automatiquement les paires de colonnes `*_type` / `*_id` comme `morphTo`.
 
 ## Les clés primaires personnalisées se propagent
 

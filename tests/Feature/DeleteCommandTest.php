@@ -121,6 +121,23 @@ class DeleteCommandTest extends GeneratorTestCase
     }
 
     #[Test]
+    public function the_enums_of_the_entity_go_with_it_but_not_an_enum_named_before_4_0(): void
+    {
+        Artisan::call('make:fullapi', ['name' => 'Widget', '--fields' => 'name:string,size:enum(small,big)']);
+        $legacy = app_path('Enums/Size.php');
+        file_put_contents($legacy, "<?php\n");
+
+        try {
+            $this->pendingArtisan('delete:fullapi', ['name' => 'Widget', '--force' => true])->assertSuccessful();
+
+            $this->assertFileDoesNotExist(app_path('Enums/WidgetSize.php'));
+            $this->assertFileExists($legacy);
+        } finally {
+            File::delete($legacy);
+        }
+    }
+
+    #[Test]
     public function restore_routes_are_removed_whatever_their_parameter(): void
     {
         file_put_contents(base_path('routes/api.php'), $this->routes."\nRoute::post('widgets/{id}/restore', fn () => null);\nRoute::delete('widgets/{widget}/force-delete', fn () => null)->withTrashed();\nRoute::post('gadgets/{gadget}/restore', fn () => null);\n");

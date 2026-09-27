@@ -87,6 +87,30 @@ class ValidateStubsCommandTest extends TestCase
     }
 
     #[Test]
+    public function model_and_migration_stubs_from_3x_miss_the_new_layout(): void
+    {
+        File::put("{$this->published}/model.stub", "{{imports}}\n\n{{phpdoc}}\nclass {{modelName}} extends {{parentClass}}\n{\n    use HasFactory;\n{{traits}}\n\n    {{fillable}}\n{{relationships}}\n}\n");
+        File::put("{$this->published}/migrations.stub", "Schema::create('{{tableName}}', function (Blueprint \$table) {\n{{idColumn}}\n            {{fields}}\n            \$table->timestamps();\n{{softDeletes}}\n{{foreignKeys}}\n});\n");
+
+        [$exitCode, $report] = $this->validate();
+
+        $this->assertSame(1, $exitCode);
+        $this->assertSame(['members', 'classAttributes'], $this->row($report, 'model')['missing']);
+        $this->assertSame(['columns'], $this->row($report, 'migrations')['missing']);
+    }
+
+    #[Test]
+    public function a_request_stub_needs_the_imports_of_its_rules(): void
+    {
+        File::put("{$this->published}/request.store.stub", "use Illuminate\\Foundation\\Http\\FormRequest;\n\nclass Store{{modelName}}Request extends FormRequest\n{\n    {{rules}}\n}\n");
+
+        [$exitCode, $report] = $this->validate();
+
+        $this->assertSame(1, $exitCode);
+        $this->assertSame(['imports'], $this->row($report, 'request.store')['missing']);
+    }
+
+    #[Test]
     public function a_unit_test_stub_calling_get_all_is_outdated(): void
     {
         File::put("{$this->published}/test.unit.stub", "class {{modelName}}ServiceTest\n{\n    // {{modelNameLower}}\n    public function test_all(): void { \$this->service->getAll(); }\n}\n");

@@ -6,9 +6,11 @@ namespace nameless\CodeGenerator\Services;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use nameless\CodeGenerator\EntitiesGenerator\EnumGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\MigrationGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\RequestGenerator;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
+use nameless\CodeGenerator\Support\PhpImports;
 use nameless\CodeGenerator\Support\StubLoader;
 use nameless\CodeGenerator\Support\Workspace;
 use nameless\CodeGenerator\Support\WorkspaceFactory;
@@ -23,6 +25,8 @@ use nameless\CodeGenerator\ValueObjects\FieldDefinition;
  */
 class EntityEvolutionService
 {
+    private const FILLABLE = '/(protected \$fillable = \[|#\[Fillable\(\[)([^\]]*)\]/s';
+
     /** @var array<int, string> */
     private array $changed = [];
 
@@ -75,7 +79,8 @@ class EntityEvolutionService
             'Factory',
             database_path("factories/{$name}Factory.php"),
             'definition',
-            $fields->map(fn (FieldDefinition $f) => "            '{$f->name}' => {$f->getFakeValue()},")
+            $fields->map(fn (FieldDefinition $f) => "            '{$f->name}' => {$f->getFakeValue($name)},"),
+            $this->enumClasses($name, $fields)
         );
         $this->patchAfterReturnArray(
             $target,
@@ -101,11 +106,11 @@ class EntityEvolutionService
      */
     private function existingFillable(string $modelContent): array
     {
-        if (! preg_match('/protected \$fillable = \[([^\]]*)\]/s', $modelContent, $matches)) {
+        if (! preg_match(self::FILLABLE, $modelContent, $matches)) {
             return [];
         }
 
-        preg_match_all("/'([^']+)'/", $matches[1], $names);
+        preg_match_all("/'([^']+)'/", $matches[2], $names);
 
         return $names[1];
     }
@@ -147,15 +152,25 @@ class EntityEvolutionService
                 continue;
             }
 
-            $cases = implode("\n    ", array_map(
-                fn (string $v) => 'case '.Str::studly(str_replace('-', '_', $v))." = '{$v}';",
-                $field->getEnumValues()
-            ));
-            $path = app_path("Enums/{$field->getEnumClass()}.php");
+            $class = $field->getEnumClass($entity);
+            $path = app_path("Enums/{$class}.php");
 
-            $workspace->put($path, "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\\Enums;\n\nenum {$field->getEnumClass()}: string\n{\n    {$cases}\n}\n", 'Enum', $entity);
+            $workspace->put($path, EnumGenerator::source($class, $field->getEnumValues()), 'Enum', $entity);
             $this->changed[] = $path;
         }
+    }
+
+    /**
+     * @param  Collection<int, FieldDefinition>  $fields
+     * @return array<int, string>
+     */
+    private function enumClasses(string $entity, Collection $fields): array
+    {
+        return $fields
+            ->filter(fn (FieldDefinition $f) => $f->isEnum())
+            ->map(fn (FieldDefinition $f) => 'App\\Enums\\'.$f->getEnumClass($entity))
+            ->values()
+            ->all();
     }
 
     /**
@@ -165,74 +180,92 @@ class EntityEvolutionService
     {
         $content = $workspace->get($modelPath);
 
-        $fillableEntries = $fields->map(fn (FieldDefinition $f) => "'{$f->name}'")->implode(', ');
+        $entries = $fields->map(fn (FieldDefinition $f) => "'{$f->name}'")->implode(', ');
         $patched = preg_replace_callback(
-            '/protected \$fillable = \[([^\]]*)\]/s',
-            function (array $matches) use ($fillableEntries) {
-                $inside = rtrim($matches[1]);
-                $separator = trim($inside) === '' ? '' : ', ';
-
-                return 'protected $fillable = ['.$inside.$separator.$fillableEntries.']';
-            },
+            self::FILLABLE,
+            fn (array $m) => $m[1].rtrim($m[2]).(trim($m[2]) === '' ? '' : ', ').$entries.']',
             $content,
             1,
             $count
         );
 
         if ($patched === null || $count === 0) {
-            $this->warnings[] = basename($modelPath).': $fillable not found, model left untouched.';
+            $this->warnings[] = basename($modelPath).': neither $fillable nor #[Fillable] found, model left untouched.';
 
             return;
         }
-        $content = $patched;
 
-        $castEntries = $fields
-            ->map(fn (FieldDefinition $f) => $f->getCastType() !== null ? "'{$f->name}' => {$f->getCastType()}" : null)
-            ->filter();
+        $casts = $fields
+            ->filter(fn (FieldDefinition $f) => $f->getCastType($entity) !== null)
+            ->map(fn (FieldDefinition $f) => "            '{$f->name}' => {$f->getCastType($entity)},");
+        $content = $casts->isEmpty() ? $patched : $this->patchCasts($patched, $casts->implode("\n"));
 
-        if ($castEntries->isNotEmpty()) {
-            $castsBlock = $castEntries->implode(",\n        ");
-            if (preg_match('/protected \$casts = \[/', $content)) {
-                $content = (string) preg_replace(
-                    '/(protected \$casts = \[)/',
-                    "$1\n        {$castsBlock},",
-                    $content,
-                    1
-                );
-            } else {
-                $content = (string) preg_replace(
-                    '/(protected \$fillable = \[[^\]]*\];)/s',
-                    "$1\n\n    protected \$casts = [\n        {$castsBlock},\n    ];",
-                    $content,
-                    1
-                );
-            }
-        }
-
-        $phpdocLines = $fields->map(function (FieldDefinition $f) {
-            $type = $f->isEnum() ? '\\App\\Enums\\'.$f->getEnumClass() : $f->getPhpType();
+        $phpdocLines = $fields->map(function (FieldDefinition $f) use ($entity) {
+            $type = match (true) {
+                $f->isEnum() => $f->getEnumClass($entity),
+                in_array($f->type, ['date', 'datetime', 'timestamp'], true) => 'Carbon',
+                default => $f->getPhpType(),
+            };
             $nullable = $f->nullable ? '|null' : '';
 
             return " * @property {$type}{$nullable} \${$f->name}";
         })->implode("\n");
 
         if (preg_match('/\/\*\*\R(?: \* @property[^\r\n]*\R)+/', $content)) {
-            $content = (string) preg_replace(
+            $content = (string) preg_replace_callback(
                 '/((?: \* @property[^\r\n]*\R)+)( \*\/)/',
-                "$1{$phpdocLines}\n$2",
+                fn (array $m) => $m[1].$phpdocLines."\n".$m[2],
                 $content,
                 1
             );
         }
 
-        $workspace->put($modelPath, $content, 'Model', $entity);
+        $dates = $fields->contains(fn (FieldDefinition $f) => in_array($f->type, ['date', 'datetime', 'timestamp'], true));
+        $imports = [...$this->enumClasses($entity, $fields), ...($dates ? ['Illuminate\\Support\\Carbon'] : [])];
+
+        $workspace->put($modelPath, PhpImports::add($content, $imports), 'Model', $entity);
         $this->changed[] = $modelPath;
     }
 
     /**
-     * @param  Collection<int, string>  $lines
+     * Adds to casts(), to a $casts property written before 4.0, or creates casts().
      */
-    private function patchAfterReturnArray(Workspace $workspace, string $entity, string $kind, string $path, string $method, Collection $lines): void
+    private function patchCasts(string $content, string $lines): string
+    {
+        if (preg_match('/protected function casts\(\): array\s*\{\s*return \[\R/', $content)) {
+            return (string) preg_replace_callback(
+                '/(protected function casts\(\): array\s*\{\s*return \[\R)/',
+                fn (array $m) => $m[1].$lines."\n",
+                $content,
+                1
+            );
+        }
+
+        if (preg_match('/protected \$casts = \[\R/', $content)) {
+            return (string) preg_replace_callback(
+                '/(protected \$casts = \[\R)/',
+                fn (array $m) => $m[1].preg_replace('/^    /m', '', $lines)."\n",
+                $content,
+                1
+            );
+        }
+
+        $method = "    protected function casts(): array\n    {\n        return [\n{$lines}\n        ];\n    }";
+
+        if (preg_match('/^    public function /m', $content, $m, PREG_OFFSET_CAPTURE)) {
+            return substr_replace($content, $method."\n\n", (int) $m[0][1], 0);
+        }
+
+        $close = (int) strrpos($content, '}');
+
+        return rtrim(substr($content, 0, $close))."\n\n".$method."\n}\n";
+    }
+
+    /**
+     * @param  Collection<int, string>  $lines
+     * @param  array<int, string>  $imports
+     */
+    private function patchAfterReturnArray(Workspace $workspace, string $entity, string $kind, string $path, string $method, Collection $lines, array $imports = []): void
     {
         if (! $workspace->exists($path)) {
             $this->warnings[] = basename($path).': file not found, skipped.';
@@ -251,7 +284,7 @@ class EntityEvolutionService
             return;
         }
 
-        $workspace->put($path, $patched, $kind, $entity);
+        $workspace->put($path, PhpImports::add($patched, $imports), $kind, $entity);
         $this->changed[] = $path;
     }
 
@@ -266,21 +299,21 @@ class EntityEvolutionService
         $legacy = app_path("Http/Requests/{$entity}Request.php");
 
         if (! $workspace->exists($store) && $workspace->exists($legacy)) {
-            $this->patchAfterReturnArray($workspace, $entity, 'Request', $legacy, 'rules', $this->ruleLines($fields, update: false));
+            $this->patchAfterReturnArray($workspace, $entity, 'Request', $legacy, 'rules', $this->ruleLines($entity, $fields, update: false), RequestGenerator::imports($fields, $entity));
 
             return;
         }
 
-        $this->patchAfterReturnArray($workspace, $entity, 'Request', $store, 'rules', $this->ruleLines($fields, update: false));
-        $this->patchAfterReturnArray($workspace, $entity, 'Request', app_path("Http/Requests/Update{$entity}Request.php"), 'rules', $this->ruleLines($fields, update: true));
+        $this->patchAfterReturnArray($workspace, $entity, 'Request', $store, 'rules', $this->ruleLines($entity, $fields, update: false), RequestGenerator::imports($fields, $entity));
+        $this->patchAfterReturnArray($workspace, $entity, 'Request', app_path("Http/Requests/Update{$entity}Request.php"), 'rules', $this->ruleLines($entity, $fields, update: true), RequestGenerator::imports($fields, $entity));
     }
 
     /**
      * @param  Collection<int, FieldDefinition>  $fields
      * @return Collection<int, string>
      */
-    private function ruleLines(Collection $fields, bool $update): Collection
+    private function ruleLines(string $entity, Collection $fields, bool $update): Collection
     {
-        return $fields->map(fn (FieldDefinition $f) => "            '{$f->name}' => ".RequestGenerator::fieldRule($f, $update).',');
+        return $fields->map(fn (FieldDefinition $f) => "            '{$f->name}' => ".RequestGenerator::fieldRule($f, $update, $entity).',');
     }
 }

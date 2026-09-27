@@ -88,7 +88,7 @@ class DTOGenerator extends AbstractGenerator
         $value = "\$data['{$key}']";
 
         return match ($phpType) {
-            'int', 'float', 'bool' => "isset({$value}) ? ({$phpType}) {$value} : null",
+            'int', 'float', 'bool', 'string' => "isset({$value}) ? ({$phpType}) {$value} : null",
             'array' => "isset({$value}) ? (is_array({$value}) ? {$value} : (array) json_decode({$value}, true)) : null",
             default => "{$value} ?? null",
         };

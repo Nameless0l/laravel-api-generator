@@ -13,6 +13,9 @@ Recent releases of the package and the VS Code extension. Full histories live on
 - `StorePostRequest` and `UpdatePostRequest` replace `PostRequest`, and a PATCH changes only the fields it sends.
 - The generated tests cover partial updates, and restore and force delete on entities with soft deletes.
 - Every index is paginated, filterable and sortable (`filter[status]=draft&sort=-created_at&per_page=20`), with or without Spatie QueryBuilder. See [Pagination, filters and sorting](/guide/generating#pagination-filters-and-sorting).
+- On Laravel 13, generated models declare their key and fillable columns with `#[Table]` and `#[Fillable]`. Casts live in a `casts()` method, and enums are named after the entity and the field (`PostStatus`).
+- The generated code passes `pint --test`, and JSON fields accept an object or a list.
+- Fixed: a migration from `--add-fields` no longer runs before the table it changes when both were generated in the same second.
 - Removed: the config file that was never loaded, and the two service methods deprecated in 3.8.
 
 ### 3.15.1 - September 27, 2026
@@ -121,6 +124,12 @@ Recent releases of the package and the VS Code extension. Full histories live on
 3.3.1 (strict-types fixes), 3.3.0 (auto-registered routes and seeders, required-by-default validation), 3.2.0 (interactive wizard, Sanctum auth, generated tests, Postman export, soft deletes), 3.0.0 (clean-architecture rewrite): details in the [full changelog](https://github.com/Nameless0l/laravel-api-generator/blob/main/CHANGELOG.md).
 
 ## VS Code extension
+
+### 1.0.0
+
+- Pairs with the package 4.0: the entity tree, **Go to Related File** and **Regenerate File(s)** read the generation manifest, so the Store and Update requests, the enums and the `--add-fields` migrations show up.
+- On Laravel 10 and 11, the extension installs the package's 3.x line, since 4.x needs Laravel 12.
+- Generation errors are read from the package's error codes, and the stub check explains why a 3.x stub no longer fits.
 
 ### 0.17.0 - September 27, 2026
 

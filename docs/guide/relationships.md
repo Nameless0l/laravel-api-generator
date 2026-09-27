@@ -51,7 +51,7 @@ entities:
       commentable: morphTo
 ```
 
-`morphTo` emits `$table->morphs('commentable')` in the migration and `morphTo()` on the model; `morphOne` / `morphMany` point back with the right morph name. Database introspection detects `*_type` / `*_id` column pairs as `morphTo` automatically.
+`morphTo` emits `$table->nullableMorphs('commentable')` in the migration and `morphTo()` on the model; `morphOne` / `morphMany` point back with the right morph name. Database introspection detects `*_type` / `*_id` column pairs as `morphTo` automatically.
 
 ## Custom primary keys propagate
 

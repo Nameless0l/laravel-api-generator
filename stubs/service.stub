@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\{{modelName}};
 use App\DTO\{{modelName}}DTO;
+use App\Models\{{modelName}};
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class {{modelName}}Service
@@ -54,12 +54,12 @@ class {{modelName}}Service
     public function update({{modelName}} ${{modelNameLower}}, {{modelName}}DTO $dto): {{modelName}}
     {
         ${{modelNameLower}}->update($dto->toArray());
+
         return ${{modelNameLower}}->fresh();
     }
 
     public function delete({{modelName}} ${{modelNameLower}}): bool
     {
         return ${{modelNameLower}}->delete();
-    }
-{{softDeleteMethods}}
+    }{{softDeleteMethods}}
 }

@@ -52,14 +52,14 @@ class GeneratorRenderTest extends GeneratorTestCase
         $paths = array_map(fn (FileChange $change) => $change->path, $workspace->changes());
 
         $this->assertCount(14, $paths);
-        $this->assertContains('app/Enums/Status.php', $paths);
+        $this->assertContains('app/Enums/InvoiceStatus.php', $paths);
         $this->assertContains('app/Http/Requests/StoreInvoiceRequest.php', $paths);
         $this->assertContains('app/Http/Requests/UpdateInvoiceRequest.php', $paths);
         $this->assertContains('app/Models/Invoice.php', $paths);
         $this->assertContains('database/migrations/2026_01_01_000000_create_invoices_table.php', $paths);
         $this->assertContains('tests/Unit/InvoiceServiceTest.php', $paths);
         $this->assertFileDoesNotExist(app_path('Models/Invoice.php'));
-        $this->assertFileDoesNotExist(app_path('Enums/Status.php'));
+        $this->assertFileDoesNotExist(app_path('Enums/InvoiceStatus.php'));
     }
 
     #[Test]

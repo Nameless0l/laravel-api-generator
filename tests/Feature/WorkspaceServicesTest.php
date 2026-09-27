@@ -57,20 +57,38 @@ class WorkspaceServicesTest extends GeneratorTestCase
     }
 
     #[Test]
+    public function postman_bodies_send_a_valid_enum_case_and_time(): void
+    {
+        $fields = collect([
+            new FieldDefinition('status', 'string', attributes: ['enum' => ['draft', 'published']]),
+            new FieldDefinition('opens_at', 'time'),
+        ]);
+        $workspace = (new WorkspaceFactory)->make();
+
+        app(PostmanExporter::class)->export(collect([new EntityDefinition('Post', $fields, collect())]), base_path('postman_collection.json'), $workspace);
+
+        $collection = $workspace->get(base_path('postman_collection.json'));
+        $this->assertStringContainsString('\"status\": \"draft\"', $collection);
+        $this->assertStringContainsString('\"opens_at\": \"10:30:00\"', $collection);
+    }
+
+    #[Test]
     public function adding_fields_is_recorded_without_writing(): void
     {
         $this->generatedEntities = ['Report'];
         $this->generatedTables = ['reports'];
+        $this->instance(WorkspaceFactory::class, new WorkspaceFactory(fn (): int => 1767225600));
         app(ApiGenerationService::class)->generateCompleteApi(
             new EntityDefinition('Report', collect([new FieldDefinition('title', 'string')]), collect())
         );
         $modelBefore = (string) file_get_contents(app_path('Models/Report.php'));
-        $workspace = (new WorkspaceFactory(fn (): int => 1767225600))->make();
+        $workspace = app(WorkspaceFactory::class)->make();
 
         app(EntityEvolutionService::class)->addFields('Report', collect([new FieldDefinition('excerpt', 'text')]), $workspace);
 
         $changes = collect($workspace->changes())->keyBy('path');
-        $this->assertTrue($changes->has('database/migrations/2026_01_01_000000_add_excerpt_to_reports_table.php'));
+        $this->assertFileExists(database_path('migrations/2026_01_01_000000_create_reports_table.php'));
+        $this->assertTrue($changes->has('database/migrations/2026_01_01_000001_add_excerpt_to_reports_table.php'));
         $this->assertSame(FileChange::UPDATE, $changes['app/Models/Report.php']->action);
         $this->assertSame($modelBefore, file_get_contents(app_path('Models/Report.php')));
         $this->assertEmpty((array) glob(database_path('migrations/*_add_excerpt_to_reports_table.php')));

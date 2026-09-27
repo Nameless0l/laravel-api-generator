@@ -42,9 +42,11 @@ class ServiceGenerator extends AbstractGenerator
         if ($definition->hasSoftDeletes()) {
             $softDeleteMethods = <<<PHP
 
+
     public function restore({$model} \${$variable}): {$model}
     {
         \${$variable}->restore();
+
         return \${$variable};
     }
 

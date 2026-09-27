@@ -61,6 +61,31 @@ L'index est paginé, filtrable et triable sans package supplémentaire. `GET /ap
 
 La taille de page vient d'un nouveau fichier de config, lu au moment de générer. Publiez-le avec `php artisan vendor:publish --tag=api-generator-config` pour changer la valeur par défaut de 15 ou le plafond de 100.
 
+## Modèles et enums
+
+Sur Laravel 13, le modèle déclare sa clé et ses colonnes fillable avec des attributs de classe. Le générateur lit la version de Laravel à chaque exécution, donc un projet Laravel 12 garde les propriétés `$primaryKey`, `$keyType`, `$incrementing` et `$fillable` :
+
+```php
+#[Table(key: 'code', keyType: 'string', incrementing: false)]
+#[Fillable(['code', 'name'])]
+class Country extends Model
+```
+
+`#[Table]` n'apparaît qu'avec une clé primaire personnalisée. Sur les deux versions, les casts passent de la propriété `$casts` à une méthode `casts()`, et `--add-fields` complète celle que le modèle contient.
+
+Les enums portent le nom de l'entité et du champ : `status` sur `Post` donne `App\Enums\PostStatus` au lieu de `App\Enums\Status`, donc deux entités avec un champ `status` n'écrivent plus dans le même enum. L'enum écrit par la 3.x reste en place. La génération le signale par un avertissement `legacy_enum`, et vous le supprimez quand plus aucun code ne s'en sert. `delete:fullapi` supprime les enums de l'entité qu'il efface.
+
+## Code généré
+
+Les fichiers générés passent `pint --test` avec le preset Laravel : imports triés et noms de classe courts, routes comprises. `routes/api.php` importe chaque contrôleur, et régénérer une entité réécrit les références complètes écrites par la 3.x.
+
+Quelques comportements changent au passage :
+
+- Les champs `json` sont validés par `array` au lieu de `json`. Les clients envoient un objet ou une liste, et une chaîne JSON encodée reçoit une 422.
+- Le DTO convertit aussi les champs texte, donc une date ou un code envoyé comme nombre, par exemple `20250101`, ne finit plus en erreur 500.
+- La resource d'une entité à clé primaire personnalisée ne renvoie plus de clé `id`, qui valait toujours `null`.
+- Les colonnes d'une relation `morphTo` acceptent `null` (`nullableMorphs`), car les requests générées ne les remplissent pas. Rattachez le propriétaire par la relation, par exemple `$post->comments()->create([...])`.
+
 ## Stubs publiés
 
 Les stubs publiés dans `stubs/vendor/laravel-api-generator` restent prioritaires, alors comparez-les avec les nouveaux. `php artisan api-generator:validate-stubs` signale ce qui manque à un stub de la 3.x :
@@ -73,6 +98,9 @@ Les stubs publiés dans `stubs/vendor/laravel-api-generator` restent prioritaire
 - `policy.stub` demande `{{modelVariable}}`.
 - `service.stub` et `service.query-builder.stub` demandent `{{allowedFilters}}`, `{{allowedSorts}}`, `{{perPage}}` et `{{maxPerPage}}`.
 - `test.unit.stub` et `test.unit.pest.stub` doivent appeler `paginate()`, car `getAll()` n'existe plus.
+- `model.stub` demande `{{members}}`, qui contient les traits, les propriétés, `casts()` et les relations, et `{{classAttributes}}` juste au-dessus de `class`, là où vont les attributs de Laravel 13. Un stub de modèle de la 3.x reçoit toujours `{{traits}}`, `{{fillable}}` et `{{relationships}}`, donc il génère encore un modèle qui fonctionne, avec des propriétés.
+- `migrations.stub` demande `{{columns}}` pour tout le corps de la table. Les placeholders de la 3.x restent remplis.
+- `request.store.stub` et `request.update.stub` demandent `{{imports}}` après l'import de `FormRequest`, pour `Rule` et les enums qu'utilisent leurs règles.
 
 Les stubs des tests feature gagnent des placeholders facultatifs pour les nouveaux cas : `{{patchFields}}`, `{{patchAssertion}}`, `{{patchedColumns}}`, `{{softDeleteTests}}`, `{{filterField}}`, `{{primaryKey}}` et `{{sortAssertion}}`.
 :::

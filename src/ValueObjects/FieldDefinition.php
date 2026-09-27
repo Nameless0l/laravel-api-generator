@@ -100,7 +100,7 @@ final readonly class FieldDefinition
             'text' => 'string',
             'uuid', 'UUID' => 'uuid',
             'float', 'decimal' => 'numeric',
-            'json' => 'json',
+            'json' => 'array',
             'date', 'datetime', 'timestamp' => 'date',
             'time' => 'date_format:H:i,H:i:s',
             default => 'string'
@@ -132,9 +132,9 @@ final readonly class FieldDefinition
         };
     }
 
-    public function getEnumClass(): string
+    public function getEnumClass(string $entity): string
     {
-        return Str::studly($this->name);
+        return Str::studly($entity).Str::studly($this->name);
     }
 
     /**
@@ -147,10 +147,13 @@ final readonly class FieldDefinition
         return array_values(array_map('strval', is_array($values) ? $values : []));
     }
 
-    public function getCastType(): ?string
+    /**
+     * Enum classes come unqualified: the caller imports App\Enums\{class}.
+     */
+    public function getCastType(string $entity): ?string
     {
         if ($this->isEnum()) {
-            return '\\App\\Enums\\'.$this->getEnumClass().'::class';
+            return $this->getEnumClass($entity).'::class';
         }
 
         return match ($this->type) {
@@ -163,10 +166,13 @@ final readonly class FieldDefinition
         };
     }
 
-    public function getFakeValue(): string
+    /**
+     * Enum classes come unqualified: the caller imports App\Enums\{class}.
+     */
+    public function getFakeValue(string $entity): string
     {
         if ($this->isEnum()) {
-            return 'fake()->randomElement(\\App\\Enums\\'.$this->getEnumClass().'::cases())';
+            return 'fake()->randomElement('.$this->getEnumClass($entity).'::cases())';
         }
 
         $fake = match ($this->type) {
@@ -176,7 +182,7 @@ final readonly class FieldDefinition
             'text' => 'fake()->sentence()',
             'uuid', 'UUID' => 'fake()->uuid()',
             'float', 'decimal' => 'fake()->randomFloat(2, 1, 1000)',
-            'json' => "json_encode(['key' => 'value'])",
+            'json' => "['key' => 'value']",
             'date' => 'fake()->date()',
             'time' => 'fake()->time()',
             'datetime', 'timestamp' => "fake()->dateTime()->format('Y-m-d H:i:s')",

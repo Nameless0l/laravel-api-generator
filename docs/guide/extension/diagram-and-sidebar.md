@@ -32,8 +32,8 @@ Below it, the **Generated Entities** view tracks everything the generator create
 
 Each entity expands into three groups:
 
-- **Files**: a green check / red slash per artifact (Model, Controller, Service…); click to open.
-- **Fields**: read from the model's `$fillable`.
+- **Files**: the files the package recorded in `.api-generator/manifest.json`, Store and Update requests, enums and `--add-fields` migrations included, each with a green check or a red slash; click to open. Entities generated before the manifest show their conventional files.
+- **Fields**: read from the model's `$fillable`, or from its `#[Fillable]` attribute on Laravel 13.
 - **Relations**: extracted from the model's relation methods, shown as `belongsTo → Author`.
 
 A file watcher keeps the tree and the status bar in sync when APIs are generated or deleted outside the extension, from the terminal or after a `git pull`.
@@ -48,4 +48,4 @@ Right-click (or use the inline icons) on any entity:
 
 ## Go to Related File
 
-`Ctrl+Alt+R` (`Cmd+Alt+R` on macOS) from any generated file jumps to its siblings (model to controller to service to test) without hunting through the tree.
+`Ctrl+Alt+R` (`Cmd+Alt+R` on macOS) from any generated file jumps to its siblings (model to controller to service to test) without hunting through the tree. It knows the Store and Update requests, the enums named after their entity and, through the manifest, the migrations.

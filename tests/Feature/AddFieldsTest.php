@@ -21,8 +21,8 @@ class AddFieldsTest extends GeneratorTestCase
                 unlink($file);
             }
         }
-        if (File::exists(app_path('Enums/Severity.php'))) {
-            File::delete(app_path('Enums/Severity.php'));
+        if (File::exists(app_path('Enums/ReportSeverity.php'))) {
+            File::delete(app_path('Enums/ReportSeverity.php'));
         }
         parent::tearDown();
     }
@@ -84,19 +84,20 @@ class AddFieldsTest extends GeneratorTestCase
         $result->assertSuccessful();
         $result->run();
 
-        $this->assertFileExists(app_path('Enums/Severity.php'));
+        $this->assertFileExists(app_path('Enums/ReportSeverity.php'));
 
         $model = (string) file_get_contents(app_path('Models/Report.php'));
-        $this->assertStringContainsString("'severity' => \App\Enums\Severity::class", $model);
+        $this->assertStringContainsString("'severity' => ReportSeverity::class", $model);
+        $this->assertStringContainsString('use App\Enums\ReportSeverity;', $model);
 
-        $this->assertStringContainsString(
-            "'severity' => ['required', \Illuminate\Validation\Rule::enum(\App\Enums\Severity::class)],",
-            (string) file_get_contents(app_path('Http/Requests/StoreReportRequest.php'))
-        );
-        $this->assertStringContainsString(
-            "'severity' => ['sometimes', 'required', \Illuminate\Validation\Rule::enum(\App\Enums\Severity::class)],",
-            (string) file_get_contents(app_path('Http/Requests/UpdateReportRequest.php'))
-        );
+        foreach (['Store' => "['required', ", 'Update' => "['sometimes', 'required', "] as $kind => $prefix) {
+            $request = (string) file_get_contents(app_path("Http/Requests/{$kind}ReportRequest.php"));
+            $this->assertStringContainsString("'severity' => {$prefix}Rule::enum(ReportSeverity::class)],", $request);
+            $this->assertStringContainsString('use App\Enums\ReportSeverity;', $request);
+            $this->assertStringContainsString('use Illuminate\Validation\Rule;', $request);
+        }
+
+        $this->assertStringContainsString('use App\Enums\ReportSeverity;', (string) file_get_contents(database_path('factories/ReportFactory.php')));
     }
 
     #[Test]

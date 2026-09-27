@@ -35,19 +35,37 @@ class RequestGenerator extends AbstractGenerator
     }
 
     /**
-     * The rule of a field that is neither unique nor the primary key.
+     * The rule of a field that is neither unique nor the primary key. It names
+     * Rule and enum classes without their namespace: see imports().
      */
-    public static function fieldRule(FieldDefinition $field, bool $update): string
+    public static function fieldRule(FieldDefinition $field, bool $update, string $entity): string
     {
         if ($field->isEnum()) {
             $parts = $update ? ["'sometimes'"] : [];
             $parts[] = $field->nullable ? "'nullable'" : "'required'";
-            $parts[] = "\\Illuminate\\Validation\\Rule::enum(\\App\\Enums\\{$field->getEnumClass()}::class)";
+            $parts[] = "Rule::enum({$field->getEnumClass($entity)}::class)";
 
             return '['.implode(', ', $parts).']';
         }
 
         return "'".($update ? 'sometimes|' : '').$field->getValidationRule()."'";
+    }
+
+    /**
+     * @param  iterable<FieldDefinition>  $fields
+     * @return array<int, string>
+     */
+    public static function imports(iterable $fields, string $entity, bool $unique = false): array
+    {
+        $imports = $unique ? ['Illuminate\\Validation\\Rule'] : [];
+        foreach ($fields as $field) {
+            if ($field->isEnum()) {
+                $imports[] = 'Illuminate\\Validation\\Rule';
+                $imports[] = 'App\\Enums\\'.$field->getEnumClass($entity);
+            }
+        }
+
+        return array_values(array_unique($imports));
     }
 
     protected function generateContent(EntityDefinition $definition): string
@@ -73,9 +91,12 @@ class RequestGenerator extends AbstractGenerator
      */
     private function replacements(EntityDefinition $definition, bool $update): array
     {
+        $unique = $definition->fields->contains(fn (FieldDefinition $field) => ! $field->isEnum() && ($field->unique || $field->isPrimary()));
+
         return [
             'modelName' => $definition->name,
             'rules' => $this->generateRules($definition, $update),
+            'imports' => implode('', array_map(fn (string $class) => "\nuse {$class};", self::imports($definition->fields, $definition->name, $unique))),
         ];
     }
 
@@ -101,11 +122,11 @@ class RequestGenerator extends AbstractGenerator
 
         $rules = $definition->fields->map(function (FieldDefinition $field) use ($definition, $update, $sometimes) {
             if ($field->isEnum() || (! $field->unique && ! $field->isPrimary())) {
-                return "'{$field->name}' => ".self::fieldRule($field, $update).',';
+                return "'{$field->name}' => ".self::fieldRule($field, $update, $definition->name).',';
             }
 
             $parts = array_map(fn (string $p) => "'{$p}'", explode('|', $sometimes.$field->getValidationRule()));
-            $unique = "\\Illuminate\\Validation\\Rule::unique('{$definition->getTableName()}')";
+            $unique = "Rule::unique('{$definition->getTableName()}')";
 
             if ($update) {
                 $keyName = $definition->getPrimaryKeyName();

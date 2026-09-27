@@ -48,8 +48,18 @@ class GeneratedFeatureTestTest extends GeneratorTestCase
         $test = $this->generate([new FieldDefinition(name: 'meta', type: 'json')]);
         $patch = substr($test, (int) strpos($test, 'function test_can_patch_ticket'), (int) strpos($test, 'function test_can_delete_ticket') - (int) strpos($test, 'function test_can_patch_ticket'));
 
-        $this->assertStringContainsString("['meta' => '{\"key\":\"value\"}']", $patch);
+        $this->assertStringContainsString("['meta' => ['key' => 'value']]", $patch);
         $this->assertStringNotContainsString('assertDatabaseHas', $patch);
+    }
+
+    #[Test]
+    public function the_create_test_looks_up_the_first_column_that_is_not_json(): void
+    {
+        $test = $this->generate([new FieldDefinition(name: 'meta', type: 'json'), new FieldDefinition(name: 'title', type: 'string')]);
+
+        $this->assertStringContainsString("\$this->assertDatabaseHas('tickets', [\n            'title' => 'test_title',\n        ]);", $test);
+        $this->assertStringNotContainsString("'meta' => ['key' => 'value'],\n        ]);", $test);
+        $this->assertStringContainsString("\$this->assertDatabaseCount('tickets', 1);", $this->generate([new FieldDefinition(name: 'meta', type: 'json')]));
     }
 
     #[Test]

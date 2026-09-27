@@ -4,11 +4,12 @@ use App\Models\{{modelName}};{{relatedImports}}
 use App\Services\{{modelName}}Service;
 use App\DTO\{{modelName}}DTO;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class, RefreshDatabase::class);
+uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->service = new {{modelName}}Service();
+    $this->service = new {{modelName}}Service;
 });
 
 it('paginates {{pluralName}}', function () {

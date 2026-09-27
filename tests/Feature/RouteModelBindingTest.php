@@ -105,7 +105,9 @@ class RouteModelBindingTest extends GeneratorTestCase
         $this->assertStringNotContainsString("'media/{id}/", $routes);
         $this->assertSame(1, substr_count($routes, "'media/{medium}/restore'"));
         $this->assertSame(1, substr_count($routes, "'media/{medium}/force-delete'"));
-        $this->assertStringContainsString("Route::post('media/{medium}/restore', [App\\Http\\Controllers\\MediaController::class, 'restore'])->withTrashed();", $routes);
+        $this->assertStringContainsString("Route::post('media/{medium}/restore', [MediaController::class, 'restore'])->withTrashed();", $routes);
+        $this->assertStringContainsString('use App\Http\Controllers\MediaController;', $routes);
+        $this->assertStringNotContainsString('App\Http\Controllers\MediaController::class', $routes);
     }
 
     #[Test]

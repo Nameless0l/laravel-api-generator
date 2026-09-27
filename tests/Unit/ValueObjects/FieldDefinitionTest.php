@@ -85,13 +85,13 @@ class FieldDefinitionTest extends TestCase
     public function test_gets_correct_fake_value(): void
     {
         $stringField = new FieldDefinition('name', 'string');
-        $this->assertEquals('fake()->word()', $stringField->getFakeValue());
+        $this->assertEquals('fake()->word()', $stringField->getFakeValue('Post'));
 
         $intField = new FieldDefinition('age', 'integer');
-        $this->assertEquals('fake()->randomNumber()', $intField->getFakeValue());
+        $this->assertEquals('fake()->randomNumber()', $intField->getFakeValue('Post'));
 
         $uuidField = new FieldDefinition('id', 'uuid');
-        $this->assertEquals('fake()->uuid()', $uuidField->getFakeValue());
+        $this->assertEquals('fake()->uuid()', $uuidField->getFakeValue('Post'));
     }
 
     public function test_unique_fields_do_not_emit_a_bare_unique_rule(): void
@@ -106,16 +106,16 @@ class FieldDefinitionTest extends TestCase
     public function test_unique_fields_get_unique_fakes(): void
     {
         $field = new FieldDefinition(name: 'name', type: 'string', unique: true);
-        $this->assertEquals('fake()->unique()->word()', $field->getFakeValue());
+        $this->assertEquals('fake()->unique()->word()', $field->getFakeValue('Post'));
     }
 
     public function test_slug_fields_use_slug_fakes(): void
     {
         $unique = new FieldDefinition(name: 'slug', type: 'string', unique: true);
-        $this->assertEquals('fake()->unique()->slug()', $unique->getFakeValue());
+        $this->assertEquals('fake()->unique()->slug()', $unique->getFakeValue('Post'));
 
         $plain = new FieldDefinition(name: 'slug', type: 'string');
-        $this->assertEquals('fake()->slug()', $plain->getFakeValue());
+        $this->assertEquals('fake()->slug()', $plain->getFakeValue('Post'));
     }
 
     public function test_date_and_time_types_get_their_own_columns(): void
@@ -133,8 +133,8 @@ class FieldDefinitionTest extends TestCase
 
     public function test_date_and_time_fakes_match_their_columns(): void
     {
-        $this->assertSame('fake()->date()', (new FieldDefinition('day', 'date'))->getFakeValue());
-        $this->assertSame('fake()->time()', (new FieldDefinition('starts_at', 'time'))->getFakeValue());
-        $this->assertSame("fake()->dateTime()->format('Y-m-d H:i:s')", (new FieldDefinition('held_at', 'datetime'))->getFakeValue());
+        $this->assertSame('fake()->date()', (new FieldDefinition('day', 'date'))->getFakeValue('Post'));
+        $this->assertSame('fake()->time()', (new FieldDefinition('starts_at', 'time'))->getFakeValue('Post'));
+        $this->assertSame("fake()->dateTime()->format('Y-m-d H:i:s')", (new FieldDefinition('held_at', 'datetime'))->getFakeValue('Post'));
     }
 }

@@ -294,10 +294,10 @@ php artisan make:fullapi Article --fields="title:string,status:enum(draft,publis
 
 One field definition produces the whole chain:
 
-- `app/Enums/Status.php` -- a backed `enum Status: string` with a case per value
-- Model -- `'status' => \App\Enums\Status::class` in `$casts` and `@property \App\Enums\Status $status` in the PHPDoc
-- Request -- `Rule::enum(Status::class)` validation
-- Factory -- `fake()->randomElement(Status::cases())`
+- `app/Enums/ArticleStatus.php` -- a backed `enum ArticleStatus: string` with a case per value, named after the entity and the field
+- Model -- `'status' => ArticleStatus::class` in `casts()` and `@property ArticleStatus $status` in the PHPDoc
+- Request -- `Rule::enum(ArticleStatus::class)` validation
+- Factory -- `fake()->randomElement(ArticleStatus::cases())`
 - Migration -- `$table->enum('status', ['draft', 'published', 'archived'])`
 
 In a schema file: `status: enum(draft,published) default=draft`.
@@ -320,7 +320,7 @@ php artisan migrate
 ```
 
 - Creates an incremental `Schema::table()` migration (with `down()`)
-- Appends to `$fillable`, `$casts` and the PHPDoc block of the existing model
+- Appends to the fillable columns, the casts and the PHPDoc block of the existing model
 - Inserts the validation rules, factory values and resource fields in place
 - Generates the enum class when needed
 - Skips fields that already exist; never touches your custom methods
