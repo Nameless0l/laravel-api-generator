@@ -14,6 +14,7 @@ Recent releases of the package and the VS Code extension. Full histories live on
 - `api-generator:serve --stdio` keeps a preview process running. The VS Code extension uses it, so its live preview shows the exact code the package writes.
 - A failed generation no longer leaves half the files behind.
 - Regenerating the Postman collection keeps its id.
+- Fixed: running `--auth` again no longer removes the resource routes from `routes/api.php`.
 
 ### 3.8.0 - September 26, 2026
 

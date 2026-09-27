@@ -14,6 +14,7 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 - `api-generator:serve --stdio` garde un processus d'aperçu ouvert. L'extension VS Code s'en sert : son aperçu en direct montre exactement le code que le package écrit.
 - Une génération qui échoue ne laisse plus la moitié des fichiers derrière elle.
 - Régénérer la collection Postman conserve son identifiant.
+- Corrigé : relancer `--auth` ne retire plus les routes de ressources de `routes/api.php`.
 
 ### 3.8.0 - 26 septembre 2026
 

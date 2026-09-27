@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Postman collection keeps the same `_postman_id` when regenerated.
 - `GeneratorInterface` gains `render(EntityDefinition, Workspace)`. The interface is not a documented extension point, but custom implementations must add the method.
 
+### Fixed
+- **Resource routes lost on a second `--auth` run.** Generating another entity with `--auth`, or the same one again, moved every resource route out of the `auth:sanctum` group without putting them back, so `routes/api.php` lost them all. Routes already in the group now stay there and new ones join them.
+
 ## [3.8.0] - 2026-09-26
 
 ### Fixed
