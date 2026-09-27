@@ -91,6 +91,7 @@ final class Protocol
             'capabilities' => [
                 'fieldTypes' => FieldDefinition::CANONICAL_TYPES,
                 'relationTypes' => SchemaParser::RELATION_KEYWORDS,
+                'keepsEditedFiles' => true,
                 'options' => [
                     'json_api' => class_exists(JsonApiResource::class)
                         ? ['supported' => true]

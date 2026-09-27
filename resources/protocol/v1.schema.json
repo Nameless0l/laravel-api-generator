@@ -67,6 +67,7 @@
           "properties": {
             "fieldTypes": { "type": "array", "items": { "type": "string" } },
             "relationTypes": { "type": "array", "items": { "type": "string" } },
+            "keepsEditedFiles": { "type": "boolean" },
             "options": {
               "type": "object",
               "required": ["json_api"],
