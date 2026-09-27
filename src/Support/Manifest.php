@@ -106,6 +106,14 @@ final class Manifest
     }
 
     /**
+     * @return array<string, array{entity: ?string, kind: string, hash: string}>
+     */
+    public function entries(): array
+    {
+        return $this->files;
+    }
+
+    /**
      * @param  array<int, string>  $exceptKinds
      * @return array<int, string>
      */

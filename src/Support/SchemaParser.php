@@ -180,6 +180,28 @@ class SchemaParser
     }
 
     /**
+     * Fields written as in a schema file, to add to an existing entity.
+     *
+     * @param  array<mixed>  $fields
+     * @return Collection<int, FieldDefinition>
+     */
+    public function parseFields(string $entity, array $fields, string $source = 'fields'): Collection
+    {
+        $this->warnings = [];
+
+        if ($fields === [] || array_is_list($fields)) {
+            throw CodeGeneratorException::invalidSchema($source, "the fields to add to '{$entity}' must be a mapping of names to types");
+        }
+
+        $parsed = collect();
+        foreach ($fields as $fieldName => $fieldDef) {
+            $parsed->push($this->parseField($entity, (string) $fieldName, $fieldDef, $source));
+        }
+
+        return $parsed;
+    }
+
+    /**
      * @param  array<string, mixed>  $definition
      * @param  array<string, mixed>  $globalOptions
      * @param  array<string, mixed>  $extraOptions

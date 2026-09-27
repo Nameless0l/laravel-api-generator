@@ -53,6 +53,7 @@ jobs:
     - name: Install dependencies
       run: |
         composer require "laravel/framework:${{ matrix.laravel-version }}" --no-interaction --no-update
+        if [ "${{ matrix.laravel-version }}" = "10.*" ]; then composer remove --dev laravel/mcp --no-interaction --no-update; fi
         composer install --prefer-dist --no-interaction
 
     - name: Run tests
@@ -107,6 +108,19 @@ jobs:
           '{"jsonrpc":"2.0","id":3,"method":"shutdown"}' \
           | php artisan api-generator:serve --stdio > worker.out
         php -r '$l = array_map(fn ($x) => json_decode($x, true), file("worker.out", FILE_IGNORE_NEW_LINES)); exit(count($l) === 3 && $l[0]["result"]["protocol"] === 1 && $l[1]["result"]["files"] !== [] && array_key_exists("result", $l[2]) ? 0 : 1);'
+        test ! -e app/Models/Book.php
+
+    - name: Talk to the MCP server
+      working-directory: app
+      run: |
+        composer require --dev laravel/mcp --no-interaction
+        printf '%s\n' \
+          '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"ci","version":"1"}}}' \
+          '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+          '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
+          '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"plan-api","arguments":{"schema":{"entities":{"Book":{"fields":{"title":"string"}}}}}}}' \
+          | php artisan api-generator:mcp > mcp.out
+        php -r '$l = array_map(fn ($x) => json_decode($x, true), file("mcp.out", FILE_IGNORE_NEW_LINES)); $t = array_column($l[1]["result"]["tools"], "name"); sort($t); exit(count($l) === 3 && $t === ["add-fields", "generate-api", "list-entities", "plan-api"] && $l[2]["result"]["isError"] === false && $l[2]["result"]["structuredContent"]["files"] !== [] ? 0 : 1);'
         test ! -e app/Models/Book.php
 
     - name: Generate the example API

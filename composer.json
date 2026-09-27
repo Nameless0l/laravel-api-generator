@@ -31,12 +31,16 @@
     },
     "require-dev": {
         "dedoc/scramble": "^0.11.31 || ^0.12 || ^0.13",
+        "laravel/mcp": "^1.0",
         "laravel/pint": "^1.0",
         "opis/json-schema": "^2.3",
         "orchestra/testbench": "^8.0 || ^9.0 || ^10.0 || ^11.0",
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-phpunit": "^2.0",
         "phpunit/phpunit": "^10.0 || ^11.0 || ^12.0"
+    },
+    "suggest": {
+        "laravel/mcp": "Required by the MCP server that lets coding agents plan and generate APIs (php artisan api-generator:mcp, Laravel 11.45+)."
     },
     "autoload": {
         "psr-4": {

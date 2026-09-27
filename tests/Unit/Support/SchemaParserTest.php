@@ -225,6 +225,16 @@ class SchemaParserTest extends TestCase
     }
 
     #[Test]
+    public function it_parses_fields_to_add_to_an_existing_entity(): void
+    {
+        $fields = $this->parser->parseFields('Post', ['excerpt' => 'text nullable', 'status' => 'enum(draft,published)']);
+
+        $this->assertSame(['excerpt', 'status'], $fields->map(fn (FieldDefinition $field) => $field->name)->all());
+        $this->assertTrue($fields[0]->nullable);
+        $this->assertSame(['draft', 'published'], $fields[1]->attributes['enum'] ?? null);
+    }
+
+    #[Test]
     public function an_unknown_type_becomes_a_string_with_a_warning(): void
     {
         $entities = $this->parser->parseArray(['entities' => ['Post' => ['fields' => [
@@ -237,5 +247,16 @@ class SchemaParserTest extends TestCase
         $this->assertSame('string', $entities[0]->fields[0]->type);
         $this->assertSame(['unknown_field_type', 'unknown_field_type'], array_column($this->parser->getWarnings(), 'code'));
         $this->assertStringContainsString("Post.title: unknown type 'strng'", $this->parser->getWarnings()[0]['message']);
+
+        $this->parser->parseFields('Post', ['excerpt' => 'text']);
+        $this->assertSame([], $this->parser->getWarnings());
+    }
+
+    #[Test]
+    public function fields_to_add_must_be_a_mapping(): void
+    {
+        $this->expectException(CodeGeneratorException::class);
+
+        $this->parser->parseFields('Post', ['excerpt', 'status']);
     }
 }

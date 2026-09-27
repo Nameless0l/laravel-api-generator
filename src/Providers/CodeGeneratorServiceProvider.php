@@ -8,11 +8,13 @@ use Dedoc\Scramble\ScrambleServiceProvider;
 use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Mcp\Server\Registrar;
 use nameless\CodeGenerator\Console\Commands\CleanRoutesCommand;
 use nameless\CodeGenerator\Console\Commands\DeleteFullApi;
 use nameless\CodeGenerator\Console\Commands\InstallPackageCommand;
 use nameless\CodeGenerator\Console\Commands\IntrospectCommand;
 use nameless\CodeGenerator\Console\Commands\MakeApiCommand;
+use nameless\CodeGenerator\Console\Commands\McpCommand;
 use nameless\CodeGenerator\Console\Commands\ServeCommand;
 use nameless\CodeGenerator\Console\Commands\ValidateStubsCommand;
 use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
@@ -30,6 +32,7 @@ use nameless\CodeGenerator\EntitiesGenerator\ResourceGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\SeederGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\ServiceGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\UnitTestGenerator;
+use nameless\CodeGenerator\Mcp\ApiGeneratorServer;
 use nameless\CodeGenerator\Services\ApiGenerationService;
 use nameless\CodeGenerator\Services\AuthGenerator;
 use nameless\CodeGenerator\Services\PostmanExporter;
@@ -53,11 +56,18 @@ class CodeGeneratorServiceProvider extends ServiceProvider
                 IntrospectCommand::class,
                 ValidateStubsCommand::class,
                 ServeCommand::class,
+                McpCommand::class,
             ]);
 
             $this->publishes([
                 __DIR__.'/../../stubs' => base_path('stubs/vendor/laravel-api-generator'),
             ], 'api-generator-stubs');
+        }
+
+        if (class_exists(Registrar::class)) {
+            $this->callAfterResolving(Registrar::class, function (Registrar $mcp): void {
+                $mcp->local(McpCommand::HANDLE, ApiGeneratorServer::class);
+            });
         }
 
         // "API" would become "a_p_i" in the JSON key of php artisan about --json
