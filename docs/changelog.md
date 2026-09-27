@@ -80,6 +80,11 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## VS Code extension
 
+### 0.13.0
+
+- In Laravel projects, GitHub Copilot gets the package's `laravel-api-generator` skill and generates APIs with `make:fullapi`.
+- `api-schema.yaml`, `.yml` and `.json` files get completion and typo checks from the package's JSON Schema.
+
 ### 0.12.0
 
 - The live preview is rendered by the installed package (3.9 or later): every file the generator writes, your published stubs, badges for new, modified and unchanged files, and a diff for modified ones.
