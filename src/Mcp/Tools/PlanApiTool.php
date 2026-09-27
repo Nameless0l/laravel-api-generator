@@ -15,6 +15,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsIdempotent;
 use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 use nameless\CodeGenerator\Services\GenerationPlanner;
+use nameless\CodeGenerator\Support\OpenApiConverter;
 use nameless\CodeGenerator\Support\Protocol;
 use nameless\CodeGenerator\Support\SchemaParser;
 use Throwable;
@@ -35,17 +36,18 @@ final class PlanApiTool extends GenerationTool
         ];
     }
 
-    public function handle(Request $request, GenerationPlanner $planner, SchemaParser $parser): Response|ResponseFactory
+    public function handle(Request $request, GenerationPlanner $planner, SchemaParser $parser, OpenApiConverter $converter): Response|ResponseFactory
     {
         try {
-            $plan = $planner->plan($this->generationRequest($request, $parser));
+            [$generation, $warnings] = $this->generationRequest($request, $parser, $converter);
+            $plan = $planner->plan($generation);
         } catch (Throwable $e) {
             return Response::error(Protocol::encode(Protocol::errorDocument($e, true)));
         }
 
         return Response::structured(Protocol::planDocument(
             $plan->changes(),
-            array_merge($parser->getWarnings(), $plan->warnings),
+            array_merge($warnings, $plan->warnings),
             true,
             $request->boolean('include_content')
         ));
