@@ -94,7 +94,7 @@ Pour reconstruire une `Resource` ou un `Test` sans toucher au reste :
 php artisan make:fullapi Post --fields="title:string,content:text" --only=FeatureTest,UnitTest
 ```
 
-Quand `--only=` est présent, la migration, la route `apiResource` et l'enregistrement dans `DatabaseSeeder` sont **laissés intacts** : seuls les artefacts listés sont réécrits.
+Quand `--only=` est présent, la migration, la route `apiResource` et l'enregistrement dans `DatabaseSeeder` sont **laissés intacts** : seuls les artefacts listés sont réécrits. Un fichier listé que vous avez modifié à la main est gardé, sauf avec `--force` (voir [Faire évoluer les entités](/fr/guide/evolving#vos-modifications-survivent-a-la-regeneration)).
 
 Types disponibles : `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.
 
@@ -104,7 +104,7 @@ Types disponibles : `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resourc
 php artisan delete:fullapi Post
 ```
 
-Après confirmation, supprime tous les fichiers générés, désenregistre le seeder de `DatabaseSeeder.php`, et nettoie les routes de l'entité dans `routes/api.php` et `routes/web.php`. Appelée sans nom d'entité, la commande supprime toutes les entités définies dans `class_data.json`. Ajoutez `--force` pour sauter la question dans un script.
+Après confirmation, supprime tous les fichiers générés, désenregistre le seeder de `DatabaseSeeder.php`, et nettoie les routes de l'entité dans `routes/api.php` et `routes/web.php`. Appelée sans nom d'entité, la commande supprime toutes les entités définies dans `class_data.json`. Ajoutez `--force` pour sauter la question dans un script, ou `--dry-run` pour lister ce qui serait supprimé sans rien effacer.
 
 Si d'anciennes suppressions ont laissé des routes pointant vers des contrôleurs disparus (la fameuse ReflectionException de `route:list`), purgez-les :
 

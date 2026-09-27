@@ -1,6 +1,6 @@
 # Faire évoluer les entités
 
-Les générateurs sont formidables au jour 1 et inutiles au jour 30, parce que régénérer efface vos modifications manuelles. `--add-fields` patche au lieu de régénérer.
+Les générateurs sont formidables au jour 1 et inutiles au jour 30 quand régénérer efface vos modifications manuelles. Ici, régénérer laisse de côté les fichiers que vous avez modifiés, et `--add-fields` patche les entités à enrichir.
 
 ## Ajouter des champs à une entité existante
 
@@ -19,6 +19,17 @@ Ce qui se passe :
 
 Le DTO (promotion de constructeur) et les tests générés sont volontairement laissés de côté et signalés comme suivis manuels.
 
+## Vos modifications survivent à la régénération
+
+Le générateur note ce qu'il écrit dans `.api-generator/manifest.json`. Committez ce fichier. Au passage suivant, tout fichier généré que vous avez modifié à la main reste tel quel, et le rapport le nomme :
+
+```
+  kept      app/Models/Post.php
+  ! app/Models/Post.php was edited since it was generated, so it was kept. Use --force to overwrite it.
+```
+
+Les fichiers que vous n'avez pas touchés sont rafraîchis comme d'habitude. Ajoutez `--force` pour écraser aussi les fichiers modifiés, ou prévisualisez tout le passage avec `--dry-run`. Les entités générées avant la 3.11 sont régénérées comme avant lors de leur prochain passage, puis suivies.
+
 ## Régénérer des fichiers précis
 
 Changé d'avis sur un seul artefact ? `--only=` réécrit uniquement les générateurs listés et laisse la migration, la route et l'enregistrement du seeder intacts :
@@ -36,7 +47,7 @@ Types disponibles : `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resourc
 php artisan delete:fullapi Post
 ```
 
-Supprime chaque fichier généré, désenregistre le seeder de `DatabaseSeeder.php`, et retire les routes de l'entité de `routes/api.php` et `routes/web.php`.
+Supprime chaque fichier généré, désenregistre le seeder de `DatabaseSeeder.php`, et retire les routes de l'entité de `routes/api.php` et `routes/web.php`. Les migrations ajoutées avec `--add-fields` partent aussi, puisque le manifest les connaît. Ajoutez `--dry-run` pour voir la liste d'abord ; la confirmation nomme aussi les fichiers modifiés à la main. Les enums et les migrations pivot restent, car d'autres entités peuvent s'en servir.
 
 ## Réparer les routes orphelines
 

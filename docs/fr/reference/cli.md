@@ -5,8 +5,8 @@
 ```bash
 php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
                          {--schema=} {--mermaid=} {--from-database} {--tables=} {--with-migrations} {--query-builder}
-                         {--pest} {--json-api} {--add-fields=} {--dry-run} {--json}
-php artisan delete:fullapi {name?} {--force}
+                         {--pest} {--json-api} {--add-fields=} {--dry-run} {--json} {--force}
+php artisan delete:fullapi {name?} {--force} {--dry-run}
 php artisan api-generator:clean-routes {--dry-run}
 php artisan api-generator:introspect {--table=}
 php artisan api-generator:validate-stubs {--json}
@@ -36,6 +36,7 @@ php artisan api-generator:serve {--stdio}
 | `--add-fields=a:type,b:type` | Ajoute des champs à une entité existante : migration incrémentale + patchs en place. |
 | `--dry-run` | Exécute toute la génération et liste les fichiers qu'elle créerait ou modifierait, sans rien écrire. |
 | `--json` | Affiche un seul document JSON à la place du rapport texte, pour les scripts, les éditeurs et les agents. Indisponible avec `--interactive`. Voir [Outils et agents](/fr/guide/integrations). |
+| `--force` | Écrase les fichiers modifiés à la main depuis leur génération. Sans cette option, ils sont gardés et signalés. |
 
 Types pour `--only` : `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.
 
@@ -45,8 +46,9 @@ Types pour `--only` : `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resou
 |-------------------|-------------|
 | `name` | Entité à supprimer. Omettre pour supprimer toutes les entités de `class_data.json`. |
 | `--force` | Passe la demande de confirmation. |
+| `--dry-run` | Liste les fichiers et les entrées qui seraient retirés, sans rien supprimer. |
 
-Supprime tous les fichiers générés, désenregistre le seeder, et retire les routes de l'entité de `routes/api.php` et `routes/web.php`.
+Supprime tous les fichiers générés, y compris les migrations ajoutées avec `--add-fields`, désenregistre le seeder, et retire les routes de l'entité de `routes/api.php` et `routes/web.php`. La confirmation nomme les fichiers modifiés à la main.
 
 ## `api-generator:clean-routes`
 

@@ -10,7 +10,7 @@ Ajoutez `--dry-run` à n'importe quelle commande `make:fullapi`. La génération
 php artisan make:fullapi Post --fields="title:string,body:text" --dry-run
 ```
 
-Un fichier existant apparaît en `update` quand son contenu changerait, en `unchanged` quand le générateur écrirait exactement les mêmes octets. Avant de régénérer une entité retouchée à la main, un dry run montre les fichiers qui seraient remplacés.
+Un fichier existant apparaît en `update` quand son contenu changerait, en `unchanged` quand le générateur écrirait exactement les mêmes octets. Un fichier modifié à la main depuis sa génération apparaît en `kept` : le générateur n'y touche pas, sauf avec `--force`.
 
 ## Une sortie lisible par les machines
 
@@ -32,7 +32,7 @@ php artisan make:fullapi Post --fields="title:string" --dry-run --json
 }
 ```
 
-Les chemins sont relatifs à la racine du projet et utilisent toujours `/`. En cas d'échec, la commande sort avec le code 1 et `errors` contient un `code` stable, un `message` et parfois un `hint`.
+Les chemins sont relatifs à la racine du projet et utilisent toujours `/`. Un fichier modifié à la main depuis sa génération porte `"kept": true` et n'est pas écrit, et un avertissement `modified_file_kept` le nomme. En cas d'échec, la commande sort avec le code 1 et `errors` contient un `code` stable, un `message` et parfois un `hint`.
 
 ## Envoyer un schéma sur l'entrée standard
 
@@ -54,7 +54,7 @@ Il parle JSON-RPC 2.0, un message par ligne sur l'entrée et la sortie standard,
 
 | Méthode | Paramètres | Résultat |
 |---|---|---|
-| `handshake` | `client`, `clientVersion` | numéro de protocole, versions du package, de Laravel et de PHP, types de champs, types de relations et options pris en charge |
+| `handshake` | `client`, `clientVersion` | numéro de protocole, versions du package, de Laravel et de PHP, types de champs, types de relations et options pris en charge, et `keepsEditedFiles` depuis la 3.11 |
 | `plan` | `schema` (un objet au format api-schema), `flags` (`auth`, `postman`, `only`) | `files` et `warnings`, comme dans un document `--dry-run --json` |
 | `shutdown` | aucun | `null`, puis le processus s'arrête |
 

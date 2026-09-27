@@ -29,7 +29,7 @@ When the preview cannot run, it says why and offers the fix: `composer install` 
 
 ## Safety while generating
 
-Regenerating an entity that already exists first shows a modal listing every file the package would modify, so you can back out before anything is written. A running operation is never a black box either: click the spinning button again and the underlying artisan process is killed, with the UI restored. When a generation succeeds, the new Model and Controller open in the editor.
+Regenerating an entity keeps the files you edited by hand. Before generating, a modal names them: **Overwrite** replaces them anyway, **Keep my changes** generates everything else. With a package older than 3.11, the modal lists every existing file that would be overwritten, so you can back out before anything is written. A running operation is never a black box either: click the spinning button again and the underlying artisan process is killed, with the UI restored. When a generation succeeds, the new Model and Controller open in the editor.
 
 ## The same command as the terminal
 

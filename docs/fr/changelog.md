@@ -6,6 +6,12 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.11.0
+
+- Régénérer garde les fichiers que vous avez modifiés à la main, et les nomme. `--force` les écrase quand même. Voir [Faire évoluer les entités](/fr/guide/evolving#vos-modifications-survivent-a-la-regeneration).
+- Le générateur note ce qu'il écrit dans `.api-generator/manifest.json` : committez ce fichier.
+- `delete:fullapi` supprime aussi les migrations ajoutées avec `--add-fields`, nomme les fichiers que vous avez modifiés, et gagne `--dry-run`.
+
 ### 3.10.0
 
 - Prise en charge de Laravel Boost : des consignes et un skill `laravel-api-generator` apprennent à votre agent de code à générer les API au lieu d'écrire les fichiers à la main. Voir [Outils et agents](/fr/guide/integrations#agents-ia).
@@ -79,6 +85,10 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 3.3.1 (correctifs strict types), 3.3.0 (routes et seeders auto-enregistrés, validation required par défaut), 3.2.0 (assistant interactif, auth Sanctum, tests générés, export Postman, soft deletes), 3.0.0 (réécriture clean architecture) : détails dans le [changelog complet](https://github.com/Nameless0l/laravel-api-generator/blob/main/CHANGELOG.md).
 
 ## Extension VS Code
+
+### 0.14.0
+
+- Régénérer depuis le formulaire garde les fichiers modifiés à la main. Une fenêtre les nomme : les écraser, ou garder vos modifications et générer le reste. L'aperçu en direct les marque **gardé**. Va avec le package 3.11.
 
 ### 0.13.0
 

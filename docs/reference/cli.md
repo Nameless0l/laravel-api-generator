@@ -5,8 +5,8 @@
 ```bash
 php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
                          {--schema=} {--mermaid=} {--from-database} {--tables=} {--with-migrations} {--query-builder}
-                         {--pest} {--json-api} {--add-fields=} {--dry-run} {--json}
-php artisan delete:fullapi {name?} {--force}
+                         {--pest} {--json-api} {--add-fields=} {--dry-run} {--json} {--force}
+php artisan delete:fullapi {name?} {--force} {--dry-run}
 php artisan api-generator:clean-routes {--dry-run}
 php artisan api-generator:introspect {--table=}
 php artisan api-generator:validate-stubs {--json}
@@ -36,6 +36,7 @@ php artisan api-generator:serve {--stdio}
 | `--add-fields=a:type,b:type` | Add fields to an existing entity: incremental migration + in-place patches. |
 | `--dry-run` | Run the whole generation and list the files it would create or update, without writing anything. |
 | `--json` | Print one JSON document instead of the text report, for scripts, editors and agents. Not available with `--interactive`. See [Tools & Agents](/guide/integrations). |
+| `--force` | Overwrite the files you edited by hand since they were generated. Without it they are kept and reported. |
 
 `--only` types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.
 
@@ -45,8 +46,9 @@ php artisan api-generator:serve {--stdio}
 |-------------------|-------------|
 | `name` | Entity to delete. Omit to delete every entity defined in `class_data.json`. |
 | `--force` | Skip the confirmation prompt. |
+| `--dry-run` | List the files and entries that would be removed, without deleting anything. |
 
-Removes all generated files, unregisters the seeder, and strips the entity's routes from `routes/api.php` and `routes/web.php`.
+Removes all generated files, including the migrations added with `--add-fields`, unregisters the seeder, and strips the entity's routes from `routes/api.php` and `routes/web.php`. The confirmation names the files you edited by hand.
 
 ## `api-generator:clean-routes`
 
