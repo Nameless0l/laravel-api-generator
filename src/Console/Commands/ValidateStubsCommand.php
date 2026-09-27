@@ -45,7 +45,7 @@ class ValidateStubsCommand extends Command
         'migrations' => ['tableName', 'fields'],
         'factory' => ['modelName', 'factoryFields'],
         'seed' => ['modelName'],
-        'policy' => ['modelName', 'modelNameLower'],
+        'policy' => ['modelName', 'modelVariable'],
         'test.feature' => ['modelName', 'modelNameLower', 'pluralName'],
         'test.unit' => ['modelName', 'modelNameLower'],
         'test.feature.pest' => ['modelName', 'modelNameLower', 'pluralName'],

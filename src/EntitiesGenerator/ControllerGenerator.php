@@ -46,6 +46,8 @@ class ControllerGenerator extends AbstractGenerator
      */
     public function restore({$model} \${$parameter})
     {
+        Gate::authorize('restore', \${$parameter});
+
         return new {$model}Resource(\$this->service->restore(\${$parameter}));
     }
 
@@ -54,6 +56,8 @@ class ControllerGenerator extends AbstractGenerator
      */
     public function forceDelete({$model} \${$parameter})
     {
+        Gate::authorize('forceDelete', \${$parameter});
+
         \$this->service->forceDelete(\${$parameter});
         return response()->noContent();
     }

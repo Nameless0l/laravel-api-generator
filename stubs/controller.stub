@@ -12,6 +12,7 @@ use App\Http\Resources\{{modelName}}Resource;
 use App\Services\{{modelName}}Service;
 use App\DTO\{{modelName}}DTO;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class {{modelName}}Controller extends Controller
 {
@@ -24,6 +25,8 @@ class {{modelName}}Controller extends Controller
      */
     public function index(Request $request)
     {
+        Gate::authorize('viewAny', {{modelName}}::class);
+
         ${{pluralName}} = $this->service->getAll($request->query());
         return {{modelName}}Resource::collection(${{pluralName}});
     }
@@ -33,6 +36,8 @@ class {{modelName}}Controller extends Controller
      */
     public function store(Store{{modelName}}Request $request)
     {
+        Gate::authorize('create', {{modelName}}::class);
+
         $dto = {{modelName}}DTO::fromRequest($request);
         ${{routeParameter}} = $this->service->create($dto);
         return new {{modelName}}Resource(${{routeParameter}});
@@ -43,6 +48,8 @@ class {{modelName}}Controller extends Controller
      */
     public function show({{modelName}} ${{routeParameter}})
     {
+        Gate::authorize('view', ${{routeParameter}});
+
         return new {{modelName}}Resource(${{routeParameter}});
     }
 
@@ -51,6 +58,8 @@ class {{modelName}}Controller extends Controller
      */
     public function update(Update{{modelName}}Request $request, {{modelName}} ${{routeParameter}})
     {
+        Gate::authorize('update', ${{routeParameter}});
+
         $dto = {{modelName}}DTO::fromRequest($request);
         return new {{modelName}}Resource($this->service->update(${{routeParameter}}, $dto));
     }
@@ -60,6 +69,8 @@ class {{modelName}}Controller extends Controller
      */
     public function destroy({{modelName}} ${{routeParameter}})
     {
+        Gate::authorize('delete', ${{routeParameter}});
+
         $this->service->delete(${{routeParameter}});
         return response()->noContent();
     }
