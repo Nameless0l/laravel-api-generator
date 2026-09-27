@@ -293,8 +293,8 @@ class MermaidParser
                     $leftMany && $rightMany => $this->addManyToMany($left, $right, ''),
                     $rightMany => $this->addOneToMany($left, $right, ''),
                     $leftMany => $this->addManyToOne($left, $right, ''),
-                    // one-to-one: FK on the right-hand entity (Laravel convention)
-                    default => $this->addOneToOne($right, $left, ''),
+                    // one-to-one: the left entity has one right entity, whose table gets the FK
+                    default => $this->addOneToOne($left, $right, ''),
                 };
             }
         }

@@ -7,6 +7,7 @@ namespace nameless\CodeGenerator\Services;
 use Illuminate\Http\Resources\JsonApi\JsonApiResource;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use nameless\CodeGenerator\Support\ApiRoutesRegistrar;
 use nameless\CodeGenerator\Support\Manifest;
 use nameless\CodeGenerator\Support\Workspace;
@@ -16,6 +17,7 @@ use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 use nameless\CodeGenerator\ValueObjects\FileChange;
 use nameless\CodeGenerator\ValueObjects\GenerationPlan;
 use nameless\CodeGenerator\ValueObjects\GenerationRequest;
+use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
 use Spatie\QueryBuilder\QueryBuilder;
 
 final class GenerationPlanner
@@ -41,6 +43,8 @@ final class GenerationPlanner
             $warnings[] = ['code' => 'json_api_unsupported', 'message' => self::JSON_API_UNSUPPORTED];
             $entities = $entities->map(fn (EntityDefinition $entity) => $entity->withOptions(['json_api' => false]));
         }
+
+        $warnings = array_merge($warnings, $this->hasOneWarnings($entities));
 
         if ($request->auth) {
             $this->authGenerator->generate($workspace);
@@ -134,5 +138,40 @@ final class GenerationPlanner
         }
 
         return $edited;
+    }
+
+    /**
+     * @param  Collection<int, EntityDefinition>  $entities
+     * @return array<int, array{code: string, message: string}>
+     */
+    private function hasOneWarnings(Collection $entities): array
+    {
+        $warnings = [];
+        $byName = $entities->keyBy(fn (EntityDefinition $entity) => $entity->name);
+
+        foreach ($entities as $entity) {
+            foreach ($entity->relationships as $relation) {
+                if ($relation->type !== 'oneToOne') {
+                    continue;
+                }
+
+                $pointsBack = $byName->get($relation->relatedModel)?->relationships
+                    ->contains(fn (RelationshipDefinition $back) => $back->type === 'manyToOne' && $back->relatedModel === $entity->name);
+
+                if ($pointsBack === true) {
+                    continue;
+                }
+
+                $column = Str::snake($entity->name).'_'.$entity->getPrimaryKeyName();
+                $article = in_array($column[0], ['a', 'e', 'i', 'o', 'u'], true) ? 'an' : 'a';
+                $table = Str::plural(Str::snake($relation->relatedModel));
+                $warnings[] = [
+                    'code' => 'has_one_foreign_key',
+                    'message' => "{$entity->name} hasOne {$relation->relatedModel}: add {$article} {$column} column to {$table}, or generate {$relation->relatedModel} with belongsTo {$entity->name}.",
+                ];
+            }
+        }
+
+        return $warnings;
     }
 }

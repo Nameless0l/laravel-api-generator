@@ -10,10 +10,11 @@ use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
 
 /**
- * Declaring one side of a relation in a schema/Mermaid source is enough:
- * the missing side is synthesized here, mirroring what DatabaseIntrospector
- * already does for introspected schemas. Synthesizing belongsTo from a
- * declared hasMany is what puts the FK column in the child migration.
+ * Declaring one side of a relation in a schema, Mermaid or class_data.json
+ * source is enough: the missing side is synthesized here, mirroring what
+ * DatabaseIntrospector already does for introspected schemas. Synthesizing
+ * belongsTo from a declared hasMany or hasOne is what puts the FK column in
+ * the child migration.
  */
 class RelationshipSynthesizer
 {
@@ -70,28 +71,28 @@ class RelationshipSynthesizer
     /**
      * When a relation targets an entity with a custom primary key, the FK
      * column name, its type and the referenced column must all follow it.
-     * A hasMany then takes the FK of the belongsTo that points back at it.
+     * A hasMany or hasOne then takes the FK of the belongsTo that points back at it.
      *
      * @param  Collection<int, EntityDefinition>  $entities
      * @return Collection<int, EntityDefinition>
      */
     public static function resolveRelatedKeys(Collection $entities): Collection
     {
-        return self::pairHasManyKeys(self::followCustomPrimaryKeys($entities));
+        return self::pairInverseForeignKeys(self::followCustomPrimaryKeys($entities));
     }
 
     /**
      * @param  Collection<int, EntityDefinition>  $entities
      * @return Collection<int, EntityDefinition>
      */
-    private static function pairHasManyKeys(Collection $entities): Collection
+    private static function pairInverseForeignKeys(Collection $entities): Collection
     {
         $byName = $entities->keyBy(fn (EntityDefinition $e) => $e->name);
 
         return $entities->map(function (EntityDefinition $entity) use ($byName) {
             $changed = false;
             $relationships = $entity->relationships->map(function (RelationshipDefinition $rel) use ($entity, $byName, &$changed) {
-                if ($rel->type !== 'oneToMany' || $rel->foreignKey !== null) {
+                if (! in_array($rel->type, ['oneToMany', 'oneToOne'], true) || $rel->foreignKey !== null) {
                     return $rel;
                 }
 
@@ -183,7 +184,7 @@ class RelationshipSynthesizer
                 relatedModel: $owner,
                 role: Str::camel(Str::plural($owner))
             ),
-            'oneToMany' => new RelationshipDefinition(
+            'oneToMany', 'oneToOne' => new RelationshipDefinition(
                 type: 'manyToOne',
                 relatedModel: $owner,
                 role: Str::camel($owner)
