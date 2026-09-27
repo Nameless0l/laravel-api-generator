@@ -4,7 +4,7 @@ Les relations se déclarent dans les [fichiers de schéma](/fr/guide/schema-file
 
 ## Déclarez un côté, obtenez les deux
 
-Sur toutes les sources schéma et Mermaid, déclarer un seul côté d'un `belongsTo` / `hasMany` / `belongsToMany` suffit : la relation inverse **et sa colonne FK dans la migration** sont synthétisées automatiquement, exactement comme le fait `--from-database` :
+Dans les fichiers de schéma, les diagrammes Mermaid et `class_data.json`, déclarer un seul côté d'un `belongsTo` / `hasOne` / `hasMany` / `belongsToMany` suffit : la relation inverse **et sa colonne FK dans la migration** sont synthétisées automatiquement, exactement comme le fait `--from-database` :
 
 ```yaml
 entities:
