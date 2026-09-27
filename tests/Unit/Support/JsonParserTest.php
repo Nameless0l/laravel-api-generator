@@ -30,7 +30,7 @@ class JsonParserTest extends TestCase
         $this->assertSame('string', $status->type);
         $this->assertTrue($status->isEnum());
         $this->assertSame(['draft', 'published'], $status->getEnumValues());
-        $this->assertSame('Status', $status->getEnumClass());
+        $this->assertSame('ArticleStatus', $status->getEnumClass($entity->name));
     }
 
     public function test_plain_enum_type_without_values_stays_string(): void

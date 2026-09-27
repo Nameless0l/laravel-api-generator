@@ -98,12 +98,19 @@ class MigrationGenerator extends AbstractGenerator
      */
     protected function getReplacements(EntityDefinition $definition): array
     {
+        $idColumn = $definition->getPrimaryField() === null ? '            $table->id();' : '';
+        $fields = $this->generateFields($definition);
+        $softDeletes = $definition->hasSoftDeletes() ? '            $table->softDeletes();' : '';
+        $foreignKeys = $this->generateForeignKeys($definition);
+
+        // columns feeds the 4.0 stub, the other keys stubs published before it
         return [
             'tableName' => $definition->getTableName(),
-            'idColumn' => $definition->getPrimaryField() === null ? '            $table->id();' : '',
-            'fields' => $this->generateFields($definition),
-            'foreignKeys' => $this->generateForeignKeys($definition),
-            'softDeletes' => $definition->hasSoftDeletes() ? '            $table->softDeletes();' : '',
+            'columns' => implode("\n", array_filter([$idColumn, $fields, '            $table->timestamps();', $softDeletes, $foreignKeys])),
+            'idColumn' => $idColumn,
+            'fields' => ltrim($fields),
+            'foreignKeys' => $foreignKeys,
+            'softDeletes' => $softDeletes,
         ];
     }
 
@@ -165,7 +172,7 @@ class MigrationGenerator extends AbstractGenerator
 
         $morphs = $definition->relationships
             ->filter(fn (RelationshipDefinition $rel) => $rel->type === 'morphTo')
-            ->map(fn (RelationshipDefinition $rel) => "            \$table->morphs('{$rel->getMorphName()}');")
+            ->map(fn (RelationshipDefinition $rel) => "            \$table->nullableMorphs('{$rel->getMorphName()}');")
             ->toArray();
 
         return implode("\n", array_merge($foreignKeys, $morphs));

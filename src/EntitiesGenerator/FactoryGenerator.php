@@ -51,11 +51,11 @@ class FactoryGenerator extends AbstractGenerator
                 return "            '{$rel->getForeignKeyName()}' => {$rel->relatedModel}::factory(),";
             })->toArray();
 
-        $fields = $definition->fields->map(function (FieldDefinition $field) {
-            return "            '{$field->name}' => {$field->getFakeValue()},";
+        $fields = $definition->fields->map(function (FieldDefinition $field) use ($definition) {
+            return "            '{$field->name}' => {$field->getFakeValue($definition->name)},";
         })->toArray();
 
-        return implode("\n", array_merge($fkFields, $fields));
+        return ltrim(implode("\n", array_merge($fkFields, $fields)));
     }
 
     private function generateFactoryImports(EntityDefinition $definition): string
@@ -63,6 +63,9 @@ class FactoryGenerator extends AbstractGenerator
         $imports = $definition->relationships
             ->filter(fn (RelationshipDefinition $rel) => $rel->requiresForeignKey())
             ->map(fn (RelationshipDefinition $rel) => "use App\\Models\\{$rel->relatedModel};")
+            ->merge($definition->fields
+                ->filter(fn (FieldDefinition $field) => $field->isEnum())
+                ->map(fn (FieldDefinition $field) => "use App\\Enums\\{$field->getEnumClass($definition->name)};"))
             ->unique()
             ->toArray();
 

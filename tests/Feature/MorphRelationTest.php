@@ -53,14 +53,14 @@ class MorphRelationTest extends GeneratorTestCase
         $result->run();
 
         $comment = (string) file_get_contents(app_path('Models/Comment.php'));
-        $this->assertStringContainsString('public function commentable()', $comment);
+        $this->assertStringContainsString('public function commentable(): MorphTo', $comment);
         $this->assertStringContainsString('return $this->morphTo();', $comment);
-        $this->assertStringContainsString('@property-read \Illuminate\Database\Eloquent\Model $commentable', $comment);
+        $this->assertStringContainsString('@property-read Model|null $commentable', $comment);
 
         $post = (string) file_get_contents(app_path('Models/Post.php'));
         $this->assertStringContainsString("morphMany(Comment::class, 'commentable')", $post);
 
         $commentsMigration = (string) file_get_contents($this->firstMigrationFor('comments'));
-        $this->assertStringContainsString("\$table->morphs('commentable');", $commentsMigration);
+        $this->assertStringContainsString("\$table->nullableMorphs('commentable');", $commentsMigration);
     }
 }

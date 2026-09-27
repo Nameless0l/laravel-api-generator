@@ -4,6 +4,7 @@ namespace nameless\CodeGenerator\Tests;
 
 use Illuminate\Testing\PendingCommand;
 use nameless\CodeGenerator\Providers\CodeGeneratorServiceProvider;
+use nameless\CodeGenerator\Support\LaravelVersion;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
@@ -13,6 +14,16 @@ abstract class TestCase extends Orchestra
         return [
             CodeGeneratorServiceProvider::class,
         ];
+    }
+
+    /**
+     * Generated models differ on Laravel 13, so every test pins 12 unless it says otherwise.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->app?->instance(LaravelVersion::class, new LaravelVersion('12.0.0'));
     }
 
     protected function getEnvironmentSetUp($app): void

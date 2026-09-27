@@ -136,6 +136,22 @@ class GenerationPlannerTest extends GeneratorTestCase
     }
 
     #[Test]
+    public function an_enum_named_before_4_0_is_reported(): void
+    {
+        $legacy = app_path('Enums/Status.php');
+        $this->originals[$legacy] = null;
+        File::ensureDirectoryExists(dirname($legacy));
+        file_put_contents($legacy, "<?php\n");
+
+        $plan = app(GenerationPlanner::class)->plan($this->request(self::requests()['enum and soft deletes'][0], false, false));
+
+        $this->assertContains([
+            'code' => 'legacy_enum',
+            'message' => 'app/Enums/Status.php: Article.status uses ArticleStatus since 4.0. Delete the old enum once nothing else uses it.',
+        ], $plan->warnings);
+    }
+
+    #[Test]
     public function a_plan_lists_every_kind_of_file_it_touches(): void
     {
         $plan = app(GenerationPlanner::class)->plan($this->request(self::requests()['auth and postman'][0], true, true));

@@ -38,7 +38,9 @@ class StubLoader
 
         $content = File::get($stubPath);
 
-        return $this->replacePlaceholders($content, $replacements);
+        $content = $this->replacePlaceholders($content, $replacements);
+
+        return str_starts_with($content, '<?php') ? PhpImports::normalize($content) : $content;
     }
 
     /**

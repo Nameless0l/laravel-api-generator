@@ -33,16 +33,16 @@ class ValidateStubsCommand extends Command
      * @var array<string, array<int, string>>
      */
     private const REQUIRED = [
-        'model' => ['modelName', 'fillable'],
+        'model' => ['modelName', 'members', 'classAttributes'],
         'controller' => ['modelName', 'pluralName', 'routeParameter'],
         'controller.query-builder' => ['modelName', 'pluralName', 'routeParameter'],
         'service' => ['modelName', 'modelNameLower', 'allowedFilters', 'allowedSorts', 'perPage', 'maxPerPage'],
         'service.query-builder' => ['modelName', 'modelNameLower', 'allowedFilters', 'allowedSorts', 'perPage', 'maxPerPage'],
         'dto' => ['modelName', 'attributes', 'attributesFromValidated'],
-        'request.store' => ['modelName', 'rules'],
-        'request.update' => ['modelName', 'rules'],
+        'request.store' => ['modelName', 'rules', 'imports'],
+        'request.update' => ['modelName', 'rules', 'imports'],
         'resource' => ['modelName', 'fields'],
-        'migrations' => ['tableName', 'fields'],
+        'migrations' => ['tableName', 'columns'],
         'factory' => ['modelName', 'factoryFields'],
         'seed' => ['modelName'],
         'policy' => ['modelName', 'modelVariable'],

@@ -45,7 +45,7 @@ class OpenApiCommandTest extends GeneratorTestCase
         $paths = array_column($document['files'], 'path');
         $this->assertContains('app/Models/Owner.php', $paths);
         $this->assertContains('app/Models/Pet.php', $paths);
-        $this->assertContains('app/Enums/Status.php', $paths);
+        $this->assertContains('app/Enums/PetStatus.php', $paths);
         $this->assertNotContains('app/Models/NewPet.php', $paths);
         $this->assertNotContains('app/Models/Error.php', $paths);
         $this->assertSame(['openapi_schema_skipped', 'openapi_schema_skipped'], array_values(array_intersect(array_column($document['warnings'], 'code'), ['openapi_schema_skipped'])));

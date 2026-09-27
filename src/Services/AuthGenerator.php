@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\Services;
 
+use nameless\CodeGenerator\Support\PhpImports;
 use nameless\CodeGenerator\Support\StubLoader;
 use nameless\CodeGenerator\Support\Workspace;
 use nameless\CodeGenerator\Support\WorkspaceFactory;
@@ -46,21 +47,12 @@ class AuthGenerator
     private function generateAuthRoutes(Workspace $workspace): void
     {
         $apiFilePath = base_path('routes/api.php');
-        $phpHeader = "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\nuse App\\Http\\Controllers\\AuthController;\n\n";
 
         if (! $workspace->exists($apiFilePath)) {
-            $workspace->put($apiFilePath, $phpHeader, 'Routes');
+            $workspace->put($apiFilePath, "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n", 'Routes');
         }
 
-        $content = $workspace->get($apiFilePath);
-
-        if (! str_contains($content, 'use App\\Http\\Controllers\\AuthController')) {
-            $workspace->put($apiFilePath, str_replace(
-                'use Illuminate\\Support\\Facades\\Route;',
-                "use Illuminate\\Support\\Facades\\Route;\nuse App\\Http\\Controllers\\AuthController;",
-                $content
-            ), 'Routes');
-        }
+        $content = PhpImports::add($workspace->get($apiFilePath), ['App\\Http\\Controllers\\AuthController']);
 
         $authRoutes = <<<'ROUTES'
 
@@ -74,9 +66,11 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 ROUTES;
 
-        if (! str_contains($workspace->get($apiFilePath), "AuthController::class, 'register'")) {
-            $workspace->append($apiFilePath, PHP_EOL.$authRoutes, 'Routes');
+        if (! str_contains($content, "AuthController::class, 'register'")) {
+            $content = ApiGenerationService::appendLine($content, $authRoutes);
         }
+
+        $workspace->put($apiFilePath, $content, 'Routes');
     }
 
     /**
@@ -130,6 +124,9 @@ ROUTES;
         $output = [];
         foreach ($lines as $index => $line) {
             if (isset($moved[$index])) {
+                continue;
+            }
+            if ($output !== [] && trim($line) === '' && trim((string) end($output)) === '') {
                 continue;
             }
             if ($index === $close) {

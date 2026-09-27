@@ -122,6 +122,10 @@ class PostmanExporter
 
     private function getSampleValue(FieldDefinition $field): mixed
     {
+        if ($field->isEnum()) {
+            return $field->getEnumValues()[0] ?? 'sample';
+        }
+
         return match ($field->type) {
             'string' => "sample_{$field->name}",
             'text' => 'Sample text content',
@@ -130,6 +134,7 @@ class PostmanExporter
             'float', 'decimal' => 10.50,
             'json' => ['key' => 'value'],
             'date', 'datetime', 'timestamp' => '2025-01-01T00:00:00.000Z',
+            'time' => '10:30:00',
             'uuid', 'UUID' => '550e8400-e29b-41d4-a716-446655440000',
             default => 'sample',
         };

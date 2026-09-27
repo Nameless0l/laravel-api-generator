@@ -83,7 +83,7 @@ abstract class GeneratorTestCase extends TestCase
                 base_path("tests/Feature/{$entity}ControllerTest.php"),
                 base_path("tests/Unit/{$entity}ServiceTest.php"),
             ];
-            foreach ($files as $file) {
+            foreach ([...$files, ...(glob(app_path("Enums/{$entity}*.php")) ?: [])] as $file) {
                 if (File::exists($file)) {
                     File::delete($file);
                 }

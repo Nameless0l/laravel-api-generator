@@ -11,7 +11,7 @@
         "kind": "Model",
         "entity": "Report",
         "action": "update",
-        "content": "<?php\n\nnamespace App\\Models;\n\nuse Illuminate\\Database\\Eloquent\\Factories\\HasFactory;\nuse Illuminate\\Database\\Eloquent\\Model;\n\n\n/**\n * @property int $id\n * @property string $title\n * @property \\Illuminate\\Support\\Carbon|null $created_at\n * @property \\Illuminate\\Support\\Carbon|null $updated_at\n * @property string $excerpt\n */\nclass Report extends Model\n{\n    use HasFactory;\n\n\n    protected $fillable = ['title', 'excerpt'];\n\n}\n"
+        "content": "<?php\n\nnamespace App\\Models;\n\nuse Illuminate\\Database\\Eloquent\\Factories\\HasFactory;\nuse Illuminate\\Database\\Eloquent\\Model;\nuse Illuminate\\Support\\Carbon;\n\n/**\n * @property int $id\n * @property string $title\n * @property Carbon|null $created_at\n * @property Carbon|null $updated_at\n * @property string $excerpt\n */\nclass Report extends Model\n{\n    use HasFactory;\n\n    protected $fillable = ['title', 'excerpt'];\n}\n"
     },
     {
         "path": "app/Http/Requests/StoreReportRequest.php",
@@ -32,13 +32,13 @@
         "kind": "Factory",
         "entity": "Report",
         "action": "update",
-        "content": "<?php\n\nnamespace Database\\Factories;\n\nuse App\\Models\\Report;\nuse Illuminate\\Database\\Eloquent\\Factories\\Factory;\n\n/**\n * @extends Factory<Report>\n */\nclass ReportFactory extends Factory\n{\n    protected $model = Report::class;\n\n    public function definition(): array\n    {\n        return [\n            'excerpt' => fake()->sentence(),\n                        'title' => fake()->word(),\n        ];\n    }\n}\n"
+        "content": "<?php\n\nnamespace Database\\Factories;\n\nuse App\\Models\\Report;\nuse Illuminate\\Database\\Eloquent\\Factories\\Factory;\n\n/**\n * @extends Factory<Report>\n */\nclass ReportFactory extends Factory\n{\n    protected $model = Report::class;\n\n    public function definition(): array\n    {\n        return [\n            'excerpt' => fake()->sentence(),\n            'title' => fake()->word(),\n        ];\n    }\n}\n"
     },
     {
         "path": "app/Http/Resources/ReportResource.php",
         "kind": "Resource",
         "entity": "Report",
         "action": "update",
-        "content": "<?php\n\nnamespace App\\Http\\Resources;\n\nuse Illuminate\\Http\\Request;\nuse Illuminate\\Http\\Resources\\Json\\JsonResource;\n\nclass ReportResource extends JsonResource\n{\n    /**\n     * Transform the resource into an array.\n     *\n     * @param  Request  $request\n     * @return array<string, mixed>\n     */\n    public function toArray(Request $request): array\n    {\n        return [\n            'excerpt' => $this->excerpt,\n                        'id' => $this->id,\n            'title' => $this->title,\n            'created_at' => $this->created_at,\n            'updated_at' => $this->updated_at,\n        ];\n    }\n}\n"
+        "content": "<?php\n\nnamespace App\\Http\\Resources;\n\nuse Illuminate\\Http\\Request;\nuse Illuminate\\Http\\Resources\\Json\\JsonResource;\n\nclass ReportResource extends JsonResource\n{\n    /**\n     * Transform the resource into an array.\n     *\n     * @return array<string, mixed>\n     */\n    public function toArray(Request $request): array\n    {\n        return [\n            'excerpt' => $this->excerpt,\n            'id' => $this->id,\n            'title' => $this->title,\n            'created_at' => $this->created_at,\n            'updated_at' => $this->updated_at,\n        ];\n    }\n}\n"
     }
 ]

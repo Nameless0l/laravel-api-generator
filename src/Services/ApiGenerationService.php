@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use nameless\CodeGenerator\Contracts\ApiGenerationServiceInterface;
 use nameless\CodeGenerator\Contracts\GeneratorInterface;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
+use nameless\CodeGenerator\Support\PhpImports;
 use nameless\CodeGenerator\Support\StubLoader;
 use nameless\CodeGenerator\Support\Workspace;
 use nameless\CodeGenerator\Support\WorkspaceFactory;
@@ -142,18 +143,18 @@ class ApiGenerationService implements ApiGenerationServiceInterface
     private function generateApiRoute(EntityDefinition $definition, Workspace $workspace): void
     {
         $pluralName = $definition->getPluralName();
-        $controllerClass = "App\\Http\\Controllers\\{$definition->name}Controller";
+        $controllerClass = "{$definition->name}Controller";
         $route = "Route::apiResource('{$pluralName}', {$controllerClass}::class);";
         $apiFilePath = base_path('routes/api.php');
-        $phpHeader = "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n\n";
 
         if (! $workspace->exists($apiFilePath)) {
-            $workspace->put($apiFilePath, $phpHeader, 'Routes');
+            $workspace->put($apiFilePath, "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n", 'Routes');
         }
 
-        if (! str_contains($workspace->get($apiFilePath), $route)) {
-            $workspace->append($apiFilePath, PHP_EOL.$route, 'Routes');
-        }
+        // Routes written by 3.x name the controller with its namespace
+        $content = str_replace("App\\Http\\Controllers\\{$controllerClass}::class", "{$controllerClass}::class", $workspace->get($apiFilePath));
+        $content = PhpImports::add($content, ["App\\Http\\Controllers\\{$controllerClass}"]);
+        $workspace->put($apiFilePath, str_contains($content, $route) ? $content : self::appendLine($content, $route), 'Routes');
 
         if ($definition->hasSoftDeletes()) {
             $parameter = $definition->getRouteParameter();
@@ -172,9 +173,16 @@ class ApiGenerationService implements ApiGenerationServiceInterface
             $workspace->put($apiFilePath, $content, 'Routes');
 
             if (! str_contains($content, $restoreRoute)) {
-                $workspace->append($apiFilePath, PHP_EOL.$restoreRoute.PHP_EOL.$forceDeleteRoute, 'Routes');
+                $workspace->put($apiFilePath, self::appendLine(self::appendLine($content, $restoreRoute), $forceDeleteRoute), 'Routes');
             }
         }
+    }
+
+    public static function appendLine(string $content, string $line): string
+    {
+        $eol = str_contains($content, "\r\n") ? "\r\n" : "\n";
+
+        return rtrim($content).$eol.$line.$eol;
     }
 
     /**
@@ -196,19 +204,6 @@ class ApiGenerationService implements ApiGenerationServiceInterface
         }
 
         $eol = str_contains($content, "\r\n") ? "\r\n" : "\n";
-
-        $useStatement = "use Database\\Seeders\\{$entityName}Seeder;";
-        if (! str_contains($content, $useStatement)) {
-            $result = preg_replace_callback(
-                '/(use [^;]+;\R)(?!use )/',
-                fn (array $match) => $match[1].$useStatement.$eol,
-                $content,
-                1
-            );
-            if (is_string($result)) {
-                $content = $result;
-            }
-        }
 
         $callLine = "        \$this->call({$seederCall});";
 

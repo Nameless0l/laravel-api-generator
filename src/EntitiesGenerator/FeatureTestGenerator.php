@@ -24,9 +24,18 @@ class FeatureTestGenerator extends AbstractGenerator
 
     protected function generateContent(EntityDefinition $definition): string
     {
-        $stubName = $definition->usesPest() ? 'test.feature.pest' : 'test.feature';
+        $replacements = $this->getReplacements($definition);
 
-        return $this->stubLoader->load($stubName, $this->getReplacements($definition));
+        if (! $definition->usesPest()) {
+            return $this->stubLoader->load('test.feature', $replacements);
+        }
+
+        // Pest closures sit one level shallower than PHPUnit methods
+        foreach (['requestFields', 'relatedFkFields', 'updateRelatedFkFields', 'createRelatedModels'] as $key) {
+            $replacements[$key] = (string) preg_replace('/^ {4}/m', '', $replacements[$key]);
+        }
+
+        return $this->stubLoader->load('test.feature.pest', $replacements);
     }
 
     protected function getStubName(): string
@@ -71,8 +80,8 @@ class FeatureTestGenerator extends AbstractGenerator
             'createRelatedModels' => $this->generateCreateRelatedModels($belongsToRels),
             'relatedFkFields' => $this->generateRelatedFkFields($belongsToRels),
             'updateRelatedFkFields' => $this->generateUpdateRelatedFkFields($definition, $belongsToRels),
-            'assertFields' => $this->generateAssertFields($definition, $belongsToRels),
-            'updateAssertFields' => $this->generateUpdateAssertFields($definition, $belongsToRels),
+            'assertFields' => $this->databaseAssertion($definition, $belongsToRels, update: false),
+            'updateAssertFields' => $this->databaseAssertion($definition, $belongsToRels, update: true),
             'userImport' => $hasAuth ? "\nuse App\\Models\\User;" : '',
             'userSetup' => $hasAuth ? $this->generateUserSetup($definition->usesPest()) : '',
             'actingAs' => $hasAuth ? '$this->actingAs($this->user)->' : '',
@@ -103,7 +112,7 @@ class FeatureTestGenerator extends AbstractGenerator
             'integer', 'int', 'bigint' => '1',
             'boolean', 'bool' => 'true',
             'float', 'decimal' => '10.50',
-            'json' => "'{\"key\":\"value\"}'",
+            'json' => "['key' => 'value']",
             'date', 'datetime', 'timestamp' => "'2025-01-01 00:00:00'",
             'time' => "'10:30:00'",
             'uuid', 'UUID' => "'550e8400-e29b-41d4-a716-446655440000'",
@@ -266,81 +275,28 @@ PHPUNIT;
     }
 
     /**
+     * JSON columns may store the payload reformatted, so the asserted column is the first other one.
+     *
      * @param  Collection<int, RelationshipDefinition>  $belongsToRels
      */
-    private function generateAssertFields(EntityDefinition $definition, $belongsToRels): string
+    private function databaseAssertion(EntityDefinition $definition, Collection $belongsToRels, bool $update): string
     {
-        // Use a simple field assertion to avoid issues with json/boolean casting
-        $firstField = $definition->fields->first();
-        if (! $firstField) {
+        $indent = $definition->usesPest() ? '    ' : '        ';
+        $field = $definition->fields->first(fn (FieldDefinition $field) => $field->type !== 'json');
+        $lines = $field === null ? [] : ["'{$field->name}' => {$this->sampleValue($field)},"];
+
+        foreach ($belongsToRels as $rel) {
+            $lines[] = $update
+                ? "'{$rel->getForeignKeyName()}' => \${$definition->getNameLower()}->{$rel->getForeignKeyName()},"
+                : "'{$rel->getForeignKeyName()}' => \$".Str::camel($rel->relatedModel).'->getKey(),';
+        }
+
+        if ($lines === []) {
             return "\$this->assertDatabaseCount('{$definition->getTableName()}', 1);";
         }
 
-        $lines = [];
-        $lines[] = "\$this->assertDatabaseHas('{$definition->getTableName()}', [";
-
-        // Add first regular field for identification
-        $value = $firstField->isEnum()
-            ? "'".($firstField->getEnumValues()[0] ?? 'test')."'"
-            : match ($firstField->type) {
-                'string' => "'test_{$firstField->name}'",
-                'text' => "'Test text content'",
-                'integer', 'int', 'bigint' => '1',
-                'boolean', 'bool' => 'true',
-                'float', 'decimal' => '10.50',
-                'date', 'datetime', 'timestamp' => "'2025-01-01 00:00:00'",
-                'time' => "'10:30:00'",
-                'uuid', 'UUID' => "'550e8400-e29b-41d4-a716-446655440000'",
-                default => "'test'",
-            };
-        $lines[] = "            '{$firstField->name}' => {$value},";
-
-        // Add FK assertions
-        foreach ($belongsToRels as $rel) {
-            $varName = Str::camel($rel->relatedModel);
-            $lines[] = "            '{$rel->getForeignKeyName()}' => \${$varName}->getKey(),";
-        }
-
-        $lines[] = '        ]);';
-
-        return implode("\n        ", $lines);
-    }
-
-    /**
-     * @param  Collection<int, RelationshipDefinition>  $belongsToRels
-     */
-    private function generateUpdateAssertFields(EntityDefinition $definition, $belongsToRels): string
-    {
-        $firstField = $definition->fields->first();
-        if (! $firstField) {
-            return "\$this->assertDatabaseCount('{$definition->getTableName()}', 1);";
-        }
-
-        $lines = [];
-        $lines[] = "\$this->assertDatabaseHas('{$definition->getTableName()}', [";
-
-        $value = $firstField->isEnum()
-            ? "'".($firstField->getEnumValues()[0] ?? 'test')."'"
-            : match ($firstField->type) {
-                'string' => "'test_{$firstField->name}'",
-                'text' => "'Test text content'",
-                'integer', 'int', 'bigint' => '1',
-                'boolean', 'bool' => 'true',
-                'float', 'decimal' => '10.50',
-                'date', 'datetime', 'timestamp' => "'2025-01-01 00:00:00'",
-                'time' => "'10:30:00'",
-                'uuid', 'UUID' => "'550e8400-e29b-41d4-a716-446655440000'",
-                default => "'test'",
-            };
-        $lines[] = "            '{$firstField->name}' => {$value},";
-
-        $modelVar = $definition->getNameLower();
-        foreach ($belongsToRels as $rel) {
-            $lines[] = "            '{$rel->getForeignKeyName()}' => \${$modelVar}->{$rel->getForeignKeyName()},";
-        }
-
-        $lines[] = '        ]);';
-
-        return implode("\n        ", $lines);
+        return "\$this->assertDatabaseHas('{$definition->getTableName()}', [\n"
+            .implode("\n", array_map(fn (string $line) => "{$indent}    {$line}", $lines))
+            ."\n{$indent}]);";
     }
 }

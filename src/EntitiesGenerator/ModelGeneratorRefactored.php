@@ -5,114 +5,143 @@ declare(strict_types=1);
 namespace nameless\CodeGenerator\EntitiesGenerator;
 
 use Illuminate\Support\Str;
+use nameless\CodeGenerator\Support\LaravelVersion;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
+use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
 
 class ModelGeneratorRefactored extends AbstractGenerator
 {
-    /**
-     * Get the type of generator.
-     */
     public function getType(): string
     {
         return 'Model';
     }
 
-    /**
-     * Get the output path for the generated file.
-     */
     public function getOutputPath(EntityDefinition $definition): string
     {
         return app_path("Models/{$definition->name}.php");
     }
 
-    /**
-     * Generate the content for the file.
-     */
     protected function generateContent(EntityDefinition $definition): string
     {
         return $this->processStub($definition);
     }
 
-    /**
-     * Get the stub name for this generator.
-     */
     protected function getStubName(): string
     {
         return 'model';
     }
 
     /**
-     * Get replacements for the stub.
+     * members and classAttributes feed the 4.0 stub; traits, fillable and
+     * relationships keep stubs published before 4.0 working.
      *
      * @return array<string, string>
      */
     protected function getReplacements(EntityDefinition $definition): array
     {
+        $attributes = app(LaravelVersion::class)->hasModelAttributes();
+        $keyProperties = $this->keyProperties($definition);
+        $fillable = '    protected $fillable = ['.$this->quotedFillable($definition).'];';
+        $casts = $this->castsMethod($definition);
+        $relationships = $definition->relationships
+            ->map(fn (RelationshipDefinition $rel) => $this->relationshipMethod($rel, $definition))
+            ->all();
+
+        $traits = $definition->hasSoftDeletes() ? 'HasFactory, SoftDeletes' : 'HasFactory';
+        $members = [
+            "    use {$traits};",
+            ...($attributes ? [] : [...$keyProperties, $fillable]),
+            ...array_filter([$casts]),
+            ...$relationships,
+        ];
+
         return [
             'modelName' => $definition->name,
-            'fillable' => $this->generateFillableArray($definition).$this->generatePrimaryKey($definition).$this->generateCasts($definition),
-            'relationships' => $this->generateRelationships($definition),
             'parentClass' => $this->getParentClass($definition),
-            'imports' => $this->generateImports($definition),
-            'traits' => $this->generateTraits($definition),
+            'imports' => implode("\n", array_map(fn (string $class) => "use {$class};", $this->imports($definition, $attributes))),
             'phpdoc' => $this->generatePhpDoc($definition),
+            'classAttributes' => $attributes ? $this->classAttributes($definition) : '',
+            'members' => implode("\n\n", $members),
+            'traits' => $definition->hasSoftDeletes() ? '    use SoftDeletes;' : '',
+            'fillable' => ltrim(implode("\n\n", [$fillable, ...$keyProperties, ...array_filter([$casts])])),
+            'relationships' => implode("\n\n", $relationships),
         ];
     }
 
-    /**
-     * Generate fillable array string.
-     */
-    private function generateFillableArray(EntityDefinition $definition): string
+    private function quotedFillable(EntityDefinition $definition): string
     {
-        $fillable = $definition->getFillableFields();
-        $fillableString = "'".implode("', '", $fillable)."'";
-
-        return "protected \$fillable = [{$fillableString}];";
+        return implode(', ', array_map(fn (string $name) => "'{$name}'", $definition->getFillableFields()));
     }
 
     /**
-     * Generate relationship methods.
+     * @return array<int, string>
      */
-    private function generateRelationships(EntityDefinition $definition): string
+    private function keyProperties(EntityDefinition $definition): array
     {
-        if (! $definition->hasRelationships()) {
+        $primary = $definition->getPrimaryField();
+        if ($primary === null) {
+            return [];
+        }
+
+        $properties = [
+            "    protected \$primaryKey = '{$primary->name}';",
+            '    public $incrementing = false;',
+        ];
+        if ($primary->getKeyType() === 'string') {
+            $properties[] = "    protected \$keyType = 'string';";
+        }
+
+        return $properties;
+    }
+
+    private function classAttributes(EntityDefinition $definition): string
+    {
+        $lines = [];
+
+        $primary = $definition->getPrimaryField();
+        if ($primary !== null) {
+            $keyType = $primary->getKeyType() === 'string' ? ", keyType: 'string'" : '';
+            $lines[] = "#[Table(key: '{$primary->name}'{$keyType}, incrementing: false)]";
+        }
+
+        if ($definition->getFillableFields() !== []) {
+            $lines[] = '#[Fillable(['.$this->quotedFillable($definition).'])]';
+        }
+
+        return implode('', array_map(fn (string $line) => $line."\n", $lines));
+    }
+
+    private function castsMethod(EntityDefinition $definition): string
+    {
+        $casts = $definition->fields
+            ->map(fn (FieldDefinition $field) => $field->getCastType($definition->name) === null
+                ? null
+                : "            '{$field->name}' => {$field->getCastType($definition->name)},")
+            ->filter()
+            ->implode("\n");
+
+        if ($casts === '') {
             return '';
         }
 
-        $methods = [];
-
-        foreach ($definition->relationships as $relationship) {
-            $methods[] = $this->generateRelationshipMethod($relationship, $definition);
-        }
-
-        return implode("\n\n", $methods);
+        return "    protected function casts(): array\n    {\n        return [\n{$casts}\n        ];\n    }";
     }
 
-    /**
-     * Generate a single relationship method.
-     */
-    private function generateRelationshipMethod(RelationshipDefinition $relationship, EntityDefinition $owner): string
+    private function relationshipMethod(RelationshipDefinition $relationship, EntityDefinition $owner): string
     {
-        $methodName = $relationship->getMethodName();
         $eloquentMethod = $relationship->getEloquentMethod();
-        $relatedModel = $relationship->relatedModel;
+        $signature = "    public function {$relationship->getMethodName()}(): ".Str::studly($eloquentMethod);
 
         if ($relationship->type === 'morphTo') {
-            return "    public function {$methodName}()
-    {
-        return \$this->morphTo();
-    }";
+            return "{$signature}\n    {\n        return \$this->morphTo();\n    }";
         }
+
+        $arguments = "{$relationship->relatedModel}::class";
 
         if ($relationship->isPolymorphic()) {
-            return "    public function {$methodName}()
-    {
-        return \$this->{$eloquentMethod}({$relatedModel}::class, '{$relationship->getMorphName()}');
-    }";
+            $arguments .= ", '{$relationship->getMorphName()}'";
         }
-
-        $arguments = "{$relatedModel}::class";
 
         // Eloquent guesses owner_id, or owner_<key> with a custom primary key
         $guessedKey = Str::snake($owner->name).'_'.$owner->getPrimaryKeyName();
@@ -120,103 +149,57 @@ class ModelGeneratorRefactored extends AbstractGenerator
             $arguments .= ", '{$relationship->foreignKey}'";
         }
 
-        return "    public function {$methodName}()
-    {
-        return \$this->{$eloquentMethod}({$arguments});
-    }";
+        return "{$signature}\n    {\n        return \$this->{$eloquentMethod}({$arguments});\n    }";
     }
 
-    /**
-     * Get parent class for inheritance.
-     */
     private function getParentClass(EntityDefinition $definition): string
     {
         return $definition->hasParent() ? ($definition->parent ?? 'Model') : 'Model';
     }
 
     /**
-     * Generate imports based on relationships and parent class.
+     * @return array<int, string>
      */
-    private function generateImports(EntityDefinition $definition): string
+    private function imports(EntityDefinition $definition, bool $attributes): array
     {
-        $imports = [];
+        $imports = [
+            'Illuminate\\Database\\Eloquent\\Factories\\HasFactory',
+            'Illuminate\\Support\\Carbon',
+        ];
+
+        $morphTo = $definition->relationships->contains(fn (RelationshipDefinition $rel) => $rel->type === 'morphTo');
+        if (! $definition->hasParent() || $morphTo) {
+            $imports[] = 'Illuminate\\Database\\Eloquent\\Model';
+        }
 
         if ($definition->hasSoftDeletes()) {
-            $imports[] = 'use Illuminate\Database\Eloquent\SoftDeletes;';
+            $imports[] = 'Illuminate\\Database\\Eloquent\\SoftDeletes';
         }
 
-        $hasCollectionRelation = $definition->relationships->contains(
-            fn (RelationshipDefinition $rel) => in_array($rel->getEloquentMethod(), ['hasMany', 'belongsToMany', 'morphMany'], true)
-        );
-        if ($hasCollectionRelation) {
-            $imports[] = 'use Illuminate\Database\Eloquent\Collection;';
+        if ($definition->relationships->contains(fn (RelationshipDefinition $rel) => in_array($rel->getEloquentMethod(), ['hasMany', 'belongsToMany', 'morphMany'], true))) {
+            $imports[] = 'Illuminate\\Database\\Eloquent\\Collection';
         }
 
-        if ($definition->hasParent()) {
-            $imports[] = "use App\\Models\\{$definition->parent};";
+        foreach ($definition->relationships as $relationship) {
+            $imports[] = 'Illuminate\\Database\\Eloquent\\Relations\\'.Str::studly($relationship->getEloquentMethod());
         }
-
-        // morphTo has no concrete related model; a self-referential import
-        // would collide with the class being declared.
-        $relatedModels = $definition->relationships
-            ->filter(fn (RelationshipDefinition $rel) => $rel->type !== 'morphTo')
-            ->pluck('relatedModel')
-            ->unique()
-            ->filter(fn ($model) => $model !== $definition->name)
-            ->map(fn ($model) => "use App\\Models\\{$model};")
-            ->toArray();
-
-        return implode("\n", array_merge($imports, $relatedModels));
-    }
-
-    private function generatePrimaryKey(EntityDefinition $definition): string
-    {
-        $primary = $definition->getPrimaryField();
-        if ($primary === null) {
-            return '';
-        }
-
-        $lines = [
-            "protected \$primaryKey = '{$primary->name}';",
-            'public $incrementing = false;',
-        ];
-        if ($primary->getKeyType() === 'string') {
-            $lines[] = "protected \$keyType = 'string';";
-        }
-
-        return "\n\n    ".implode("\n\n    ", $lines);
-    }
-
-    /**
-     * Generate $casts array for JSON and other special field types.
-     */
-    private function generateCasts(EntityDefinition $definition): string
-    {
-        $casts = [];
 
         foreach ($definition->fields as $field) {
-            $cast = $field->getCastType();
-            if ($cast !== null) {
-                $casts[] = "'{$field->name}' => {$cast}";
+            if ($field->isEnum()) {
+                $imports[] = 'App\\Enums\\'.$field->getEnumClass($definition->name);
             }
         }
 
-        if (empty($casts)) {
-            return '';
+        if ($attributes) {
+            if ($definition->getPrimaryField() !== null) {
+                $imports[] = 'Illuminate\\Database\\Eloquent\\Attributes\\Table';
+            }
+            if ($definition->getFillableFields() !== []) {
+                $imports[] = 'Illuminate\\Database\\Eloquent\\Attributes\\Fillable';
+            }
         }
 
-        $castsString = implode(",\n        ", $casts);
-
-        return "\n\n    protected \$casts = [\n        {$castsString},\n    ];";
-    }
-
-    private function generateTraits(EntityDefinition $definition): string
-    {
-        if ($definition->hasSoftDeletes()) {
-            return '    use SoftDeletes;';
-        }
-
-        return '';
+        return array_values(array_unique($imports));
     }
 
     private function generatePhpDoc(EntityDefinition $definition): string
@@ -228,7 +211,7 @@ class ModelGeneratorRefactored extends AbstractGenerator
 
         foreach ($definition->fields as $field) {
             $phpType = $field->isEnum()
-                ? '\\App\\Enums\\'.$field->getEnumClass()
+                ? $field->getEnumClass($definition->name)
                 : $this->phpTypeFromField($field->type);
             $nullable = $field->nullable ? '|null' : '';
             $lines[] = " * @property {$phpType}{$nullable} \${$field->name}";
@@ -244,18 +227,18 @@ class ModelGeneratorRefactored extends AbstractGenerator
             $phpType = match ($rel->getEloquentMethod()) {
                 'belongsTo', 'hasOne', 'morphOne' => $rel->relatedModel,
                 'hasMany', 'belongsToMany', 'morphMany' => "Collection<int, {$rel->relatedModel}>",
-                'morphTo' => '\\Illuminate\\Database\\Eloquent\\Model',
+                'morphTo' => 'Model|null',
                 default => 'mixed',
             };
 
             $lines[] = " * @property-read {$phpType} \${$rel->getMethodName()}";
         }
 
-        $lines[] = ' * @property \Illuminate\Support\Carbon|null $created_at';
-        $lines[] = ' * @property \Illuminate\Support\Carbon|null $updated_at';
+        $lines[] = ' * @property Carbon|null $created_at';
+        $lines[] = ' * @property Carbon|null $updated_at';
 
         if ($definition->hasSoftDeletes()) {
-            $lines[] = ' * @property \Illuminate\Support\Carbon|null $deleted_at';
+            $lines[] = ' * @property Carbon|null $deleted_at';
         }
 
         $lines[] = ' */';
@@ -270,7 +253,7 @@ class ModelGeneratorRefactored extends AbstractGenerator
             'float', 'double', 'decimal' => 'float',
             'boolean', 'bool' => 'bool',
             'json' => 'array',
-            'date', 'datetime', 'timestamp' => '\\Illuminate\\Support\\Carbon',
+            'date', 'datetime', 'timestamp' => 'Carbon',
             default => 'string',
         };
     }

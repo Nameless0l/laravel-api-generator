@@ -53,7 +53,7 @@ class ResourceGenerator extends AbstractGenerator
 
     private function generateFields(EntityDefinition $definition): string
     {
-        $fields = ["            'id' => \$this->id,"];
+        $fields = $definition->getPrimaryField() === null ? ["            'id' => \$this->id,"] : [];
 
         $definition->fields->each(function (FieldDefinition $field) use (&$fields) {
             $fields[] = "            '{$field->name}' => \$this->{$field->name},";
@@ -62,7 +62,7 @@ class ResourceGenerator extends AbstractGenerator
         $fields[] = "            'created_at' => \$this->created_at,";
         $fields[] = "            'updated_at' => \$this->updated_at,";
 
-        return implode("\n", $fields);
+        return ltrim(implode("\n", $fields));
     }
 
     private function generateJsonApiAttributes(EntityDefinition $definition): string

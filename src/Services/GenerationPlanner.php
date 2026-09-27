@@ -44,7 +44,7 @@ final class GenerationPlanner
             $entities = $entities->map(fn (EntityDefinition $entity) => $entity->withOptions(['json_api' => false]));
         }
 
-        $warnings = array_merge($warnings, $this->hasOneWarnings($entities), $this->legacyRequestWarnings($entities, $request->only));
+        $warnings = array_merge($warnings, $this->hasOneWarnings($entities), $this->legacyRequestWarnings($entities, $request->only), $this->legacyEnumWarnings($entities, $request->only));
 
         if ($request->auth) {
             $this->authGenerator->generate($workspace);
@@ -159,6 +159,33 @@ final class GenerationPlanner
             ])
             ->values()
             ->all();
+    }
+
+    /**
+     * @param  Collection<int, EntityDefinition>  $entities
+     * @param  array<int, string>|null  $only
+     * @return array<int, array{code: string, message: string}>
+     */
+    private function legacyEnumWarnings(Collection $entities, ?array $only): array
+    {
+        if ($only !== null && ! in_array('Enum', $only, true)) {
+            return [];
+        }
+
+        $warnings = [];
+        foreach ($entities as $entity) {
+            foreach ($entity->fields as $field) {
+                $legacy = Str::studly($field->name);
+                if ($field->isEnum() && File::exists(app_path("Enums/{$legacy}.php"))) {
+                    $warnings[] = [
+                        'code' => 'legacy_enum',
+                        'message' => "app/Enums/{$legacy}.php: {$entity->name}.{$field->name} uses {$field->getEnumClass($entity->name)} since 4.0. Delete the old enum once nothing else uses it.",
+                    ];
+                }
+            }
+        }
+
+        return $warnings;
     }
 
     /**

@@ -37,6 +37,7 @@ use nameless\CodeGenerator\Services\ApiGenerationService;
 use nameless\CodeGenerator\Services\AuthGenerator;
 use nameless\CodeGenerator\Services\PostmanExporter;
 use nameless\CodeGenerator\Support\JsonParser;
+use nameless\CodeGenerator\Support\LaravelVersion;
 use nameless\CodeGenerator\Support\Protocol;
 use nameless\CodeGenerator\Support\ProtocolHandler;
 use nameless\CodeGenerator\Support\SchemaParser;
@@ -98,6 +99,7 @@ class CodeGeneratorServiceProvider extends ServiceProvider
     private function registerServices(): void
     {
         $this->app->singleton(WorkspaceFactory::class, fn () => new WorkspaceFactory);
+        $this->app->singleton(LaravelVersion::class, fn ($app) => new LaravelVersion($app->version()));
         $this->app->bind(LineHandler::class, ProtocolHandler::class);
 
         // Register StubLoader

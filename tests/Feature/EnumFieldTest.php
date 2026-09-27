@@ -21,8 +21,8 @@ class EnumFieldTest extends GeneratorTestCase
 
     protected function tearDown(): void
     {
-        if (File::exists(app_path('Enums/Status.php'))) {
-            File::delete(app_path('Enums/Status.php'));
+        if (File::exists(app_path('Enums/ArticleStatus.php'))) {
+            File::delete(app_path('Enums/ArticleStatus.php'));
         }
         parent::tearDown();
     }
@@ -38,11 +38,11 @@ class EnumFieldTest extends GeneratorTestCase
         $result->assertSuccessful();
         $result->run();
 
-        $enumPath = app_path('Enums/Status.php');
+        $enumPath = app_path('Enums/ArticleStatus.php');
         $this->assertFileExists($enumPath);
 
         $enum = (string) file_get_contents($enumPath);
-        $this->assertStringContainsString('enum Status: string', $enum);
+        $this->assertStringContainsString('enum ArticleStatus: string', $enum);
         $this->assertStringContainsString("case Draft = 'draft';", $enum);
         $this->assertStringContainsString("case Published = 'published';", $enum);
     }
@@ -58,20 +58,21 @@ class EnumFieldTest extends GeneratorTestCase
         $result->run();
 
         $model = (string) file_get_contents(app_path('Models/Article.php'));
-        $this->assertStringContainsString("'status' => \App\Enums\Status::class", $model);
-        $this->assertStringContainsString('@property \App\Enums\Status $status', $model);
+        $this->assertStringContainsString('use App\Enums\ArticleStatus;', $model);
+        $this->assertStringContainsString("'status' => ArticleStatus::class", $model);
+        $this->assertStringContainsString('@property ArticleStatus $status', $model);
 
         $this->assertStringContainsString(
-            "'status' => ['required', \Illuminate\Validation\Rule::enum(\App\Enums\Status::class)],",
+            "'status' => ['required', Rule::enum(ArticleStatus::class)],",
             (string) file_get_contents(app_path('Http/Requests/StoreArticleRequest.php'))
         );
         $this->assertStringContainsString(
-            "'status' => ['sometimes', 'required', \Illuminate\Validation\Rule::enum(\App\Enums\Status::class)],",
+            "'status' => ['sometimes', 'required', Rule::enum(ArticleStatus::class)],",
             (string) file_get_contents(app_path('Http/Requests/UpdateArticleRequest.php'))
         );
 
         $factory = (string) file_get_contents(database_path('factories/ArticleFactory.php'));
-        $this->assertStringContainsString('fake()->randomElement(\App\Enums\Status::cases())', $factory);
+        $this->assertStringContainsString('fake()->randomElement(ArticleStatus::cases())', $factory);
 
         $migration = (string) file_get_contents($this->firstMigrationFor('articles'));
         $this->assertStringContainsString("\$table->enum('status', ['draft', 'published']);", $migration);
@@ -89,11 +90,11 @@ class EnumFieldTest extends GeneratorTestCase
         ));
 
         $this->assertStringContainsString(
-            "'status' => ['nullable', \Illuminate\Validation\Rule::enum(\App\Enums\Status::class)],",
+            "'status' => ['nullable', Rule::enum(ArticleStatus::class)],",
             (string) file_get_contents(app_path('Http/Requests/StoreArticleRequest.php'))
         );
         $this->assertStringContainsString(
-            "'status' => ['sometimes', 'nullable', \Illuminate\Validation\Rule::enum(\App\Enums\Status::class)],",
+            "'status' => ['sometimes', 'nullable', Rule::enum(ArticleStatus::class)],",
             (string) file_get_contents(app_path('Http/Requests/UpdateArticleRequest.php'))
         );
     }
@@ -116,7 +117,7 @@ class EnumFieldTest extends GeneratorTestCase
             $result->assertSuccessful();
             $result->run();
 
-            $this->assertFileExists(app_path('Enums/Status.php'));
+            $this->assertFileExists(app_path('Enums/ArticleStatus.php'));
 
             $migration = (string) file_get_contents($this->firstMigrationFor('articles'));
             $this->assertStringContainsString("\$table->enum('status', ['draft', 'published'])->default('draft');", $migration);

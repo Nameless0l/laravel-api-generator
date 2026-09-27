@@ -41,6 +41,7 @@ class ControllerGenerator extends AbstractGenerator
         if ($definition->hasSoftDeletes()) {
             $softDeleteMethods = <<<PHP
 
+
     /**
      * Restore the specified soft-deleted resource.
      */
@@ -59,6 +60,7 @@ class ControllerGenerator extends AbstractGenerator
         Gate::authorize('forceDelete', \${$parameter});
 
         \$this->service->forceDelete(\${$parameter});
+
         return response()->noContent();
     }
 PHP;

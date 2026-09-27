@@ -7,6 +7,7 @@ namespace nameless\CodeGenerator\Tests\Feature;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\ValidationException;
 use nameless\CodeGenerator\EntitiesGenerator\DTOGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\RequestGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\ServiceGenerator;
@@ -40,6 +41,7 @@ class PartialUpdateDtoTest extends GeneratorTestCase
             new FieldDefinition(name: 'subtitle', type: 'string', nullable: true),
             new FieldDefinition(name: 'pages', type: 'integer', nullable: true),
             new FieldDefinition(name: 'meta', type: 'json', nullable: true),
+            new FieldDefinition(name: 'issued_on', type: 'date', nullable: true),
         ];
 
         if ($extraField !== '') {
@@ -54,7 +56,7 @@ class PartialUpdateDtoTest extends GeneratorTestCase
     {
         $dto = $this->newDto(title: 'Guide', pages: 3);
 
-        $this->assertSame(['title' => 'Guide', 'subtitle' => null, 'pages' => 3, 'meta' => null], $dto->toArray());
+        $this->assertSame(['title' => 'Guide', 'subtitle' => null, 'pages' => 3, 'meta' => null, 'issued_on' => null], $dto->toArray());
     }
 
     #[Test]
@@ -70,9 +72,24 @@ class PartialUpdateDtoTest extends GeneratorTestCase
     }
 
     #[Test]
+    public function a_numeric_date_reaches_the_dto_as_a_string(): void
+    {
+        $this->assertSame(['issued_on' => '20250101'], $this->dto('Update', 'PATCH', '/leaflets/1', ['issued_on' => 20250101])->toArray());
+    }
+
+    #[Test]
+    public function a_json_field_takes_an_object_and_refuses_a_string(): void
+    {
+        $this->assertSame(['meta' => ['lang' => 'fr']], $this->dto('Update', 'PATCH', '/leaflets/1', ['meta' => ['lang' => 'fr']])->toArray());
+
+        $this->expectException(ValidationException::class);
+        $this->dto('Update', 'PATCH', '/leaflets/1', ['meta' => '{"lang":"fr"}']);
+    }
+
+    #[Test]
     public function a_dto_from_a_store_leaves_out_the_optional_fields_not_sent(): void
     {
-        $dto = $this->dto('Store', 'POST', '/leaflets', ['title' => 'Guide', 'meta' => '{"lang":"fr"}']);
+        $dto = $this->dto('Store', 'POST', '/leaflets', ['title' => 'Guide', 'meta' => ['lang' => 'fr']]);
 
         $this->assertSame(['title' => 'Guide', 'meta' => ['lang' => 'fr']], $dto->toArray());
     }

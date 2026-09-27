@@ -57,6 +57,22 @@ class WorkspaceServicesTest extends GeneratorTestCase
     }
 
     #[Test]
+    public function postman_bodies_send_a_valid_enum_case_and_time(): void
+    {
+        $fields = collect([
+            new FieldDefinition('status', 'string', attributes: ['enum' => ['draft', 'published']]),
+            new FieldDefinition('opens_at', 'time'),
+        ]);
+        $workspace = (new WorkspaceFactory)->make();
+
+        app(PostmanExporter::class)->export(collect([new EntityDefinition('Post', $fields, collect())]), base_path('postman_collection.json'), $workspace);
+
+        $collection = $workspace->get(base_path('postman_collection.json'));
+        $this->assertStringContainsString('\"status\": \"draft\"', $collection);
+        $this->assertStringContainsString('\"opens_at\": \"10:30:00\"', $collection);
+    }
+
+    #[Test]
     public function adding_fields_is_recorded_without_writing(): void
     {
         $this->generatedEntities = ['Report'];

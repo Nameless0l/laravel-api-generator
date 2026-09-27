@@ -149,8 +149,9 @@ class DeleteFullApi extends Command
 
     /**
      * The conventional file names, plus whatever the manifest recorded for
-     * the entity (migrations added with --add-fields, for instance). Enums
-     * and pivot migrations stay: other entities may use them.
+     * the entity (migrations added with --add-fields, for instance) and its
+     * enums. Pivot migrations stay, like enums named before 4.0: other
+     * entities may use them.
      *
      * @return array<string, string> relative path => file type
      */
@@ -181,6 +182,12 @@ class DeleteFullApi extends Command
 
         foreach ($manifest->filesOf($className, ['Enum', 'PivotMigration']) as $path) {
             $targets[$path] ??= 'Generated file';
+        }
+
+        foreach ($manifest->filesOf($className, ['PivotMigration']) as $path) {
+            if (str_starts_with($path, 'app/Enums/'.$className)) {
+                $targets[$path] ??= 'Enum';
+            }
         }
 
         return $targets;

@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\DTO\{{modelName}}DTO;
 use App\Http\Requests\Store{{modelName}}Request;
 use App\Http\Requests\Update{{modelName}}Request;
-use App\Models\{{modelName}};
 use App\Http\Resources\{{modelName}}Resource;
+use App\Models\{{modelName}};
 use App\Services\{{modelName}}Service;
-use App\DTO\{{modelName}}DTO;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -30,6 +29,7 @@ class {{modelName}}Controller extends Controller
         Gate::authorize('viewAny', {{modelName}}::class);
 
         ${{pluralName}} = $this->service->paginate($request->query());
+
         return {{modelName}}Resource::collection(${{pluralName}});
     }
 
@@ -42,6 +42,7 @@ class {{modelName}}Controller extends Controller
 
         $dto = {{modelName}}DTO::fromRequest($request);
         ${{routeParameter}} = $this->service->create($dto);
+
         return new {{modelName}}Resource(${{routeParameter}});
     }
 
@@ -63,6 +64,7 @@ class {{modelName}}Controller extends Controller
         Gate::authorize('update', ${{routeParameter}});
 
         $dto = {{modelName}}DTO::fromRequest($request);
+
         return new {{modelName}}Resource($this->service->update(${{routeParameter}}, $dto));
     }
 
@@ -74,7 +76,7 @@ class {{modelName}}Controller extends Controller
         Gate::authorize('delete', ${{routeParameter}});
 
         $this->service->delete(${{routeParameter}});
+
         return response()->noContent();
-    }
-{{softDeleteMethods}}
+    }{{softDeleteMethods}}
 }

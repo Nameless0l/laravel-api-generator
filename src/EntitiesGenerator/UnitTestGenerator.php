@@ -24,9 +24,18 @@ class UnitTestGenerator extends AbstractGenerator
 
     protected function generateContent(EntityDefinition $definition): string
     {
-        $stubName = $definition->usesPest() ? 'test.unit.pest' : 'test.unit';
+        $replacements = $this->getReplacements($definition);
 
-        return $this->stubLoader->load($stubName, $this->getReplacements($definition));
+        if (! $definition->usesPest()) {
+            return $this->stubLoader->load('test.unit', $replacements);
+        }
+
+        // Pest closures sit one level shallower than PHPUnit methods
+        foreach (['dtoConstructorArgs', 'createRelatedModels', 'dtoFkArgs', 'updateCreateRelatedOrUseExisting', 'updateDtoFkArgs'] as $key) {
+            $replacements[$key] = (string) preg_replace('/^ {4}/m', '', $replacements[$key]);
+        }
+
+        return $this->stubLoader->load('test.unit.pest', $replacements);
     }
 
     protected function getStubName(): string

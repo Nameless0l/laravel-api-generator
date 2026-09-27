@@ -51,11 +51,11 @@ class UniqueRuleGenerationTest extends GeneratorTestCase
         $update = (string) file_get_contents(app_path('Http/Requests/UpdateProductRequest.php'));
 
         $this->assertStringContainsString(
-            "'slug' => ['required', 'string', 'max:255', \Illuminate\Validation\Rule::unique('products')],",
+            "'slug' => ['required', 'string', 'max:255', Rule::unique('products')],",
             $store
         );
         $this->assertStringContainsString(
-            "'slug' => ['sometimes', 'required', 'string', 'max:255', \Illuminate\Validation\Rule::unique('products')->ignore(\$this->route('product'))],",
+            "'slug' => ['sometimes', 'required', 'string', 'max:255', Rule::unique('products')->ignore(\$this->route('product'))],",
             $update
         );
         $this->assertStringContainsString("'title' => 'required|string|max:255',", $store);

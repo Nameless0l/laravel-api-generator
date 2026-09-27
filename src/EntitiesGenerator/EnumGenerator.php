@@ -45,35 +45,22 @@ class EnumGenerator extends AbstractGenerator
     {
         foreach ($definition->fields as $field) {
             if ($field->isEnum()) {
-                $workspace->put(
-                    app_path("Enums/{$field->getEnumClass()}.php"),
-                    $this->generateEnumClass($field),
-                    $this->getType(),
-                    $definition->name
-                );
+                $class = $field->getEnumClass($definition->name);
+                $workspace->put(app_path("Enums/{$class}.php"), self::source($class, $field->getEnumValues()), $this->getType(), $definition->name);
             }
         }
     }
 
-    private function generateEnumClass(FieldDefinition $field): string
+    /**
+     * @param  array<int, string>  $values
+     */
+    public static function source(string $class, array $values): string
     {
-        $cases = implode("\n    ", array_map(
-            fn (string $v) => 'case '.Str::studly(str_replace('-', '_', $v))." = '{$v}';",
-            $field->getEnumValues()
+        $cases = implode("\n", array_map(
+            fn (string $value) => '    case '.Str::studly(str_replace('-', '_', $value))." = '{$value}';",
+            $values
         ));
 
-        return <<<PHP
-<?php
-
-declare(strict_types=1);
-
-namespace App\Enums;
-
-enum {$field->getEnumClass()}: string
-{
-    {$cases}
-}
-
-PHP;
+        return "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\Enums;\n\nenum {$class}: string\n{\n{$cases}\n}\n";
     }
 }
