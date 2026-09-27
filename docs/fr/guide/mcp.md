@@ -81,6 +81,8 @@ Plus tard, « ajoute un résumé aux articles » passe par `add-fields`. L'outil
 | `generate-api` | Écrit les fichiers d'un document api-schema ou d'une spec OpenAPI du projet, avec `auth`, `postman` et `only` comme en ligne de commande. |
 | `add-fields` | Ajoute des colonnes à une entité générée, avec un essai à blanc possible. |
 
+Le serveur fournit aussi un prompt `design-api`, que la plupart des clients proposent comme commande slash. Donnez-lui la description, et il guide l'agent à travers les étapes ci-dessus, en attendant votre accord avant `generate-api`.
+
 Les résultats reprennent le document JSON de [`make:fullapi --json`](/fr/guide/integrations#une-sortie-lisible-par-les-machines), les erreurs gardent donc les mêmes codes stables et les mêmes indices. Le serveur expose aussi le JSON Schema du format api-schema, sous la ressource `api-generator://schema/api-schema.json`.
 
 ## Ce qui reste entre vos mains

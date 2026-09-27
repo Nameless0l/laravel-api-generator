@@ -6,6 +6,10 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
+### 3.14.0
+
+- Le serveur MCP propose un prompt `design-api` : décrivez l'API avec vos mots, l'agent rédige le schéma, vous montre le plan, puis génère une fois votre accord donné. Voir [Serveur MCP](/fr/guide/mcp#demander-une-api).
+
 ### 3.13.0
 
 - Génération depuis une spec OpenAPI 3.0, 3.1 ou Swagger 2.0 avec `--openapi`, en ligne de commande ou par le serveur MCP. Voir [Specs OpenAPI](/fr/guide/openapi).
