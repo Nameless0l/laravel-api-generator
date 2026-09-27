@@ -18,7 +18,7 @@ class McpCommand extends Command
     public function handle(): int
     {
         if (! class_exists(Registrar::class)) {
-            $this->output->getErrorStyle()->writeln('<error>The MCP server needs laravel/mcp (Laravel 11.45+). Install it with: composer require --dev laravel/mcp</error>');
+            $this->output->getErrorStyle()->writeln('<error>The MCP server needs laravel/mcp (Laravel 12.41+). Install it with: composer require --dev laravel/mcp</error>');
 
             return self::FAILURE;
         }
