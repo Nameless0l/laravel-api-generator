@@ -32,6 +32,7 @@
         },
         "entity": { "type": "string" },
         "action": { "enum": ["create", "update", "unchanged"] },
+        "kept": { "type": "boolean" },
         "content": { "type": "string" }
       },
       "additionalProperties": false

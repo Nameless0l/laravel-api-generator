@@ -53,7 +53,7 @@ final class Protocol
 
     /**
      * @param  array<int, FileChange>  $changes
-     * @return array<int, array<string, string>>
+     * @return array<int, array<string, string|bool>>
      */
     public static function files(array $changes, bool $withContent): array
     {

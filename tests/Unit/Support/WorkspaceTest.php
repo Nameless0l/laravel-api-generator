@@ -134,6 +134,31 @@ class WorkspaceTest extends TestCase
     }
 
     #[Test]
+    public function commit_can_leave_files_untouched(): void
+    {
+        file_put_contents($this->root.'/app/Kept.php', 'mine');
+        $workspace = $this->workspace();
+        $workspace->put($this->root.'/app/Kept.php', 'generated', 'Model', 'Kept');
+        $workspace->put($this->root.'/app/New.php', 'new', 'Model', 'New');
+
+        $workspace->commit(['app/Kept.php']);
+
+        $this->assertSame('mine', file_get_contents($this->root.'/app/Kept.php'));
+        $this->assertSame('new', file_get_contents($this->root.'/app/New.php'));
+    }
+
+    #[Test]
+    public function a_kept_file_is_flagged_and_writes_nothing(): void
+    {
+        $kept = (new FileChange('app/Models/Post.php', 'Model', 'Post', FileChange::UPDATE, '<?php'))->asKept();
+
+        $this->assertTrue($kept->kept);
+        $this->assertFalse($kept->writesToDisk());
+        $this->assertTrue($kept->toArray(false)['kept']);
+        $this->assertArrayNotHasKey('kept', (new FileChange('app/Models/Post.php', 'Model', 'Post', FileChange::UPDATE, ''))->toArray(false));
+    }
+
+    #[Test]
     public function to_array_omits_content_unless_asked(): void
     {
         $change = new FileChange('app/Models/Post.php', 'Model', 'Post', FileChange::CREATE, '<?php');
