@@ -25,6 +25,11 @@ entities:
     fields:
       name: string unique
 
+  Language:
+    fields:
+      code: string primary
+      name: string
+
   Post:
     soft_deletes: true
     fields:
@@ -35,6 +40,7 @@ entities:
       views: { type: integer, default: 0 }
     relations:
       category: belongsTo Category
+      language: belongsTo Language
       tags: belongsToMany Tag
       comments: hasMany Comment
 
