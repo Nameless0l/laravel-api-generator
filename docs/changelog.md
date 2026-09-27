@@ -6,35 +6,35 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
-### 3.14.0
+### 3.14.0 - September 27, 2026
 
 - The MCP server offers a `design-api` prompt: describe the API in plain words, and the agent drafts the schema, shows you the plan, then generates it once you agree. See [MCP Server](/guide/mcp#ask-for-an-api).
 
-### 3.13.0
+### 3.13.0 - September 27, 2026
 
 - Generate from an OpenAPI 3.0, 3.1 or Swagger 2.0 spec with `--openapi`, from the command line or through the MCP server. See [OpenAPI Specs](/guide/openapi).
 - Fixed: a `hasMany` follows the `belongsTo` of the other side when it is named after its role, such as `author_id` for `author: belongsTo User`.
 
-### 3.12.0
+### 3.12.0 - September 27, 2026
 
 - An MCP server lets Claude Code, Copilot, Cursor and other agents list, preview and generate APIs, and add fields, without ever overwriting your edits. See [MCP Server](/guide/mcp).
 - A schema field with an unknown type now comes with an `unknown_field_type` warning.
 - `--add-fields` refuses an entity name that points outside `app/Models`.
 
-### 3.11.0
+### 3.11.0 - September 27, 2026
 
 - Regenerating keeps the files you edited by hand, and names them. `--force` overwrites them anyway. See [Evolving Entities](/guide/evolving#your-edits-survive-regeneration).
 - The generator records what it writes in `.api-generator/manifest.json`: commit it.
 - `delete:fullapi` also removes the migrations added with `--add-fields`, names the files you edited, and gains `--dry-run`.
 
-### 3.10.0
+### 3.10.0 - September 27, 2026
 
 - Laravel Boost support: guidelines and a `laravel-api-generator` skill teach your coding agent to generate APIs instead of writing the files by hand. See [Tools & Agents](/guide/integrations#ai-coding-agents).
 - A JSON Schema for schema files brings autocompletion and typo checks to your editor. See [Editor autocompletion](/guide/schema-files#editor-autocompletion).
 - `php artisan about` shows the installed version, the protocol and the detected schema file.
 - The documentation publishes `llms.txt` and `llms-full.txt` for AI agents.
 
-### 3.9.0
+### 3.9.0 - September 27, 2026
 
 - `--dry-run` shows every file a command would create or update, with nothing written, for every source including `--add-fields`.
 - `--json` prints one machine-readable document for scripts, editors and AI agents. See [Tools & Agents](/guide/integrations).
@@ -44,7 +44,7 @@ Recent releases of the package and the VS Code extension. Full histories live on
 - Regenerating the Postman collection keeps its id.
 - Fixed: running `--auth` again no longer removes the resource routes from `routes/api.php`.
 
-### 3.8.0 - September 26, 2026
+### 3.8.0 - September 27, 2026
 
 - Fixed: a PUT that keeps a unique value no longer returns 422 on multi-word entities (`BlogPost`) or with a custom primary key.
 - Fixed: the seeder is registered in `DatabaseSeeder.php` even when the file uses Windows (CRLF) line endings.
@@ -101,34 +101,34 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## VS Code extension
 
-### 0.17.0
+### 0.17.0 - September 27, 2026
 
 - **Describe an API with Copilot**: write the API in plain words, review the `api-schema.yaml` Copilot drafts, then preview and generate it. See [Imports](/guide/extension/imports#describe-an-api-with-copilot).
 
-### 0.16.0
+### 0.16.0 - September 27, 2026
 
 - Generate from an OpenAPI 3.0, 3.1 or Swagger 2.0 spec, JSON or YAML, from the command palette, the sidebar or the builder's **Import OpenAPI** button. A dry run shows the entities, the files and the schemas left aside before anything is written. Pairs with package 3.13.
 
-### 0.15.0
+### 0.15.0 - September 27, 2026
 
 - With `laravel/mcp` in the project, Copilot's agent mode lists the package's MCP server, started with your PHP command, Sail and Docker included. See [Copilot and schema files](/guide/extension/reference#copilot-and-schema-files). Pairs with package 3.12.
 
-### 0.14.0
+### 0.14.0 - September 27, 2026
 
 - Regenerating from the builder keeps the files you edited by hand. A modal names them: overwrite them, or keep your changes and generate the rest. The live preview marks them **kept**. Pairs with package 3.11.
 
-### 0.13.0
+### 0.13.0 - September 27, 2026
 
 - In Laravel projects, GitHub Copilot gets the package's `laravel-api-generator` skill and generates APIs with `make:fullapi`.
 - `api-schema.yaml`, `.yml` and `.json` files get completion and typo checks from the package's JSON Schema.
 
-### 0.12.0
+### 0.12.0 - September 27, 2026
 
 - The live preview is rendered by the installed package (3.9 or later): every file the generator writes, your published stubs, badges for new, modified and unchanged files, and a diff for modified ones.
 - Generation sends the form to `make:fullapi --schema=-`. No `class_data.json` at the project root anymore, and Soft Deletes, Auth and Postman are no longer ignored when the form has relationships.
 - `laravelApiGenerator.phpCommand` runs PHP through Sail or Docker.
 
-### 0.11.1 - September 26, 2026
+### 0.11.1 - September 27, 2026
 
 - The builder form now offers the one-click package update when the installed `nameless/laravel-api-generator` is too old for an option, as the import commands already did.
 

@@ -5,12 +5,12 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.14.0] - Unreleased
+## [3.14.0] - 2026-09-27
 
 ### Added
 - **`design-api` prompt on the MCP server.** Given a description in plain words, it walks the agent through `list-entities`, an api-schema document, `plan-api`, your agreement and `generate-api`. Clients show it as a slash command.
 
-## [3.13.0] - Unreleased
+## [3.13.0] - 2026-09-27
 
 ### Added
 - **OpenAPI source.** `make:fullapi --openapi=<file|->` generates an entity from each object schema of an OpenAPI 3.0, 3.1 or Swagger 2.0 document, in JSON or YAML. References become relations, `post_id` or `postId` next to a `Post` schema a `belongsTo`, string enums PHP enums, `deleted_at` soft deletes and a string `id` a custom primary key. Error, pagination and payload schemas (`NewPet`, `CreatePetRequest`) are skipped with an `openapi_schema_skipped` warning.
@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - A `hasMany` uses the foreign key of the `belongsTo` that points back at it. With `author: belongsTo Writer` on `Story`, `Writer::stories()` looked for `writer_id` while the migration created `author_id`.
 
-## [3.12.0] - Unreleased
+## [3.12.0] - 2026-09-27
 
 ### Added
 - **MCP server for coding agents.** `php artisan api-generator:mcp` starts a local server built on `laravel/mcp` (optional, Laravel 11.45+) with four tools: `list-entities`, `plan-api`, `generate-api` and `add-fields`. It also serves the JSON Schema of the api-schema format as a resource. Agents never overwrite a file edited by hand, never delete and never migrate.
@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - `make:fullapi --add-fields` refuses an entity name that points outside `app/Models`, such as `../../config/app`.
 
-## [3.11.0] - Unreleased
+## [3.11.0] - 2026-09-27
 
 ### Added
 - **Generation manifest.** The generator records a hash of every file it writes in `.api-generator/manifest.json`. Commit it with your code.
@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `delete:fullapi` also removes the migrations added with `--add-fields`, and its confirmation names the files edited by hand.
 - The handshake of `api-generator:serve` announces `keepsEditedFiles`.
 
-## [3.10.0] - Unreleased
+## [3.10.0] - 2026-09-27
 
 ### Added
 - **Laravel Boost support.** The package ships guidelines (`resources/boost/guidelines/core.blade.php`) and a `laravel-api-generator` skill (`resources/boost/skills/`). Tick the package in `php artisan boost:install` and your coding agent learns to generate APIs with `make:fullapi` instead of writing the files by hand.
@@ -48,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`php artisan about`** gains a Laravel Api Generator section: installed version, protocol, detected schema file and published stubs.
 - The documentation site publishes `llms.txt` and `llms-full.txt` for AI agents.
 
-## [3.9.0] - Unreleased
+## [3.9.0] - 2026-09-27
 
 ### Added
 - **`--dry-run`** on `make:fullapi` runs the whole generation and lists every file it would create or update, with nothing written. It works with every source: `--fields`, schema files, Mermaid, the database, `class_data.json` and `--add-fields`.
@@ -65,7 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Resource routes lost on a second `--auth` run.** Generating another entity with `--auth`, or the same one again, moved every resource route out of the `auth:sanctum` group without putting them back, so `routes/api.php` lost them all. Routes already in the group now stay there and new ones join them.
 
-## [3.8.0] - 2026-09-26
+## [3.8.0] - 2026-09-27
 
 ### Fixed
 - **Updates rejected by the `unique` rule.** For multi-word entities (`BlogPost`), the generated request read `$this->route('blog_post')` while `Route::apiResource()` names the parameter `blogpost`, so the current record was never ignored and a PUT keeping the same unique value returned 422. Entities with a custom primary key ignored the record on a nonexistent `id` column. The rule now reads the real route parameter and passes the key column when it is not `id`.
