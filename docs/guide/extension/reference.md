@@ -29,6 +29,7 @@ All commands live under the **Laravel API Generator** category in the command pa
 | Setting | Default | Description |
 |---------|---------|-------------|
 | `laravelApiGenerator.phpPath` | `php` | Path to the PHP executable |
+| `laravelApiGenerator.phpCommand` | `[]` | Full command that runs PHP, one argument per item (Sail, Docker). Wins over `phpPath` when set. |
 | `laravelApiGenerator.locale` | `auto` | UI language: `auto` (follow VS Code), `en` or `fr` |
 
 ## PHP snippets

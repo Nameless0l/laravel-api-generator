@@ -29,6 +29,7 @@ Toutes les commandes vivent sous la catégorie **Laravel API Generator** de la p
 | Réglage | Défaut | Description |
 |---------|--------|-------------|
 | `laravelApiGenerator.phpPath` | `php` | Chemin de l'exécutable PHP |
+| `laravelApiGenerator.phpCommand` | `[]` | Commande complète qui lance PHP, un argument par élément (Sail, Docker). Prioritaire sur `phpPath` quand elle est définie. |
 | `laravelApiGenerator.locale` | `auto` | Langue de l'interface : `auto` (suit VS Code), `en` ou `fr` |
 
 ## Snippets PHP

@@ -73,6 +73,12 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## VS Code extension
 
+### 0.13.0
+
+- The live preview is rendered by the installed package (3.10 or later): every file the generator writes, your published stubs, badges for new, modified and unchanged files, and a diff for modified ones.
+- Generation sends the form to `make:fullapi --schema=-`. No `class_data.json` at the project root anymore, and Soft Deletes, Auth and Postman are no longer ignored when the form has relationships.
+- `laravelApiGenerator.phpCommand` runs PHP through Sail or Docker.
+
 ### 0.11.1 - September 26, 2026
 
 - The builder form now offers the one-click package update when the installed `nameless/laravel-api-generator` is too old for an option, as the import commands already did.
