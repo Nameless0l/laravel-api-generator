@@ -8,6 +8,8 @@ A professional Laravel package that generates complete, production-ready REST AP
 
 **📖 Documentation: [nameless0l.github.io/laravel-api-generator](https://nameless0l.github.io/laravel-api-generator/)**
 
+[![Laravel API Generator 4.0 in two minutes: the MCP server for AI agents, the generated code and the VS Code extension](https://img.youtube.com/vi/bRK9Y8jn7yY/maxresdefault.jpg)](https://youtu.be/bRK9Y8jn7yY)
+
 ![Demo](docs/demo.gif)
 
 ### VS Code Extension

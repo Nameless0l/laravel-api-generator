@@ -155,10 +155,8 @@ Trois commandes, et la suite de tests est déjà verte. Les tests arrivent avec 
 
 <HomeTestimonials title="Ce qu'on en dit" :items="testimonials" />
 
-<!-- VIDEO #1 (YouTube) : décommenter et renseigner VIDEO_ID quand la première vidéo de démo est en ligne :
 ## Voir la démo
 
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
-  <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Une API Laravel complète en 30 secondes" allowfullscreen loading="lazy"></iframe>
+  <iframe src="https://www.youtube-nocookie.com/embed/bRK9Y8jn7yY" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Laravel API Generator 4.0 en deux minutes" allowfullscreen loading="lazy"></iframe>
 </div>
--->
