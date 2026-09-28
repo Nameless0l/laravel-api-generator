@@ -50,7 +50,7 @@ claude mcp add -s project laravel-api-generator -- php artisan api-generator:mcp
 
 :::
 
-Avec Claude Code, `-s project` écrit `.mcp.json`, que vous pouvez committer pour que toute l'équipe profite du serveur. `-s local` le garde pour vous seul. Tout autre client prend la même commande, `php artisan api-generator:mcp`, lancée depuis la racine du projet.
+Avec Claude Code, `-s project` écrit `.mcp.json`, que vous pouvez committer pour que toute l'équipe profite du serveur. Tapez `/mcp` dans une session pour vérifier : le serveur apparaît connecté, avec ses outils, sa ressource et son prompt. `-s local` le garde pour vous seul. Tout autre client prend la même commande, `php artisan api-generator:mcp`, lancée depuis la racine du projet.
 
 Quand PHP tourne dans un conteneur, préfixez la commande. Gardez `-i` avec Docker, car le serveur parle sur l'entrée standard :
 
@@ -70,9 +70,13 @@ docker exec -i my-app php artisan api-generator:mcp
 
 Demandez avec vos mots, par exemple un blog avec des articles, des catégories et des tags, où un article est brouillon ou publié. L'agent regarde ce qui existe déjà avec `list-entities`, écrit un document [api-schema](/fr/guide/schema-files) et appelle `plan-api`, qui liste chaque fichier que la génération créerait ou modifierait sans rien écrire. Une fois votre accord donné, `generate-api` les écrit, et l'agent peut lancer `php artisan migrate` puis les tests générés.
 
+![Claude Code lance le prompt design-api : le schéma proposé et les 56 fichiers, avant toute écriture](/mcp-plan.png)
+
 Quand le dépôt contient déjà une spec, demandez l'API décrite dans `docs/openapi.yaml`. L'agent passe ce chemin à `plan-api` au lieu d'écrire un schéma, et les avertissements lui disent quels schémas ont été écartés.
 
 Plus tard, « ajoute un résumé aux articles » passe par `add-fields`. L'outil écrit une migration incrémentale et modifie sur place le modèle, les form requests, la factory et la resource, en gardant ce que vous y avez changé.
+
+![Les quatre outils dans Claude Code, les deux qui ne changent rien marqués en lecture seule](/mcp-tools.png)
 
 | Outil | Rôle |
 |---|---|

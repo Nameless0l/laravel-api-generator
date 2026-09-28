@@ -50,7 +50,7 @@ claude mcp add -s project laravel-api-generator -- php artisan api-generator:mcp
 
 :::
 
-With Claude Code, `-s project` writes `.mcp.json`, which you can commit so the whole team gets the server. Use `-s local` to keep it to yourself. Any other client takes the same command, `php artisan api-generator:mcp`, run from the project root.
+With Claude Code, `-s project` writes `.mcp.json`, which you can commit so the whole team gets the server. Type `/mcp` in a session to check it: the server shows as connected, with its tools, its resource and its prompt. Use `-s local` to keep it to yourself. Any other client takes the same command, `php artisan api-generator:mcp`, run from the project root.
 
 When PHP runs in a container, prefix the command. Keep `-i` with Docker, since the server talks over stdin:
 
@@ -70,9 +70,13 @@ docker exec -i my-app php artisan api-generator:mcp
 
 Ask in plain words, for example a blog with posts, categories and tags where a post can be a draft or published. The agent checks what already exists with `list-entities`, writes an [api-schema](/guide/schema-files) document and calls `plan-api`, which lists every file the generation would create or update without writing anything. Once you agree, `generate-api` writes them, and the agent can run `php artisan migrate` and the generated tests.
 
+![Claude Code running the design-api prompt: the proposed schema and the 56 files, before anything is written](/mcp-plan.png)
+
 When the repository already holds a spec, ask for the API described in `docs/openapi.yaml`. The agent passes that path to `plan-api` instead of writing a schema, and the warnings tell it which schemas were left aside.
 
 Later, "add an excerpt to posts" goes through `add-fields`. It writes an incremental migration and patches the model, form requests, factory and resource in place, keeping what you changed in them.
+
+![The four tools in Claude Code, the two that change nothing marked read-only](/mcp-tools.png)
 
 | Tool | What it does |
 |---|---|

@@ -58,7 +58,7 @@ const enExtensionSidebar = [
     text: "Generate",
     items: [
       { text: "Entity Builder", link: "/guide/extension/builder" },
-      { text: "Imports: DB, JSON, OpenAPI", link: "/guide/extension/imports" },
+      { text: "Sources & Review", link: "/guide/extension/imports" },
     ],
   },
   {
@@ -69,7 +69,7 @@ const enExtensionSidebar = [
         link: "/guide/extension/diagram-and-sidebar",
       },
       {
-        text: "Quick Actions & Guardrails",
+        text: "API Ready & Project Actions",
         link: "/guide/extension/quick-actions",
       },
     ],
@@ -146,7 +146,7 @@ const frExtensionSidebar = [
     items: [
       { text: "Builder d'entités", link: "/fr/guide/extension/builder" },
       {
-        text: "Imports : BDD, JSON, OpenAPI",
+        text: "Sources & relecture",
         link: "/fr/guide/extension/imports",
       },
     ],
@@ -159,7 +159,7 @@ const frExtensionSidebar = [
         link: "/fr/guide/extension/diagram-and-sidebar",
       },
       {
-        text: "Actions rapides & garde-fous",
+        text: "API prête & actions du projet",
         link: "/fr/guide/extension/quick-actions",
       },
     ],

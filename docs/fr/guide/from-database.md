@@ -54,7 +54,7 @@ php artisan api-generator:introspect --table=products
 
 :::
 
-C'est ce qui alimente la fonctionnalité **Import from Database** de l'[extension VS Code](/fr/guide/extension/imports).
+C'est ce qui alimente les imports depuis la base de l'[extension VS Code](/fr/guide/extension/imports#depuis-la-base-de-donnees).
 
 ## Le gain
 

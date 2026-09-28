@@ -36,3 +36,12 @@
     max-width: 100%;
     height: auto;
 }
+
+.medium-zoom-overlay,
+.medium-zoom-image--opened {
+    z-index: 100;
+}
+
+.vp-doc img {
+    cursor: zoom-in;
+}

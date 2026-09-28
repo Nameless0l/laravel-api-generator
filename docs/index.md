@@ -21,6 +21,9 @@ hero:
       link: /guide/extension/
 
 features:
+  - icon: 🤖
+    title: Ready for AI agents
+    details: "An MCP server gives Claude Code, Copilot and Cursor four tools to plan and generate your API. They preview every file first and never overwrite one you edited."
   - icon: 🧪
     title: Tests written, not scaffolded
     details: "Feature and unit tests with real assertions: PHPUnit or Pest. php artisan test is green right after generation."
@@ -48,6 +51,7 @@ features:
 ---
 
 <script setup>
+import { withBase } from 'vitepress'
 import demoGif from './demo.gif'
 import archImg from './architecture-flow.svg'
 import archMotion from './architecture-motion.gif'
@@ -57,10 +61,18 @@ const tabs = [
     {
         title: 'One command',
         img: demoGif,
-        imgAlt: 'make:fullapi terminal demo',
-        text: 'make:fullapi turns one line into thirteen files and a registered route: model, controller, service, DTO, requests, resources, policy, migration, factory, seeder and two test suites.',
+        imgAlt: 'make:fullapi generating two entities from api-schema.yaml, then php artisan test and pint --test',
+        text: 'From one line of flags or a schema file, make:fullapi writes thirteen files per entity and registers the routes. The tests it writes pass right away, and the code passes Pint.',
         link: '/guide/generating',
         linkText: 'The make:fullapi command',
+    },
+    {
+        title: 'AI agents',
+        img: withBase('/mcp-tools.png'),
+        imgAlt: 'The four tools of the MCP server in Claude Code',
+        text: 'Add laravel/mcp and your agent gets four tools to list the entities, preview every file, generate the API and add fields. The design-api prompt takes it from your description to a plan you approve, and a file you edited by hand is never overwritten.',
+        link: '/guide/mcp',
+        linkText: 'The MCP server',
     },
     {
         title: 'Tests included',
@@ -113,13 +125,9 @@ php artisan make:fullapi --from-database \\
     },
     {
         title: 'VS Code extension',
-        bullets: [
-            'Visual entity builder with live code preview',
-            'Import from your database, JSON or an OpenAPI spec',
-            'Interactive entity diagram',
-            'Migrate, seed, test and open API docs in one click',
-        ],
-        text: 'The whole generator without the terminal: a free extension with a visual builder, live preview and one-click lifecycle actions.',
+        img: withBase('/ext-builder.gif'),
+        imgAlt: 'The extension builder: pick an example, add a relation, and the live preview follows',
+        text: 'The whole generator without the terminal. A builder with the live preview of every file, one review screen for your database, a spec or a Copilot description, and the migrations and tests run from the same panel.',
         link: '/guide/extension/',
         linkText: 'The VS Code extension',
     },

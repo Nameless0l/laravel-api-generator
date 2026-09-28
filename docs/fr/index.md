@@ -21,6 +21,9 @@ hero:
       link: /fr/guide/extension/
 
 features:
+  - icon: 🤖
+    title: Prêt pour les agents IA
+    details: "Un serveur MCP donne à Claude Code, Copilot et Cursor quatre outils pour planifier et générer votre API. Ils prévisualisent chaque fichier d'abord et n'écrasent jamais celui que vous avez retouché."
   - icon: 🧪
     title: Des tests écrits, pas des squelettes
     details: "Tests feature et unitaires avec de vraies assertions : PHPUnit ou Pest. php artisan test est vert dès la génération."
@@ -48,6 +51,7 @@ features:
 ---
 
 <script setup>
+import { withBase } from 'vitepress'
 import demoGif from '../demo.gif'
 import archImg from '../architecture-flow-fr.svg'
 import archMotion from '../architecture-motion.gif'
@@ -57,10 +61,18 @@ const tabs = [
     {
         title: 'Une commande',
         img: demoGif,
-        imgAlt: 'Démo terminal de make:fullapi',
-        text: "make:fullapi transforme une ligne en treize fichiers et une route enregistrée : modèle, contrôleur, service, DTO, requests, resources, policy, migration, factory, seeder et deux suites de tests.",
+        imgAlt: 'make:fullapi génère deux entités depuis api-schema.yaml, puis php artisan test et pint --test',
+        text: "Depuis une ligne de flags ou un fichier de schéma, make:fullapi écrit treize fichiers par entité et enregistre les routes. Les tests qu'il écrit passent tout de suite, et le code passe Pint.",
         link: '/fr/guide/generating',
         linkText: 'La commande make:fullapi',
+    },
+    {
+        title: 'Agents IA',
+        img: withBase('/mcp-tools.png'),
+        imgAlt: 'Les quatre outils du serveur MCP dans Claude Code',
+        text: "Ajoutez laravel/mcp et votre agent reçoit quatre outils pour lister les entités, prévisualiser chaque fichier, générer l'API et ajouter des champs. Le prompt design-api le mène de votre description à un plan que vous validez, et un fichier retouché à la main n'est jamais écrasé.",
+        link: '/fr/guide/mcp',
+        linkText: 'Le serveur MCP',
     },
     {
         title: 'Tests inclus',
@@ -113,13 +125,9 @@ php artisan make:fullapi --from-database \\
     },
     {
         title: 'Extension VS Code',
-        bullets: [
-            "Builder visuel avec aperçu du code en direct",
-            "Import depuis votre base, un JSON ou une spec OpenAPI",
-            "Diagramme d'entités interactif",
-            "Migrate, seed, tests et doc API en un clic",
-        ],
-        text: "Tout le générateur sans le terminal : une extension gratuite avec builder visuel, aperçu en direct et actions de cycle de vie en un clic.",
+        img: withBase('/ext-builder.gif'),
+        imgAlt: "Le builder de l'extension : choisir un exemple, ajouter une relation, et l'aperçu en direct suit",
+        text: "Tout le générateur sans le terminal. Un builder avec l'aperçu en direct de chaque fichier, un seul écran de relecture pour votre base, une spec ou une description Copilot, et les migrations et les tests lancés depuis le même panneau.",
         link: '/fr/guide/extension/',
         linkText: "L'extension VS Code",
     },

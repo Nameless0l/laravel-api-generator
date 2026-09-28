@@ -65,7 +65,7 @@ php artisan api-generator:clean-routes
 
 :::
 
-L'[extension VS Code](/fr/guide/extension/quick-actions) propose cette réparation automatiquement quand *List Routes* échoue sur un contrôleur orphelin.
+L'[extension VS Code](/fr/guide/extension/quick-actions#reparation-des-routes-orphelines) propose cette réparation quand sa liste des routes échoue sur un contrôleur orphelin.
 
 <!-- VIDEO #6 (YouTube) : décommenter et renseigner VIDEO_ID quand la vidéo est en ligne, puis la placer en haut de page :
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">

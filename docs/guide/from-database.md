@@ -54,7 +54,7 @@ php artisan api-generator:introspect --table=products
 
 :::
 
-This powers the **Import from Database** feature of the [VS Code extension](/guide/extension/imports).
+This powers the database imports of the [VS Code extension](/guide/extension/imports#from-the-database).
 
 ## The payoff
 

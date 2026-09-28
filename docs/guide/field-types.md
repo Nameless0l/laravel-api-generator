@@ -32,15 +32,76 @@ Every type flows through the whole stack: migration column, validation rules, mo
 php artisan make:fullapi Article --fields="title:string,status:enum(draft,published,archived)"
 ```
 
-One field definition produces the entire chain:
+One field definition produces the entire chain. Here is the code the command above writes, trimmed to the lines the enum touches:
 
-![One enum field expands into five coherent files](/enum-chain.gif)
+::: code-group
 
-- `app/Enums/ArticleStatus.php`: a backed `enum ArticleStatus: string` with a case per value, named after the entity and the field
-- Model: `'status' => ArticleStatus::class` in `casts()` and `@property ArticleStatus $status` in the PHPDoc
-- Request: `Rule::enum(ArticleStatus::class)` validation
-- Factory: `fake()->randomElement(ArticleStatus::cases())`
-- Migration: `$table->enum('status', ['draft', 'published', 'archived'])`
+```php [Enum]
+namespace App\Enums;
+
+enum ArticleStatus: string
+{
+    case Draft = 'draft';
+    case Published = 'published';
+    case Archived = 'archived';
+}
+```
+
+```php [Model]
+/**
+ * @property int $id
+ * @property string $title
+ * @property ArticleStatus $status
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
+class Article extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['title', 'status'];
+
+    protected function casts(): array
+    {
+        return [
+            'status' => ArticleStatus::class,
+        ];
+    }
+}
+```
+
+```php [Request]
+public function rules(): array
+{
+    return [
+        'title' => 'required|string|max:255',
+        'status' => ['required', Rule::enum(ArticleStatus::class)],
+    ];
+}
+```
+
+```php [Factory]
+public function definition(): array
+{
+    return [
+        'title' => fake()->word(),
+        'status' => fake()->randomElement(ArticleStatus::cases()),
+    ];
+}
+```
+
+```php [Migration]
+Schema::create('articles', function (Blueprint $table) {
+    $table->id();
+    $table->string('title');
+    $table->enum('status', ['draft', 'published', 'archived']);
+    $table->timestamps();
+});
+```
+
+:::
+
+The enum is named after the entity and the field, `ArticleStatus` here, so two entities can each have their own `status`.
 
 In a schema file:
 

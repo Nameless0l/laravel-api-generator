@@ -65,7 +65,7 @@ php artisan api-generator:clean-routes
 
 :::
 
-The [VS Code extension](/guide/extension/quick-actions) offers this fix automatically when *List Routes* fails on an orphan controller.
+The [VS Code extension](/guide/extension/quick-actions#orphan-route-repair) offers this fix when its route list fails on an orphan controller.
 
 <!-- VIDEO #6 (YouTube): uncomment and set VIDEO_ID once the video is online, then move it near the top of the page:
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">

@@ -1,59 +1,49 @@
-# Imports: Database, Schema, Mermaid, JSON, OpenAPI
+# Sources & Review
 
-You rarely start from a blank form. The extension can generate the whole API surface from what you already have, a database, a versioned schema, a diagram or a spec.
+You rarely start from a blank form. The extension generates the whole API from what you already have, a database, a versioned schema, a diagram or a spec, or from a description written in plain words. Every one of these sources ends on the same review screen, before anything is written.
 
-## Whole-schema commands
+The sources are in the sidebar home under **Generate from**, in the `...` menu of the entities view and in the command palette.
 
-Available from the command palette and the sidebar `…` menu.
+## The review screen
 
-### Describe an API with Copilot
+The package runs the generation as a dry run, and the panel shows what it would do. Each entity lists its fields, its relations and the files it would get, with a badge for the new ones or the entities already generated. The shared files, `routes/api.php` and `DatabaseSeeder.php`, have their own row. On the side, the summary counts the files to create and to update and the new routes, and the generation options (Pest tests, Postman collection, Sanctum auth, Spatie QueryBuilder, JSON:API resources) can still be switched.
 
-Start from a sentence. Describe the API in plain words, for example a library that lends books to members where a loan has a due date, and the model VS Code offers (GitHub Copilot first) drafts an `api-schema.yaml`. The model also gets the names of the entities your project already has, so the draft relates to them instead of redefining them. The draft opens in an editor, where you can fix a type or rename a field before anything happens.
+![The review of an OpenAPI spec, then the generation of both entities](/ext-review.gif)
 
-**Preview and Generate** sends the edited draft to the package. The same dry run dialog as the OpenAPI import names the entities and counts the files, and **Generate** writes them. **Save as api-schema.yaml** keeps the draft at the project root instead, as the versioned source of the API. It needs VS Code 1.90 or later and a signed-in chat model.
+A file you edited by hand since the last generation stays as it is. The screen names it, **View the diffs** compares it with what the generator would write, and **Overwrite anyway** includes it on purpose. Schemas the package left aside are listed with the reason, such as the error schema of a spec.
 
-### Generate APIs from Database
+**Generate** writes the files and opens the [API ready screen](/guide/extension/quick-actions) with the next steps.
 
-This is the legacy-project command. It generates complete REST APIs for **every table at once**, straight from the existing schema.
+## Describe an API with Copilot
 
-<!-- SCREENSHOT: the multi-select table QuickPick. Save as docs/public/ext-imports-database.png then:
-![Table selection](/ext-imports-database.png)
--->
+Start from a sentence. **A description** opens a panel where you write the API in plain words, for example rooms that members book by time slot, where a booking has a start, an end and a status. Three examples fill the box if you want to try first.
 
-A multi-select lists the tables, all preselected except `users` so your customized `app/Models/User.php` is never overwritten by accident. Choose the options you want (Spatie QueryBuilder filtering, Pest tests, whether to also generate migration files) and generate: foreign keys become `belongsTo`/`hasMany`, pivot tables become `belongsToMany`, and `deleted_at` columns enable Soft Deletes, all automatically. Details in [From an Existing Database](/guide/from-database).
+![The Describe your API panel](/ext-describe.png)
 
-### Generate APIs from Schema File
+Pick the chat model VS Code offers (GitHub Copilot by default) and choose whether it relates the new entities to the ones your project already has. The model drafts an `api-schema.yaml`, and the proposed entities show up as cards, marked new, changed or already in the project. Click a card to adjust the entity in the YAML draft, and the cards follow your edits. **Review the plan** opens the review screen. **Save as api-schema.yaml** keeps the draft at the project root instead, as the versioned source of the API.
 
-Describe the whole API in a declarative, versionable YAML/JSON file. The extension auto-detects `api-schema.yaml` / `.yml` / `.json` at the project root, or lets you browse for one. Entities are generated parents-first with FK-safe migration ordering and automatic pivot migrations. See [YAML & JSON Schemas](/guide/schema-files).
+When the model cannot answer, the panel says why, whether Copilot is signed out, no model is installed or the provider returned an error, with the fix as a button when there is one, such as setting an API key. The panel needs VS Code 1.90 or later.
 
-### Generate APIs from Mermaid Diagram
+## From the database
 
-Turn a Mermaid `erDiagram` or `classDiagram` (hand-written or produced by an AI assistant) into a working API. The command uses the active `.mmd` file or lets you browse for one. Cardinalities (`||--o{`, `"1" --> "*"`) become the right Eloquent relations on both sides. See [Mermaid Diagrams](/guide/mermaid).
+This is the legacy-project route. It generates complete REST APIs for **every table at once**, straight from the existing schema. A multi-select lists the tables with their column count, all preselected except `users`, so your customized `app/Models/User.php` is never overwritten by accident. The review screen follows, where **Migrations too** decides whether the migration files are written as well. Foreign keys become `belongsTo` and `hasMany`, pivot tables become `belongsToMany`, and `deleted_at` columns enable soft deletes. Details in [From an Existing Database](/guide/from-database).
 
-### Generate APIs from OpenAPI Spec
+## From a schema file
 
-Hand an OpenAPI 3.0, 3.1 or Swagger 2.0 spec, JSON or YAML, to the package. The command uses the active spec or lets you browse for one, then runs a dry run before anything is written. A dialog names the entities it found, counts the files to create and update, and lists the schemas left aside with the reason, such as `NewPet` next to `Pet` or `ErrorResponse`. **Generate** writes them.
+Describe the whole API in a declarative, versionable YAML or JSON file. The extension picks up `api-schema.yaml`, `.yml` or `.json` at the project root, or lets you browse for one. Entities are generated parents first, with FK-safe migration ordering and automatic pivot migrations. See [YAML & JSON Schemas](/guide/schema-files).
 
-A spec that lives outside the project is sent on stdin, so Sail and Docker projects work too. See [OpenAPI Specs](/guide/openapi) for what becomes what.
+## From a Mermaid diagram
 
-## Panel imports
+Turn a Mermaid `erDiagram` or `classDiagram`, hand-written or produced by an AI assistant, into a working API. The command uses the active `.mmd` file or lets you browse for one. Cardinalities (`||--o{`, `"1" --> "*"`) become the right Eloquent relations on both sides. See [Mermaid Diagrams](/guide/mermaid).
 
-Buttons inside the generator panel that pre-fill the form, so you can review and adjust before generating.
+## From an OpenAPI spec
 
-### Import from Database (single table)
+Hand an OpenAPI 3.0, 3.1 or Swagger 2.0 spec, JSON or YAML, to the package. The command uses the active spec or lets you browse for one, and the review screen shows the schema count of the spec next to its name. A spec that lives outside the project is sent on stdin, so Sail and Docker projects work too. See [OpenAPI Specs](/guide/openapi) for what becomes what.
 
-Prefer to review one table before generating? The extension lists every user table (system tables like `migrations`, `sessions` and `personal_access_tokens` are filtered out). Pick one: its columns are read, mapped to the generator's vocabulary, and the form is pre-filled with the entity name (singularized and PascalCased), the field list and the Soft Deletes flag when a `deleted_at` column exists. Review, adjust, then click **Generate API**.
+## Builder imports
 
-### OpenAPI / Swagger import
+The builder's **Import** menu fills the form instead, so you can adjust one entity before generating it.
 
-The **Import OpenAPI** button opens the same flow as the command above, YAML included: the package reads the spec, the dry run dialog shows what it understood, and **Generate** writes the API.
-
-<!-- SCREENSHOT: the OpenAPI dry run dialog. Save as docs/public/ext-import-openapi.png then:
-![OpenAPI import](/ext-import-openapi.png)
--->
-
-With a package older than 3.13, the button falls back to the extension's own importer, which reads JSON specs only and fills the bulk list like the JSON import below.
-
-### JSON bulk import
-
-Import a `class_data.json` file to generate multiple entities at once, with a visual preview of every entity, its fields and relationships before the one-click generation. Relationships (`oneToMany`, `manyToOne`, `manyToMany`, compositions, aggregations) are supported. [Download a sample class_data.json](https://github.com/Nameless0l/laravel-api-generator/blob/main/examples/class_data.json) to try it: a Blog with Author, Category, Article and Tag.
+- **A database table** lists the user tables, system tables such as `migrations`, `sessions` or `personal_access_tokens` left out. The columns of the table you pick are mapped to the generator's types, and the form gets the entity name (singular, PascalCase), the fields and soft deletes when a `deleted_at` column exists.
+- **A class_data.json file** shows every entity it defines with its fields and relations, then generates them all in one click. Relationships (`oneToMany`, `manyToOne`, `manyToMany`, compositions, aggregations) are supported. [Download a sample class_data.json](https://github.com/Nameless0l/laravel-api-generator/blob/main/examples/class_data.json) to try it, a blog with Author, Category, Article and Tag.
+- **An OpenAPI spec** leads to the review screen above. With a package older than 3.13, it falls back to the extension's own importer, which reads JSON specs only.

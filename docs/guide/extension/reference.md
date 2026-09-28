@@ -7,11 +7,11 @@ All commands live under the **Laravel API Generator** category in the command pa
 | Command | Description |
 |---------|-------------|
 | Generate Full API | Open the [Entity Builder](/guide/extension/builder) panel |
-| Generate APIs from Database | Whole-schema generation with table multi-select |
-| Generate APIs from Schema File | Generate from `api-schema.yaml` / `.yml` / `.json` |
-| Generate APIs from Mermaid Diagram | Generate from a `.mmd` file |
-| Generate APIs from OpenAPI Spec | Generate from an OpenAPI or Swagger file, JSON or YAML, after a dry run |
-| Describe an API with Copilot | Draft `api-schema.yaml` from a description, then preview and generate it |
+| Generate APIs from Database | Every table at once, picked in a multi-select, then the [review screen](/guide/extension/imports#the-review-screen) |
+| Generate APIs from Schema File | Generate from `api-schema.yaml` / `.yml` / `.json`, after the review screen |
+| Generate APIs from Mermaid Diagram | Generate from a `.mmd` file, after the review screen |
+| Generate APIs from OpenAPI Spec | Generate from an OpenAPI or Swagger file, JSON or YAML, after the review screen |
+| Describe an API with Copilot | Open the Copilot panel: describe the API, adjust the proposed entities, then review the plan |
 | Add Fields to Entity… | Evolve an entity via `--add-fields` |
 | Regenerate File(s)… | Rebuild selected artifacts via `--only=` |
 | Delete Full API | Remove an entity's files, routes and seeder registration |
@@ -19,6 +19,7 @@ All commands live under the **Laravel API Generator** category in the command pa
 | Show Snippets | List the bundled PHP snippets |
 | Go to Related File | Jump between an entity's generated files |
 | Refresh Entities | Re-scan the project for generated entities |
+| Project Actions | Migrations, tests, seeding, API docs and stubs, run in a panel with their result |
 
 ## Keybindings
 
@@ -56,7 +57,9 @@ Type a `lag:` prefix in any PHP file:
 
 In a Laravel project, the extension gives GitHub Copilot (VS Code 1.109 and later) the package's `laravel-api-generator` agent skill. Copilot loads it when a task calls for new API resources or CRUD endpoints, and generates them with `make:fullapi` instead of writing the files by hand.
 
-When the project also has `laravel/mcp`, the extension registers the package's [MCP server](/guide/mcp) (VS Code 1.101 and later). Copilot's agent mode then lists a Laravel API Generator server whose tools list your entities, preview a generation, generate APIs and add fields, and never overwrite a file you edited. The server starts with the PHP command of the settings above, so Sail and Docker work too, and it appears or disappears on its own when you install or remove `laravel/mcp`.
+When the project also has `laravel/mcp`, the extension registers the package's [MCP server](/guide/mcp) (VS Code 1.101 and later). Copilot's agent mode then lists a Laravel API Generator server whose tools list your entities, preview a generation, generate APIs and add fields, and never overwrite a file you edited. The server starts with the PHP command of the settings above, so Sail and Docker work too, and it appears or disappears on its own when you install or remove `laravel/mcp`. It also shows up in the Extensions view, under **MCP Servers - Installed**.
+
+![The package's MCP server in VS Code, started with php artisan api-generator:mcp](/ext-mcp-server.png)
 
 `api-schema.yaml`, `api-schema.yml` and `api-schema.json` are checked against the package's [JSON Schema](/guide/schema-files#editor-autocompletion): keys and types complete as you type, and typos show up as problems. YAML files need the Red Hat YAML extension; JSON works out of the box.
 

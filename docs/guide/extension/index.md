@@ -1,27 +1,25 @@
 # VS Code Extension
 
-A free visual interface for the generator: build entities in a form, preview the generated code live, and drive the whole API lifecycle without touching the terminal.
+A free visual interface for the generator. Build an entity in a form while the package shows the files it will write, generate from your database, a spec or a plain description, then run the migrations and the tests from the same panel.
 
 [**Install from the Marketplace**](https://marketplace.visualstudio.com/items?itemName=Nameless0l.laravel-api-generator) · [Extension repository](https://github.com/Nameless0l/laravel-api-generator-vscode)
 
-<!-- VIDEO #5 (YouTube): uncomment and set VIDEO_ID once the extension tour video is online:
+<!-- VIDEO (YouTube): uncomment and set VIDEO_ID once the 4.0 launch video is online:
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
-  <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="The VS Code extension tour" allowfullscreen loading="lazy"></iframe>
+  <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Laravel API Generator 4.0 and its VS Code extension" allowfullscreen loading="lazy"></iframe>
 </div>
 -->
 
-<!-- SCREENSHOT: full extension view (sidebar + generator panel). Save as docs/public/ext-overview.png then:
-![The extension in VS Code](/ext-overview.png)
--->
+![The extension in VS Code: the sidebar home, the builder and the live preview of the files](/ext-overview.png)
 
 ## What it adds
 
 | | |
 |---|---|
-| [Entity Builder](/guide/extension/builder) | A form with live code preview instead of CLI flags: fields, enums, relations, options |
-| [Imports](/guide/extension/imports) | Generate from your database, a schema file, a Mermaid diagram, a JSON definition or an **OpenAPI / Swagger spec** |
-| [Diagram & Sidebar](/guide/extension/diagram-and-sidebar) | An interactive entity canvas and a tree of everything you generated |
-| [Quick Actions & Guardrails](/guide/extension/quick-actions) | Migrate, seed, tests, routes and API docs in one click, server and dependencies handled for you |
+| [Entity Builder](/guide/extension/builder) | A form next to the live preview of every file, rendered by the package installed in your project |
+| [Sources & Review](/guide/extension/imports) | Generate from a description with Copilot, your database, a schema file, a Mermaid diagram or an **OpenAPI spec**, after reviewing the package's dry run |
+| [Diagram & Sidebar](/guide/extension/diagram-and-sidebar) | An entity canvas with an inspector, and the tree of every generated file, the ones you edited flagged |
+| [API Ready & Project Actions](/guide/extension/quick-actions) | Migrations, tests, seeding, API docs and stubs, run in place with their result |
 | [Copilot](/guide/extension/reference#copilot-and-schema-files) | The package's agent skill and its [MCP server](/guide/mcp), so Copilot's agent mode plans and generates APIs through the package |
 | [Commands & Settings](/guide/extension/reference) | Command palette reference, keybindings, settings, PHP snippets |
 
@@ -43,16 +41,16 @@ A native **Getting Started walkthrough** (Help → Get Started) covers the packa
 
 ## Requirements
 
-- VS Code 1.80+
-- PHP 8.2+ on your PATH (or set `laravelApiGenerator.phpPath`)
+- VS Code 1.82+
+- PHP 8.2+ on your PATH (or set `laravelApiGenerator.phpPath`, or `laravelApiGenerator.phpCommand` for Sail and Docker)
 - A Laravel 10 / 11 / 12 / 13 project. The package's 4.x line needs Laravel 12: on Laravel 10 and 11, the extension installs its 3.x line.
 
 ## Your first API, without a terminal
 
-1. Click the **Laravel API Generator** icon in the activity bar.
-2. Pick a Quick Start preset (Blog Post, Product…), fill the form, or [import](/guide/extension/imports) from your database or a spec.
-3. Watch the [live preview](/guide/extension/builder) update as you type, then click **Generate API**. The new Model and Controller open in the editor.
-4. Click **Run Migrations** (if `.env` is missing, the extension offers to create it from `.env.example`), then **Fresh + Seed** if you want sample data.
-5. Click **Open API Docs**: the extension starts the server if none is running and opens the interactive documentation of your new API in the browser.
+1. Click the **Laravel API Generator** icon in the activity bar, then **New API**.
+2. Fill the form, start from the **Examples** menu, or bring an entity from the **Import** menu. The [live preview](/guide/extension/builder) follows every change.
+3. Click **Generate the API** (`Ctrl+Enter`). The panel becomes the [API ready screen](/guide/extension/quick-actions), with the files written and the routes registered.
+4. Run the migrations, then the tests. Each step shows its result in place, such as the number of tests passed. If `.env` is missing, the extension first offers to create it from `.env.example`.
+5. **Open the API documentation** starts the development server if none is running and opens the interactive documentation of your new API. When Scramble is missing, the step offers to install it.
 
-The full tour of the buttons is on the [Quick Actions](/guide/extension/quick-actions) page.
+![One click on Generate the API, then the migrations and the tests run in place](/ext-generate.gif)

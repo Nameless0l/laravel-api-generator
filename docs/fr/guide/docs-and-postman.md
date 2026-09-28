@@ -13,7 +13,7 @@ php artisan serve
 
 Ouvrez `http://localhost:8000/docs/api` :
 
-Depuis VS Code, le bouton **Open API Docs** de l'[extension](/fr/guide/extension/quick-actions) fait tout le trajet en un clic, y compris démarrer le serveur si aucun ne tourne et proposer l'installation de Scramble s'il manque.
+Depuis VS Code, l'étape **Ouvrir la documentation de l'API** de l'[extension](/fr/guide/extension/quick-actions) fait tout le trajet en un clic, y compris démarrer le serveur si aucun ne tourne et proposer l'installation de Scramble s'il manque.
 
 ![Doc API Scramble](../../scramble-docs.png)
 

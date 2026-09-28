@@ -125,6 +125,14 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## VS Code extension
 
+### 1.1.0 - September 28, 2026
+
+- A redesigned interface. The sidebar home shows the project, its Laravel and PHP versions and the package state, with **New API**, the sources and the project tools. See [Diagram & Sidebar](/guide/extension/diagram-and-sidebar#the-sidebar-home).
+- **One review screen for every source**: a description, the database, a schema file, a Mermaid diagram and an OpenAPI spec open the package's dry run, entity by entity, before **Generate**. See [Sources & Review](/guide/extension/imports#the-review-screen).
+- **Describe with Copilot in a panel**: pick the model, relate the API to the existing entities or not, adjust the proposed entities, then review the plan.
+- **An API ready screen** runs the migrations, the tests, the seeding, the docs and the stubs in place, and **Project Actions** opens it at any time. See [API Ready & Project Actions](/guide/extension/quick-actions).
+- The builder previews the real files next to the form, with **nullable**, **unique** and **default** on each field. The entity diagram gains a search, a minimap, an export to SVG or Mermaid and an inspector. Files edited by hand are flagged in the entity tree.
+
 ### 1.0.0 - September 27, 2026
 
 - Pairs with the package 4.0: the entity tree, **Go to Related File** and **Regenerate File(s)** read the generation manifest, so the Store and Update requests, the enums and the `--add-fields` migrations show up.
@@ -133,7 +141,7 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ### 0.17.0 - September 27, 2026
 
-- **Describe an API with Copilot**: write the API in plain words, review the `api-schema.yaml` Copilot drafts, then preview and generate it. See [Imports](/guide/extension/imports#describe-an-api-with-copilot).
+- **Describe an API with Copilot**: write the API in plain words, review the `api-schema.yaml` Copilot drafts, then preview and generate it. See [Sources & Review](/guide/extension/imports#describe-an-api-with-copilot).
 
 ### 0.16.0 - September 27, 2026
 
