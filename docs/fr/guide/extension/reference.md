@@ -7,11 +7,11 @@ Toutes les commandes vivent sous la catégorie **Laravel API Generator** de la p
 | Commande | Description |
 |----------|-------------|
 | Generate Full API | Ouvre le panneau du [builder d'entités](/fr/guide/extension/builder) |
-| Generate APIs from Database | Génération schéma complet avec multi-sélection des tables |
-| Generate APIs from Schema File | Génère depuis `api-schema.yaml` / `.yml` / `.json` |
-| Generate APIs from Mermaid Diagram | Génère depuis un fichier `.mmd` |
-| Generate APIs from OpenAPI Spec | Génère depuis un fichier OpenAPI ou Swagger, en JSON ou en YAML, après un essai à blanc |
-| Describe an API with Copilot | Rédige `api-schema.yaml` depuis une description, puis le prévisualise et le génère |
+| Generate APIs from Database | Toutes les tables d'un coup, choisies dans une sélection multiple, puis l'[écran de relecture](/fr/guide/extension/imports#l-ecran-de-relecture) |
+| Generate APIs from Schema File | Génère depuis `api-schema.yaml` / `.yml` / `.json`, après l'écran de relecture |
+| Generate APIs from Mermaid Diagram | Génère depuis un fichier `.mmd`, après l'écran de relecture |
+| Generate APIs from OpenAPI Spec | Génère depuis un fichier OpenAPI ou Swagger, en JSON ou en YAML, après l'écran de relecture |
+| Describe an API with Copilot | Ouvre le panneau Copilot : décrivez l'API, ajustez les entités proposées, puis relisez le plan |
 | Add Fields to Entity… | Fait évoluer une entité via `--add-fields` |
 | Regenerate File(s)… | Reconstruit les artefacts choisis via `--only=` |
 | Delete Full API | Supprime fichiers, routes et enregistrement du seeder d'une entité |
@@ -19,6 +19,7 @@ Toutes les commandes vivent sous la catégorie **Laravel API Generator** de la p
 | Show Snippets | Liste les snippets PHP embarqués |
 | Go to Related File | Saute entre les fichiers générés d'une entité |
 | Refresh Entities | Re-scanne le projet à la recherche d'entités générées |
+| Project Actions | Migrations, tests, seed, doc API et stubs, lancés dans un panneau avec leur résultat |
 
 ## Raccourcis clavier
 
@@ -56,7 +57,9 @@ Tapez un préfixe `lag:` dans n'importe quel fichier PHP :
 
 Dans un projet Laravel, l'extension donne à GitHub Copilot (VS Code 1.109 et plus) le skill `laravel-api-generator` du package. Copilot le charge quand une tâche demande de nouvelles ressources d'API ou des endpoints CRUD, et les génère avec `make:fullapi` au lieu d'écrire les fichiers à la main.
 
-Quand le projet a aussi `laravel/mcp`, l'extension enregistre le [serveur MCP](/fr/guide/mcp) du package (VS Code 1.101 et plus). Le mode agent de Copilot affiche alors un serveur Laravel API Generator dont les outils listent vos entités, prévisualisent une génération, génèrent des API et ajoutent des champs, sans jamais écraser un fichier que vous avez modifié. Le serveur démarre avec la commande PHP des réglages ci-dessus, Sail et Docker compris, et il apparaît ou disparaît de lui-même quand vous installez ou retirez `laravel/mcp`.
+Quand le projet a aussi `laravel/mcp`, l'extension enregistre le [serveur MCP](/fr/guide/mcp) du package (VS Code 1.101 et plus). Le mode agent de Copilot affiche alors un serveur Laravel API Generator dont les outils listent vos entités, prévisualisent une génération, génèrent des API et ajoutent des champs, sans jamais écraser un fichier que vous avez modifié. Le serveur démarre avec la commande PHP des réglages ci-dessus, Sail et Docker compris, et il apparaît ou disparaît de lui-même quand vous installez ou retirez `laravel/mcp`. On le retrouve aussi dans la vue Extensions, sous **MCP Servers - Installed**.
+
+![Le serveur MCP du package dans VS Code, lancé avec php artisan api-generator:mcp](/ext-mcp-server.png)
 
 `api-schema.yaml`, `api-schema.yml` et `api-schema.json` sont vérifiés avec le [JSON Schema](/fr/guide/schema-files#autocompletion-dans-l-editeur) du package : les clés et les types se complètent pendant la saisie, et les fautes de frappe apparaissent comme des problèmes. Les fichiers YAML demandent l'extension YAML de Red Hat ; le JSON fonctionne tel quel.
 

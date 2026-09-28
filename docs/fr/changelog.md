@@ -125,6 +125,14 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Extension VS Code
 
+### 1.1.0 - 28 septembre 2026
+
+- Une interface repensée. L'accueil de la sidebar montre le projet, ses versions de Laravel et de PHP et l'état du package, avec **Nouvelle API**, les sources et les outils du projet. Voir [Diagramme & sidebar](/fr/guide/extension/diagram-and-sidebar#l-accueil-de-la-sidebar).
+- **Un seul écran de relecture pour toutes les sources** : une description, la base, un fichier de schéma, un diagramme Mermaid et une spec OpenAPI ouvrent la simulation du package, entité par entité, avant **Générer**. Voir [Sources & relecture](/fr/guide/extension/imports#l-ecran-de-relecture).
+- **Décrire avec Copilot dans un panneau** : choisissez le modèle, reliez ou non l'API aux entités existantes, ajustez les entités proposées, puis relisez le plan.
+- **Un écran d'API prête** lance sur place les migrations, les tests, le seed, la doc et les stubs, et **Project Actions** l'ouvre à tout moment. Voir [API prête & actions du projet](/fr/guide/extension/quick-actions).
+- Le builder prévisualise les vrais fichiers à côté du formulaire, avec **nullable**, **unique** et **défaut** sur chaque champ. Le diagramme d'entités gagne une recherche, une minicarte, un export SVG ou Mermaid et un inspecteur. Les fichiers retouchés à la main sont signalés dans l'arbre des entités.
+
 ### 1.0.0 - 27 septembre 2026
 
 - Va avec le package 4.0 : l'arbre des entités, **Go to Related File** et **Regenerate File(s)** lisent le manifest de génération, donc les requests Store et Update, les enums et les migrations de `--add-fields` apparaissent.
@@ -133,7 +141,7 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ### 0.17.0 - 27 septembre 2026
 
-- **Describe an API with Copilot** : décrivez l'API avec vos mots, relisez l'`api-schema.yaml` rédigé par Copilot, puis prévisualisez-le et générez-le. Voir [Imports](/fr/guide/extension/imports#describe-an-api-with-copilot).
+- **Describe an API with Copilot** : décrivez l'API avec vos mots, relisez l'`api-schema.yaml` rédigé par Copilot, puis prévisualisez-le et générez-le. Voir [Sources & relecture](/fr/guide/extension/imports#decrire-une-api-avec-copilot).
 
 ### 0.16.0 - 27 septembre 2026
 

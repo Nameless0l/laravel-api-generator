@@ -32,15 +32,76 @@ Chaque type se propage dans toute la pile : colonne de migration, règles de val
 php artisan make:fullapi Article --fields="title:string,status:enum(draft,published,archived)"
 ```
 
-Une seule définition de champ produit toute la chaîne :
+Une seule définition de champ produit toute la chaîne. Voici le code qu'écrit la commande ci-dessus, réduit aux lignes qui concernent l'enum :
 
-![Un seul champ enum se déploie en cinq fichiers cohérents](/enum-chain.gif)
+::: code-group
 
-- `app/Enums/ArticleStatus.php` : un `enum ArticleStatus: string` avec un case par valeur, nommé d'après l'entité et le champ
-- Modèle : `'status' => ArticleStatus::class` dans `casts()` et `@property ArticleStatus $status` dans le PHPDoc
-- Request : validation `Rule::enum(ArticleStatus::class)`
-- Factory : `fake()->randomElement(ArticleStatus::cases())`
-- Migration : `$table->enum('status', ['draft', 'published', 'archived'])`
+```php [Enum]
+namespace App\Enums;
+
+enum ArticleStatus: string
+{
+    case Draft = 'draft';
+    case Published = 'published';
+    case Archived = 'archived';
+}
+```
+
+```php [Modèle]
+/**
+ * @property int $id
+ * @property string $title
+ * @property ArticleStatus $status
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
+class Article extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['title', 'status'];
+
+    protected function casts(): array
+    {
+        return [
+            'status' => ArticleStatus::class,
+        ];
+    }
+}
+```
+
+```php [Request]
+public function rules(): array
+{
+    return [
+        'title' => 'required|string|max:255',
+        'status' => ['required', Rule::enum(ArticleStatus::class)],
+    ];
+}
+```
+
+```php [Factory]
+public function definition(): array
+{
+    return [
+        'title' => fake()->word(),
+        'status' => fake()->randomElement(ArticleStatus::cases()),
+    ];
+}
+```
+
+```php [Migration]
+Schema::create('articles', function (Blueprint $table) {
+    $table->id();
+    $table->string('title');
+    $table->enum('status', ['draft', 'published', 'archived']);
+    $table->timestamps();
+});
+```
+
+:::
+
+L'enum porte le nom de l'entité et du champ, `ArticleStatus` ici, si bien que deux entités peuvent avoir chacune leur `status`.
 
 Dans un fichier de schéma :
 

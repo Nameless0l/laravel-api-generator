@@ -1,59 +1,49 @@
-# Imports : base de données, schéma, Mermaid, JSON, OpenAPI
+# Sources & relecture
 
-On part rarement d'un formulaire vide. L'extension sait générer toute la surface d'API depuis ce que vous avez déjà, une base de données, un schéma versionné, un diagramme ou une spec.
+On part rarement d'un formulaire vide. L'extension génère toute l'API depuis ce que vous avez déjà, une base de données, un schéma versionné, un diagramme ou une spec, ou depuis une description écrite avec vos mots. Toutes ces sources mènent au même écran de relecture, avant que quoi que ce soit ne soit écrit.
 
-## Commandes schéma complet
+Les sources sont dans l'accueil de la sidebar sous **Générer depuis**, dans le menu `...` de la vue des entités et dans la palette de commandes.
 
-Disponibles dans la palette de commandes et le menu `…` de la sidebar.
+## L'écran de relecture
 
-### Describe an API with Copilot
+Le package lance la génération à blanc, et le panneau montre ce qu'elle ferait. Chaque entité liste ses champs, ses relations et les fichiers qu'elle recevrait, avec un badge pour les nouvelles et pour celles déjà générées. Les fichiers partagés, `routes/api.php` et `DatabaseSeeder.php`, ont leur propre ligne. Sur le côté, le résumé compte les fichiers à créer et à modifier et les nouvelles routes, et les options de génération (Tests Pest, Collection Postman, Auth Sanctum, Spatie QueryBuilder, Resources JSON:API) restent modifiables.
 
-Partez d'une phrase. Décrivez l'API avec vos mots, par exemple une bibliothèque qui prête des livres à ses membres, où un prêt a une date de retour, et le modèle que propose VS Code (GitHub Copilot en priorité) rédige un `api-schema.yaml`. Le modèle reçoit aussi le nom des entités déjà présentes dans le projet, et le brouillon s'y rattache au lieu de les redéfinir. Il s'ouvre dans un éditeur, où vous corrigez un type ou renommez un champ avant toute action.
+![La relecture d'une spec OpenAPI, puis la génération des deux entités](/ext-review.gif)
 
-**Prévisualiser et générer** envoie le brouillon modifié au package. La même fenêtre d'essai à blanc que pour l'import OpenAPI nomme les entités et compte les fichiers, et **Générer** les écrit. **Enregistrer en api-schema.yaml** garde plutôt le brouillon à la racine du projet, comme source versionnée de l'API. Il faut VS Code 1.90 ou plus récent et un modèle de chat connecté.
+Un fichier retouché à la main depuis la dernière génération reste tel quel. L'écran le nomme, **Voir les diffs** le compare avec ce que le générateur écrirait, et **Écraser quand même** l'inclut volontairement. Les schémas que le package a laissés de côté sont listés avec la raison, comme le schéma d'erreur d'une spec.
 
-### Generate APIs from Database
+**Générer** écrit les fichiers et ouvre l'[écran de l'API prête](/fr/guide/extension/quick-actions) avec les étapes suivantes.
 
-C'est la commande des projets legacy. Elle génère des API REST complètes pour **toutes les tables d'un coup**, directement depuis le schéma existant.
+## Décrire une API avec Copilot
 
-<!-- CAPTURE : le QuickPick multi-sélection de tables. Enregistrer sous docs/public/ext-imports-database.png puis :
-![Sélection des tables](/ext-imports-database.png)
--->
+Partez d'une phrase. **Une description** ouvre un panneau où vous écrivez l'API avec vos mots, par exemple des salles que des membres réservent par créneau, une réservation ayant un début, une fin et un statut. Trois exemples remplissent la zone si vous voulez d'abord essayer.
 
-Une multi-sélection liste les tables, toutes présélectionnées sauf `users` pour ne jamais écraser votre `app/Models/User.php` personnalisé par accident. Choisissez vos options (filtrage Spatie QueryBuilder, tests Pest, génération ou non des fichiers de migration) et générez : les clés étrangères deviennent `belongsTo`/`hasMany`, les tables pivots `belongsToMany`, et les colonnes `deleted_at` activent les Soft Deletes, le tout automatiquement. Détails dans [Depuis une base existante](/fr/guide/from-database).
+![Le panneau Décrivez votre API](/ext-describe.png)
 
-### Generate APIs from Schema File
+Choisissez le modèle de chat que propose VS Code (GitHub Copilot par défaut) et décidez s'il doit relier les nouvelles entités à celles que votre projet contient déjà. Le modèle rédige un `api-schema.yaml`, et les entités proposées apparaissent en cartes, marquées nouvelles, modifiées ou déjà dans le projet. Cliquez sur une carte pour ajuster l'entité dans le brouillon YAML, et les cartes suivent vos modifications. **Relire le plan** ouvre l'écran de relecture. **Enregistrer en api-schema.yaml** garde plutôt le brouillon à la racine du projet, comme source versionnée de l'API.
 
-Décrivez toute l'API dans un fichier YAML/JSON déclaratif et versionnable. L'extension détecte `api-schema.yaml` / `.yml` / `.json` à la racine du projet, ou vous laisse en choisir un. Les entités sont générées parents d'abord, avec un ordre de migrations sûr pour les FK et les migrations pivots automatiques. Voir [Schémas YAML & JSON](/fr/guide/schema-files).
+Quand le modèle ne peut pas répondre, le panneau dit pourquoi, que Copilot soit déconnecté, qu'aucun modèle ne soit installé ou que le fournisseur renvoie une erreur, avec la correction en bouton quand elle existe, comme renseigner une clé d'API. Le panneau demande VS Code 1.90 ou plus récent.
 
-### Generate APIs from Mermaid Diagram
+## Depuis la base de données
 
-Transformez un `erDiagram` ou `classDiagram` Mermaid (écrit à la main ou produit par un assistant IA) en API fonctionnelle. La commande utilise le fichier `.mmd` actif ou vous laisse en choisir un. Les cardinalités (`||--o{`, `"1" --> "*"`) deviennent les bonnes relations Eloquent des deux côtés. Voir [Diagrammes Mermaid](/fr/guide/mermaid).
+C'est la voie des projets existants. Elle génère des API REST complètes pour **toutes les tables d'un coup**, directement depuis le schéma en place. Une sélection multiple liste les tables avec leur nombre de colonnes, toutes cochées sauf `users`, pour que votre `app/Models/User.php` personnalisé ne soit jamais écrasé par accident. L'écran de relecture suit, où **Avec les migrations** décide si les fichiers de migration sont écrits aussi. Les clés étrangères deviennent `belongsTo` et `hasMany`, les tables pivot `belongsToMany`, et les colonnes `deleted_at` activent les soft deletes. Détails dans [Depuis une base existante](/fr/guide/from-database).
 
-### Generate APIs from OpenAPI Spec
+## Depuis un fichier de schéma
 
-Confiez au package une spec OpenAPI 3.0, 3.1 ou Swagger 2.0, en JSON ou en YAML. La commande prend la spec active ou vous laisse en choisir une, puis lance un essai à blanc avant d'écrire quoi que ce soit. Une fenêtre nomme les entités trouvées, compte les fichiers à créer et à modifier, et liste les schémas écartés avec la raison, comme `NewPet` à côté de `Pet` ou `ErrorResponse`. **Générer** les écrit.
+Décrivez toute l'API dans un fichier YAML ou JSON déclaratif et versionnable. L'extension repère `api-schema.yaml`, `.yml` ou `.json` à la racine du projet, ou vous laisse en choisir un. Les entités sont générées parents d'abord, avec un ordre de migrations compatible avec les clés étrangères et des migrations pivot automatiques. Voir [Schémas YAML & JSON](/fr/guide/schema-files).
 
-Une spec rangée hors du projet passe par l'entrée standard, les projets Sail et Docker fonctionnent donc aussi. Voir [Specs OpenAPI](/fr/guide/openapi) pour ce que devient chaque élément.
+## Depuis un diagramme Mermaid
 
-## Imports du panneau
+Transformez un `erDiagram` ou un `classDiagram` Mermaid, écrit à la main ou produit par un assistant IA, en API qui fonctionne. La commande prend le fichier `.mmd` actif ou vous laisse en choisir un. Les cardinalités (`||--o{`, `"1" --> "*"`) deviennent les bonnes relations Eloquent des deux côtés. Voir [Diagrammes Mermaid](/fr/guide/mermaid).
 
-Des boutons dans le panneau générateur qui pré-remplissent le formulaire, pour relire et ajuster avant de générer.
+## Depuis une spec OpenAPI
 
-### Import from Database (une table)
+Confiez une spec OpenAPI 3.0, 3.1 ou Swagger 2.0, en JSON ou en YAML, au package. La commande prend la spec active ou vous laisse en choisir une, et l'écran de relecture affiche le nombre de schémas lus à côté de son nom. Une spec située hors du projet passe par stdin, donc les projets Sail et Docker fonctionnent aussi. Voir [Specs OpenAPI](/fr/guide/openapi) pour savoir ce que devient chaque élément.
 
-Vous préférez relire une table avant de générer ? L'extension liste toutes les tables utilisateur (les tables système comme `migrations`, `sessions` et `personal_access_tokens` sont filtrées). Choisissez-en une : ses colonnes sont lues, mappées vers le vocabulaire du générateur, et le formulaire est pré-rempli avec le nom d'entité (singularisé et en PascalCase), la liste des champs et le flag Soft Deletes si une colonne `deleted_at` existe. Relisez, ajustez, puis cliquez **Generate API**.
+## Imports du builder
 
-### Import OpenAPI / Swagger
+Le menu **Importer** du builder remplit plutôt le formulaire, pour ajuster une entité avant de la générer.
 
-Le bouton **Import OpenAPI** ouvre le même parcours que la commande ci-dessus, YAML compris : le package lit la spec, la fenêtre de l'essai à blanc montre ce qu'il a compris, et **Générer** écrit l'API.
-
-<!-- CAPTURE : la fenêtre de l'essai à blanc OpenAPI. Enregistrer sous docs/public/ext-import-openapi.png puis :
-![Import OpenAPI](/ext-import-openapi.png)
--->
-
-Avec un package antérieur à 3.13, le bouton revient à l'importeur de l'extension, qui ne lit que les specs JSON et remplit la liste en masse comme l'import JSON ci-dessous.
-
-### Import JSON en masse
-
-Importez un fichier `class_data.json` pour générer plusieurs entités d'un coup, avec un aperçu visuel de chaque entité, ses champs et ses relations avant la génération en un clic. Les relations (`oneToMany`, `manyToOne`, `manyToMany`, compositions, agrégations) sont supportées. [Téléchargez un class_data.json d'exemple](https://github.com/Nameless0l/laravel-api-generator/blob/main/examples/class_data.json) pour essayer : un blog avec Author, Category, Article et Tag.
+- **Une table de la base** liste les tables utilisateur, sans les tables système comme `migrations`, `sessions` ou `personal_access_tokens`. Les colonnes de la table choisie sont traduites dans les types du générateur, et le formulaire reçoit le nom d'entité (au singulier, en PascalCase), les champs et les soft deletes quand une colonne `deleted_at` existe.
+- **Un fichier class_data.json** montre chaque entité qu'il définit avec ses champs et ses relations, puis les génère toutes en un clic. Les relations (`oneToMany`, `manyToOne`, `manyToMany`, compositions, agrégations) sont supportées. [Téléchargez un class_data.json d'exemple](https://github.com/Nameless0l/laravel-api-generator/blob/main/examples/class_data.json) pour essayer, un blog avec Author, Category, Article et Tag.
+- **Une spec OpenAPI** mène à l'écran de relecture décrit plus haut. Avec un package antérieur à la 3.13, elle se rabat sur l'importeur de l'extension, qui ne lit que les specs JSON.
