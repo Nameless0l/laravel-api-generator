@@ -155,10 +155,8 @@ Three commands, and the test suite is already green. The tests come with the API
 
 <HomeTestimonials title="What people say" :items="testimonials" />
 
-<!-- VIDEO #1 (YouTube): uncomment and set VIDEO_ID once the first demo video is online:
 ## Watch the demo
 
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
-  <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="A complete Laravel API in 30 seconds" allowfullscreen loading="lazy"></iframe>
+  <iframe src="https://www.youtube-nocookie.com/embed/bRK9Y8jn7yY" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Laravel API Generator 4.0 in two minutes" allowfullscreen loading="lazy"></iframe>
 </div>
--->

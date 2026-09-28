@@ -4,11 +4,9 @@ A free visual interface for the generator. Build an entity in a form while the p
 
 [**Install from the Marketplace**](https://marketplace.visualstudio.com/items?itemName=Nameless0l.laravel-api-generator) · [Extension repository](https://github.com/Nameless0l/laravel-api-generator-vscode)
 
-<!-- VIDEO (YouTube): uncomment and set VIDEO_ID once the 4.0 launch video is online:
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
-  <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Laravel API Generator 4.0 and its VS Code extension" allowfullscreen loading="lazy"></iframe>
+  <iframe src="https://www.youtube-nocookie.com/embed/bRK9Y8jn7yY" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Laravel API Generator 4.0 and its VS Code extension" allowfullscreen loading="lazy"></iframe>
 </div>
--->
 
 ![The extension in VS Code: the sidebar home, the builder and the live preview of the files](/ext-overview.png)
 
