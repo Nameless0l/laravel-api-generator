@@ -109,6 +109,7 @@ L'autocomplétion fonctionne immédiatement dans VS Code et PhpStorm, sans `ide-
 - [Générer depuis une base de données existante](/fr/guide/from-database)
 - [Décrire toute votre API dans un schéma YAML](/fr/guide/schema-files)
 - [Utiliser l'extension VS Code](/fr/guide/extension/)
+- [La comparaison avec API Platform](/fr/guide/comparison)
 
 <!-- VIDEO #1 (YouTube) : décommenter et renseigner VIDEO_ID quand la vidéo est en ligne, puis la placer en haut de page :
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">

@@ -109,6 +109,7 @@ Autocomplete works instantly in VS Code and PhpStorm, without `ide-helper` for t
 - [Generate from an existing database](/guide/from-database)
 - [Describe your whole API in a YAML schema](/guide/schema-files)
 - [Use the VS Code extension](/guide/extension/)
+- [How it compares to API Platform](/guide/comparison)
 
 <!-- VIDEO #1 (YouTube): uncomment and set VIDEO_ID once the video is online, then move it near the top of the page:
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
