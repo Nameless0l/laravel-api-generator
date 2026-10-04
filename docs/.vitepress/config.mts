@@ -4,7 +4,10 @@ import llmstxt from "vitepress-plugin-llms";
 const enCliSidebar = [
   {
     text: "Introduction",
-    items: [{ text: "Getting Started", link: "/guide/getting-started" }],
+    items: [
+      { text: "Getting Started", link: "/guide/getting-started" },
+      { text: "Compared to API Platform", link: "/guide/comparison" },
+    ],
   },
   {
     text: "Generate",
@@ -86,7 +89,10 @@ const enExtensionSidebar = [
 const frCliSidebar = [
   {
     text: "Introduction",
-    items: [{ text: "Démarrage rapide", link: "/fr/guide/getting-started" }],
+    items: [
+      { text: "Démarrage rapide", link: "/fr/guide/getting-started" },
+      { text: "Comparaison avec API Platform", link: "/fr/guide/comparison" },
+    ],
   },
   {
     text: "Générer",
