@@ -21,8 +21,9 @@ The generator writes the code instead. Each entity gets a controller, a service,
 | Tests | Assertion helpers for Pest and PHPUnit, tests written by you | Feature and unit tests written for each entity, green right after generation |
 | Changing behavior | Configuration, state providers and processors | Edit the generated code, or the [stubs](/guide/customizing-stubs) for the next generations |
 | Adding a column | Migrate, and the API reads the new column from the database | [`--add-fields`](/guide/evolving) writes the migration and patches the model, requests, factory and resource |
-| Inputs | Eloquent models | CLI flags, a YAML or JSON schema, a Mermaid diagram, an OpenAPI spec, an existing database, a description given to an AI agent |
-| Also | Real-time updates with Mercure, HTTP cache with invalidation, admin and client generators | An [MCP server](/guide/mcp) for coding agents, a [VS Code extension](/guide/extension/) |
+| Inputs | Eloquent models. Its [schema generator](https://api-platform.com/docs/schema-generator/) can also write Doctrine entities, meant for Symfony, from an OpenAPI document or Schema.org | CLI flags, a YAML or JSON schema, a Mermaid diagram, an OpenAPI spec, an existing database, a description given to an AI agent |
+| AI agents | An experimental [MCP server](https://api-platform.com/docs/core/mcp/) lets agents call your running API, and a Claude Code plugin with an `AGENTS.md` guides the agent that writes the code | An [MCP server](/guide/mcp) through which coding agents plan and generate the API, every file shown before it is written |
+| Also | Real-time updates with Mercure, HTTP cache with invalidation, admin and client generators | A [VS Code extension](/guide/extension/) |
 
 ## Which one to pick
 

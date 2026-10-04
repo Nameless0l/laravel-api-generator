@@ -21,8 +21,9 @@ Le générateur, lui, écrit le code. Chaque entité reçoit un contrôleur, un 
 | Tests | Assertions prêtes pour Pest et PHPUnit, tests écrits par vous | Tests feature et unitaires écrits pour chaque entité, verts dès la génération |
 | Changer le comportement | Configuration, state providers et processors | Modifier le code généré, ou les [stubs](/fr/guide/customizing-stubs) pour les prochaines générations |
 | Ajouter une colonne | Migrer, et l'API lit la nouvelle colonne dans la base | [`--add-fields`](/fr/guide/evolving) écrit la migration et modifie le modèle, les requests, la factory et la resource |
-| Sources | Modèles Eloquent | Flags CLI, schéma YAML ou JSON, diagramme Mermaid, spec OpenAPI, base existante, description confiée à un agent IA |
-| En plus | Temps réel avec Mercure, cache HTTP avec invalidation, générateurs d'admin et de clients | Un [serveur MCP](/fr/guide/mcp) pour les agents de code, une [extension VS Code](/fr/guide/extension/) |
+| Sources | Modèles Eloquent. Son [schema generator](https://api-platform.com/docs/schema-generator/) peut aussi écrire des entités Doctrine, pensées pour Symfony, depuis un document OpenAPI ou Schema.org | Flags CLI, schéma YAML ou JSON, diagramme Mermaid, spec OpenAPI, base existante, description confiée à un agent IA |
+| Agents IA | Un [serveur MCP](https://api-platform.com/docs/core/mcp/) expérimental permet aux agents d'appeler votre API en fonctionnement, et un plugin Claude Code avec un `AGENTS.md` guide l'agent qui écrit le code | Un [serveur MCP](/fr/guide/mcp) par lequel les agents de code planifient et génèrent l'API, chaque fichier montré avant d'être écrit |
+| En plus | Temps réel avec Mercure, cache HTTP avec invalidation, générateurs d'admin et de clients | Une [extension VS Code](/fr/guide/extension/) |
 
 ## Lequel choisir
 
