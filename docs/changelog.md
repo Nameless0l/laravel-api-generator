@@ -6,6 +6,11 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
+### 4.1.0 - October 27, 2026
+
+- Regenerate an entity without retyping its fields: the manifest keeps the definition each entity was generated from, so `make:fullapi Post --only=Model,Request` brings back its relations, enum values, foreign keys and column modifiers. See [Regenerate specific files](/guide/evolving#regenerate-specific-files).
+- Fields added with `--add-fields` join that definition and keep their own migration.
+
 ### 4.0.0 - September 27, 2026
 
 - Laravel 12 or 13 is required. Laravel 10 and 11 projects keep 3.15, and [Upgrading to 4.0](/guide/upgrading) lists every change.
@@ -124,6 +129,13 @@ Recent releases of the package and the VS Code extension. Full histories live on
 3.3.1 (strict-types fixes), 3.3.0 (auto-registered routes and seeders, required-by-default validation), 3.2.0 (interactive wizard, Sanctum auth, generated tests, Postman export, soft deletes), 3.0.0 (clean-architecture rewrite): details in the [full changelog](https://github.com/Nameless0l/laravel-api-generator/blob/main/CHANGELOG.md).
 
 ## VS Code extension
+
+### 1.2.0 - October 27, 2026
+
+- Fixed: **Regenerate File(s)** no longer drops an entity's relations, enums and column modifiers. It opens the review screen with the diff of every file, and with package 4.1 the entity comes back from its recorded definition.
+- Cursor gets the MCP server and the agent skill, with no `mcp.json` to write, and an **Agents** block in the sidebar installs `laravel/mcp` when it is missing and copies the Claude Code command. See [MCP Server](/guide/mcp#connect-your-agent).
+- Fixed: the review screen handles large imports (it failed past about 50 entities), Herd's `php.bat` on Windows works, and the Copilot model list follows Copilot as it loads.
+- The views, commands and shortcut only show in Laravel projects, and the walkthrough covers the current extension, agents included.
 
 ### 1.1.0 - September 28, 2026
 

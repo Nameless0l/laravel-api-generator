@@ -24,4 +24,8 @@ php artisan make:fullapi Post --fields="title:string,body:text,status:enum(draft
 <code-snippet name="Add columns to an entity generated before" lang="bash">
 php artisan make:fullapi Post --add-fields="excerpt:text"
 </code-snippet>
+
+<code-snippet name="Rebuild some files of a generated entity from its recorded definition" lang="bash">
+php artisan make:fullapi Post --only=Resource,FeatureTest
+</code-snippet>
 @endverbatim

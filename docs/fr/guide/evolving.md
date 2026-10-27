@@ -32,11 +32,19 @@ Les fichiers que vous n'avez pas touchés sont rafraîchis comme d'habitude. Ajo
 
 ## Régénérer des fichiers précis
 
-Changé d'avis sur un seul artefact ? `--only=` réécrit uniquement les générateurs listés et laisse la migration, la route et l'enregistrement du seeder intacts :
+Changé d'avis sur un seul artefact ? `--only=` réécrit uniquement les générateurs listés et laisse la migration, la route et l'enregistrement du seeder intacts. Le manifeste garde aussi la définition à partir de laquelle chaque entité a été générée, il n'y a donc rien à retaper :
+
+```bash
+php artisan make:fullapi Post --only=Resource
+php artisan make:fullapi Post --only=FeatureTest,UnitTest
+```
+
+Les relations, les valeurs d'enum, les clés étrangères, les colonnes unique et nullable et les options de génération reviennent telles quelles, comme les champs ajoutés avec `--add-fields`. Leurs colonnes restent dans leur propre migration.
+
+Une entité générée avant la 4.1 n'a pas encore de définition enregistrée, la commande demande donc ses champs. Passez-les une fois, ou régénérez l'entité depuis son fichier de schéma, sa base ou son diagramme, et la définition est enregistrée à partir de là :
 
 ```bash
 php artisan make:fullapi Post --fields="title:string,content:text" --only=Resource
-php artisan make:fullapi Post --fields="title:string,content:text" --only=FeatureTest,UnitTest
 ```
 
 Types disponibles : `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.

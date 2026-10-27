@@ -14,7 +14,7 @@ The package registers its server on its own, so there is no route file to publis
 
 ## Connect your agent
 
-With the [VS Code extension](/guide/extension/), there is nothing to configure. As soon as the package and `laravel/mcp` are installed, Copilot's agent mode lists a Laravel API Generator server, started with the PHP command of the extension settings, Sail and Docker included.
+With the [VS Code extension](/guide/extension/), there is nothing to configure. As soon as the package and `laravel/mcp` are installed, Copilot's agent mode lists a Laravel API Generator server, started with the PHP command of the extension settings, Sail and Docker included. In Cursor, the same extension registers the server and the agent skill itself, so `.cursor/mcp.json` is not needed. Its sidebar has an **Agents** block that installs `laravel/mcp` when it is missing and copies the Claude Code command below.
 
 Other clients need the command once. Claude Code registers it in one line, and most other clients read a JSON file at the root of the project:
 

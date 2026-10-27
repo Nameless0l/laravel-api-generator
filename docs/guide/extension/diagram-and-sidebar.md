@@ -43,7 +43,7 @@ Entities generated before the manifest show their conventional files. A file wat
 Right-click (or use the inline icons) on any entity:
 
 - **Add Fields to Entity…**: type `excerpt:text,status:enum(draft,published)` and the package creates an incremental migration and patches the model, requests, factory and resource in place via `--add-fields`, with one click to run the migration after. See [Evolving Entities](/guide/evolving).
-- **Regenerate File(s)…**: the extension reads the field list back from the existing migration, then lets you multi-select which artifacts to rebuild. The underlying call is `make:fullapi --only=…`, so the migration, route and seeder registration are left untouched.
+- **Regenerate File(s)…**: multi-select the artifacts to rebuild, then the [review screen](/guide/extension/imports#the-review-screen) shows the diff of every file before anything is written. With package 4.1 or later, the entity comes back from the definition the package recorded when it generated it, relations, enum values and column modifiers included. An entity generated before 4.1 is read back from its migrations, model and enums, and the screen says so. The underlying call is `make:fullapi --only=…`, so the migration, route and seeder registration are left untouched.
 - **Delete**: full cleanup via `delete:fullapi` (files, routes, seeder registration).
 
 ## Go to Related File

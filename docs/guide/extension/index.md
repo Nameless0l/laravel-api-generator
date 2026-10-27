@@ -2,7 +2,7 @@
 
 A free visual interface for the generator. Build an entity in a form while the package shows the files it will write, generate from your database, a spec or a plain description, then run the migrations and the tests from the same panel.
 
-[**Install from the Marketplace**](https://marketplace.visualstudio.com/items?itemName=Nameless0l.laravel-api-generator) · [Extension repository](https://github.com/Nameless0l/laravel-api-generator-vscode)
+[**Install from the Marketplace**](https://marketplace.visualstudio.com/items?itemName=Nameless0l.laravel-api-generator) · [Open VSX for Cursor](https://open-vsx.org/extension/Nameless0l/laravel-api-generator) · [Extension repository](https://github.com/Nameless0l/laravel-api-generator-vscode)
 
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
   <iframe src="https://www.youtube-nocookie.com/embed/bRK9Y8jn7yY" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Laravel API Generator 4.0 and its VS Code extension" allowfullscreen loading="lazy"></iframe>
@@ -18,14 +18,14 @@ A free visual interface for the generator. Build an entity in a form while the p
 | [Sources & Review](/guide/extension/imports) | Generate from a description with Copilot, your database, a schema file, a Mermaid diagram or an **OpenAPI spec**, after reviewing the package's dry run |
 | [Diagram & Sidebar](/guide/extension/diagram-and-sidebar) | An entity canvas with an inspector, and the tree of every generated file, the ones you edited flagged |
 | [API Ready & Project Actions](/guide/extension/quick-actions) | Migrations, tests, seeding, API docs and stubs, run in place with their result |
-| [Copilot](/guide/extension/reference#copilot-and-schema-files) | The package's agent skill and its [MCP server](/guide/mcp), so Copilot's agent mode plans and generates APIs through the package |
+| [Copilot and Cursor](/guide/extension/reference#copilot-and-schema-files) | The package's agent skill and its [MCP server](/guide/mcp), registered for Copilot's agent mode and for Cursor, so they plan and generate APIs through the package. The sidebar's **Agents** block installs `laravel/mcp` when it is missing and copies the Claude Code command |
 | [Commands & Settings](/guide/extension/reference) | Command palette reference, keybindings, settings, PHP snippets |
 
 The whole UI (panel labels, popups, prompts, error messages) is available in **English and French**, following VS Code's display language (forceable via the `laravelApiGenerator.locale` setting).
 
 ## Install
 
-1. Search **"Laravel API Generator"** in VS Code Extensions (`Ctrl+Shift+X`), or install from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=Nameless0l.laravel-api-generator).
+1. Search **"Laravel API Generator"** in VS Code Extensions (`Ctrl+Shift+X`), or install from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=Nameless0l.laravel-api-generator). In Cursor and the other VS Code forks, it comes from [Open VSX](https://open-vsx.org/extension/Nameless0l/laravel-api-generator).
 2. Open a Laravel project: the extension activates when it finds an `artisan` file (monorepos are supported: Laravel apps up to two levels below the workspace root, e.g. `backend/` or `apps/api/`, are detected).
 3. The extension drives the Composer package in your project:
 
@@ -35,7 +35,7 @@ composer require --dev nameless/laravel-api-generator
 
 If the package is missing, the extension offers to install it for you, as a dev dependency (nothing from the generator ships to production, and the generated code doesn't depend on it). If the installed version is too old for a feature, it explains why and offers to run `composer update`.
 
-A native **Getting Started walkthrough** (Help → Get Started) covers the package install, your first generation, database import and the sidebar.
+A native **Getting Started walkthrough** (Help → Get Started) covers the package install, your first generation, the other sources, the sidebar and the agents.
 
 ## Requirements
 

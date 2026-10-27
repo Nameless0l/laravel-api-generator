@@ -101,8 +101,10 @@ Un assistant pas à pas : nom de l'entité, champs un par un (type, nullable, un
 Pour reconstruire une `Resource` ou un `Test` sans toucher au reste :
 
 ```bash
-php artisan make:fullapi Post --fields="title:string,content:text" --only=FeatureTest,UnitTest
+php artisan make:fullapi Post --only=FeatureTest,UnitTest
 ```
+
+Les champs, les relations et les options viennent de la définition enregistrée à la génération de l'entité. Une entité générée avant la 4.1 a besoin de ses `--fields` une fois (voir [Régénérer des fichiers précis](/fr/guide/evolving#regenerer-des-fichiers-precis)).
 
 Quand `--only=` est présent, la migration, la route `apiResource` et l'enregistrement dans `DatabaseSeeder` sont **laissés intacts** : seuls les artefacts listés sont réécrits. Un fichier listé que vous avez modifié à la main est gardé, sauf avec `--force` (voir [Faire évoluer les entités](/fr/guide/evolving#vos-modifications-survivent-a-la-regeneration)).
 

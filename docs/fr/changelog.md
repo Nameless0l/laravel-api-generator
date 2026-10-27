@@ -6,6 +6,11 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
+### 4.1.0 - 27 octobre 2026
+
+- Régénérez une entité sans retaper ses champs : le manifeste garde la définition à partir de laquelle chaque entité a été générée, et `make:fullapi Post --only=Model,Request` retrouve ses relations, ses valeurs d'enum, ses clés étrangères et ses modificateurs de colonnes. Voir [Régénérer des fichiers précis](/fr/guide/evolving#regenerer-des-fichiers-precis).
+- Les champs ajoutés avec `--add-fields` rejoignent cette définition et gardent leur propre migration.
+
 ### 4.0.0 - 27 septembre 2026
 
 - Laravel 12 ou 13 est requis. Les projets Laravel 10 et 11 gardent la 3.15, et [Passer à la 4.0](/fr/guide/upgrading) liste tous les changements.
@@ -124,6 +129,13 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 3.3.1 (correctifs strict types), 3.3.0 (routes et seeders auto-enregistrés, validation required par défaut), 3.2.0 (assistant interactif, auth Sanctum, tests générés, export Postman, soft deletes), 3.0.0 (réécriture clean architecture) : détails dans le [changelog complet](https://github.com/Nameless0l/laravel-api-generator/blob/main/CHANGELOG.md).
 
 ## Extension VS Code
+
+### 1.2.0 - 27 octobre 2026
+
+- Corrigé : **Regenerate File(s)** ne fait plus perdre à une entité ses relations, ses enums et ses modificateurs de colonnes. La commande ouvre l'écran de relecture avec le diff de chaque fichier, et avec le package 4.1 l'entité revient depuis sa définition enregistrée.
+- Cursor reçoit le serveur MCP et le skill de l'agent, sans `mcp.json` à écrire, et un bloc **Agents** dans la sidebar installe `laravel/mcp` quand il manque et copie la commande Claude Code. Voir [Serveur MCP](/fr/guide/mcp#brancher-votre-agent).
+- Corrigé : l'écran de relecture tient les gros imports (il échouait au-delà d'environ 50 entités), le `php.bat` de Herd sous Windows fonctionne, et la liste des modèles Copilot suit Copilot pendant son chargement.
+- Les vues, les commandes et le raccourci ne s'affichent que dans les projets Laravel, et le walkthrough couvre l'extension actuelle, agents compris.
 
 ### 1.1.0 - 28 septembre 2026
 

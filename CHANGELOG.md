@@ -5,6 +5,12 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-10-27
+
+### Added
+- **Regenerate an entity without retyping its fields.** The manifest now keeps the definition each entity was generated from: fields with their modifiers and enum values, relations and options. `make:fullapi Post --only=Model,Request` rebuilds those files from it, so the relations, enums, foreign keys, unique and nullable columns stay as they were. Without `--fields`, an entity generated before 4.1 is refused with a hint: pass its fields once, or generate it again from its source.
+- Fields added with `--add-fields` join the recorded definition and keep their own migration, so regenerating the create migration does not add them twice. `delete:fullapi` forgets the definition with the files.
+
 ## [4.0.0] - 2026-09-27
 
 ### Changed

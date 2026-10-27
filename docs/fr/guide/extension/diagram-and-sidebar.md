@@ -43,7 +43,7 @@ Les entités générées avant le manifest montrent leurs fichiers habituels. Un
 Clic droit (ou les icônes en ligne) sur n'importe quelle entité :
 
 - **Add Fields to Entity…** : tapez `excerpt:text,status:enum(draft,published)` et le package crée une migration incrémentale et patche en place le modèle, les requests, la factory et la resource via `--add-fields`, avec un clic pour lancer la migration ensuite. Voir [Faire évoluer les entités](/fr/guide/evolving).
-- **Regenerate File(s)…** : l'extension relit la liste des champs dans la migration existante, puis vous laisse choisir les fichiers à reconstruire. L'appel sous-jacent est `make:fullapi --only=…`, donc la migration, la route et l'enregistrement du seeder restent intacts.
+- **Regenerate File(s)…** : choisissez les fichiers à reconstruire, puis l'[écran de relecture](/fr/guide/extension/imports#l-ecran-de-relecture) montre le diff de chaque fichier avant toute écriture. Avec le package 4.1 ou plus récent, l'entité revient depuis la définition que le package a enregistrée en la générant, relations, valeurs d'enum et modificateurs de colonnes compris. Une entité générée avant la 4.1 est relue dans ses migrations, son modèle et ses enums, et l'écran le signale. L'appel sous-jacent est `make:fullapi --only=…`, donc la migration, la route et l'enregistrement du seeder restent intacts.
 - **Delete** : nettoyage complet via `delete:fullapi` (fichiers, routes, enregistrement du seeder).
 
 ## Aller au fichier lié
