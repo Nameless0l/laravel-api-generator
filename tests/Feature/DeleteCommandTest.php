@@ -78,6 +78,7 @@ class DeleteCommandTest extends GeneratorTestCase
         $this->pendingArtisan('delete:fullapi', ['name' => 'Widget', '--force' => true])->assertSuccessful();
 
         $this->assertFileDoesNotExist(app_path('Models/Widget.php'));
+        $this->assertNull(Manifest::load(base_path())->definition('Widget'));
     }
 
     #[Test]

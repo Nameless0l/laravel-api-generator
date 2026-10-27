@@ -91,6 +91,7 @@ class DeleteFullApi extends Command
             $this->deleteFile(base_path($path), $type);
             $manifest->forget($path);
         }
+        $manifest->forgetDefinition($className);
 
         $this->removeFromAuthServiceProvider($className);
         $this->unregisterSeederFromDatabaseSeeder($className);

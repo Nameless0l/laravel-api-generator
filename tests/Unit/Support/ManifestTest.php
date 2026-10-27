@@ -8,7 +8,10 @@ use Illuminate\Support\Facades\File;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\Support\Manifest;
 use nameless\CodeGenerator\Tests\TestCase;
+use nameless\CodeGenerator\ValueObjects\EntityDefinition;
+use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 use nameless\CodeGenerator\ValueObjects\FileChange;
+use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
 use PHPUnit\Framework\Attributes\Test;
 
 class ManifestTest extends TestCase
@@ -93,6 +96,41 @@ class ManifestTest extends TestCase
         try {
             Manifest::load($this->root);
             $this->fail('A corrupted manifest was accepted.');
+        } catch (CodeGeneratorException $e) {
+            $this->assertSame('invalid_manifest', $e->errorCode);
+        }
+    }
+
+    #[Test]
+    public function a_recorded_definition_reads_back_as_it_was(): void
+    {
+        $post = new EntityDefinition(
+            'Post',
+            collect([
+                new FieldDefinition('code', 'string', attributes: ['primary' => true]),
+                new FieldDefinition('rating', 'decimal', nullable: true, default: '2.5', validationRules: ['numeric']),
+            ]),
+            collect([new RelationshipDefinition('manyToMany', 'Tag', 'tags', pivotTable: 'post_tag')]),
+            'Content',
+            ['pest' => true]
+        );
+        $manifest = Manifest::load($this->root);
+        $manifest->define($post);
+        $manifest->save();
+
+        $this->assertEquals($post, Manifest::load($this->root)->definition('Post'));
+        $this->assertNull(Manifest::load($this->root)->definition('Tag'));
+    }
+
+    #[Test]
+    public function a_malformed_definition_is_reported(): void
+    {
+        File::ensureDirectoryExists($this->root.'/.api-generator');
+        File::put($this->root.'/.api-generator/manifest.json', json_encode(['version' => 1, 'files' => [], 'entities' => ['Post' => ['fields' => [['type' => 'string']]]]]) ?: '');
+
+        try {
+            Manifest::load($this->root)->definition('Post');
+            $this->fail('The malformed definition was accepted');
         } catch (CodeGeneratorException $e) {
             $this->assertSame('invalid_manifest', $e->errorCode);
         }

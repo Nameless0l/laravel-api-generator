@@ -17,6 +17,7 @@ final class GenerationPlan
      * @param  array<int, array{code: string, message: string}>  $warnings
      * @param  array<int, string>  $kept  paths edited since they were generated, left as they are
      * @param  bool  $patchesInPlace  field additions patch files around manual edits
+     * @param  array<int, EntityDefinition>  $definitions  recorded so the entities can be regenerated without their source
      */
     public function __construct(
         private readonly Workspace $workspace,
@@ -24,6 +25,7 @@ final class GenerationPlan
         private readonly ?Manifest $manifest = null,
         private readonly array $kept = [],
         private readonly bool $patchesInPlace = false,
+        private readonly array $definitions = [],
     ) {}
 
     /**
@@ -59,6 +61,10 @@ final class GenerationPlan
             }
 
             $this->manifest->record($change);
+        }
+
+        foreach ($this->definitions as $definition) {
+            $this->manifest->define($definition);
         }
 
         $this->manifest->save();

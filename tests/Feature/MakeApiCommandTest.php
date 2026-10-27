@@ -99,8 +99,10 @@ class MakeApiCommandTest extends TestCase
     }
 
     #[Test]
-    public function it_requires_fields_option(): void
+    public function it_requires_fields_for_an_entity_without_recorded_definition(): void
     {
+        File::deleteDirectory(base_path('.api-generator'));
+
         /** @var PendingCommand $result */
         $result = $this->artisan('make:fullapi', [
             'name' => 'Post',

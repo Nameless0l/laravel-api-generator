@@ -84,7 +84,7 @@ final class GenerationPlanner
             ];
         }
 
-        return new GenerationPlan($workspace, $warnings, $manifest, $kept);
+        return new GenerationPlan($workspace, $warnings, $manifest, $kept, definitions: $entities->values()->all());
     }
 
     /**
@@ -100,12 +100,14 @@ final class GenerationPlanner
 
         $result = $this->entityEvolutionService->addFields($entity, $fields, $workspace);
         $manifest = Manifest::load(base_path());
+        $recorded = $manifest->definition($entity);
 
         return new GenerationPlan(
             $workspace,
             array_map(fn (string $message) => ['code' => 'field_addition', 'message' => $message], $result['warnings']),
             $manifest->exists() ? $manifest : null,
-            patchesInPlace: true
+            patchesInPlace: true,
+            definitions: $recorded === null ? [] : [$recorded->withFields($fields)]
         );
     }
 

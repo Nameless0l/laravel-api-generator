@@ -13,6 +13,7 @@ use nameless\CodeGenerator\Support\DatabaseIntrospector;
 use nameless\CodeGenerator\Support\EntitySorter;
 use nameless\CodeGenerator\Support\FieldParser;
 use nameless\CodeGenerator\Support\JsonParser;
+use nameless\CodeGenerator\Support\Manifest;
 use nameless\CodeGenerator\Support\MermaidParser;
 use nameless\CodeGenerator\Support\OpenApiConverter;
 use nameless\CodeGenerator\Support\Protocol;
@@ -29,7 +30,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class MakeApiCommand extends Command
 {
-    protected $signature = 'make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
+    protected $signature = 'make:fullapi {name?}
+        {--fields= : Fields as name:type pairs. Without it, an entity recorded in .api-generator/manifest.json is regenerated from its definition}
+        {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
         {--schema= : Generate from a declarative YAML/JSON schema file, or - to read it from stdin}
         {--mermaid= : Generate from a Mermaid classDiagram or erDiagram file}
         {--openapi= : Generate from the schemas of an OpenAPI 3 or Swagger 2 document, JSON or YAML, or - to read it from stdin}
@@ -331,23 +334,43 @@ class MakeApiCommand extends Command
     private function entityFromFields(string $name): EntityDefinition
     {
         $fieldsOption = $this->option('fields');
+        $recorded = ! is_string($fieldsOption) || $fieldsOption === '';
 
-        if (! is_string($fieldsOption) || $fieldsOption === '') {
-            throw CodeGeneratorException::invalidRequest('You must specify fields with the --fields option. Example: --fields="name:string,age:integer". Or use --interactive for guided setup.');
-        }
-
-        $definition = $this->createEntityDefinition($name, FieldParser::parseFieldsString($fieldsOption));
+        $definition = $recorded
+            ? $this->recordedDefinition(ucfirst($name))
+            : $this->createEntityDefinition($name, FieldParser::parseFieldsString($fieldsOption));
         $onlyTypes = $this->onlyTypesOption();
+        $from = $recorded ? ' from its recorded definition' : '';
 
         $this->info($onlyTypes !== null
-            ? 'Regenerating only: '.implode(', ', $onlyTypes)." for: {$name}"
-            : "Generating complete API for: {$name}");
+            ? 'Regenerating only: '.implode(', ', $onlyTypes)." for: {$name}{$from}"
+            : "Generating complete API for: {$name}{$from}");
 
         if ($definition->hasSoftDeletes()) {
             $this->info('  -> Soft Deletes enabled');
         }
 
         return $definition;
+    }
+
+    private function recordedDefinition(string $name): EntityDefinition
+    {
+        $definition = Manifest::load(base_path())->definition($name);
+
+        if ($definition === null) {
+            throw new CodeGeneratorException(
+                "{$name} has no definition recorded in ".Manifest::PATH.', so its fields are needed: --fields="name:string,age:integer". Or use --interactive for guided setup.',
+                'invalid_request',
+                'Entities generated since 4.1 are recorded and regenerate without --fields. Generate this one again from its source, or pass its fields once.'
+            );
+        }
+
+        $options = $this->cliEntityOptions();
+        if ($this->option('soft-deletes')) {
+            $options['soft_deletes'] = true;
+        }
+
+        return $options === [] ? $definition : $definition->withOptions($options);
     }
 
     private function fieldAdditionPlan(string $addFields): GenerationPlan
