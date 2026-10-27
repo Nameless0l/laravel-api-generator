@@ -25,6 +25,55 @@ final readonly class RelationshipDefinition
         $this->validateRole($role);
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function toArray(): array
+    {
+        return array_filter([
+            'type' => $this->type,
+            'relatedModel' => $this->relatedModel,
+            'role' => $this->role,
+            'foreignKey' => $this->foreignKey,
+            'localKey' => $this->localKey,
+            'pivotTable' => $this->pivotTable,
+            'morphName' => $this->morphName,
+            'relatedKey' => $this->relatedKey,
+            'relatedKeyType' => $this->relatedKeyType,
+        ], fn (?string $value) => $value !== null);
+    }
+
+    /**
+     * @param  array<mixed>  $data
+     */
+    public static function fromArray(array $data): self
+    {
+        $value = function (string $key) use ($data): ?string {
+            $value = $data[$key] ?? null;
+
+            return is_string($value) ? $value : null;
+        };
+
+        $type = $value('type');
+        $relatedModel = $value('relatedModel');
+        $role = $value('role');
+        if ($type === null || $relatedModel === null || $role === null) {
+            throw new InvalidArgumentException('A relationship needs a type, a related model and a role');
+        }
+
+        return new self(
+            $type,
+            $relatedModel,
+            $role,
+            $value('foreignKey'),
+            $value('localKey'),
+            $value('pivotTable'),
+            $value('morphName'),
+            $value('relatedKey'),
+            $value('relatedKeyType'),
+        );
+    }
+
     private function validateType(string $type): void
     {
         $allowedTypes = ['oneToOne', 'oneToMany', 'manyToOne', 'manyToMany', 'morphTo', 'morphOne', 'morphMany'];

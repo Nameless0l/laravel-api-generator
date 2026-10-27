@@ -32,11 +32,19 @@ Files you never touched are refreshed as usual. Add `--force` to overwrite the e
 
 ## Regenerate specific files
 
-Changed your mind about a single artifact? `--only=` rewrites just the listed generators and leaves the migration, route and seeder registration untouched:
+Changed your mind about a single artifact? `--only=` rewrites just the listed generators and leaves the migration, route and seeder registration untouched. The manifest also keeps the definition each entity was generated from, so there is nothing to retype:
+
+```bash
+php artisan make:fullapi Post --only=Resource
+php artisan make:fullapi Post --only=FeatureTest,UnitTest
+```
+
+Relations, enum values, foreign keys, unique and nullable columns and the generation options come back as they were, and so do the fields added with `--add-fields`. Their columns stay in their own migration.
+
+An entity generated before 4.1 has no recorded definition yet, so the command asks for its fields. Pass them once, or generate the entity again from its schema file, database or diagram, and the definition is recorded from then on:
 
 ```bash
 php artisan make:fullapi Post --fields="title:string,content:text" --only=Resource
-php artisan make:fullapi Post --fields="title:string,content:text" --only=FeatureTest,UnitTest
 ```
 
 Available types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.

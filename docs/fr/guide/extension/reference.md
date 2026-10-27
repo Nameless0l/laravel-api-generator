@@ -13,7 +13,7 @@ Toutes les commandes vivent sous la catégorie **Laravel API Generator** de la p
 | Generate APIs from OpenAPI Spec | Génère depuis un fichier OpenAPI ou Swagger, en JSON ou en YAML, après l'écran de relecture |
 | Describe an API with Copilot | Ouvre le panneau Copilot : décrivez l'API, ajustez les entités proposées, puis relisez le plan |
 | Add Fields to Entity… | Fait évoluer une entité via `--add-fields` |
-| Regenerate File(s)… | Reconstruit les artefacts choisis via `--only=` |
+| Regenerate File(s)… | Reconstruit les artefacts choisis via `--only=`, après l'écran de relecture |
 | Delete Full API | Supprime fichiers, routes et enregistrement du seeder d'une entité |
 | Show Entity Diagram | Ouvre le [canevas interactif](/fr/guide/extension/diagram-and-sidebar) |
 | Show Snippets | Liste les snippets PHP embarqués |

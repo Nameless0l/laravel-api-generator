@@ -116,6 +116,7 @@ They return the same JSON document as `--json`. Run `php artisan migrate` and `p
 ## Evolving the API
 
 - New columns on a generated entity: `php artisan make:fullapi Post --add-fields="excerpt:text,published_at:datetime"`. It writes an incremental migration and patches the model, both requests, factory and resource in place. Update the DTO and the tests yourself.
+- Rebuild some files of a generated entity: `php artisan make:fullapi Post --only=Model,Request`, without `--fields`. Since 4.1 the definition recorded at generation brings back the relations, enums and column modifiers that retyped fields would drop. An entity generated before 4.1 fails with `invalid_request`: generate it again from its source, or pass its fields once.
 - Remove an entity and all its files: `php artisan delete:fullapi Post --force` (without `--force` it asks for confirmation).
 - After deleting controllers by hand: `php artisan api-generator:clean-routes`.
 - Read the database structure as JSON: `php artisan api-generator:introspect --table=posts`.

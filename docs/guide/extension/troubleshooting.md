@@ -10,7 +10,7 @@ The extension calls `php` from your PATH. If VS Code cannot find it, or picks th
 { "laravelApiGenerator.phpPath": "C:/laragon/bin/php/php-8.3/php.exe" }
 ```
 
-Herd, Valet, Laragon and XAMPP each bundle their own PHP; point the setting at the one your project runs on.
+Herd, Valet, Laragon and XAMPP each bundle their own PHP; point the setting at the one your project runs on. Herd's `php.bat` on Windows works as it is, from the PATH or from this setting.
 
 ## PHP runs in Sail or Docker
 

@@ -37,6 +37,65 @@ final readonly class EntityDefinition
         return new self($this->name, $this->fields, $this->relationships, $this->parent, array_merge($this->options, $options));
     }
 
+    /**
+     * Fields the entity already has are left out.
+     *
+     * @param  Collection<int, FieldDefinition>  $fields
+     */
+    public function withFields(Collection $fields): self
+    {
+        $known = $this->fields->pluck('name')->all();
+        $added = $fields
+            ->reject(fn (FieldDefinition $field) => in_array($field->name, $known, true))
+            ->map(fn (FieldDefinition $field) => $field->asAdded());
+
+        return new self($this->name, $this->fields->concat($added)->values(), $this->relationships, $this->parent, $this->options);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return array_filter([
+            'fields' => $this->fields->map(fn (FieldDefinition $field) => $field->toArray())->values()->all(),
+            'relationships' => $this->relationships->map(fn (RelationshipDefinition $relation) => $relation->toArray())->values()->all(),
+            'parent' => $this->parent,
+            'options' => $this->options,
+        ], fn (mixed $value) => $value !== null && $value !== []);
+    }
+
+    /**
+     * @param  array<mixed>  $data
+     */
+    public static function fromArray(string $name, array $data): self
+    {
+        $fields = $data['fields'] ?? [];
+        $relationships = $data['relationships'] ?? [];
+        $parent = $data['parent'] ?? null;
+        $options = $data['options'] ?? [];
+        if (! is_array($fields) || ! is_array($relationships) || ! is_array($options)) {
+            throw new InvalidArgumentException('fields, relationships and options must be lists');
+        }
+
+        $list = function (mixed $item): array {
+            if (! is_array($item)) {
+                throw new InvalidArgumentException('every field and relationship must be an object');
+            }
+
+            return $item;
+        };
+
+        /** @var array<string, mixed> $options */
+        return new self(
+            $name,
+            collect(array_values($fields))->map(fn (mixed $field) => FieldDefinition::fromArray($list($field))),
+            collect(array_values($relationships))->map(fn (mixed $relation) => RelationshipDefinition::fromArray($list($relation))),
+            is_string($parent) ? $parent : null,
+            $options
+        );
+    }
+
     private function validateName(string $name): void
     {
         if (empty(trim($name))) {

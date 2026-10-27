@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\Tests\Feature;
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use nameless\CodeGenerator\Services\GenerationPlanner;
 use nameless\CodeGenerator\Support\FieldParser;
@@ -14,6 +15,7 @@ use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 use nameless\CodeGenerator\ValueObjects\FileChange;
 use nameless\CodeGenerator\ValueObjects\GenerationPlan;
 use nameless\CodeGenerator\ValueObjects\GenerationRequest;
+use nameless\CodeGenerator\ValueObjects\RelationshipDefinition;
 use PHPUnit\Framework\Attributes\Test;
 
 class ManifestGenerationTest extends GeneratorTestCase
@@ -59,6 +61,21 @@ class ManifestGenerationTest extends GeneratorTestCase
         $plan->apply();
 
         return $plan;
+    }
+
+    private function detailedTicket(): EntityDefinition
+    {
+        return new EntityDefinition(
+            'Ticket',
+            collect([
+                new FieldDefinition('title', 'string', unique: true),
+                new FieldDefinition('body', 'text', nullable: true),
+                new FieldDefinition('views', 'integer', default: '0'),
+                new FieldDefinition('status', 'string', attributes: ['enum' => ['open', 'closed']]),
+            ]),
+            collect([new RelationshipDefinition('manyToOne', 'Project', 'project')]),
+            options: ['soft_deletes' => true]
+        );
     }
 
     private function addField(string $name): void
@@ -166,5 +183,66 @@ class ManifestGenerationTest extends GeneratorTestCase
         $this->assertTrue($this->pristine('app/Http/Requests/UpdateTicketRequest.php'));
         $this->assertStringContainsString('excerpt', (string) file_get_contents(app_path('Http/Requests/StoreTicketRequest.php')));
         $this->assertFalse($this->pristine('app/Http/Requests/StoreTicketRequest.php'));
+    }
+
+    #[Test]
+    public function the_definition_of_a_generated_entity_is_recorded(): void
+    {
+        app(GenerationPlanner::class)->plan(new GenerationRequest(collect([$this->detailedTicket()])))->apply();
+
+        $this->assertEquals($this->detailedTicket(), $this->manifest()->definition('Ticket'));
+    }
+
+    #[Test]
+    public function a_recorded_entity_is_regenerated_without_its_fields(): void
+    {
+        app(GenerationPlanner::class)->plan(new GenerationRequest(collect([$this->detailedTicket()])))->apply();
+        $paths = [self::MODEL, 'app/Http/Requests/StoreTicketRequest.php'];
+        $generated = array_map(fn (string $path) => (string) file_get_contents(base_path($path)), $paths);
+        array_map(fn (string $path) => File::delete(base_path($path)), $paths);
+
+        $exitCode = Artisan::call('make:fullapi', ['name' => 'Ticket', '--only' => 'Model,Request']);
+
+        $this->assertSame(0, $exitCode);
+        $this->assertStringContainsString('from its recorded definition', Artisan::output());
+        $this->assertSame($generated, array_map(fn (string $path) => (string) file_get_contents(base_path($path)), $paths));
+    }
+
+    #[Test]
+    public function an_entity_without_recorded_definition_still_needs_its_fields(): void
+    {
+        $this->generate();
+        $manifest = $this->manifest();
+        $manifest->forgetDefinition('Ticket');
+        $manifest->save();
+
+        $exitCode = Artisan::call('make:fullapi', ['name' => 'Ticket', '--only' => 'Model', '--json' => true]);
+        $document = json_decode(trim(Artisan::output()), true, 512, JSON_THROW_ON_ERROR);
+
+        $this->assertSame(1, $exitCode);
+        $this->assertSame('invalid_request', $document['errors'][0]['code']);
+        $this->assertStringContainsString('no definition recorded', $document['errors'][0]['message']);
+    }
+
+    #[Test]
+    public function adding_fields_extends_the_recorded_definition(): void
+    {
+        $this->generate();
+
+        $this->addField('excerpt');
+
+        $this->assertSame(['title', 'excerpt'], $this->manifest()->definition('Ticket')?->fields->pluck('name')->all());
+    }
+
+    #[Test]
+    public function a_field_added_later_stays_out_of_the_create_migration(): void
+    {
+        $this->generate();
+        $this->addField('excerpt');
+
+        Artisan::call('make:fullapi', ['name' => 'Ticket', '--only' => 'Migration,Model']);
+
+        $this->assertStringNotContainsString('excerpt', (string) file_get_contents($this->firstMigrationFor('tickets')));
+        $this->assertStringContainsString("'excerpt'", (string) file_get_contents(base_path(self::MODEL)));
     }
 }

@@ -14,7 +14,7 @@ Le package enregistre son serveur tout seul, il n'y a donc aucun fichier de rout
 
 ## Brancher votre agent
 
-Avec l'[extension VS Code](/fr/guide/extension/), rien à configurer. Dès que le package et `laravel/mcp` sont installés, le mode agent de Copilot affiche un serveur Laravel API Generator, lancé avec la commande PHP des réglages de l'extension, Sail et Docker compris.
+Avec l'[extension VS Code](/fr/guide/extension/), rien à configurer. Dès que le package et `laravel/mcp` sont installés, le mode agent de Copilot affiche un serveur Laravel API Generator, lancé avec la commande PHP des réglages de l'extension, Sail et Docker compris. Dans Cursor, la même extension enregistre elle-même le serveur et le skill de l'agent, sans `.cursor/mcp.json`. Sa barre latérale a un bloc **Agents** qui installe `laravel/mcp` quand il manque et copie la commande Claude Code ci-dessous.
 
 Les autres clients ont besoin de la commande une fois. Claude Code l'enregistre en une ligne, et la plupart des autres clients lisent un fichier JSON à la racine du projet :
 

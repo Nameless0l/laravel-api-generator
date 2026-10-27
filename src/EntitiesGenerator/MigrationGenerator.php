@@ -116,7 +116,7 @@ class MigrationGenerator extends AbstractGenerator
 
     private function generateFields(EntityDefinition $definition): string
     {
-        $fields = $definition->fields->map(
+        $fields = $definition->fields->reject(fn (FieldDefinition $field) => $field->wasAdded())->map(
             fn (FieldDefinition $field) => '            '.self::columnDefinition($field)
         )->toArray();
 

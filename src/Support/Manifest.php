@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace nameless\CodeGenerator\Support;
 
 use Illuminate\Support\Facades\File;
+use InvalidArgumentException;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
+use nameless\CodeGenerator\ValueObjects\EntityDefinition;
 use nameless\CodeGenerator\ValueObjects\FileChange;
 
 /**
- * Remembers what the generator wrote, so a later run can tell a file left
- * untouched (safe to regenerate) from one edited by hand.
+ * Remembers what the generator wrote and from which definitions, so a later
+ * run can tell a file left untouched (safe to regenerate) from one edited by
+ * hand, and regenerate an entity without its source.
  */
 final class Manifest
 {
@@ -24,11 +27,13 @@ final class Manifest
 
     /**
      * @param  array<string, array{entity: ?string, kind: string, hash: string}>  $files
+     * @param  array<string, array<mixed>>  $entities
      */
     private function __construct(
         private readonly string $basePath,
         private array $files,
         private readonly bool $exists,
+        private array $entities = [],
     ) {}
 
     public static function load(string $basePath): self
@@ -59,7 +64,14 @@ final class Manifest
             }
         }
 
-        return new self($basePath, $files, true);
+        $entities = [];
+        foreach (is_array($data['entities'] ?? null) ? $data['entities'] : [] as $entity => $definition) {
+            if (is_string($entity) && is_array($definition)) {
+                $entities[$entity] = $definition;
+            }
+        }
+
+        return new self($basePath, $files, true, $entities);
     }
 
     public static function tracks(string $kind): bool
@@ -105,6 +117,36 @@ final class Manifest
         unset($this->files[$path]);
     }
 
+    public function define(EntityDefinition $entity): void
+    {
+        $this->entities[$entity->name] = $entity->toArray();
+    }
+
+    /**
+     * Null for an entity generated before 4.1, which recorded no definition.
+     */
+    public function definition(string $entity): ?EntityDefinition
+    {
+        if (! isset($this->entities[$entity])) {
+            return null;
+        }
+
+        try {
+            return EntityDefinition::fromArray($entity, $this->entities[$entity]);
+        } catch (InvalidArgumentException $e) {
+            throw new CodeGeneratorException(
+                "The definition of {$entity} recorded in ".self::PATH." is not valid: {$e->getMessage()}.",
+                'invalid_manifest',
+                'Restore the manifest from version control, or regenerate the entity from its source.'
+            );
+        }
+    }
+
+    public function forgetDefinition(string $entity): void
+    {
+        unset($this->entities[$entity]);
+    }
+
     /**
      * @return array<string, array{entity: ?string, kind: string, hash: string}>
      */
@@ -128,11 +170,17 @@ final class Manifest
     public function save(): void
     {
         ksort($this->files);
+        ksort($this->entities);
+
+        $data = ['version' => 1, 'files' => $this->files];
+        if ($this->entities !== []) {
+            $data['entities'] = $this->entities;
+        }
 
         File::ensureDirectoryExists(dirname(self::file($this->basePath)));
         File::put(
             self::file($this->basePath),
-            json_encode(['version' => 1, 'files' => $this->files], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR)."\n"
+            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)."\n"
         );
     }
 

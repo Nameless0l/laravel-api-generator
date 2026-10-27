@@ -101,8 +101,10 @@ A step-by-step guided setup: entity name, fields one by one (type, nullable, uni
 To rebuild a `Resource` or a `Test` without touching everything else:
 
 ```bash
-php artisan make:fullapi Post --fields="title:string,content:text" --only=FeatureTest,UnitTest
+php artisan make:fullapi Post --only=FeatureTest,UnitTest
 ```
+
+The fields, relations and options come from the definition recorded when the entity was generated. An entity generated before 4.1 needs its `--fields` once (see [Regenerate specific files](/guide/evolving#regenerate-specific-files)).
 
 When `--only=` is set, the migration, the `apiResource` route and the `DatabaseSeeder` registration are **left untouched**: only the listed artifacts are rewritten. A listed file you edited by hand is kept unless you add `--force` (see [Evolving Entities](/guide/evolving#your-edits-survive-regeneration)).
 

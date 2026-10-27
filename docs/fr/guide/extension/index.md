@@ -2,7 +2,7 @@
 
 Une interface visuelle gratuite pour le générateur. Construisez une entité dans un formulaire pendant que le package affiche les fichiers qu'il va écrire, générez depuis votre base, une spec ou une simple description, puis lancez les migrations et les tests depuis le même panneau.
 
-[**Installer depuis le Marketplace**](https://marketplace.visualstudio.com/items?itemName=Nameless0l.laravel-api-generator) · [Dépôt de l'extension](https://github.com/Nameless0l/laravel-api-generator-vscode)
+[**Installer depuis le Marketplace**](https://marketplace.visualstudio.com/items?itemName=Nameless0l.laravel-api-generator) · [Open VSX pour Cursor](https://open-vsx.org/extension/Nameless0l/laravel-api-generator) · [Dépôt de l'extension](https://github.com/Nameless0l/laravel-api-generator-vscode)
 
 <div style="position:relative;padding-bottom:56.25%;height:0;margin:16px 0">
   <iframe src="https://www.youtube-nocookie.com/embed/bRK9Y8jn7yY" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" title="Laravel API Generator 4.0 et son extension VS Code" allowfullscreen loading="lazy"></iframe>
@@ -18,14 +18,14 @@ Une interface visuelle gratuite pour le générateur. Construisez une entité da
 | [Sources & relecture](/fr/guide/extension/imports) | Générez depuis une description avec Copilot, votre base de données, un fichier de schéma, un diagramme Mermaid ou une **spec OpenAPI**, après relecture de la simulation du package |
 | [Diagramme & sidebar](/fr/guide/extension/diagram-and-sidebar) | Un canevas d'entités avec un inspecteur, et l'arbre de chaque fichier généré, ceux que vous avez retouchés signalés |
 | [API prête & actions du projet](/fr/guide/extension/quick-actions) | Migrations, tests, seed, doc API et stubs, lancés sur place avec leur résultat |
-| [Copilot](/fr/guide/extension/reference#copilot-et-fichiers-de-schema) | Le skill d'agent du package et son [serveur MCP](/fr/guide/mcp), pour que le mode agent de Copilot planifie et génère des API avec le package |
+| [Copilot et Cursor](/fr/guide/extension/reference#copilot-et-fichiers-de-schema) | Le skill d'agent du package et son [serveur MCP](/fr/guide/mcp), enregistrés pour le mode agent de Copilot et pour Cursor, qui planifient et génèrent des API avec le package. Le bloc **Agents** de la barre latérale installe `laravel/mcp` quand il manque et copie la commande Claude Code |
 | [Commandes & réglages](/fr/guide/extension/reference) | Référence de la palette de commandes, raccourcis, settings, snippets PHP |
 
 Toute l'interface (libellés, popups, invites, messages d'erreur) existe en **anglais et en français**, selon la langue d'affichage de VS Code (forçable via le réglage `laravelApiGenerator.locale`). Les captures de cette documentation montrent l'interface en anglais.
 
 ## Installation
 
-1. Cherchez **« Laravel API Generator »** dans les extensions VS Code (`Ctrl+Shift+X`), ou installez depuis le [Marketplace](https://marketplace.visualstudio.com/items?itemName=Nameless0l.laravel-api-generator).
+1. Cherchez **« Laravel API Generator »** dans les extensions VS Code (`Ctrl+Shift+X`), ou installez depuis le [Marketplace](https://marketplace.visualstudio.com/items?itemName=Nameless0l.laravel-api-generator). Dans Cursor et les autres forks de VS Code, elle vient d'[Open VSX](https://open-vsx.org/extension/Nameless0l/laravel-api-generator).
 2. Ouvrez un projet Laravel : l'extension s'active dès qu'elle trouve un fichier `artisan` (monorepos supportés : les apps Laravel jusqu'à deux niveaux sous la racine du workspace, ex. `backend/` ou `apps/api/`, sont détectées).
 3. L'extension pilote le package Composer de votre projet :
 
@@ -35,7 +35,7 @@ composer require --dev nameless/laravel-api-generator
 
 Si le package manque, l'extension propose de l'installer pour vous, en dépendance de dev (rien du générateur ne part en production, et le code généré n'en dépend pas). Si la version installée est trop ancienne pour une fonctionnalité, elle l'explique et propose un `composer update`.
 
-Un **walkthrough natif** (Help → Get Started) couvre l'installation du package, la première génération, l'import de base de données et la sidebar.
+Un **walkthrough natif** (Help → Get Started) couvre l'installation du package, la première génération, les autres sources, la sidebar et les agents.
 
 ## Prérequis
 

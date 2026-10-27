@@ -36,6 +36,49 @@ final readonly class FieldDefinition
         $this->validateType($type);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return array_filter([
+            'name' => $this->name,
+            'type' => $this->type,
+            'nullable' => $this->nullable ?: null,
+            'unique' => $this->unique ?: null,
+            'default' => $this->default,
+            'validationRules' => $this->validationRules ?: null,
+            'attributes' => $this->attributes ?: null,
+        ], fn (mixed $value) => $value !== null);
+    }
+
+    /**
+     * @param  array<mixed>  $data
+     */
+    public static function fromArray(array $data): self
+    {
+        $name = $data['name'] ?? null;
+        $type = $data['type'] ?? null;
+        if (! is_string($name) || ! is_string($type)) {
+            throw new InvalidArgumentException('A field needs a name and a type');
+        }
+
+        $default = $data['default'] ?? null;
+        $rules = $data['validationRules'] ?? [];
+        /** @var array<string, mixed> $attributes */
+        $attributes = is_array($data['attributes'] ?? null) ? $data['attributes'] : [];
+
+        return new self(
+            name: $name,
+            type: $type,
+            nullable: ($data['nullable'] ?? false) === true,
+            unique: ($data['unique'] ?? false) === true,
+            default: is_scalar($default) ? (string) $default : null,
+            validationRules: is_array($rules) ? array_values(array_filter($rules, 'is_string')) : [],
+            attributes: $attributes,
+        );
+    }
+
     private function validateName(string $name): void
     {
         if (empty(trim($name))) {
@@ -122,6 +165,19 @@ final readonly class FieldDefinition
     public function isPrimary(): bool
     {
         return ($this->attributes['primary'] ?? false) === true;
+    }
+
+    public function asAdded(): self
+    {
+        return new self($this->name, $this->type, $this->nullable, $this->unique, $this->default, $this->validationRules, [...$this->attributes, 'added' => true]);
+    }
+
+    /**
+     * Added with --add-fields, so its column lives in its own migration.
+     */
+    public function wasAdded(): bool
+    {
+        return ($this->attributes['added'] ?? false) === true;
     }
 
     public function getKeyType(): string
