@@ -68,6 +68,7 @@ class ModernModelTest extends GeneratorTestCase
             }
             PHP, $model);
         $this->assertStringContainsString('use App\Enums\VoucherStatus;', $model);
+        $this->assertStringContainsString('@property string $amount', $model);
         $this->assertStringNotContainsString('$casts', $model);
         $this->assertStringNotContainsString('#[', $model);
     }

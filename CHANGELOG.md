@@ -5,6 +5,13 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.1] - 2026-11-10
+
+### Fixed
+- **`--add-fields` updates the DTO.** The new properties and their `fromRequest()` arguments are inserted before `$provided`, so the added fields reach the service without editing `PostDTO.php` by hand. The MCP `add-fields` tool does the same. A DTO written by 3.x has no `$provided` parameter: it is left alone and reported.
+- Two fields that would generate the same enum class are refused with an `enum_name_collision` error instead of overwriting each other. `Post.tag_status` and `PostTag.status` both gave `App\Enums\PostTagStatus`.
+- The model PHPDoc declares `decimal` attributes as `string`, which is what the `decimal:2` cast returns.
+
 ## [4.1.0] - 2026-10-27
 
 ### Added

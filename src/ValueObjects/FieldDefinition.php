@@ -130,6 +130,20 @@ final readonly class FieldDefinition
         };
     }
 
+    /**
+     * What Eloquent returns for the attribute once cast: `decimal:2` gives a
+     * string. Enum classes come unqualified.
+     */
+    public function getAttributePhpType(string $entity): string
+    {
+        return match (true) {
+            $this->isEnum() => $this->getEnumClass($entity),
+            in_array($this->type, ['date', 'datetime', 'timestamp'], true) => 'Carbon',
+            $this->type === 'decimal' => 'string',
+            default => $this->getPhpType(),
+        };
+    }
+
     public function getValidationRule(): string
     {
         if (! empty($this->validationRules)) {

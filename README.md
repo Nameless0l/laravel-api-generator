@@ -323,11 +323,11 @@ php artisan migrate
 
 - Creates an incremental `Schema::table()` migration (with `down()`)
 - Appends to the fillable columns, the casts and the PHPDoc block of the existing model
-- Inserts the validation rules, factory values and resource fields in place
+- Inserts the validation rules, factory values, resource fields and DTO properties in place
 - Generates the enum class when needed
 - Skips fields that already exist; never touches your custom methods
 
-The DTO (constructor promotion) and the generated tests are left alone and reported as manual follow-ups.
+The generated tests are left alone and reported as a manual follow-up.
 
 ### Delete generated API
 

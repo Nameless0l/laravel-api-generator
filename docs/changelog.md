@@ -6,6 +6,12 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
+### 4.1.1 - November 10, 2026
+
+- `--add-fields` updates the DTO too, so the added fields reach the service without a manual edit. See [Add fields to an existing entity](/guide/evolving#add-fields-to-an-existing-entity).
+- Two fields that would generate the same enum class (`Post.tag_status` and `PostTag.status`) are refused instead of overwriting each other.
+- The model PHPDoc types `decimal` attributes as `string`, which is what the `decimal:2` cast returns.
+
 ### 4.1.0 - October 27, 2026
 
 - Regenerate an entity without retyping its fields: the manifest keeps the definition each entity was generated from, so `make:fullapi Post --only=Model,Request` brings back its relations, enum values, foreign keys and column modifiers. See [Regenerate specific files](/guide/evolving#regenerate-specific-files).

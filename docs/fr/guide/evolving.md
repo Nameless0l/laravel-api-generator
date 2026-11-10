@@ -14,10 +14,11 @@ Ce qui se passe :
 - Une migration **incrémentale** `Schema::table()` est créée (avec un vrai `down()`)
 - Les colonnes fillable (`$fillable` ou `#[Fillable]`), les casts (`casts()`, ou `$casts` dans un modèle écrit par la 3.x) et le bloc PHPDoc du modèle existant sont **patchés en place**
 - Les règles de validation vont dans les deux requests (avec `sometimes` dans celle de mise à jour), les valeurs de factory et les champs de resource à leur place
+- Le DTO reçoit les nouvelles propriétés et leurs arguments dans `fromRequest()`, donc les champs arrivent jusqu'au service
 - La classe enum est générée si nécessaire
 - Les champs déjà existants sont ignorés ; **vos méthodes personnalisées ne sont jamais touchées**
 
-Le DTO (promotion de constructeur) et les tests générés sont volontairement laissés de côté et signalés comme suivis manuels.
+Les tests générés sont laissés de côté et signalés comme suivi manuel. Un DTO écrit par la 3.x aussi.
 
 ## Vos modifications survivent à la régénération
 
