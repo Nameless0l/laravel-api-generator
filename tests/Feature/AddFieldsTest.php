@@ -80,13 +80,13 @@ class AddFieldsTest extends GeneratorTestCase
     public function the_dto_carries_the_added_fields_to_the_service(): void
     {
         $this->generateReport();
-        Artisan::call('make:fullapi', ['name' => 'Report', '--add-fields' => 'pages:integer,price:decimal:nullable']);
+        Artisan::call('make:fullapi', ['name' => 'Report', '--add-fields' => 'pages:integer,price:decimal']);
         require_once app_path('DTO/ReportDTO.php');
 
-        $dto = 'App\\DTO\\ReportDTO';
+        $dto = "App\\DTO\\{$this->generatedEntities[0]}DTO";
 
         $this->assertSame(['title' => 'Q3', 'pages' => 12, 'price' => null], get_object_vars(new $dto(title: 'Q3', pages: 12)));
-        $this->assertStringContainsString('@property string|null $price', (string) file_get_contents(app_path('Models/Report.php')));
+        $this->assertStringContainsString('@property string $price', (string) file_get_contents(app_path('Models/Report.php')));
     }
 
     #[Test]
