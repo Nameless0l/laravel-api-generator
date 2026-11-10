@@ -38,6 +38,7 @@ class PlanSnapshotTest extends GeneratorTestCase
             'enum-soft-deletes' => ['{"entities":{"Article":{"soft_deletes":true,"fields":{"title":"string","status":"enum(draft,published)"}}}}', []],
             'relations-pivot' => ['{"entities":{"Author":{"fields":{"name":"string"}},"Book":{"fields":{"title":"string"},"relations":{"author":"belongsTo Author","genres":"belongsToMany Genre"}},"Genre":{"fields":{"name":"string"}}}}', []],
             'auth-postman' => ['{"entities":{"Note":{"fields":{"body":"text"}}}}', ['--auth' => true, '--postman' => true]],
+            'mcp-tools' => ['{"options":{"mcp":true},"entities":{"Owner":{"fields":{"name":"string"}},"Ticket":{"soft_deletes":true,"fields":{"code":"string unique","subject":"string","priority":"enum(low,high)","due_on":"date nullable","meta":"json nullable"},"relations":{"owner":"belongsTo Owner"}}}}', []],
         ];
     }
 

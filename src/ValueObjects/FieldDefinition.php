@@ -232,6 +232,7 @@ final readonly class FieldDefinition
             'datetime', 'timestamp' => "'datetime'",
             'boolean', 'bool' => "'boolean'",
             'decimal' => "'decimal:2'",
+            'float' => "'float'",
             default => null,
         };
     }

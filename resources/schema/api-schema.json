@@ -17,7 +17,8 @@
         "queryBuilder": { "$ref": "#/definitions/queryBuilder" },
         "pest": { "$ref": "#/definitions/pest" },
         "json_api": { "$ref": "#/definitions/jsonApi" },
-        "jsonApi": { "$ref": "#/definitions/jsonApi" }
+        "jsonApi": { "$ref": "#/definitions/jsonApi" },
+        "mcp": { "$ref": "#/definitions/mcp" }
       },
       "additionalProperties": false
     },
@@ -35,6 +36,7 @@
     "queryBuilder": { "type": "boolean", "description": "Filtering and sorting on index endpoints with spatie/laravel-query-builder." },
     "pest": { "type": "boolean", "description": "Generate Pest tests instead of PHPUnit classes." },
     "jsonApi": { "type": "boolean", "description": "JSON:API resources (Laravel 12.45+). Falls back to standard resources on older versions." },
+    "mcp": { "type": "boolean", "description": "MCP tools (list, show, create, update, delete) and a server, so agents use the entity through its service and policy. Needs laravel/mcp." },
     "entity": {
       "type": "object",
       "required": ["fields"],
@@ -54,7 +56,8 @@
         "queryBuilder": { "$ref": "#/definitions/queryBuilder" },
         "pest": { "$ref": "#/definitions/pest" },
         "json_api": { "$ref": "#/definitions/jsonApi" },
-        "jsonApi": { "$ref": "#/definitions/jsonApi" }
+        "jsonApi": { "$ref": "#/definitions/jsonApi" },
+        "mcp": { "$ref": "#/definitions/mcp" }
       },
       "additionalProperties": false
     },

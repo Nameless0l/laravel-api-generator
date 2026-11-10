@@ -28,7 +28,7 @@
       "properties": {
         "path": { "type": "string", "pattern": "^(?![A-Za-z]:)[^\\\\/][^\\\\]*$" },
         "kind": {
-          "enum": ["Controller", "DTO", "Enum", "Factory", "FeatureTest", "Migration", "Model", "Policy", "Request", "Resource", "Seeder", "Service", "UnitTest", "Routes", "DatabaseSeeder", "PivotMigration", "Auth", "Bootstrap", "Postman"]
+          "enum": ["Controller", "DTO", "Enum", "Factory", "FeatureTest", "Migration", "Model", "Policy", "Request", "Resource", "Seeder", "Service", "UnitTest", "Routes", "DatabaseSeeder", "PivotMigration", "Auth", "Bootstrap", "Postman", "McpTool", "McpServer", "McpRoutes"]
         },
         "entity": { "type": "string" },
         "action": { "enum": ["create", "update", "unchanged"] },
@@ -73,6 +73,14 @@
               "required": ["json_api"],
               "properties": {
                 "json_api": {
+                  "type": "object",
+                  "required": ["supported"],
+                  "properties": {
+                    "supported": { "type": "boolean" },
+                    "reason": { "type": "string" }
+                  }
+                },
+                "mcp": {
                   "type": "object",
                   "required": ["supported"],
                   "properties": {

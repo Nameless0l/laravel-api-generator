@@ -1,0 +1,49 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Mcp\Tools\{{modelName}};
+
+use App\Http\Resources\{{modelName}}Resource;
+use {{modelImport}};
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\Types\Type;
+use Illuminate\Support\Facades\Gate;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
+use Laravel\Mcp\Server\Attributes\Description;
+use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
+
+#[Name('show-{{toolSingular}}')]
+#[Description('Returns one {{label}} by its {{primaryKey}}.')]
+#[IsReadOnly]
+#[IsOpenWorld(false)]
+class Show{{modelName}}Tool extends Tool
+{
+    public function handle(Request $request): Response|ResponseFactory
+    {
+        ${{variable}} = {{modelClass}}::find($request->validate(['{{primaryKey}}' => ['required', '{{keyRule}}']])['{{primaryKey}}']);
+
+        if (${{variable}} === null) {
+            return Response::error('{{modelName}} not found.');
+        }
+
+        Gate::authorize('view', ${{variable}});
+
+        return Response::structured((new {{modelName}}Resource(${{variable}}))->response()->getData(true));
+    }
+
+    /**
+     * @return array<string, Type>
+     */
+    public function schema(JsonSchema $schema): array
+    {
+        return [
+            '{{primaryKey}}' => $schema->{{keySchema}}()->required(),
+        ];
+    }
+}

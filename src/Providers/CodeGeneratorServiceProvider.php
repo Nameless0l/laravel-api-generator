@@ -24,6 +24,7 @@ use nameless\CodeGenerator\EntitiesGenerator\DTOGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\EnumGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\FactoryGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\FeatureTestGenerator;
+use nameless\CodeGenerator\EntitiesGenerator\McpToolGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\MigrationGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\ModelGeneratorRefactored;
 use nameless\CodeGenerator\EntitiesGenerator\PolicyGenerator;
@@ -144,6 +145,7 @@ class CodeGeneratorServiceProvider extends ServiceProvider
                 $app->make(SeederGenerator::class),
                 $app->make(FeatureTestGenerator::class),
                 $app->make(UnitTestGenerator::class),
+                $app->make(McpToolGenerator::class),
             ]);
         });
     }

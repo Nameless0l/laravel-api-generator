@@ -94,6 +94,15 @@ class ModernModelTest extends GeneratorTestCase
     }
 
     #[Test]
+    public function a_float_is_cast_so_every_database_returns_a_number(): void
+    {
+        $model = $this->generate('Parcel', 'weight:float');
+
+        $this->assertStringContainsString("'weight' => 'float',", $model);
+        $this->assertStringContainsString('@property float $weight', $model);
+    }
+
+    #[Test]
     public function an_auto_increment_key_needs_no_table_attribute(): void
     {
         $model = $this->generate('Parcel', 'label:string', '13.0.0');

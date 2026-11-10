@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use nameless\CodeGenerator\EntitiesGenerator\DTOGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\EnumGenerator;
+use nameless\CodeGenerator\EntitiesGenerator\McpToolGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\MigrationGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\RequestGenerator;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
@@ -22,7 +23,7 @@ use nameless\CodeGenerator\ValueObjects\FieldDefinition;
  * Adds fields to an already generated entity without regenerating it,
  * so manual changes in the existing files survive: incremental migration,
  * then in-place patches of fillable/casts/PHPDoc, validation rules,
- * factory definition, resource fields and DTO properties.
+ * factory definition, resource fields, DTO properties and MCP tools.
  */
 class EntityEvolutionService
 {
@@ -71,6 +72,10 @@ class EntityEvolutionService
         }
 
         $this->createMigration($target, $name, $table, $fields);
+        $required = $fields->filter(fn (FieldDefinition $f) => ! $f->nullable && $f->default === null)->map(fn (FieldDefinition $f) => $f->name);
+        if ($required->isNotEmpty()) {
+            $this->warnings[] = $required->implode(', ').': required and without a default, so the migration fails on PostgreSQL and SQLite when the table already has rows. Make the column nullable or give it a default in the migration.';
+        }
         $this->generateEnums($target, $name, $fields);
         $this->patchModel($target, $name, $modelPath, $fields);
         $this->patchRequests($target, $name, $fields);
@@ -93,6 +98,7 @@ class EntityEvolutionService
         );
 
         $this->patchDto($target, $name, $fields);
+        $this->patchMcpTools($target, $name, $fields);
 
         $this->warnings[] = 'Generated tests were not patched: new required fields may break the create/update tests.';
 
@@ -100,7 +106,7 @@ class EntityEvolutionService
             $target->commit();
         }
 
-        return ['changed' => $this->changed, 'warnings' => $this->warnings];
+        return ['changed' => array_values(array_unique($this->changed)), 'warnings' => $this->warnings];
     }
 
     /**
@@ -133,6 +139,10 @@ class EntityEvolutionService
             'tableName' => $table,
             'columns' => $columns,
             'dropColumns' => $dropColumns,
+            'dropIndexes' => $fields
+                ->filter(fn (FieldDefinition $f) => $f->unique)
+                ->map(fn (FieldDefinition $f) => "\n            \$table->dropUnique(['{$f->name}']);")
+                ->implode(''),
         ]);
 
         $slug = $fields->count() === 1
@@ -322,6 +332,30 @@ class EntityEvolutionService
     }
 
     /**
+     * @param  Collection<int, FieldDefinition>  $fields
+     */
+    private function patchMcpTools(Workspace $workspace, string $entity, Collection $fields): void
+    {
+        foreach (['Create' => false, 'Update' => true] as $action => $update) {
+            $path = McpToolGenerator::path($entity, "{$action}{$entity}Tool");
+
+            if (! $workspace->exists($path)) {
+                continue;
+            }
+
+            $this->patchAfterReturnArray($workspace, $entity, 'McpTool', $path, 'rules', $this->ruleLines($entity, $fields, $update, '$'.McpToolGenerator::variable($entity)), $this->ruleImports($entity, $fields));
+            $this->patchAfterReturnArray(
+                $workspace,
+                $entity,
+                'McpTool',
+                $path,
+                'schema',
+                $fields->map(fn (FieldDefinition $f) => '            '.McpToolGenerator::schemaLine($f, $entity, $update))
+            );
+        }
+    }
+
+    /**
      * @param  Collection<int, string>  $lines
      */
     private function insertBefore(string $content, string $anchor, Collection $lines): ?string
@@ -346,23 +380,39 @@ class EntityEvolutionService
     {
         $store = app_path("Http/Requests/Store{$entity}Request.php");
         $legacy = app_path("Http/Requests/{$entity}Request.php");
+        $current = "\$this->route('".(new EntityDefinition($entity, $fields, collect()))->getRouteParameter()."')";
+        $imports = $this->ruleImports($entity, $fields);
 
         if (! $workspace->exists($store) && $workspace->exists($legacy)) {
-            $this->patchAfterReturnArray($workspace, $entity, 'Request', $legacy, 'rules', $this->ruleLines($entity, $fields, update: false), RequestGenerator::imports($fields, $entity));
+            $this->patchAfterReturnArray($workspace, $entity, 'Request', $legacy, 'rules', $this->ruleLines($entity, $fields, false, $current), $imports);
 
             return;
         }
 
-        $this->patchAfterReturnArray($workspace, $entity, 'Request', $store, 'rules', $this->ruleLines($entity, $fields, update: false), RequestGenerator::imports($fields, $entity));
-        $this->patchAfterReturnArray($workspace, $entity, 'Request', app_path("Http/Requests/Update{$entity}Request.php"), 'rules', $this->ruleLines($entity, $fields, update: true), RequestGenerator::imports($fields, $entity));
+        $this->patchAfterReturnArray($workspace, $entity, 'Request', $store, 'rules', $this->ruleLines($entity, $fields, false, $current), $imports);
+        $this->patchAfterReturnArray($workspace, $entity, 'Request', app_path("Http/Requests/Update{$entity}Request.php"), 'rules', $this->ruleLines($entity, $fields, true, $current), $imports);
     }
 
     /**
      * @param  Collection<int, FieldDefinition>  $fields
+     * @param  string  $current  the expression of the model an update leaves out of its unique rules
      * @return Collection<int, string>
      */
-    private function ruleLines(string $entity, Collection $fields, bool $update): Collection
+    private function ruleLines(string $entity, Collection $fields, bool $update, string $current): Collection
     {
-        return $fields->map(fn (FieldDefinition $f) => "            '{$f->name}' => ".RequestGenerator::fieldRule($f, $update, $entity).',');
+        $table = Str::plural(Str::snake($entity));
+
+        return $fields->map(fn (FieldDefinition $f) => "            '{$f->name}' => ".($f->unique && ! $f->isEnum()
+            ? RequestGenerator::uniqueRule($f, $table, $update, $current)
+            : RequestGenerator::fieldRule($f, $update, $entity)).',');
+    }
+
+    /**
+     * @param  Collection<int, FieldDefinition>  $fields
+     * @return array<int, string>
+     */
+    private function ruleImports(string $entity, Collection $fields): array
+    {
+        return RequestGenerator::imports($fields, $entity, $fields->contains(fn (FieldDefinition $f) => $f->unique && ! $f->isEnum()));
     }
 }

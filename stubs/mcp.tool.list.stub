@@ -1,0 +1,54 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Mcp\Tools\{{modelName}};
+
+use App\Http\Resources\{{modelName}}Resource;
+use {{modelImport}};
+use App\Services\{{modelName}}Service;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\Types\Type;
+use Illuminate\Support\Facades\Gate;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
+use Laravel\Mcp\Server\Attributes\Description;
+use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
+
+#[Name('list-{{toolPlural}}')]
+#[Description('Lists {{labelPlural}} one page at a time, with exact filters and sorting.')]
+#[IsReadOnly]
+#[IsOpenWorld(false)]
+class List{{pluralStudly}}Tool extends Tool
+{
+    public function handle(Request $request, {{modelName}}Service ${{service}}): ResponseFactory
+    {
+        Gate::authorize('viewAny', {{modelClass}}::class);
+
+        $page = ${{service}}->paginate($request->validate([
+            'filter' => ['nullable', 'array'],
+            'sort' => ['nullable', 'string'],
+            'page' => ['nullable', 'integer', 'min:1'],
+            'per_page' => ['nullable', 'integer', 'min:1'],
+        ]));
+
+        return Response::structured({{modelName}}Resource::collection($page)->response()->getData(true));
+    }
+
+    /**
+     * @return array<string, Type>
+     */
+    public function schema(JsonSchema $schema): array
+    {
+        return [
+            'filter' => $schema->object()->description('Exact matches, as {"column": value}. Columns: {{filterColumns}}.'),
+            'sort' => $schema->string()->description('Comma-separated columns, with a leading - for descending. Columns: {{sortColumns}}.'),
+            'page' => $schema->integer()->min(1),
+            'per_page' => $schema->integer()->min(1)->max({{maxPerPage}}),
+        ];
+    }
+}

@@ -23,7 +23,7 @@ final class Manifest
      * Shared files are patched in place (routes, seeders, bootstrap) or
      * rebuilt whole every run (Postman), so there is nothing to protect.
      */
-    private const UNTRACKED_KINDS = ['Routes', 'DatabaseSeeder', 'Bootstrap', 'Postman'];
+    private const UNTRACKED_KINDS = ['Routes', 'DatabaseSeeder', 'Bootstrap', 'Postman', 'McpServer', 'McpRoutes'];
 
     /**
      * @param  array<string, array{entity: ?string, kind: string, hash: string}>  $files
