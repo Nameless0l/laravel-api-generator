@@ -117,6 +117,12 @@ claude mcp add -s project my-api -- php artisan mcp:start api
 
 A local server has no signed-in user, so the policies receive `null`. The generated policies let everyone through until you restrict them. Once a policy requires a user, the local server is refused like any guest, and agents go through HTTP with a token.
 
+## From the VS Code extension
+
+The [extension](/guide/extension/) does both steps without a terminal. Tick **MCP tools** in the builder, or on the review screen of a schema file, a Mermaid diagram, an OpenAPI spec, a description or a database, and the tools are generated with the rest of the API. When `laravel/mcp` is missing, generating offers to install it.
+
+Once `routes/ai.php` registers the server, Copilot's agent mode lists it as `<folder> API` and Cursor gets it with no `mcp.json` to write. It starts with the PHP command of your settings, Sail and Docker included, and its tools are listed again when an entity joins or leaves the server. For Claude Code, the **Agents** block of the sidebar copies the `claude mcp add` command.
+
 ## Over HTTP
 
 When the API sits behind Sanctum, with `--auth` or because `routes/api.php` already protects its routes with `auth:sanctum`, the generator adds a web route next to the local one:

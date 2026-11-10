@@ -143,6 +143,21 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## VS Code extension
 
+### 1.4.0 - November 10, 2026
+
+- **MCP tools for the generated API**: with package 4.2, the builder and the review screen have an **MCP tools** option that writes one tool per action for each entity and a server for your application. Generating offers to install `laravel/mcp` when it is missing. See [MCP Tools for Your API](/guide/mcp-tools#from-the-vs-code-extension).
+- Copilot's agent mode and Cursor list the server of your API on their own, as `<folder> API`, and the **Agents** block copies the command that adds it to Claude Code.
+- The fields added with **Edit Entity** take **nullable** and **unique** with package 4.2.
+
+### 1.3.0 - November 10, 2026
+
+- **Edit an entity in the builder**: its fields and relations are shown locked, and the fields you add go through the review screen before the migration is written. See [Edit a generated entity](/guide/extension/builder#edit-a-generated-entity).
+- **A review before deleting**: the files that would go, the ones edited by hand called out, and nothing deleted before you confirm.
+- **Describe an API** takes follow-ups with **Adjust** and keeps the description, the model and the proposal per project. The builder keeps its form as a draft too.
+- Right-click an `api-schema.yaml`, a `.mmd` diagram or an OpenAPI spec to generate from it, and install the package with one command from the sidebar, the entities view or the walkthrough.
+- Fixed: a double click no longer confirms **Fill the database**, a `class_data.json` import goes through the review screen before anything is written, and a stopped generation is no longer shown as a failure.
+- The command titles, views, walkthrough and settings follow the display language, French included.
+
 ### 1.2.0 - October 27, 2026
 
 - Fixed: **Regenerate File(s)** no longer drops an entity's relations, enums and column modifiers. It opens the review screen with the diff of every file, and with package 4.1 the entity comes back from its recorded definition.
@@ -166,7 +181,7 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ### 0.17.0 - September 27, 2026
 
-- **Describe an API with Copilot**: write the API in plain words, review the `api-schema.yaml` Copilot drafts, then preview and generate it. See [Sources & Review](/guide/extension/imports#describe-an-api-with-copilot).
+- **Describe an API with Copilot**: write the API in plain words, review the `api-schema.yaml` Copilot drafts, then preview and generate it. See [Sources & Review](/guide/extension/imports#describe-an-api).
 
 ### 0.16.0 - September 27, 2026
 

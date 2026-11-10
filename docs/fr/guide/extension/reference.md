@@ -6,26 +6,30 @@ Toutes les commandes vivent sous la catégorie **Laravel API Generator** de la p
 
 | Commande | Description |
 |----------|-------------|
-| Generate Full API | Ouvre le panneau du [builder d'entités](/fr/guide/extension/builder) |
-| Generate APIs from Database | Toutes les tables d'un coup, choisies dans une sélection multiple, puis l'[écran de relecture](/fr/guide/extension/imports#l-ecran-de-relecture) |
-| Generate APIs from Schema File | Génère depuis `api-schema.yaml` / `.yml` / `.json`, après l'écran de relecture |
-| Generate APIs from Mermaid Diagram | Génère depuis un fichier `.mmd`, après l'écran de relecture |
-| Generate APIs from OpenAPI Spec | Génère depuis un fichier OpenAPI ou Swagger, en JSON ou en YAML, après l'écran de relecture |
-| Describe an API with Copilot | Ouvre le panneau Copilot : décrivez l'API, ajustez les entités proposées, puis relisez le plan |
-| Add Fields to Entity… | Fait évoluer une entité via `--add-fields` |
-| Regenerate File(s)… | Reconstruit les artefacts choisis via `--only=`, après l'écran de relecture |
-| Delete Full API | Supprime fichiers, routes et enregistrement du seeder d'une entité |
-| Show Entity Diagram | Ouvre le [canevas interactif](/fr/guide/extension/diagram-and-sidebar) |
-| Show Snippets | Liste les snippets PHP embarqués |
-| Go to Related File | Saute entre les fichiers générés d'une entité |
-| Refresh Entities | Re-scanne le projet à la recherche d'entités générées |
-| Project Actions | Migrations, tests, seed, doc API et stubs, lancés dans un panneau avec leur résultat |
+| Nouvelle API | Ouvre le panneau du [builder d'entités](/fr/guide/extension/builder) |
+| Générer des API depuis la base de données | Toutes les tables d'un coup, choisies dans une sélection multiple, puis l'[écran de relecture](/fr/guide/extension/imports#l-ecran-de-relecture) |
+| Générer des API depuis un fichier de schéma | Génère depuis `api-schema.yaml` / `.yml` / `.json`, après l'écran de relecture |
+| Générer des API depuis un diagramme Mermaid | Génère depuis un fichier `.mmd`, après l'écran de relecture |
+| Générer des API depuis une spec OpenAPI | Génère depuis un fichier OpenAPI ou Swagger, en JSON ou en YAML, après l'écran de relecture |
+| Décrire une API | Ouvre le panneau de description : décrivez l'API, ajustez la proposition, puis relisez le plan |
+| Modifier l'entité… | Ouvre le builder sur une entité générée pour lui [ajouter des champs](/fr/guide/extension/builder#modifier-une-entite-generee), via `--add-fields` |
+| Ajouter des champs à une entité… | Le même écran de modification, sous son ancien nom |
+| Régénérer des fichiers… | Reconstruit les artefacts choisis via `--only=`, après l'écran de relecture |
+| Supprimer l'API… | Relit ce qui part, puis supprime les fichiers, les routes, l'enregistrement du seeder et les outils MCP d'une entité |
+| Afficher le diagramme des entités | Ouvre le [canevas interactif](/fr/guide/extension/diagram-and-sidebar) |
+| Afficher les snippets | Liste les snippets PHP embarqués |
+| Aller au fichier lié | Saute entre les fichiers générés d'une entité |
+| Actualiser les entités | Re-scanne le projet à la recherche d'entités générées |
+| Actions du projet | Migrations, tests, seed, doc API et stubs, lancés dans un panneau avec leur résultat |
+| Installer le package Composer | Installe `nameless/laravel-api-generator` en dépendance de dev. Listée tant que le package manque |
+
+Depuis la palette, Modifier, Régénérer et Supprimer choisissent l'entité dans une liste. Un clic droit sur un fichier `api-schema.yaml`, un diagramme `.mmd` ou une spec OpenAPI propose la commande correspondante. Avec VS Code en anglais, les commandes portent leur nom anglais, comme **New API**, **Edit Entity…** ou **Delete API…**.
 
 ## Raccourcis clavier
 
 | Touches | Commande |
 |---------|----------|
-| `Ctrl+Alt+R` (`Cmd+Alt+R` sur macOS) | Go to Related File |
+| `Ctrl+Alt+R` (`Cmd+Alt+R` sur macOS) | Aller au fichier lié |
 
 ## Réglages
 
@@ -33,7 +37,8 @@ Toutes les commandes vivent sous la catégorie **Laravel API Generator** de la p
 |---------|--------|-------------|
 | `laravelApiGenerator.phpPath` | `php` | Chemin de l'exécutable PHP |
 | `laravelApiGenerator.phpCommand` | `[]` | Commande complète qui lance PHP, un argument par élément (Sail, Docker). Prioritaire sur `phpPath` quand elle est définie. |
-| `laravelApiGenerator.mcp.enabled` | `true` | Propose le serveur MCP du package au mode agent de Copilot quand le projet a `laravel/mcp` |
+| `laravelApiGenerator.mcp.enabled` | `true` | Propose le serveur MCP du package au mode agent de Copilot et à Cursor quand le projet a `laravel/mcp` |
+| `laravelApiGenerator.mcp.apiServer` | `true` | Propose le serveur MCP de votre API générée au mode agent de Copilot et à Cursor, une fois que `make:fullapi --mcp` l'a écrit |
 | `laravelApiGenerator.locale` | `auto` | Langue de l'interface : `auto` (suit VS Code), `en` ou `fr` |
 
 ## Snippets PHP
@@ -61,11 +66,13 @@ Quand le projet a aussi `laravel/mcp`, l'extension enregistre le [serveur MCP](/
 
 ![Le serveur MCP du package dans VS Code, lancé avec php artisan api-generator:mcp](/ext-mcp-server.png)
 
+Quand le projet a des [outils MCP](/fr/guide/mcp-tools), l'extension enregistre à côté le serveur de votre API. Il apparaît sous le nom `<dossier> API`, démarre avec `php artisan mcp:start api` et relit ses outils quand une entité rejoint ou quitte le serveur. Cursor reçoit les deux serveurs sans `mcp.json` à écrire, et le bloc **Agents** de la sidebar copie la commande `claude mcp add` de chacun pour Claude Code. Le réglage `laravelApiGenerator.mcp.apiServer` désactive le serveur de l'API.
+
 `api-schema.yaml`, `api-schema.yml` et `api-schema.json` sont vérifiés avec le [JSON Schema](/fr/guide/schema-files#autocompletion-dans-l-editeur) du package : les clés et les types se complètent pendant la saisie, et les fautes de frappe apparaissent comme des problèmes. Les fichiers YAML demandent l'extension YAML de Red Hat ; le JSON fonctionne tel quel.
 
 ## Activation
 
-L'extension s'active quand le workspace contient un fichier `artisan` : y compris dans les monorepos où l'app Laravel vit jusqu'à deux niveaux de profondeur (`backend/`, `apps/api/`…).
+L'extension s'active quand le workspace contient un fichier `artisan` : y compris dans les monorepos où l'app Laravel vit jusqu'à deux niveaux de profondeur (`backend/`, `apps/api/`…). Elle suit un projet qui apparaît ou disparaît pendant que la fenêtre est ouverte, comme un dossier ajouté au workspace ou un fichier `artisan` créé.
 
 ## Changelog
 

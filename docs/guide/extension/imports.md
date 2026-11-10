@@ -2,11 +2,11 @@
 
 You rarely start from a blank form. The extension generates the whole API from what you already have, a database, a versioned schema, a diagram or a spec, or from a description written in plain words. Every one of these sources ends on the same review screen, before anything is written.
 
-The sources are in the sidebar home under **Generate from**, in the `...` menu of the entities view and in the command palette.
+The sources are in the sidebar home under **Generate from**, in the `...` menu of the entities view and in the command palette. A right-click on an `api-schema.yaml` or `.json` file, a `.mmd` diagram or a spec whose name contains `openapi` or `swagger`, in the Explorer or on its editor tab, starts from that file.
 
 ## The review screen
 
-The package runs the generation as a dry run, and the panel shows what it would do. Each entity lists its fields, its relations and the files it would get, with a badge for the new ones or the entities already generated. The shared files, `routes/api.php` and `DatabaseSeeder.php`, have their own row. On the side, the summary counts the files to create and to update and the new routes, and the generation options (Pest tests, Postman collection, Sanctum auth, Spatie QueryBuilder, JSON:API resources) can still be switched.
+The package runs the generation as a dry run, and the panel shows what it would do. Each entity lists its fields, its relations and the files it would get, with a badge for the new ones or the entities already generated. The shared files, `routes/api.php` and `DatabaseSeeder.php`, have their own row. On the side, the summary counts the files to create and to update and the new routes, and the generation options (Pest tests, Postman collection, Sanctum auth, Spatie QueryBuilder, JSON:API resources, and MCP tools with package 4.2) can still be switched.
 
 ![The review of an OpenAPI spec, then the generation of both entities](/ext-review.gif)
 
@@ -14,13 +14,15 @@ A file you edited by hand since the last generation stays as it is. The screen n
 
 **Generate** writes the files and opens the [API ready screen](/guide/extension/quick-actions) with the next steps.
 
-## Describe an API with Copilot
+## Describe an API
 
 Start from a sentence. **A description** opens a panel where you write the API in plain words, for example rooms that members book by time slot, where a booking has a start, an end and a status. Three examples fill the box if you want to try first.
 
 ![The Describe your API panel](/ext-describe.png)
 
 Pick the chat model VS Code offers (GitHub Copilot by default) and choose whether it relates the new entities to the ones your project already has. The model drafts an `api-schema.yaml`, and the proposed entities show up as cards, marked new, changed or already in the project. Click a card to adjust the entity in the YAML draft, and the cards follow your edits. **Review the plan** opens the review screen. **Save as api-schema.yaml** keeps the draft at the project root instead, as the versioned source of the API.
+
+To change a proposal without rewriting the description, type what to change in the **Adjust** field, such as adding a status to orders or dropping the tags, and the model sends back a new proposal. The description, the model and the last proposal are kept for each project, so the panel reopens where you left it.
 
 When the model cannot answer, the panel says why, whether Copilot is signed out, no model is installed or the provider returned an error, with the fix as a button when there is one, such as setting an API key. The panel needs VS Code 1.90 or later.
 
@@ -45,5 +47,5 @@ Hand an OpenAPI 3.0, 3.1 or Swagger 2.0 spec, JSON or YAML, to the package. The 
 The builder's **Import** menu fills the form instead, so you can adjust one entity before generating it.
 
 - **A database table** lists the user tables, system tables such as `migrations`, `sessions` or `personal_access_tokens` left out. The columns of the table you pick are mapped to the generator's types, and the form gets the entity name (singular, PascalCase), the fields and soft deletes when a `deleted_at` column exists.
-- **A class_data.json file** shows every entity it defines with its fields and relations, then generates them all in one click. Relationships (`oneToMany`, `manyToOne`, `manyToMany`, compositions, aggregations) are supported. [Download a sample class_data.json](https://github.com/Nameless0l/laravel-api-generator/blob/main/examples/class_data.json) to try it, a blog with Author, Category, Article and Tag.
+- **A class_data.json file** shows every entity it defines with its fields and relations, then opens the review screen for all of them, so nothing is written before **Generate**. Relationships (`oneToMany`, `manyToOne`, `manyToMany`, compositions, aggregations) are supported. [Download a sample class_data.json](https://github.com/Nameless0l/laravel-api-generator/blob/main/examples/class_data.json) to try it, a blog with Author, Category, Article and Tag.
 - **An OpenAPI spec** leads to the review screen above. With a package older than 3.13, it falls back to the extension's own importer, which reads JSON specs only.
