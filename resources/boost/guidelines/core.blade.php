@@ -7,6 +7,7 @@ This project uses `nameless/laravel-api-generator`. One command writes a complet
 - Preview before writing with `--dry-run --json`. Files edited by hand since they were generated are kept unless you pass `--force`.
 - When the `laravel-api-generator` MCP server is available, use its `plan-api` and `generate-api` tools instead of the shell commands.
 - Add columns to a generated entity with `--add-fields` rather than regenerating it.
+- To let agents read and change an entity's data, generate it with `--mcp` (requires `laravel/mcp`). Extend the generated tools in `app/Mcp/Tools` rather than writing tools that skip the service and the policy.
 - Put business logic in the generated service class and keep the controller thin.
 - Restrict access in the generated policy. Every controller action calls `Gate::authorize()`, and the policy allows everyone, guests included, until you change it.
 

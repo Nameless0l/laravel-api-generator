@@ -65,6 +65,7 @@ Les options peuvent être globales (sous `options:`) ou par entité :
 | `query_builder: true` | Filtrage & tri Spatie QueryBuilder sur l'index |
 | `pest: true` | Tests Pest au lieu de PHPUnit |
 | `json_api: true` | Resources JSON:API (Laravel 12.45+, resources classiques sur les versions antérieures) |
+| `mcp: true` | Outils MCP et serveur pour les agents (demande `laravel/mcp`). Voir [Outils MCP pour votre API](/fr/guide/mcp-tools) |
 
 ## Autocomplétion dans l'éditeur
 

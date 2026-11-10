@@ -94,7 +94,7 @@ Generates `it(...)` / `expect(...)` style tests instead of PHPUnit classes, with
 php artisan make:fullapi --interactive
 ```
 
-A step-by-step guided setup: entity name, fields one by one (type, nullable, unique, default), relationships, options, and a full preview before generation. Ideal for configuring constraints not available in the `--fields` string syntax.
+A step-by-step guided setup: entity name, fields one by one (type, nullable, unique, default), relationships, options, and a full preview before generation. Ideal for defaults and the other constraints the `--fields` string syntax does not cover.
 
 ## Regenerate selected files with `--only=`
 
@@ -108,7 +108,7 @@ The fields, relations and options come from the definition recorded when the ent
 
 When `--only=` is set, the migration, the `apiResource` route and the `DatabaseSeeder` registration are **left untouched**: only the listed artifacts are rewritten. A listed file you edited by hand is kept unless you add `--force` (see [Evolving Entities](/guide/evolving#your-edits-survive-regeneration)).
 
-Available types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.
+Available types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`, `McpTool`.
 
 ## Deleting an entity
 

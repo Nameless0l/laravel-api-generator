@@ -5,6 +5,22 @@ All notable changes to `laravel-api-generator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.0] - 2026-11-10
+
+### Added
+- **`--mcp` opens the generated API to agents.** For each entity, the generator writes one [Laravel MCP](https://laravel.com/docs/mcp) tool per action under `app/Mcp/Tools/{Entity}` (`list-posts`, `show-post`, `create-post`, `update-post`, `delete-post`, and `restore-post` with soft deletes) and registers them on `App\Mcp\Servers\ApiServer`, which an agent starts with `php artisan mcp:start api`. The tools call `Gate::authorize()` with the abilities of the controller, validate with the rules of the store and update requests, go through the service and answer with the resource. Force delete is not exposed. In a schema file the option is `mcp: true`, per entity or under `options`. Without `laravel/mcp` the files are still written, and a `mcp_missing` warning says what to install.
+- The server is written once and patched afterwards: each entity adds its tools to `$tools`, and `delete:fullapi` removes them. `routes/ai.php` registers the local server, and `Mcp::web('/mcp/api')` behind `auth:sanctum` when the API uses Sanctum.
+- `--add-fields` adds the new fields to the rules and the input schema of the create and update tools, `--only=McpTool` regenerates the tools alone, and the handshake of the preview worker reports `capabilities.options.mcp`.
+- The DTO gains `fromArray(array $data)`, which `fromRequest()` calls, so the same validated data can come from an HTTP request or from a tool. When tools are added to an entity whose DTO was generated earlier, a `mcp_dto_outdated` warning asks to regenerate it.
+- `--fields` and `--add-fields` take the `nullable` and `unique` modifiers on the command line: `--fields="sku:string:unique,notes:text:nullable"`. An unknown modifier is reported with an `unknown_modifier` warning instead of being dropped in silence.
+- Stubs: `mcp.tool.list`, `mcp.tool.show`, `mcp.tool.create`, `mcp.tool.update`, `mcp.tool.delete`, `mcp.tool.restore` and `mcp.server`, checked by `api-generator:validate-stubs`. The `dto` stub has the `fromArray()` method, and the `migration.add-fields` stub an optional `{{dropIndexes}}` placeholder.
+
+### Fixed
+- A unique field added with `--add-fields` gets its `Rule::unique()` in both requests, and the update one ignores the current row. It only had the database index, so a duplicate ended in a 500 instead of a 422.
+- The `down()` of an `--add-fields` migration drops a unique index before its column. SQLite refused to roll it back.
+- `--add-fields` names the required fields that have no default: such a column cannot be added to a table that already has rows on PostgreSQL and SQLite.
+- `float` attributes are cast to `float`. Their column is a decimal, which MySQL and PostgreSQL return as a string.
+
 ## [4.1.1] - 2026-11-10
 
 ### Fixed

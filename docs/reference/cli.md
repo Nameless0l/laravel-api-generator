@@ -5,7 +5,7 @@
 ```bash
 php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
                          {--schema=} {--mermaid=} {--openapi=} {--from-database} {--tables=} {--with-migrations} {--query-builder}
-                         {--pest} {--json-api} {--add-fields=} {--dry-run} {--json} {--force}
+                         {--pest} {--json-api} {--mcp} {--add-fields=} {--dry-run} {--json} {--force}
 php artisan delete:fullapi {name?} {--force} {--dry-run}
 php artisan api-generator:clean-routes {--dry-run}
 php artisan api-generator:introspect {--table=}
@@ -20,7 +20,7 @@ php artisan api-generator:mcp
 | Argument / Option | Description |
 |-------------------|-------------|
 | `name` | Entity name (PascalCase). Omit to use the schema file / JSON mode. |
-| `--fields` | Field definitions in `name:type` format, comma-separated. `enum(a,b)` and `:primary` supported. |
+| `--fields` | Field definitions in `name:type` format, comma-separated. `enum(a,b)` and the `:primary`, `:nullable` and `:unique` modifiers are supported. |
 | `--soft-deletes` | Add SoftDeletes trait, migration column, restore/forceDelete endpoints. |
 | `--postman` | Export a Postman v2.1 collection after generation. |
 | `--auth` | Scaffold Sanctum authentication (AuthController, requests, routes, middleware). |
@@ -35,12 +35,13 @@ php artisan api-generator:mcp
 | `--query-builder` | Use spatie/laravel-query-builder for index filtering and sorting. |
 | `--pest` | Generate Pest tests instead of PHPUnit. |
 | `--json-api` | Generate JSON:API-compliant resources (`JsonApiResource`, Laravel 12.45+). Falls back to a standard resource on older versions. |
+| `--mcp` | Also generate MCP tools and a server, so agents use the API through its services, validation rules and policies. Needs `laravel/mcp`. See [MCP Tools for Your API](/guide/mcp-tools). |
 | `--add-fields=a:type,b:type` | Add fields to an existing entity: incremental migration + in-place patches. |
 | `--dry-run` | Run the whole generation and list the files it would create or update, without writing anything. |
 | `--json` | Print one JSON document instead of the text report, for scripts, editors and agents. Not available with `--interactive`. See [Tools & Agents](/guide/integrations). |
 | `--force` | Overwrite the files you edited by hand since they were generated. Without it they are kept and reported. |
 
-`--only` types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.
+`--only` types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`, `McpTool`.
 
 ## `delete:fullapi`
 

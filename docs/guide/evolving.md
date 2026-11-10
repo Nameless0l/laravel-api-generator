@@ -14,11 +14,20 @@ What happens:
 - An **incremental** `Schema::table()` migration is created (with a proper `down()`)
 - The fillable columns (`$fillable` or `#[Fillable]`), the casts (`casts()`, or `$casts` in a model written by 3.x) and the PHPDoc block of the existing model are **patched in place**
 - Validation rules go into both requests (with `sometimes` in the update one), factory values and resource fields where they belong
-- The DTO gets the new properties and their `fromRequest()` arguments, so the fields reach the service
+- The DTO gets the new properties and reads them from the validated data, so the fields reach the service
+- The [MCP tools](/guide/mcp-tools) of the entity, when it has them, get the rules and the input schema of the new fields
 - The enum class is generated when needed
 - Fields that already exist are skipped; **your custom methods are never touched**
 
 The generated tests are left alone and reported as a manual follow-up. So is a DTO written by 3.x.
+
+A field takes the `nullable` and `unique` modifiers:
+
+```bash
+php artisan make:fullapi Post --add-fields="excerpt:text:nullable,ref:string:unique"
+```
+
+PostgreSQL and SQLite refuse to add a required column without a default to a table that already has rows. The report names the fields in that case: make them nullable, or give the column a default in the migration before you run it.
 
 ## Your edits survive regeneration
 
@@ -48,7 +57,7 @@ An entity generated before 4.1 has no recorded definition yet, so the command as
 php artisan make:fullapi Post --fields="title:string,content:text" --only=Resource
 ```
 
-Available types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.
+Available types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`, `McpTool`.
 
 ## Delete cleanly
 

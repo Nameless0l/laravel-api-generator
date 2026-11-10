@@ -323,7 +323,7 @@ php artisan migrate
 
 - Creates an incremental `Schema::table()` migration (with `down()`)
 - Appends to the fillable columns, the casts and the PHPDoc block of the existing model
-- Inserts the validation rules, factory values, resource fields and DTO properties in place
+- Inserts the validation rules, factory values, resource fields and DTO properties in place, and the fields of the MCP tools when the entity has them
 - Generates the enum class when needed
 - Skips fields that already exist; never touches your custom methods
 
@@ -355,7 +355,7 @@ php artisan make:fullapi Post --fields="title:string,content:text" --only=Resour
 
 When `--only=` is set, the migration, the `apiResource` route and the `DatabaseSeeder` registration are **left untouched** -- only the listed artifacts are rewritten.
 
-Available types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.
+Available types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`, `McpTool`.
 
 ### Introspect an existing database
 
@@ -393,6 +393,15 @@ claude mcp add -s project laravel-api-generator -- php artisan api-generator:mcp
 
 The agent gets four tools, `list-entities`, `plan-api`, `generate-api` and `add-fields`. It previews before writing and never overwrites a file you edited by hand. The VS Code extension registers the server for Copilot on its own. See [MCP Server](https://nameless0l.github.io/laravel-api-generator/guide/mcp) for Cursor, Docker and Sail.
 
+### Let agents use the generated API (`--mcp`)
+
+```bash
+composer require laravel/mcp
+php artisan make:fullapi Post --fields="title:string,status:enum(draft,published)" --mcp
+```
+
+Each entity gets one MCP tool per action (`list-posts`, `show-post`, `create-post`, `update-post`, `delete-post`) on a server of your application, started with `php artisan mcp:start api`. The tools go through the service, the validation rules and the policy of the entity, so an agent is held to the same rules as an HTTP client. See [MCP Tools for Your API](https://nameless0l.github.io/laravel-api-generator/guide/mcp-tools).
+
 ---
 
 ## Customize the generated code (stubs)
@@ -414,7 +423,7 @@ After editing, run `api-generator:validate-stubs` (or let the VS Code extension 
 ```
 php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
                          {--schema=} {--mermaid=} {--openapi=} {--from-database} {--tables=} {--with-migrations} {--query-builder}
-                         {--pest} {--json-api} {--add-fields=} {--dry-run} {--json} {--force}
+                         {--pest} {--json-api} {--mcp} {--add-fields=} {--dry-run} {--json} {--force}
 php artisan delete:fullapi {name?} {--force} {--dry-run}
 php artisan api-generator:clean-routes {--dry-run}
 php artisan api-generator:introspect {--table=}
@@ -427,7 +436,7 @@ php artisan api-generator:mcp
 | Argument / Option | Description |
 |-------------------|-------------|
 | `name` | Entity name (PascalCase). Omit to use the schema file / JSON mode. |
-| `--fields` | Field definitions in `name:type` format, comma-separated. |
+| `--fields` | Field definitions in `name:type` format, comma-separated. `enum(a,b)` and the `:primary`, `:nullable` and `:unique` modifiers are supported. |
 | `--soft-deletes` | Add SoftDeletes trait, migration column, restore/forceDelete endpoints. |
 | `--postman` | Export a Postman v2.1 collection after generation. |
 | `--auth` | Scaffold Sanctum authentication (AuthController, requests, routes, middleware). |
@@ -442,6 +451,7 @@ php artisan api-generator:mcp
 | `--query-builder` | Use spatie/laravel-query-builder for index filtering and sorting. |
 | `--pest` | Generate Pest tests instead of PHPUnit. |
 | `--json-api` | Generate JSON:API-compliant resources (`JsonApiResource`, Laravel 12.45+). Falls back to a standard resource on older versions. |
+| `--mcp` | Also generate MCP tools and a server, so agents use the API through its services, validation rules and policies. Needs `laravel/mcp`. |
 | `--add-fields=a:type,b:type` | Add fields to an existing entity: incremental migration + in-place patches. |
 | `--dry-run` | Run the whole generation and list the files it would create or update, without writing anything. |
 | `--json` | Print one JSON document instead of the text report, for scripts, editors and agents. Not available with `--interactive`. See [Tools & Agents](https://nameless0l.github.io/laravel-api-generator/guide/integrations). |
