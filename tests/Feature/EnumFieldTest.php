@@ -48,6 +48,26 @@ class EnumFieldTest extends GeneratorTestCase
     }
 
     #[Test]
+    public function a_cli_enum_keeps_its_values_as_typed(): void
+    {
+        /** @var PendingCommand $result */
+        $result = $this->artisan('make:fullapi', [
+            'name' => 'Article',
+            '--fields' => 'Title:String,status:Enum(In Review,ratio:16:9):Nullable',
+        ]);
+        $result->assertSuccessful();
+        $result->run();
+
+        $enum = (string) file_get_contents(app_path('Enums/ArticleStatus.php'));
+        $this->assertStringContainsString("= 'In Review';", $enum);
+        $this->assertStringContainsString("= 'ratio:16:9';", $enum);
+
+        $migration = (string) file_get_contents((string) collect(File::glob(database_path('migrations/*_create_articles_table.php')))->last());
+        $this->assertStringContainsString("\$table->string('Title');", $migration);
+        $this->assertStringContainsString('->nullable()', $migration);
+    }
+
+    #[Test]
     public function it_wires_the_enum_into_model_request_factory_and_migration(): void
     {
         /** @var PendingCommand $result */

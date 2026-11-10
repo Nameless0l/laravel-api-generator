@@ -11,7 +11,7 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 - `--mcp` écrit des outils MCP et un serveur pour l'API générée : Claude Code, Cursor ou Copilot peuvent lister, lire, créer, modifier et supprimer des enregistrements en passant par les mêmes services, règles de validation et policies que les endpoints REST. Voir [Outils MCP pour votre API](/fr/guide/mcp-tools).
 - `--add-fields` tient ces outils à jour, et `delete:fullapi` les retire du serveur.
 - `--fields` et `--add-fields` acceptent `:nullable` et `:unique` en ligne de commande.
-- Corrigé : un champ unique ajouté avec `--add-fields` est validé dans les deux requests et sa migration s'annule sur SQLite. Les attributs `float` reviennent en nombres sur MySQL et PostgreSQL.
+- Corrigé : un champ unique ajouté avec `--add-fields` est validé dans les deux requests et sa migration s'annule sur SQLite. Les attributs `float` reviennent en nombres sur MySQL et PostgreSQL. Les valeurs d'enum saisies en ligne de commande gardent leur casse.
 
 ### 4.1.1 - 10 novembre 2026
 

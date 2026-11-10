@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `down()` of an `--add-fields` migration drops a unique index before its column. SQLite refused to roll it back.
 - `--add-fields` names the required fields that have no default: such a column cannot be added to a table that already has rows on PostgreSQL and SQLite.
 - `float` attributes are cast to `float`. Their column is a decimal, which MySQL and PostgreSQL return as a string.
+- The values of an `enum(...)` typed in `--fields` or `--add-fields` keep their case, and a value may contain a colon. They were lowercased, unlike the same values in a schema file.
 
 ## [4.1.1] - 2026-11-10
 

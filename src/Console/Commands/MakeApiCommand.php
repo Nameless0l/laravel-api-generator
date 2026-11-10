@@ -743,7 +743,7 @@ class MakeApiCommand extends Command
 
     private function makeFieldDefinition(string $fieldName, string $type): FieldDefinition
     {
-        $segments = explode(':', $type);
+        $segments = FieldParser::segments($type);
         $baseType = (string) array_shift($segments);
         $modifiers = array_map('strtolower', $segments);
 

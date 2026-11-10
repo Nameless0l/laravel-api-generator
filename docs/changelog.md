@@ -11,7 +11,7 @@ Recent releases of the package and the VS Code extension. Full histories live on
 - `--mcp` writes MCP tools and a server for the generated API, so Claude Code, Cursor or Copilot can list, read, create, update and delete records through the same services, validation rules and policies as the REST endpoints. See [MCP Tools for Your API](/guide/mcp-tools).
 - `--add-fields` keeps those tools up to date, and `delete:fullapi` removes them from the server.
 - `--fields` and `--add-fields` accept `:nullable` and `:unique` on the command line.
-- Fixed: a unique field added with `--add-fields` is validated in both requests and its migration rolls back on SQLite. `float` attributes come back as numbers on MySQL and PostgreSQL.
+- Fixed: a unique field added with `--add-fields` is validated in both requests and its migration rolls back on SQLite. `float` attributes come back as numbers on MySQL and PostgreSQL. Enum values typed on the command line keep their case.
 
 ### 4.1.1 - November 10, 2026
 
