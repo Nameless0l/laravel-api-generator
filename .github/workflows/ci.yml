@@ -133,6 +133,10 @@ jobs:
       working-directory: app
       run: php artisan make:fullapi Gadget --fields="code:string:primary,name:string,kind:enum(small,big),specs:json" --soft-deletes --no-interaction
 
+    - name: Generate an entity with MCP tools
+      working-directory: app
+      run: php artisan make:fullapi Parcel --fields="code:string:primary,label:string:unique,kind:enum(small,big),weight:float:nullable" --soft-deletes --mcp --no-interaction
+
     - name: Check the style of the generated code
       working-directory: app
       run: vendor/bin/pint --test
@@ -146,6 +150,22 @@ jobs:
       run: |
         rm -f tests/Feature/ExampleTest.php tests/Unit/ExampleTest.php
         php artisan test
+
+    - name: Use the generated API through its MCP tools
+      working-directory: app
+      run: |
+        printf '%s\n' \
+          '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"ci","version":"1"}}}' \
+          '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+          '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
+          '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"create-parcel","arguments":{"code":"P-1","label":"Box","kind":"small","weight":2.5}}}' \
+          '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"create-parcel","arguments":{"code":"P-2","label":"Box","kind":"huge"}}}' \
+          '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"update-parcel","arguments":{"code":"P-1","label":"Box","kind":"big"}}}' \
+          '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"delete-parcel","arguments":{"code":"P-1"}}}' \
+          '{"jsonrpc":"2.0","id":7,"method":"tools/call","params":{"name":"restore-parcel","arguments":{"code":"P-1"}}}' \
+          '{"jsonrpc":"2.0","id":8,"method":"tools/call","params":{"name":"list-parcels","arguments":{"filter":{"kind":"big"}}}}' \
+          | php artisan mcp:start api > api-mcp.out
+        php -r '$l = array_map(fn ($x) => json_decode($x, true), file("api-mcp.out", FILE_IGNORE_NEW_LINES)); $t = array_column($l[1]["result"]["tools"], "name"); sort($t); $r = fn (int $i) => $l[$i]["result"]; exit(count($l) === 8 && $t === ["create-parcel", "delete-parcel", "list-parcels", "restore-parcel", "show-parcel", "update-parcel"] && $r(2)["structuredContent"]["data"]["weight"] === 2.5 && $r(3)["isError"] === true && $r(4)["structuredContent"]["data"]["kind"] === "big" && $r(5)["isError"] === false && $r(6)["isError"] === false && array_column($r(7)["structuredContent"]["data"], "code") === ["P-1"] ? 0 : 1);'
 
   static-analysis:
     runs-on: ubuntu-latest
