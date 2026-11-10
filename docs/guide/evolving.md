@@ -14,10 +14,11 @@ What happens:
 - An **incremental** `Schema::table()` migration is created (with a proper `down()`)
 - The fillable columns (`$fillable` or `#[Fillable]`), the casts (`casts()`, or `$casts` in a model written by 3.x) and the PHPDoc block of the existing model are **patched in place**
 - Validation rules go into both requests (with `sometimes` in the update one), factory values and resource fields where they belong
+- The DTO gets the new properties and their `fromRequest()` arguments, so the fields reach the service
 - The enum class is generated when needed
 - Fields that already exist are skipped; **your custom methods are never touched**
 
-The DTO (constructor promotion) and the generated tests are left alone and reported as manual follow-ups.
+The generated tests are left alone and reported as a manual follow-up. So is a DTO written by 3.x.
 
 ## Your edits survive regeneration
 

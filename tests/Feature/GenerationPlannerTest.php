@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\Tests\Feature;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
+use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\Services\GenerationPlanner;
+use nameless\CodeGenerator\Support\Manifest;
 use nameless\CodeGenerator\Support\SchemaParser;
 use nameless\CodeGenerator\Support\WorkspaceFactory;
+use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 use nameless\CodeGenerator\ValueObjects\FileChange;
 use nameless\CodeGenerator\ValueObjects\GenerationRequest;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -149,6 +153,46 @@ class GenerationPlannerTest extends GeneratorTestCase
             'code' => 'legacy_enum',
             'message' => 'app/Enums/Status.php: Article.status uses ArticleStatus since 4.0. Delete the old enum once nothing else uses it.',
         ], $plan->warnings);
+    }
+
+    #[Test]
+    public function two_fields_that_would_share_an_enum_class_are_refused(): void
+    {
+        try {
+            app(GenerationPlanner::class)->plan($this->request(['entities' => [
+                'Post' => ['fields' => ['tag_status' => 'enum(open,closed)']],
+                'PostTag' => ['fields' => ['status' => 'enum(on,off)']],
+            ]], false, false));
+            $this->fail('Two fields were allowed to generate the same enum class.');
+        } catch (CodeGeneratorException $e) {
+            $this->assertSame('enum_name_collision', $e->errorCode);
+            $this->assertSame('PostTag.status would generate App\Enums\PostTagStatus, which Post already uses.', $e->getMessage());
+        }
+    }
+
+    #[Test]
+    public function an_enum_class_generated_for_another_entity_is_refused(): void
+    {
+        File::ensureDirectoryExists(base_path('.api-generator'));
+        File::put(base_path(Manifest::PATH), (string) json_encode(['version' => 1, 'files' => [
+            'app/Enums/PostTagStatus.php' => ['entity' => 'Post', 'kind' => 'Enum', 'hash' => 'unused'],
+        ]]));
+        $planner = app(GenerationPlanner::class);
+        $status = new FieldDefinition(name: 'status', type: 'string', attributes: ['enum' => ['on', 'off']]);
+
+        foreach ([
+            fn () => $planner->plan($this->request(['entities' => ['PostTag' => ['fields' => ['status' => 'enum(on,off)']]]], false, false)),
+            fn () => $planner->planFieldAddition('PostTag', new Collection([$status])),
+        ] as $plan) {
+            try {
+                $plan();
+                $this->fail('An enum class owned by another entity was overwritten.');
+            } catch (CodeGeneratorException $e) {
+                $this->assertSame('enum_name_collision', $e->errorCode);
+            }
+        }
+
+        $this->assertNotEmpty($planner->plan($this->request(['entities' => ['Post' => ['fields' => ['tag_status' => 'enum(open,closed)']]]], false, false))->changes());
     }
 
     #[Test]

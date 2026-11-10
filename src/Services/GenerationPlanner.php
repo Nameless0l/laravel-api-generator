@@ -8,6 +8,7 @@ use Illuminate\Http\Resources\JsonApi\JsonApiResource;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\Support\ApiRoutesRegistrar;
 use nameless\CodeGenerator\Support\Manifest;
 use nameless\CodeGenerator\Support\Workspace;
@@ -44,6 +45,9 @@ final class GenerationPlanner
             $entities = $entities->map(fn (EntityDefinition $entity) => $entity->withOptions(['json_api' => false]));
         }
 
+        $manifest = Manifest::load(base_path());
+        $this->refuseEnumCollisions($manifest, $entities->mapWithKeys(fn (EntityDefinition $entity) => [$entity->name => $entity->fields])->all());
+
         $warnings = array_merge($warnings, $this->hasOneWarnings($entities), $this->legacyRequestWarnings($entities, $request->only), $this->legacyEnumWarnings($entities, $request->only));
 
         if ($request->auth) {
@@ -74,7 +78,6 @@ final class GenerationPlanner
         }
 
         $warnings = array_merge($warnings, $this->apiRoutesRegistrar->register($workspace));
-        $manifest = Manifest::load(base_path());
         $kept = $request->force ? [] : $this->editedFiles($workspace, $manifest);
 
         foreach ($kept as $path) {
@@ -93,13 +96,14 @@ final class GenerationPlanner
     public function planFieldAddition(string $entity, Collection $fields, bool $auth = false): GenerationPlan
     {
         $workspace = $this->workspaces->make();
+        $manifest = Manifest::load(base_path());
+        $this->refuseEnumCollisions($manifest, [$entity => $fields]);
 
         if ($auth) {
             $this->authGenerator->generate($workspace);
         }
 
         $result = $this->entityEvolutionService->addFields($entity, $fields, $workspace);
-        $manifest = Manifest::load(base_path());
         $recorded = $manifest->definition($entity);
 
         return new GenerationPlan(
@@ -109,6 +113,43 @@ final class GenerationPlanner
             patchesInPlace: true,
             definitions: $recorded === null ? [] : [$recorded->withFields($fields)]
         );
+    }
+
+    /**
+     * Enums are named {Entity}{Field}, so Post.tag_status and PostTag.status
+     * would write the same class.
+     *
+     * @param  array<string, Collection<int, FieldDefinition>>  $fieldsByEntity
+     */
+    private function refuseEnumCollisions(Manifest $manifest, array $fieldsByEntity): void
+    {
+        $owners = [];
+        foreach ($manifest->entries() as $path => $entry) {
+            if ($entry['kind'] === 'Enum' && $entry['entity'] !== null) {
+                $owners[basename($path, '.php')] = $entry['entity'];
+            }
+        }
+
+        foreach ($fieldsByEntity as $entity => $fields) {
+            foreach ($fields as $field) {
+                if (! $field->isEnum()) {
+                    continue;
+                }
+
+                $class = $field->getEnumClass($entity);
+                $owner = $owners[$class] ?? $entity;
+
+                if ($owner !== $entity) {
+                    throw new CodeGeneratorException(
+                        "{$entity}.{$field->name} would generate App\\Enums\\{$class}, which {$owner} already uses.",
+                        'enum_name_collision',
+                        'Rename one of the two fields.'
+                    );
+                }
+
+                $owners[$class] = $entity;
+            }
+        }
     }
 
     /**

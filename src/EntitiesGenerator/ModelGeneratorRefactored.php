@@ -210,11 +210,8 @@ class ModelGeneratorRefactored extends AbstractGenerator
         }
 
         foreach ($definition->fields as $field) {
-            $phpType = $field->isEnum()
-                ? $field->getEnumClass($definition->name)
-                : $this->phpTypeFromField($field->type);
             $nullable = $field->nullable ? '|null' : '';
-            $lines[] = " * @property {$phpType}{$nullable} \${$field->name}";
+            $lines[] = " * @property {$field->getAttributePhpType($definition->name)}{$nullable} \${$field->name}";
         }
 
         foreach ($definition->relationships as $rel) {
@@ -244,17 +241,5 @@ class ModelGeneratorRefactored extends AbstractGenerator
         $lines[] = ' */';
 
         return implode("\n", $lines);
-    }
-
-    private function phpTypeFromField(string $fieldType): string
-    {
-        return match ($fieldType) {
-            'integer', 'int', 'bigint' => 'int',
-            'float', 'double', 'decimal' => 'float',
-            'boolean', 'bool' => 'bool',
-            'json' => 'array',
-            'date', 'datetime', 'timestamp' => 'Carbon',
-            default => 'string',
-        };
     }
 }

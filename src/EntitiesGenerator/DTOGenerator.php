@@ -50,11 +50,21 @@ class DTOGenerator extends AbstractGenerator
         ];
     }
 
+    public static function propertyLine(string $name, string $phpType): string
+    {
+        return "public ?{$phpType} \${$name} = null,";
+    }
+
+    public static function argumentLine(string $name, string $phpType): string
+    {
+        return "{$name}: ".self::validatedValue($name, $phpType).',';
+    }
+
     private function generateAttributes(EntityDefinition $definition): string
     {
         $lines = [];
         foreach ($this->properties($definition) as $name => $phpType) {
-            $lines[] = "public ?{$phpType} \${$name} = null,";
+            $lines[] = self::propertyLine($name, $phpType);
         }
 
         return implode("\n        ", $lines);
@@ -64,7 +74,7 @@ class DTOGenerator extends AbstractGenerator
     {
         $lines = [];
         foreach ($this->properties($definition) as $name => $phpType) {
-            $lines[] = "{$name}: {$this->validatedValue($name, $phpType)},";
+            $lines[] = self::argumentLine($name, $phpType);
         }
 
         return implode("\n            ", $lines);
@@ -83,7 +93,7 @@ class DTOGenerator extends AbstractGenerator
         return $fields->merge($foreignKeys)->all();
     }
 
-    private function validatedValue(string $key, string $phpType): string
+    private static function validatedValue(string $key, string $phpType): string
     {
         $value = "\$data['{$key}']";
 

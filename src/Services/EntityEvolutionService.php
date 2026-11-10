@@ -6,6 +6,7 @@ namespace nameless\CodeGenerator\Services;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use nameless\CodeGenerator\EntitiesGenerator\DTOGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\EnumGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\MigrationGenerator;
 use nameless\CodeGenerator\EntitiesGenerator\RequestGenerator;
@@ -21,7 +22,7 @@ use nameless\CodeGenerator\ValueObjects\FieldDefinition;
  * Adds fields to an already generated entity without regenerating it,
  * so manual changes in the existing files survive: incremental migration,
  * then in-place patches of fillable/casts/PHPDoc, validation rules,
- * factory definition and resource fields.
+ * factory definition, resource fields and DTO properties.
  */
 class EntityEvolutionService
 {
@@ -91,7 +92,8 @@ class EntityEvolutionService
             $fields->map(fn (FieldDefinition $f) => "            '{$f->name}' => \$this->{$f->name},")
         );
 
-        $this->warnings[] = "app/DTO/{$name}DTO.php was not patched (constructor promotion): add the new properties manually.";
+        $this->patchDto($target, $name, $fields);
+
         $this->warnings[] = 'Generated tests were not patched: new required fields may break the create/update tests.';
 
         if ($workspace === null) {
@@ -201,14 +203,9 @@ class EntityEvolutionService
         $content = $casts->isEmpty() ? $patched : $this->patchCasts($patched, $casts->implode("\n"));
 
         $phpdocLines = $fields->map(function (FieldDefinition $f) use ($entity) {
-            $type = match (true) {
-                $f->isEnum() => $f->getEnumClass($entity),
-                in_array($f->type, ['date', 'datetime', 'timestamp'], true) => 'Carbon',
-                default => $f->getPhpType(),
-            };
             $nullable = $f->nullable ? '|null' : '';
 
-            return " * @property {$type}{$nullable} \${$f->name}";
+            return " * @property {$f->getAttributePhpType($entity)}{$nullable} \${$f->name}";
         })->implode("\n");
 
         if (preg_match('/\/\*\*\R(?: \* @property[^\r\n]*\R)+/', $content)) {
@@ -286,6 +283,58 @@ class EntityEvolutionService
 
         $workspace->put($path, PhpImports::add($patched, $imports), $kind, $entity);
         $this->changed[] = $path;
+    }
+
+    /**
+     * A DTO written before 4.0 has no $provided to anchor on and is left alone.
+     *
+     * @param  Collection<int, FieldDefinition>  $fields
+     */
+    private function patchDto(Workspace $workspace, string $entity, Collection $fields): void
+    {
+        $path = app_path("DTO/{$entity}DTO.php");
+
+        if (! $workspace->exists($path)) {
+            $this->warnings[] = basename($path).': file not found, skipped.';
+
+            return;
+        }
+
+        $content = $this->insertBefore(
+            $workspace->get($path),
+            '/^([ \t]*)private \?array \$provided = null/m',
+            $fields->map(fn (FieldDefinition $f) => DTOGenerator::propertyLine($f->name, $f->getPhpType()))
+        );
+        $content = $content === null ? null : $this->insertBefore(
+            $content,
+            '/^([ \t]*)provided: array_keys\(\$data\)/m',
+            $fields->map(fn (FieldDefinition $f) => DTOGenerator::argumentLine($f->name, $f->getPhpType()))
+        );
+
+        if ($content === null) {
+            $this->warnings[] = basename($path).': could not locate the $provided parameter, add the new properties manually.';
+
+            return;
+        }
+
+        $workspace->put($path, $content, 'DTO', $entity);
+        $this->changed[] = $path;
+    }
+
+    /**
+     * @param  Collection<int, string>  $lines
+     */
+    private function insertBefore(string $content, string $anchor, Collection $lines): ?string
+    {
+        $patched = preg_replace_callback(
+            $anchor,
+            fn (array $m) => $lines->map(fn (string $line) => $m[1].$line."\n")->implode('').$m[0],
+            $content,
+            1,
+            $count
+        );
+
+        return $count === 1 ? $patched : null;
     }
 
     /**

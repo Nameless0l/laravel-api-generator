@@ -6,6 +6,12 @@ Les versions récentes du package et de l'extension VS Code. Les historiques com
 
 ## Package - `nameless/laravel-api-generator`
 
+### 4.1.1 - 10 novembre 2026
+
+- `--add-fields` met aussi le DTO à jour, donc les champs ajoutés arrivent au service sans retouche manuelle. Voir [Ajouter des champs à une entité existante](/fr/guide/evolving#ajouter-des-champs-a-une-entite-existante).
+- Deux champs qui donneraient la même classe enum (`Post.tag_status` et `PostTag.status`) sont refusés au lieu de s'écraser l'un l'autre.
+- Le PHPDoc du modèle type les attributs `decimal` en `string`, ce que renvoie le cast `decimal:2`.
+
 ### 4.1.0 - 27 octobre 2026
 
 - Régénérez une entité sans retaper ses champs : le manifeste garde la définition à partir de laquelle chaque entité a été générée, et `make:fullapi Post --only=Model,Request` retrouve ses relations, ses valeurs d'enum, ses clés étrangères et ses modificateurs de colonnes. Voir [Régénérer des fichiers précis](/fr/guide/evolving#regenerer-des-fichiers-precis).

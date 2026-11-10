@@ -115,7 +115,7 @@ They return the same JSON document as `--json`. Run `php artisan migrate` and `p
 
 ## Evolving the API
 
-- New columns on a generated entity: `php artisan make:fullapi Post --add-fields="excerpt:text,published_at:datetime"`. It writes an incremental migration and patches the model, both requests, factory and resource in place. Update the DTO and the tests yourself.
+- New columns on a generated entity: `php artisan make:fullapi Post --add-fields="excerpt:text,published_at:datetime"`. It writes an incremental migration and patches the model, both requests, factory, resource and, since 4.1.1, the DTO in place. Update the tests yourself.
 - Rebuild some files of a generated entity: `php artisan make:fullapi Post --only=Model,Request`, without `--fields`. Since 4.1 the definition recorded at generation brings back the relations, enums and column modifiers that retyped fields would drop. An entity generated before 4.1 fails with `invalid_request`: generate it again from its source, or pass its fields once.
 - Remove an entity and all its files: `php artisan delete:fullapi Post --force` (without `--force` it asks for confirmation).
 - After deleting controllers by hand: `php artisan api-generator:clean-routes`.
@@ -131,7 +131,7 @@ They return the same JSON document as `--json`. Run `php artisan migrate` and `p
 - `"kept": true` marks a file edited by hand since it was generated. It is not written.
 - Warnings worth acting on: `unknown_field_type` (a typo in a field type, generated as a string column), `modified_file_kept`, `legacy_request` (a request left by 3.x, to merge into the new ones then delete) and `api_routes_not_loaded`.
 - `content` is only present with `--dry-run`.
-- On failure the exit code is 1 and each error has a stable `code`: `invalid_request`, `invalid_schema`, `invalid_diagram`, `invalid_json`, `file_not_found`, `write_failed`, `reserved_field_name`, `generation_failed` or `unexpected_error`. A `hint` often gives the fix.
+- On failure the exit code is 1 and each error has a stable `code`: `invalid_request`, `invalid_schema`, `invalid_diagram`, `invalid_json`, `file_not_found`, `write_failed`, `invalid_manifest`, `reserved_field_name`, `enum_name_collision` (two fields would write the same enum class, rename one), `generation_failed` or `unexpected_error`. A `hint` often gives the fix.
 
 ## Good to know
 

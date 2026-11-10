@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace nameless\CodeGenerator\Tests\Feature;
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Testing\PendingCommand;
 use PHPUnit\Framework\Attributes\Test;
@@ -69,6 +70,36 @@ class AddFieldsTest extends GeneratorTestCase
 
         $resource = (string) file_get_contents(app_path('Http/Resources/ReportResource.php'));
         $this->assertStringContainsString("'excerpt' => \$this->excerpt,", $resource);
+
+        $dto = (string) file_get_contents(app_path('DTO/ReportDTO.php'));
+        $this->assertStringContainsString("        public ?string \$excerpt = null,\n        private ?array \$provided = null", $dto);
+        $this->assertStringContainsString("            excerpt: isset(\$data['excerpt']) ? (string) \$data['excerpt'] : null,\n            provided: array_keys(\$data)", $dto);
+    }
+
+    #[Test]
+    public function the_dto_carries_the_added_fields_to_the_service(): void
+    {
+        $this->generateReport();
+        Artisan::call('make:fullapi', ['name' => 'Report', '--add-fields' => 'pages:integer,price:decimal:nullable']);
+        require_once app_path('DTO/ReportDTO.php');
+
+        $dto = 'App\\DTO\\ReportDTO';
+
+        $this->assertSame(['title' => 'Q3', 'pages' => 12, 'price' => null], get_object_vars(new $dto(title: 'Q3', pages: 12)));
+        $this->assertStringContainsString('@property string|null $price', (string) file_get_contents(app_path('Models/Report.php')));
+    }
+
+    #[Test]
+    public function a_dto_written_by_3x_is_left_alone_and_reported(): void
+    {
+        $this->generateReport();
+        $legacy = "<?php\n\nreadonly class ReportDTO\n{\n    public function __construct(\n        public ?string \$title,\n    ) {}\n}\n";
+        File::put(app_path('DTO/ReportDTO.php'), $legacy);
+
+        Artisan::call('make:fullapi', ['name' => 'Report', '--add-fields' => 'excerpt:text']);
+
+        $this->assertSame($legacy, file_get_contents(app_path('DTO/ReportDTO.php')));
+        $this->assertStringContainsString('ReportDTO.php: could not locate the $provided parameter', Artisan::output());
     }
 
     #[Test]
