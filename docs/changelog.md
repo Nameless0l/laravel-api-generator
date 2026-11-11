@@ -6,11 +6,12 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## Package - `nameless/laravel-api-generator`
 
-### 4.2.0 - November 10, 2026
+### 4.2.0 - November 11, 2026
 
 - `--mcp` writes MCP tools and a server for the generated API, so Claude Code, Cursor or Copilot can list, read, create, update and delete records through the same services, validation rules and policies as the REST endpoints. See [MCP Tools for Your API](/guide/mcp-tools).
 - `--add-fields` keeps those tools up to date, and `delete:fullapi` removes them from the server.
 - `--fields` and `--add-fields` accept `:nullable` and `:unique` on the command line.
+- `laravel/mcp` installs without `--dev`, since the tools of your API need it in production, and `--mcp` warns when it sits in `require-dev`.
 - Fixed: a unique field added with `--add-fields` is validated in both requests and its migration rolls back on SQLite. `float` attributes come back as numbers on MySQL and PostgreSQL. Enum values typed on the command line keep their case.
 
 ### 4.1.1 - November 10, 2026
@@ -143,13 +144,14 @@ Recent releases of the package and the VS Code extension. Full histories live on
 
 ## VS Code extension
 
-### 1.4.0 - November 10, 2026
+### 1.4.0 - November 11, 2026
 
 - **MCP tools for the generated API**: with package 4.2, the builder and the review screen have an **MCP tools** option that writes one tool per action for each entity and a server for your application. Generating offers to install `laravel/mcp` when it is missing. See [MCP Tools for Your API](/guide/mcp-tools#from-the-vs-code-extension).
 - Copilot's agent mode and Cursor list the server of your API on their own, as `<folder> API`, and the **Agents** block copies the command that adds it to Claude Code.
-- The fields added with **Edit Entity** take **nullable** and **unique** with package 4.2.
+- The fields added with **Edit Entity** take **nullable** and **unique** with package 4.2, and the ones you type are kept per entity until they are added.
+- The **Agents** block installs `laravel/mcp` as a regular dependency, and generating MCP tools offers to move it out of `require-dev`.
 
-### 1.3.0 - November 10, 2026
+### 1.3.0 - November 11, 2026
 
 - **Edit an entity in the builder**: its fields and relations are shown locked, and the fields you add go through the review screen before the migration is written. See [Edit a generated entity](/guide/extension/builder#edit-a-generated-entity).
 - **A review before deleting**: the files that would go, the ones edited by hand called out, and nothing deleted before you confirm.

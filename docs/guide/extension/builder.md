@@ -41,7 +41,7 @@ A running generation can be stopped. The main button is locked while the files a
 
 **Edit Entity…**, on an entity of the tree or from the command palette, opens the builder on an API that already exists. Its fields and relations are locked. They come from the definition the package recorded when it generated the entity, or from its migrations and its model when the entity is older than package 4.1.
 
-Add the new fields and click **Review the changes**. The package runs `--add-fields` as a dry run, and the [review screen](/guide/extension/imports#the-review-screen) shows the migration and every patched file before anything is written. With package 4.2, each new field can be **nullable** or **unique**, which lets a column join a table that already has rows. After **Generate**, the API ready screen has the migration one click away. Relations are not added from this screen. See [Evolving Entities](/guide/evolving).
+Add the new fields and click **Review the changes**. The package runs `--add-fields` as a dry run, and the [review screen](/guide/extension/imports#the-review-screen) shows the migration and every patched file before anything is written. With package 4.2, each new field can be **nullable** or **unique**, which lets a column join a table that already has rows. The fields you type are kept per entity until they are added, so closing the builder loses nothing. After **Generate**, the API ready screen has the migration one click away. Relations are not added from this screen. See [Evolving Entities](/guide/evolving).
 
 ## The same command as the terminal
 

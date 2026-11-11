@@ -41,7 +41,7 @@ Une génération en cours peut s'arrêter. Le bouton principal est verrouillé p
 
 **Modifier l'entité…**, sur une entité de l'arbre ou depuis la palette de commandes, ouvre le builder sur une API qui existe déjà. Ses champs et ses relations sont verrouillés. Ils viennent de la définition que le package a enregistrée en générant l'entité, ou de ses migrations et de son modèle quand l'entité date d'avant le package 4.1.
 
-Ajoutez les nouveaux champs et cliquez sur **Relire les changements**. Le package lance `--add-fields` à blanc, et l'[écran de relecture](/fr/guide/extension/imports#l-ecran-de-relecture) montre la migration et chaque fichier modifié avant toute écriture. Avec le package 4.2, chaque nouveau champ peut être **nullable** ou **unique**, ce qui permet d'ajouter une colonne à une table qui contient déjà des lignes. Après **Générer**, l'écran de l'API prête met la migration à un clic. Les relations ne s'ajoutent pas depuis cet écran. Voir [Faire évoluer les entités](/fr/guide/evolving).
+Ajoutez les nouveaux champs et cliquez sur **Relire les changements**. Le package lance `--add-fields` à blanc, et l'[écran de relecture](/fr/guide/extension/imports#l-ecran-de-relecture) montre la migration et chaque fichier modifié avant toute écriture. Avec le package 4.2, chaque nouveau champ peut être **nullable** ou **unique**, ce qui permet d'ajouter une colonne à une table qui contient déjà des lignes. Les champs saisis sont gardés par entité jusqu'à leur ajout, donc fermer le builder ne fait rien perdre. Après **Générer**, l'écran de l'API prête met la migration à un clic. Les relations ne s'ajoutent pas depuis cet écran. Voir [Faire évoluer les entités](/fr/guide/evolving).
 
 ## La même commande que le terminal
 
