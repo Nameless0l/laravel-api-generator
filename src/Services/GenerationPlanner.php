@@ -171,7 +171,7 @@ final class GenerationPlanner
         } elseif ($this->onlyInRequireDev('laravel/mcp')) {
             $warnings[] = [
                 'code' => 'mcp_dev_dependency',
-                'message' => 'laravel/mcp is in require-dev, so the MCP tools stop working wherever Composer skips dev dependencies. Move it with: composer require laravel/mcp',
+                'message' => 'laravel/mcp is in require-dev, so the MCP tools stop working wherever Composer skips dev dependencies. Move it with: composer require laravel/mcp --no-interaction',
             ];
         }
 
