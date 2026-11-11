@@ -7,7 +7,7 @@ Coding agents such as Claude Code, GitHub Copilot or Cursor can call the generat
 The server runs on [Laravel MCP](https://laravel.com/docs/mcp), which needs Laravel 12.41 or later. Add it next to the package:
 
 ```bash
-composer require --dev laravel/mcp
+composer require laravel/mcp
 ```
 
 The package registers its server on its own, so there is no route file to publish. Your agent starts it with `php artisan api-generator:mcp` whenever it needs it.

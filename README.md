@@ -387,7 +387,7 @@ Wire this into your CI to catch broken stubs before they reach production.
 Install `laravel/mcp` (Laravel 12.41+) and register the server in your agent. With Claude Code:
 
 ```bash
-composer require --dev laravel/mcp
+composer require laravel/mcp
 claude mcp add -s project laravel-api-generator -- php artisan api-generator:mcp
 ```
 

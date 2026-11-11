@@ -168,9 +168,26 @@ final class GenerationPlanner
                 'code' => 'mcp_missing',
                 'message' => 'The generated MCP tools need laravel/mcp. Install it with: composer require laravel/mcp',
             ];
+        } elseif ($this->onlyInRequireDev('laravel/mcp')) {
+            $warnings[] = [
+                'code' => 'mcp_dev_dependency',
+                'message' => 'laravel/mcp is in require-dev, so the MCP tools stop working wherever Composer skips dev dependencies. Move it with: composer require laravel/mcp',
+            ];
         }
 
         return $warnings;
+    }
+
+    private function onlyInRequireDev(string $package): bool
+    {
+        $path = base_path('composer.json');
+        $composer = is_file($path) ? json_decode((string) file_get_contents($path), true) : null;
+        if (! is_array($composer) || ! is_array($composer['require-dev'] ?? null)) {
+            return false;
+        }
+        $require = is_array($composer['require'] ?? null) ? $composer['require'] : [];
+
+        return array_key_exists($package, $composer['require-dev']) && ! array_key_exists($package, $require);
     }
 
     /**

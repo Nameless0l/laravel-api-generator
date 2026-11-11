@@ -217,6 +217,22 @@ class McpToolsTest extends GeneratorTestCase
         $this->assertStringContainsString('app/DTO/TicketDTO.php has no fromArray()', Artisan::output());
     }
 
+    #[Test]
+    public function laravel_mcp_kept_in_require_dev_is_reported(): void
+    {
+        $composer = base_path('composer.json');
+        $original = (string) file_get_contents($composer);
+        File::put($composer, (string) json_encode(['require-dev' => ['laravel/mcp' => '^0.5']]));
+
+        try {
+            Artisan::call('make:fullapi', ['name' => 'Tool', '--fields' => 'label:string', '--mcp' => true]);
+        } finally {
+            File::put($composer, $original);
+        }
+
+        $this->assertStringContainsString('laravel/mcp is in require-dev', Artisan::output());
+    }
+
     /**
      * @param  array<string, mixed>  $entities
      */

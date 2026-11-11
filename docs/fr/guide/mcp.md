@@ -7,7 +7,7 @@ Les agents de code comme Claude Code, GitHub Copilot ou Cursor peuvent appeler l
 Le serveur repose sur [Laravel MCP](https://laravel.com/docs/mcp), qui demande Laravel 12.41 ou plus récent. Ajoutez-le à côté du package :
 
 ```bash
-composer require --dev laravel/mcp
+composer require laravel/mcp
 ```
 
 Le package enregistre son serveur tout seul, il n'y a donc aucun fichier de routes à publier. Votre agent le lance avec `php artisan api-generator:mcp` quand il en a besoin.

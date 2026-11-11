@@ -13,6 +13,8 @@ composer require laravel/mcp
 php artisan make:fullapi Post --fields="title:string,status:enum(draft,published)" --mcp
 ```
 
+Gardez `laravel/mcp` dans `require`, pas dans `require-dev` : les outils tournent partout où tourne l'API, et `--mcp` prévient quand il trouve le paquet parmi les dépendances de développement.
+
 Dans un fichier de schéma, mettez `mcp: true` sur une entité, ou sous `options` pour les couvrir toutes.
 
 ```
@@ -119,7 +121,7 @@ Un serveur local n'a pas d'utilisateur connecté, donc les policies reçoivent `
 
 ## Depuis l'extension VS Code
 
-L'[extension](/fr/guide/extension/) fait les deux étapes sans terminal. Cochez **Outils MCP** dans le builder, ou sur l'écran de relecture d'un fichier de schéma, d'un diagramme Mermaid, d'une spec OpenAPI, d'une description ou d'une base de données, et les outils sont générés avec le reste de l'API. Quand `laravel/mcp` manque, la génération propose de l'installer.
+L'[extension](/fr/guide/extension/) fait les deux étapes sans terminal. Cochez **Outils MCP** dans le builder, ou sur l'écran de relecture d'un fichier de schéma, d'un diagramme Mermaid, d'une spec OpenAPI, d'une description ou d'une base de données, et les outils sont générés avec le reste de l'API. Quand `laravel/mcp` manque, la génération propose de l'installer, et quand il est dans `require-dev`, de le déplacer dans `require`.
 
 Dès que `routes/ai.php` enregistre le serveur, le mode agent de Copilot l'affiche sous le nom `<dossier> API` et Cursor le reçoit sans `mcp.json` à écrire. Il démarre avec la commande PHP de vos réglages, Sail et Docker compris, et ses outils sont relus quand une entité rejoint ou quitte le serveur. Pour Claude Code, le bloc **Agents** de la sidebar copie la commande `claude mcp add`.
 
