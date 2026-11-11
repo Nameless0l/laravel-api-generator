@@ -6,6 +6,7 @@ namespace nameless\CodeGenerator\Support;
 
 use Composer\InstalledVersions;
 use Illuminate\Http\Resources\JsonApi\JsonApiResource;
+use Laravel\Mcp\Server;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\ValueObjects\FieldDefinition;
 use nameless\CodeGenerator\ValueObjects\FileChange;
@@ -97,6 +98,9 @@ final class Protocol
                     'json_api' => class_exists(JsonApiResource::class)
                         ? ['supported' => true]
                         : ['supported' => false, 'reason' => 'JSON:API resources need Laravel 12.45+.'],
+                    'mcp' => class_exists(Server::class)
+                        ? ['supported' => true]
+                        : ['supported' => false, 'reason' => 'MCP tools need laravel/mcp: composer require laravel/mcp'],
                 ],
             ],
         ];

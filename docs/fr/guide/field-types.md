@@ -126,7 +126,13 @@ Toute la pile suit automatiquement :
 
 ## Nullable, unique et valeurs par défaut
 
-La syntaxe `--fields` s'en tient à `nom:type`. Pour les contraintes par champ, utilisez l'[assistant interactif](/fr/guide/generating#assistant-interactif) ou un [fichier de schéma](/fr/guide/schema-files), qui accepte un raccourci ou un mapping :
+En ligne de commande, ajoutez `:nullable` ou `:unique` à un champ :
+
+```bash
+php artisan make:fullapi Product --fields="sku:string:unique,description:text:nullable"
+```
+
+Pour les valeurs par défaut et les règles personnalisées, utilisez l'[assistant interactif](/fr/guide/generating#assistant-interactif) ou un [fichier de schéma](/fr/guide/schema-files), qui accepte un raccourci ou un mapping :
 
 ```yaml
 fields:

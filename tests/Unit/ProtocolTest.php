@@ -52,6 +52,7 @@ class ProtocolTest extends TestCase
         $this->assertContains('string', $handshake['capabilities']['fieldTypes']);
         $this->assertContains('belongsToMany', $handshake['capabilities']['relationTypes']);
         $this->assertTrue($handshake['capabilities']['keepsEditedFiles']);
+        $this->assertSame(['supported' => true], $handshake['capabilities']['options']['mcp']);
     }
 
     #[Test]

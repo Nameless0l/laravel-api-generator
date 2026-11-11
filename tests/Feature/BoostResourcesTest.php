@@ -16,7 +16,7 @@ class BoostResourcesTest extends TestCase
 
     private const GUIDELINES = __DIR__.'/../../resources/boost/guidelines/core.blade.php';
 
-    private const FRAMEWORK_COMMANDS = ['migrate', 'test', 'install:api'];
+    private const FRAMEWORK_COMMANDS = ['migrate', 'test', 'install:api', 'mcp:start'];
 
     private function text(): string
     {

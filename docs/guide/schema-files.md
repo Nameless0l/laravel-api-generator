@@ -65,6 +65,7 @@ Options can be global (under `options:`) or per entity:
 | `query_builder: true` | Spatie QueryBuilder filtering & sorting on index |
 | `pest: true` | Pest tests instead of PHPUnit |
 | `json_api: true` | JSON:API resources (Laravel 12.45+, standard resources on older versions) |
+| `mcp: true` | MCP tools and a server for agents (needs `laravel/mcp`). See [MCP Tools for Your API](/guide/mcp-tools) |
 
 ## Editor autocompletion
 

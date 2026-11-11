@@ -5,7 +5,7 @@
 ```bash
 php artisan make:fullapi {name?} {--fields=} {--soft-deletes} {--postman} {--auth} {--interactive} {--only=}
                          {--schema=} {--mermaid=} {--openapi=} {--from-database} {--tables=} {--with-migrations} {--query-builder}
-                         {--pest} {--json-api} {--add-fields=} {--dry-run} {--json} {--force}
+                         {--pest} {--json-api} {--mcp} {--add-fields=} {--dry-run} {--json} {--force}
 php artisan delete:fullapi {name?} {--force} {--dry-run}
 php artisan api-generator:clean-routes {--dry-run}
 php artisan api-generator:introspect {--table=}
@@ -20,7 +20,7 @@ php artisan api-generator:mcp
 | Argument / Option | Description |
 |-------------------|-------------|
 | `name` | Nom de l'entité (PascalCase). Omettre pour le mode schéma / JSON. |
-| `--fields` | Définitions de champs au format `nom:type`, séparées par des virgules. `enum(a,b)` et `:primary` supportés. |
+| `--fields` | Définitions de champs au format `nom:type`, séparées par des virgules. `enum(a,b)` et les modificateurs `:primary`, `:nullable` et `:unique` sont supportés. |
 | `--soft-deletes` | Trait SoftDeletes, colonne de migration, endpoints restore/forceDelete. |
 | `--postman` | Exporte une collection Postman v2.1 après génération. |
 | `--auth` | Génère l'authentification Sanctum (AuthController, requests, routes, middleware). |
@@ -35,12 +35,13 @@ php artisan api-generator:mcp
 | `--query-builder` | Utilise spatie/laravel-query-builder pour le filtrage et le tri de l'index. |
 | `--pest` | Génère des tests Pest au lieu de PHPUnit. |
 | `--json-api` | Génère des resources conformes à JSON:API (`JsonApiResource`, Laravel 12.45+). Repli sur une resource standard sur les versions antérieures. |
+| `--mcp` | Génère aussi des outils MCP et un serveur, pour que les agents utilisent l'API à travers ses services, ses règles de validation et ses policies. Demande `laravel/mcp`. Voir [Outils MCP pour votre API](/fr/guide/mcp-tools). |
 | `--add-fields=a:type,b:type` | Ajoute des champs à une entité existante : migration incrémentale + patchs en place. |
 | `--dry-run` | Exécute toute la génération et liste les fichiers qu'elle créerait ou modifierait, sans rien écrire. |
 | `--json` | Affiche un seul document JSON à la place du rapport texte, pour les scripts, les éditeurs et les agents. Indisponible avec `--interactive`. Voir [Outils et agents](/fr/guide/integrations). |
 | `--force` | Écrase les fichiers modifiés à la main depuis leur génération. Sans cette option, ils sont gardés et signalés. |
 
-Types pour `--only` : `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.
+Types pour `--only` : `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`, `McpTool`.
 
 ## `delete:fullapi`
 

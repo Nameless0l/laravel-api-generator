@@ -26,15 +26,20 @@ class FieldParser
         $fieldTokens = preg_split('/,(?![^()]*\))/', $fields) ?: [];
 
         foreach ($fieldTokens as $field) {
-            $parts = explode(':', trim($field));
+            $parts = self::segments(trim($field));
 
             if (count($parts) < 2) {
                 throw new InvalidArgumentException("Invalid field format: {$field}. Expected format: field:type");
             }
 
             $fieldName = trim($parts[0]);
-            // Keep any modifier segments (e.g. code:string:primary) in the type spec
-            $fieldType = trim(strtolower(implode(':', array_slice($parts, 1))));
+            // Keep any modifier segments (e.g. code:string:primary) in the type spec,
+            // lowercased except for the values of enum(...), which stay as typed
+            $fieldType = (string) preg_replace_callback(
+                '/^[^(]+|\)[^(]*$/',
+                fn (array $match): string => strtolower($match[0]),
+                trim(implode(':', array_slice($parts, 1)))
+            );
 
             if (empty($fieldName) || empty($fieldType)) {
                 throw new InvalidArgumentException("Field name and type cannot be empty: {$field}");
@@ -44,6 +49,16 @@ class FieldParser
         }
 
         return $fieldsArray;
+    }
+
+    /**
+     * Split a field spec on the colons outside parentheses, so enum(a:b) keeps its value.
+     *
+     * @return array<int, string>
+     */
+    public static function segments(string $spec): array
+    {
+        return preg_split('/:(?![^()]*\))/', $spec) ?: [];
     }
 
     /**

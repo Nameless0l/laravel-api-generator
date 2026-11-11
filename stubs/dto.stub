@@ -19,8 +19,14 @@ readonly class {{modelName}}DTO
 
     public static function fromRequest(Store{{modelName}}Request|Update{{modelName}}Request $request): self
     {
-        $data = $request->validated();
+        return self::fromArray($request->validated());
+    }
 
+    /**
+     * @param  array<string, mixed>  $data  validated input, whatever sent it
+     */
+    public static function fromArray(array $data): self
+    {
         return new self(
             {{attributesFromValidated}}
             provided: array_keys($data)

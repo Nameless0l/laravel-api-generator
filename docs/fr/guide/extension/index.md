@@ -14,11 +14,11 @@ Une interface visuelle gratuite pour le générateur. Construisez une entité da
 
 | | |
 |---|---|
-| [Le builder d'entités](/fr/guide/extension/builder) | Un formulaire à côté de l'aperçu en direct de chaque fichier, rendu par le package installé dans votre projet |
+| [Le builder d'entités](/fr/guide/extension/builder) | Un formulaire à côté de l'aperçu en direct de chaque fichier, rendu par le package installé dans votre projet. Il se rouvre sur une entité générée pour lui ajouter des champs |
 | [Sources & relecture](/fr/guide/extension/imports) | Générez depuis une description avec Copilot, votre base de données, un fichier de schéma, un diagramme Mermaid ou une **spec OpenAPI**, après relecture de la simulation du package |
 | [Diagramme & sidebar](/fr/guide/extension/diagram-and-sidebar) | Un canevas d'entités avec un inspecteur, et l'arbre de chaque fichier généré, ceux que vous avez retouchés signalés |
 | [API prête & actions du projet](/fr/guide/extension/quick-actions) | Migrations, tests, seed, doc API et stubs, lancés sur place avec leur résultat |
-| [Copilot et Cursor](/fr/guide/extension/reference#copilot-et-fichiers-de-schema) | Le skill d'agent du package et son [serveur MCP](/fr/guide/mcp), enregistrés pour le mode agent de Copilot et pour Cursor, qui planifient et génèrent des API avec le package. Le bloc **Agents** de la barre latérale installe `laravel/mcp` quand il manque et copie la commande Claude Code |
+| [Copilot et Cursor](/fr/guide/extension/reference#copilot-et-fichiers-de-schema) | Le skill d'agent du package et son [serveur MCP](/fr/guide/mcp), enregistrés pour le mode agent de Copilot et pour Cursor, qui planifient et génèrent des API avec le package. Avec l'option **Outils MCP**, le [serveur de votre propre API](/fr/guide/mcp-tools) est enregistré de la même façon, et les agents lisent et écrivent ses enregistrements. Le bloc **Agents** de la barre latérale installe `laravel/mcp` quand il manque et copie les commandes pour Claude Code |
 | [Commandes & réglages](/fr/guide/extension/reference) | Référence de la palette de commandes, raccourcis, settings, snippets PHP |
 
 Toute l'interface (libellés, popups, invites, messages d'erreur) existe en **anglais et en français**, selon la langue d'affichage de VS Code (forçable via le réglage `laravelApiGenerator.locale`). Les captures de cette documentation montrent l'interface en anglais.
@@ -33,7 +33,7 @@ Toute l'interface (libellés, popups, invites, messages d'erreur) existe en **an
 composer require --dev nameless/laravel-api-generator
 ```
 
-Si le package manque, l'extension propose de l'installer pour vous, en dépendance de dev (rien du générateur ne part en production, et le code généré n'en dépend pas). Si la version installée est trop ancienne pour une fonctionnalité, elle l'explique et propose un `composer update`.
+Si le package manque, le bouton principal de la sidebar l'installe pour vous, en dépendance de dev (rien du générateur ne part en production, et le code généré n'en dépend pas). La commande **Installer le package Composer** fait la même chose depuis la palette. Si la version installée est trop ancienne pour une fonctionnalité, l'extension l'explique et propose un `composer update`.
 
 Un **walkthrough natif** (Help → Get Started) couvre l'installation du package, la première génération, les autres sources, la sidebar et les agents.
 

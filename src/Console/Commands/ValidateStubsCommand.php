@@ -51,6 +51,12 @@ class ValidateStubsCommand extends Command
         'test.feature.pest' => ['modelName', 'modelNameLower', 'pluralName'],
         'test.unit.pest' => ['modelName', 'modelNameLower'],
         'migration.add-fields' => ['tableName', 'columns', 'dropColumns'],
+        'mcp.tool.list' => ['modelName', 'modelImport', 'modelClass', 'service'],
+        'mcp.tool.show' => ['modelName', 'modelImport', 'modelClass', 'variable', 'primaryKey'],
+        'mcp.tool.create' => ['modelName', 'modelImport', 'modelClass', 'service', 'rules', 'schema', 'imports'],
+        'mcp.tool.update' => ['modelName', 'modelImport', 'modelClass', 'service', 'variable', 'primaryKey', 'rules', 'schema', 'imports'],
+        'mcp.tool.delete' => ['modelName', 'modelImport', 'modelClass', 'service', 'variable', 'primaryKey'],
+        'mcp.tool.restore' => ['modelName', 'modelImport', 'modelClass', 'service', 'variable', 'primaryKey'],
     ];
 
     /**

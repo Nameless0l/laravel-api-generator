@@ -1,0 +1,50 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Mcp\Tools\{{modelName}};
+
+use {{modelImport}};
+use App\Services\{{modelName}}Service;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\Types\Type;
+use Illuminate\Support\Facades\Gate;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
+use Laravel\Mcp\Server\Attributes\Description;
+use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
+use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
+
+#[Name('delete-{{toolSingular}}')]
+#[Description('{{deleteDescription}}')]
+#[IsDestructive]
+#[IsOpenWorld(false)]
+class Delete{{modelName}}Tool extends Tool
+{
+    public function handle(Request $request, {{modelName}}Service ${{service}}): Response
+    {
+        ${{variable}} = {{modelClass}}::find($request->validate(['{{primaryKey}}' => ['required', '{{keyRule}}']])['{{primaryKey}}']);
+
+        if (${{variable}} === null) {
+            return Response::error('{{modelName}} not found.');
+        }
+
+        Gate::authorize('delete', ${{variable}});
+
+        ${{service}}->delete(${{variable}});
+
+        return Response::text('{{modelName}} deleted.');
+    }
+
+    /**
+     * @return array<string, Type>
+     */
+    public function schema(JsonSchema $schema): array
+    {
+        return [
+            '{{primaryKey}}' => $schema->{{keySchema}}()->required(),
+        ];
+    }
+}

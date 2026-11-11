@@ -128,7 +128,8 @@ abstract class GenerationTool extends Tool
             .'Types: '.implode(', ', FieldDefinition::CANONICAL_TYPES).', or enum(a,b) without spaces. '
             .'A relation is "<type> <Model>" with the types '.implode(', ', SchemaParser::RELATION_KEYWORDS).' ("morphTo" alone). '
             .'Declaring one side is enough: the inverse relation and the foreign key column are added, and so are id and timestamps. '
-            .'Options, per entity or under "options" for every entity: soft_deletes, query_builder, pest, json_api. '
+            .'Options, per entity or under "options" for every entity: soft_deletes, query_builder, pest, json_api, '
+            .'mcp (MCP tools and a server exposing the entity to agents). '
             .'Full JSON Schema: resource api-generator://schema/api-schema.json.';
     }
 }

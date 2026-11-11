@@ -32,6 +32,7 @@ const enCliSidebar = [
       { text: "Evolving Entities", link: "/guide/evolving" },
       { text: "Generated Tests", link: "/guide/testing" },
       { text: "API Docs & Postman", link: "/guide/docs-and-postman" },
+      { text: "MCP Tools for Your API", link: "/guide/mcp-tools" },
     ],
   },
   {
@@ -120,6 +121,7 @@ const frCliSidebar = [
       { text: "Faire évoluer les entités", link: "/fr/guide/evolving" },
       { text: "Tests générés", link: "/fr/guide/testing" },
       { text: "Doc API & Postman", link: "/fr/guide/docs-and-postman" },
+      { text: "Outils MCP pour votre API", link: "/fr/guide/mcp-tools" },
     ],
   },
   {

@@ -102,6 +102,15 @@ class RequestGenerator extends AbstractGenerator
 
     private function generateRules(EntityDefinition $definition, bool $update): string
     {
+        return implode("\n            ", self::ruleLines($definition, $update, "\$this->route('{$definition->getRouteParameter()}')"));
+    }
+
+    /**
+     * @param  string  $current  the expression of the row an update leaves out of its unique rules
+     * @return array<int, string>
+     */
+    public static function ruleLines(EntityDefinition $definition, bool $update, string $current): array
+    {
         $sometimes = $update ? 'sometimes|' : '';
 
         $fkRules = $definition->relationships
@@ -118,26 +127,33 @@ class RequestGenerator extends AbstractGenerator
                 };
 
                 return "'{$fk}' => '{$sometimes}required|{$type}|exists:{$table},{$column}',";
-            })->toArray();
+            });
 
-        $rules = $definition->fields->map(function (FieldDefinition $field) use ($definition, $update, $sometimes) {
-            if ($field->isEnum() || (! $field->unique && ! $field->isPrimary())) {
-                return "'{$field->name}' => ".self::fieldRule($field, $update, $definition->name).',';
-            }
+        $rules = $definition->fields->map(function (FieldDefinition $field) use ($definition, $update, $current) {
+            $rule = $field->isEnum() || (! $field->unique && ! $field->isPrimary())
+                ? self::fieldRule($field, $update, $definition->name)
+                : self::uniqueRule($field, $definition->getTableName(), $update, $current, $definition->getPrimaryKeyName());
 
-            $parts = array_map(fn (string $p) => "'{$p}'", explode('|', $sometimes.$field->getValidationRule()));
-            $unique = "Rule::unique('{$definition->getTableName()}')";
+            return "'{$field->name}' => {$rule},";
+        });
 
-            if ($update) {
-                $keyName = $definition->getPrimaryKeyName();
-                $unique .= "->ignore(\$this->route('{$definition->getRouteParameter()}')".($keyName === 'id' ? '' : ", '{$keyName}'").')';
-            }
+        return $fkRules->concat($rules)->values()->all();
+    }
 
-            $parts[] = $unique;
+    /**
+     * @param  string  $current  the expression of the row an update leaves out: a model, or a key with $keyName
+     */
+    public static function uniqueRule(FieldDefinition $field, string $table, bool $update, string $current, string $keyName = 'id'): string
+    {
+        $parts = array_map(fn (string $p) => "'{$p}'", explode('|', ($update ? 'sometimes|' : '').$field->getValidationRule()));
+        $unique = "Rule::unique('{$table}')";
 
-            return "'{$field->name}' => [".implode(', ', $parts).'],';
-        })->toArray();
+        if ($update) {
+            $unique .= "->ignore({$current}".($keyName === 'id' ? '' : ", '{$keyName}'").')';
+        }
 
-        return implode("\n            ", array_merge($fkRules, $rules));
+        $parts[] = $unique;
+
+        return '['.implode(', ', $parts).']';
     }
 }

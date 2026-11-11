@@ -90,6 +90,31 @@ class AddFieldsTest extends GeneratorTestCase
     }
 
     #[Test]
+    public function the_cli_takes_nullable_and_unique_and_reports_what_it_ignores(): void
+    {
+        $this->generateReport();
+        Artisan::call('make:fullapi', ['name' => 'Report', '--add-fields' => 'excerpt:text:nullable,ref:string:unique,pages:integer:big']);
+        $output = Artisan::output();
+
+        $migration = (string) file_get_contents((string) ((array) glob(database_path('migrations/*_to_reports_table.php')))[0]);
+        $this->assertStringContainsString("\$table->text('excerpt')->nullable();", $migration);
+        $this->assertStringContainsString("\$table->string('ref')->unique();", $migration);
+        $this->assertStringContainsString("            \$table->dropUnique(['ref']);\n            \$table->dropColumn(['excerpt', 'ref', 'pages']);", $migration);
+
+        $store = (string) file_get_contents(app_path('Http/Requests/StoreReportRequest.php'));
+        $this->assertStringContainsString("'excerpt' => 'nullable|string',", $store);
+        $this->assertStringContainsString("'ref' => ['required', 'string', 'max:255', Rule::unique('reports')],", $store);
+        $this->assertStringContainsString('use Illuminate\Validation\Rule;', $store);
+        $this->assertStringContainsString(
+            "'ref' => ['sometimes', 'required', 'string', 'max:255', Rule::unique('reports')->ignore(\$this->route('report'))],",
+            (string) file_get_contents(app_path('Http/Requests/UpdateReportRequest.php'))
+        );
+
+        $this->assertStringContainsString('pages: "big" is not a modifier and was ignored.', $output);
+        $this->assertStringContainsString('ref, pages: required and without a default', $output);
+    }
+
+    #[Test]
     public function a_dto_written_by_3x_is_left_alone_and_reported(): void
     {
         $this->generateReport();

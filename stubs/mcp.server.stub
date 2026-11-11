@@ -1,0 +1,22 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Mcp\Servers;
+
+use Laravel\Mcp\Server;
+
+class ApiServer extends Server
+{
+    protected string $name = 'API';
+
+    protected string $instructions = 'Reads and changes the data of this application through the same services, validation rules and policies as its REST API. The list tools take filter, sort, page and per_page.';
+
+    protected array $tools = [
+    ];
+
+    protected function boot(): void
+    {
+        $this->name = config('app.name').' API';
+    }
+}

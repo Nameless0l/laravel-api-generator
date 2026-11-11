@@ -258,6 +258,11 @@ final readonly class EntityDefinition
         return ($this->options['json_api'] ?? false) === true;
     }
 
+    public function exposesMcp(): bool
+    {
+        return ($this->options['mcp'] ?? false) === true;
+    }
+
     public function getPrimaryField(): ?FieldDefinition
     {
         return $this->fields->first(fn (FieldDefinition $field) => $field->isPrimary());

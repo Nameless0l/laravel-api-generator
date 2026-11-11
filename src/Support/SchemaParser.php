@@ -401,7 +401,7 @@ class SchemaParser
     {
         $options = [];
 
-        foreach (['soft_deletes' => 'softDeletes', 'query_builder' => 'queryBuilder', 'pest' => 'pest', 'json_api' => 'jsonApi'] as $snake => $camel) {
+        foreach (['soft_deletes' => 'softDeletes', 'query_builder' => 'queryBuilder', 'pest' => 'pest', 'json_api' => 'jsonApi', 'mcp' => 'mcp'] as $snake => $camel) {
             if (array_key_exists($snake, $data)) {
                 $options[$snake] = (bool) $data[$snake];
             } elseif (array_key_exists($camel, $data)) {

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use nameless\CodeGenerator\Support\Manifest;
+use nameless\CodeGenerator\Support\McpRegistrar;
 
 class DeleteFullApi extends Command
 {
@@ -70,6 +71,9 @@ class DeleteFullApi extends Command
                 }
             }
             $this->line("  update    routes/api.php and DatabaseSeeder.php (the {$className} entries)");
+            if (File::isDirectory(app_path("Mcp/Tools/{$className}"))) {
+                $this->line("  update    app/Mcp/Servers/ApiServer.php (the {$className} tools)");
+            }
             foreach ($edited as $path) {
                 $this->warn("  ! {$path} was edited by hand since it was generated.");
             }
@@ -96,6 +100,13 @@ class DeleteFullApi extends Command
         $this->removeFromAuthServiceProvider($className);
         $this->unregisterSeederFromDatabaseSeeder($className);
         $this->removeApiRoute($className, Str::plural(Str::lower($className)));
+
+        foreach (McpRegistrar::forget($className) as $tool) {
+            $this->info("MCP tool unregistered: {$tool}");
+        }
+        if (File::isDirectory($tools = app_path("Mcp/Tools/{$className}")) && File::isEmptyDirectory($tools)) {
+            File::deleteDirectory($tools);
+        }
 
         if ($manifest->exists()) {
             $manifest->save();

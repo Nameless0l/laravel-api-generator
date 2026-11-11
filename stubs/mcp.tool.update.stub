@@ -1,0 +1,63 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Mcp\Tools\{{modelName}};
+
+use App\DTO\{{modelName}}DTO;
+use App\Http\Resources\{{modelName}}Resource;
+use {{modelImport}};
+use App\Services\{{modelName}}Service;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\Types\Type;
+use Illuminate\Support\Facades\Gate;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
+use Laravel\Mcp\Server\Attributes\Description;
+use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsIdempotent;
+use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;{{imports}}
+
+#[Name('update-{{toolSingular}}')]
+#[Description('Updates a {{label}}. Only the fields sent are changed.')]
+#[IsIdempotent]
+#[IsOpenWorld(false)]
+class Update{{modelName}}Tool extends Tool
+{
+    public function handle(Request $request, {{modelName}}Service ${{service}}): Response|ResponseFactory
+    {
+        ${{variable}} = {{modelClass}}::find($request->validate(['{{primaryKey}}' => ['required', '{{keyRule}}']])['{{primaryKey}}']);
+
+        if (${{variable}} === null) {
+            return Response::error('{{modelName}} not found.');
+        }
+
+        Gate::authorize('update', ${{variable}});
+
+        ${{variable}} = ${{service}}->update(${{variable}}, {{modelName}}DTO::fromArray($request->validate($this->rules(${{variable}}))));
+
+        return Response::structured((new {{modelName}}Resource(${{variable}}))->response()->getData(true));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function rules({{modelClass}} ${{variable}}): array
+    {
+        return [
+            {{rules}}
+        ];
+    }
+
+    /**
+     * @return array<string, Type>
+     */
+    public function schema(JsonSchema $schema): array
+    {
+        return [
+            {{schema}}
+        ];
+    }
+}

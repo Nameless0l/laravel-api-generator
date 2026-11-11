@@ -14,11 +14,11 @@ A free visual interface for the generator. Build an entity in a form while the p
 
 | | |
 |---|---|
-| [Entity Builder](/guide/extension/builder) | A form next to the live preview of every file, rendered by the package installed in your project |
+| [Entity Builder](/guide/extension/builder) | A form next to the live preview of every file, rendered by the package installed in your project. It reopens on a generated entity to add fields |
 | [Sources & Review](/guide/extension/imports) | Generate from a description with Copilot, your database, a schema file, a Mermaid diagram or an **OpenAPI spec**, after reviewing the package's dry run |
 | [Diagram & Sidebar](/guide/extension/diagram-and-sidebar) | An entity canvas with an inspector, and the tree of every generated file, the ones you edited flagged |
 | [API Ready & Project Actions](/guide/extension/quick-actions) | Migrations, tests, seeding, API docs and stubs, run in place with their result |
-| [Copilot and Cursor](/guide/extension/reference#copilot-and-schema-files) | The package's agent skill and its [MCP server](/guide/mcp), registered for Copilot's agent mode and for Cursor, so they plan and generate APIs through the package. The sidebar's **Agents** block installs `laravel/mcp` when it is missing and copies the Claude Code command |
+| [Copilot and Cursor](/guide/extension/reference#copilot-and-schema-files) | The package's agent skill and its [MCP server](/guide/mcp), registered for Copilot's agent mode and for Cursor, so they plan and generate APIs through the package. With the **MCP tools** option, the [server of your own API](/guide/mcp-tools) is registered the same way, and agents read and write its records. The sidebar's **Agents** block installs `laravel/mcp` when it is missing and copies the commands for Claude Code |
 | [Commands & Settings](/guide/extension/reference) | Command palette reference, keybindings, settings, PHP snippets |
 
 The whole UI (panel labels, popups, prompts, error messages) is available in **English and French**, following VS Code's display language (forceable via the `laravelApiGenerator.locale` setting).
@@ -33,7 +33,7 @@ The whole UI (panel labels, popups, prompts, error messages) is available in **E
 composer require --dev nameless/laravel-api-generator
 ```
 
-If the package is missing, the extension offers to install it for you, as a dev dependency (nothing from the generator ships to production, and the generated code doesn't depend on it). If the installed version is too old for a feature, it explains why and offers to run `composer update`.
+If the package is missing, the main button of the sidebar installs it for you, as a dev dependency (nothing from the generator ships to production, and the generated code doesn't depend on it). The **Install the Composer Package** command does the same from the palette. If the installed version is too old for a feature, the extension explains why and offers to run `composer update`.
 
 A native **Getting Started walkthrough** (Help → Get Started) covers the package install, your first generation, the other sources, the sidebar and the agents.
 

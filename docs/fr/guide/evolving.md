@@ -14,11 +14,20 @@ Ce qui se passe :
 - Une migration **incrémentale** `Schema::table()` est créée (avec un vrai `down()`)
 - Les colonnes fillable (`$fillable` ou `#[Fillable]`), les casts (`casts()`, ou `$casts` dans un modèle écrit par la 3.x) et le bloc PHPDoc du modèle existant sont **patchés en place**
 - Les règles de validation vont dans les deux requests (avec `sometimes` dans celle de mise à jour), les valeurs de factory et les champs de resource à leur place
-- Le DTO reçoit les nouvelles propriétés et leurs arguments dans `fromRequest()`, donc les champs arrivent jusqu'au service
+- Le DTO reçoit les nouvelles propriétés et les lit dans les données validées, donc les champs arrivent jusqu'au service
+- Les [outils MCP](/fr/guide/mcp-tools) de l'entité, quand elle en a, reçoivent les règles et le schéma d'entrée des nouveaux champs
 - La classe enum est générée si nécessaire
 - Les champs déjà existants sont ignorés ; **vos méthodes personnalisées ne sont jamais touchées**
 
 Les tests générés sont laissés de côté et signalés comme suivi manuel. Un DTO écrit par la 3.x aussi.
+
+Un champ accepte les modificateurs `nullable` et `unique` :
+
+```bash
+php artisan make:fullapi Post --add-fields="excerpt:text:nullable,ref:string:unique"
+```
+
+PostgreSQL et SQLite refusent d'ajouter une colonne obligatoire sans valeur par défaut à une table qui contient déjà des lignes. Le rapport nomme alors les champs concernés : rendez-les nullable, ou donnez une valeur par défaut à la colonne dans la migration avant de la lancer.
 
 ## Vos modifications survivent à la régénération
 
@@ -48,7 +57,7 @@ Une entité générée avant la 4.1 n'a pas encore de définition enregistrée, 
 php artisan make:fullapi Post --fields="title:string,content:text" --only=Resource
 ```
 
-Types disponibles : `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.
+Types disponibles : `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`, `McpTool`.
 
 ## Supprimer proprement
 

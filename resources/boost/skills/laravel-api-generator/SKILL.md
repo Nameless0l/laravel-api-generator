@@ -73,7 +73,7 @@ entities:
 - Mapping form, for rules or typed defaults: `price: { type: decimal, nullable: true, default: 0, rules: [min:0] }`.
 - `primary` replaces the auto-increment `id` with that column.
 - Relations: `belongsTo`, `hasOne`, `hasMany`, `belongsToMany`, `morphTo`, `morphOne`, `morphMany`. Declaring one side is enough: the inverse relation and the foreign key column are added.
-- Entity options: `soft_deletes`, `query_builder`, `pest`, `json_api`. Under `options`, they apply to every entity.
+- Entity options: `soft_deletes`, `query_builder`, `pest`, `json_api`, `mcp`. Under `options`, they apply to every entity.
 - JSON Schema of this file, for validation: `vendor/nameless/laravel-api-generator/resources/schema/api-schema.json`.
 
 The schema can also come from stdin, so nothing has to be saved first:
@@ -109,13 +109,14 @@ They return the same JSON document as `--json`. Run `php artisan migrate` and `p
 | `--query-builder` | Index filters, sorts and pagination through `spatie/laravel-query-builder` (must be installed) instead of the built-in code, same parameters |
 | `--pest` | Pest tests instead of PHPUnit classes |
 | `--json-api` | JSON:API resources (Laravel 12.45+, standard resources otherwise) |
+| `--mcp` | One MCP tool per action in `app/Mcp/Tools/{Entity}`, registered on `App\Mcp\Servers\ApiServer` (`php artisan mcp:start api`), so agents use the API through its service, request rules and policy (requires `laravel/mcp`) |
 | `--only=Resource,FeatureTest` | Regenerate only these files; routes and the seeder registration stay untouched |
 
-`--only` types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`.
+`--only` types: `Model`, `Controller`, `Service`, `DTO`, `Request`, `Resource`, `Migration`, `Factory`, `Seeder`, `Policy`, `FeatureTest`, `UnitTest`, `McpTool`.
 
 ## Evolving the API
 
-- New columns on a generated entity: `php artisan make:fullapi Post --add-fields="excerpt:text,published_at:datetime"`. It writes an incremental migration and patches the model, both requests, factory, resource and, since 4.1.1, the DTO in place. Update the tests yourself.
+- New columns on a generated entity: `php artisan make:fullapi Post --add-fields="excerpt:text,published_at:datetime"`. It writes an incremental migration and patches the model, both requests, factory, resource, DTO and MCP tools in place. Modifiers: `excerpt:text:nullable`, `ref:string:unique`. A required column without a default cannot be added to a table that already has rows on PostgreSQL and SQLite, so make it nullable. Update the tests yourself.
 - Rebuild some files of a generated entity: `php artisan make:fullapi Post --only=Model,Request`, without `--fields`. Since 4.1 the definition recorded at generation brings back the relations, enums and column modifiers that retyped fields would drop. An entity generated before 4.1 fails with `invalid_request`: generate it again from its source, or pass its fields once.
 - Remove an entity and all its files: `php artisan delete:fullapi Post --force` (without `--force` it asks for confirmation).
 - After deleting controllers by hand: `php artisan api-generator:clean-routes`.

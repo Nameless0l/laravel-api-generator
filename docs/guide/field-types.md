@@ -126,7 +126,13 @@ The whole stack follows automatically:
 
 ## Nullable, unique and defaults
 
-The `--fields` string syntax keeps to `name:type`. For per-field constraints, use either the [interactive wizard](/guide/generating#interactive-wizard) or a [schema file](/guide/schema-files), which accepts a shorthand or a mapping:
+On the command line, append `:nullable` or `:unique` to a field:
+
+```bash
+php artisan make:fullapi Product --fields="sku:string:unique,description:text:nullable"
+```
+
+For defaults and custom rules, use the [interactive wizard](/guide/generating#interactive-wizard) or a [schema file](/guide/schema-files), which accepts a shorthand or a mapping:
 
 ```yaml
 fields:

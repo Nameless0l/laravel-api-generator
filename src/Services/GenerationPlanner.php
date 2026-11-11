@@ -8,9 +8,12 @@ use Illuminate\Http\Resources\JsonApi\JsonApiResource;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Laravel\Mcp\Server;
+use nameless\CodeGenerator\EntitiesGenerator\McpToolGenerator;
 use nameless\CodeGenerator\Exceptions\CodeGeneratorException;
 use nameless\CodeGenerator\Support\ApiRoutesRegistrar;
 use nameless\CodeGenerator\Support\Manifest;
+use nameless\CodeGenerator\Support\McpRegistrar;
 use nameless\CodeGenerator\Support\Workspace;
 use nameless\CodeGenerator\Support\WorkspaceFactory;
 use nameless\CodeGenerator\ValueObjects\EntityDefinition;
@@ -32,6 +35,7 @@ final class GenerationPlanner
         private readonly EntityEvolutionService $entityEvolutionService,
         private readonly ApiRoutesRegistrar $apiRoutesRegistrar,
         private readonly WorkspaceFactory $workspaces,
+        private readonly McpRegistrar $mcpRegistrar,
     ) {}
 
     public function plan(GenerationRequest $request): GenerationPlan
@@ -66,6 +70,10 @@ final class GenerationPlanner
             $this->authGenerator->wrapRoutesInAuthMiddleware($workspace);
         }
 
+        $mcpWritten = $request->only === null || in_array('McpTool', $request->only, true);
+        $exposed = $entities->filter(fn (EntityDefinition $entity) => $mcpWritten && $entity->exposesMcp())->values();
+        $warnings = array_merge($warnings, $this->registerMcpTools($exposed, $workspace));
+
         if ($request->postman) {
             $this->postmanExporter->export($entities, base_path('postman_collection.json'), $workspace);
         }
@@ -85,6 +93,19 @@ final class GenerationPlanner
                 'code' => 'modified_file_kept',
                 'message' => "{$path} was edited since it was generated, so it was kept. Use --force to overwrite it.",
             ];
+        }
+
+        foreach ($exposed as $entity) {
+            $dto = "app/DTO/{$entity->name}DTO.php";
+            $written = ! in_array($dto, $kept, true) && ($request->only === null || in_array('DTO', $request->only, true));
+            $content = $written ? $workspace->get(base_path($dto)) : (File::exists(base_path($dto)) ? File::get(base_path($dto)) : '');
+
+            if (! str_contains($content, 'function fromArray(')) {
+                $warnings[] = [
+                    'code' => 'mcp_dto_outdated',
+                    'message' => "{$dto} has no fromArray(), which the MCP tools of {$entity->name} call. Regenerate it with --only=DTO (and --force if you edited it), or add the method.",
+                ];
+            }
         }
 
         return new GenerationPlan($workspace, $warnings, $manifest, $kept, definitions: $entities->values()->all());
@@ -113,6 +134,60 @@ final class GenerationPlanner
             patchesInPlace: true,
             definitions: $recorded === null ? [] : [$recorded->withFields($fields)]
         );
+    }
+
+    /**
+     * The web route follows the REST API: it is only written behind Sanctum.
+     *
+     * @param  Collection<int, EntityDefinition>  $exposed
+     * @return array<int, array{code: string, message: string}>
+     */
+    private function registerMcpTools(Collection $exposed, Workspace $workspace): array
+    {
+        if ($exposed->isEmpty()) {
+            return [];
+        }
+
+        $warnings = [];
+        $unregistered = $this->mcpRegistrar->register($workspace, $exposed->flatMap(fn (EntityDefinition $entity) => array_map(
+            fn (string $class) => "App\\Mcp\\Tools\\{$entity->name}\\{$class}",
+            array_values(McpToolGenerator::toolClasses($entity))
+        ))->all());
+
+        if ($unregistered !== null) {
+            $warnings[] = ['code' => 'mcp_server_not_patched', 'message' => $unregistered];
+        }
+
+        $api = base_path('routes/api.php');
+        if ($workspace->exists($api) && str_contains($workspace->get($api), "Route::middleware('auth:sanctum')")) {
+            $this->mcpRegistrar->exposeOverHttp($workspace);
+        }
+
+        if (! class_exists(Server::class)) {
+            $warnings[] = [
+                'code' => 'mcp_missing',
+                'message' => 'The generated MCP tools need laravel/mcp. Install it with: composer require laravel/mcp',
+            ];
+        } elseif ($this->onlyInRequireDev('laravel/mcp')) {
+            $warnings[] = [
+                'code' => 'mcp_dev_dependency',
+                'message' => 'laravel/mcp is in require-dev, so the MCP tools stop working wherever Composer skips dev dependencies. Move it with: composer require laravel/mcp --no-interaction',
+            ];
+        }
+
+        return $warnings;
+    }
+
+    private function onlyInRequireDev(string $package): bool
+    {
+        $path = base_path('composer.json');
+        $composer = is_file($path) ? json_decode((string) file_get_contents($path), true) : null;
+        if (! is_array($composer) || ! is_array($composer['require-dev'] ?? null)) {
+            return false;
+        }
+        $require = is_array($composer['require'] ?? null) ? $composer['require'] : [];
+
+        return array_key_exists($package, $composer['require-dev']) && ! array_key_exists($package, $require);
     }
 
     /**

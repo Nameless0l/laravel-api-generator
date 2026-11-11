@@ -14,6 +14,7 @@ use nameless\CodeGenerator\Support\EntitySorter;
 use nameless\CodeGenerator\Support\FieldParser;
 use nameless\CodeGenerator\Support\JsonParser;
 use nameless\CodeGenerator\Support\Manifest;
+use nameless\CodeGenerator\Support\McpRegistrar;
 use nameless\CodeGenerator\Support\MermaidParser;
 use nameless\CodeGenerator\Support\OpenApiConverter;
 use nameless\CodeGenerator\Support\Protocol;
@@ -42,6 +43,7 @@ class MakeApiCommand extends Command
         {--query-builder : Use spatie/laravel-query-builder for index filtering and sorting}
         {--pest : Generate Pest tests instead of PHPUnit}
         {--json-api : Generate JSON:API-compliant resources (requires Laravel 12.45+)}
+        {--mcp : Also generate MCP tools and a server, so agents use the API through its services and policies (requires laravel/mcp)}
         {--add-fields= : Add fields to an existing entity (incremental migration + in-place patches)}
         {--dry-run : List the files that would be written, without writing anything}
         {--json : Print one JSON document (protocol 1) instead of text}
@@ -439,6 +441,9 @@ class MakeApiCommand extends Command
         if ($this->option('json-api')) {
             $options['json_api'] = true;
         }
+        if ($this->option('mcp')) {
+            $options['mcp'] = true;
+        }
 
         return $options;
     }
@@ -490,6 +495,10 @@ class MakeApiCommand extends Command
             $this->line('  composer require laravel/sanctum');
             $this->line('  php artisan vendor:publish --provider="Laravel\\Sanctum\\SanctumServiceProvider"');
             $this->line('  php artisan migrate');
+        }
+
+        if (collect($changes)->contains(fn (FileChange $change) => $change->kind === 'McpServer' && $change->writesToDisk())) {
+            $this->info('MCP server ready. Point an agent at it with: php artisan mcp:start '.McpRegistrar::HANDLE);
         }
 
         $addFields = $this->option('add-fields');
@@ -734,9 +743,16 @@ class MakeApiCommand extends Command
 
     private function makeFieldDefinition(string $fieldName, string $type): FieldDefinition
     {
-        $segments = explode(':', $type);
+        $segments = FieldParser::segments($type);
         $baseType = (string) array_shift($segments);
         $modifiers = array_map('strtolower', $segments);
+
+        foreach (array_diff($modifiers, ['primary', 'pk', 'nullable', 'unique']) as $unknown) {
+            $this->inputWarnings[] = [
+                'code' => 'unknown_modifier',
+                'message' => "{$fieldName}: \"{$unknown}\" is not a modifier and was ignored. Use primary, nullable or unique.",
+            ];
+        }
 
         $attributes = [];
         if (in_array('primary', $modifiers, true) || in_array('pk', $modifiers, true)) {
@@ -745,13 +761,16 @@ class MakeApiCommand extends Command
 
         $enumValues = FieldParser::parseEnumType($baseType);
         if ($enumValues !== null) {
-            return new FieldDefinition(
-                name: $fieldName,
-                type: 'string',
-                attributes: array_merge($attributes, ['enum' => $enumValues])
-            );
+            $baseType = 'string';
+            $attributes['enum'] = $enumValues;
         }
 
-        return new FieldDefinition(name: $fieldName, type: $baseType, attributes: $attributes);
+        return new FieldDefinition(
+            name: $fieldName,
+            type: $baseType,
+            nullable: in_array('nullable', $modifiers, true),
+            unique: in_array('unique', $modifiers, true),
+            attributes: $attributes
+        );
     }
 }
