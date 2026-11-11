@@ -4,7 +4,7 @@
 
 **Diagramme des entités** dessine chaque entité générée sur un canevas infini, avec ses colonnes et leurs types lus dans les migrations, clés étrangères comprises.
 
-![Le diagramme d'entités, avec l'inspecteur de l'entité Loan](/ext-diagram.png)
+![Le diagramme d'entités, avec les fichiers de l'entité Comment dans l'inspecteur](/ext-diagram.png)
 
 Les déclarations inverses (Post `hasMany` Comment et Comment `belongsTo` Post) sont fusionnées en un seul lien avec sa cardinalité, et une relation auto-référentielle se dessine en petite boucle. Survoler une carte met ses connexions en surbrillance.
 

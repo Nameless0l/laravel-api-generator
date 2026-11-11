@@ -8,7 +8,7 @@ The sources are in the sidebar home under **Generate from**, in the `...` menu o
 
 The package runs the generation as a dry run, and the panel shows what it would do. Each entity lists its fields, its relations and the files it would get, with a badge for the new ones or the entities already generated. The shared files, `routes/api.php` and `DatabaseSeeder.php`, have their own row. On the side, the summary counts the files to create and to update and the new routes, and the generation options (Pest tests, Postman collection, Sanctum auth, Spatie QueryBuilder, JSON:API resources, and MCP tools with package 4.2) can still be switched.
 
-![The review of an OpenAPI spec, then the generation of both entities](/ext-review.gif)
+![The review of an OpenAPI spec with the MCP tools, then the generation of both entities](/ext-review.gif)
 
 A file you edited by hand since the last generation stays as it is. The screen names it, **View the diffs** compares it with what the generator would write, and **Overwrite anyway** includes it on purpose. Schemas the package left aside are listed with the reason, such as the error schema of a spec.
 

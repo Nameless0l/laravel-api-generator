@@ -4,7 +4,7 @@
 
 **Entity diagram** draws every generated entity on an infinite canvas, with its columns and their types read from the migrations, foreign keys included.
 
-![The entity diagram, with the inspector of the Loan entity](/ext-diagram.png)
+![The entity diagram, with the files of the Comment entity in the inspector](/ext-diagram.png)
 
 Inverse declarations (Post `hasMany` Comment and Comment `belongsTo` Post) are merged into a single link with its cardinality, and a self-referential relation draws a small loop. Hovering a card highlights its connections.
 

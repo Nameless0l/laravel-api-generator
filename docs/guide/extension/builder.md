@@ -21,7 +21,7 @@ The options are Soft deletes, Pest tests, Sanctum auth, Spatie QueryBuilder, JSO
 
 The form is saved as a draft for each project. It comes back when the builder or the window reopens, until **Reset the form** or a successful generation clears it. An example or an import applied over a filled form offers **Undo**. When **Generate the API** is off, a line in the footer says why and each row to fix carries its message.
 
-![Pick an example, add a relation, and the preview follows](/ext-builder.gif)
+![Pick an example, add a relation, turn on the MCP tools, and the preview follows](/ext-builder.gif)
 
 ## Live preview
 

@@ -8,7 +8,7 @@ Les sources sont dans l'accueil de la sidebar sous **Générer depuis**, dans le
 
 Le package lance la génération à blanc, et le panneau montre ce qu'elle ferait. Chaque entité liste ses champs, ses relations et les fichiers qu'elle recevrait, avec un badge pour les nouvelles et pour celles déjà générées. Les fichiers partagés, `routes/api.php` et `DatabaseSeeder.php`, ont leur propre ligne. Sur le côté, le résumé compte les fichiers à créer et à modifier et les nouvelles routes, et les options de génération (Tests Pest, Collection Postman, Auth Sanctum, Spatie QueryBuilder, Resources JSON:API, et Outils MCP avec le package 4.2) restent modifiables.
 
-![La relecture d'une spec OpenAPI, puis la génération des deux entités](/ext-review.gif)
+![La relecture d'une spec OpenAPI avec les outils MCP, puis la génération des deux entités](/ext-review.gif)
 
 Un fichier retouché à la main depuis la dernière génération reste tel quel. L'écran le nomme, **Voir les diffs** le compare avec ce que le générateur écrirait, et **Écraser quand même** l'inclut volontairement. Les schémas que le package a laissés de côté sont listés avec la raison, comme le schéma d'erreur d'une spec.
 

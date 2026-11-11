@@ -21,7 +21,7 @@ Les options sont Soft deletes, Tests Pest, Auth Sanctum, Spatie QueryBuilder, Re
 
 Le formulaire est enregistré en brouillon pour chaque projet. Il revient à la réouverture du builder ou de la fenêtre, jusqu'à ce que **Réinitialiser le formulaire** ou une génération réussie l'efface. Un exemple ou un import appliqué sur un formulaire déjà rempli propose **Annuler**. Quand **Générer l'API** est désactivé, une ligne du pied de page dit pourquoi et chaque ligne à corriger porte son message.
 
-![Choisir un exemple, ajouter une relation, et l'aperçu suit](/ext-builder.gif)
+![Choisir un exemple, ajouter une relation, activer les outils MCP, et l'aperçu suit](/ext-builder.gif)
 
 ## Aperçu en direct
 
